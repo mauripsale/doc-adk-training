@@ -74,6 +74,8 @@ The final part of the course covers everything you need to know to take your age
     *   [Theory](./module20-observability/theory.md) | [Lab](./module20-observability/lab.md)
 *   **Module 21: Programmatic Execution**
     *   [Theory](./module21-programmatic-execution/theory.md) | [Lab](./module21-programmatic-execution/lab.md)
+*   **Module 22: Intercepting Execution with Callbacks**
+    *   [Theory](./module22-callbacks/theory.md) | [Lab](./module22-callbacks/lab.md)
 
 ---
 

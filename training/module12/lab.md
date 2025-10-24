@@ -1,0 +1,137 @@
+# Module 12: Orchestration with Workflow Agents: Sequential & Parallel
+
+## Lab 12: Building a Sequential Data Pipeline
+
+### Goal
+
+In this lab, you will build a multi-agent system that follows a strict, predictable sequence of steps. You will create a simple "Story Generator" pipeline that uses a `SequentialAgent` to orchestrate three specialist `LlmAgent`s:
+
+1.  **`character_agent`:** Generates a character for a story.
+2.  **`setting_agent`:** Creates a setting for the story based on the character.
+3.  **`plot_agent`:** Generates a simple plot for the story using the character and setting.
+
+This will teach you how to build deterministic workflows and pass data between agents using the shared session state.
+
+### Step 1: Create the Project Structure
+
+1.  **Navigate to your training directory:**
+
+    ```shell
+    cd /path/to/your/adk-training
+    ```
+
+2.  **Create the agent project:**
+
+    ```shell
+    adk create --type=config story-pipeline
+    ```
+
+3.  **Navigate into the new directory:**
+
+    ```shell
+    cd story-pipeline
+    ```
+
+### Step 2: Create the Specialist "Step" Agents
+
+We'll create three separate YAML files, one for each step in our pipeline.
+
+1.  **Create `step1_character.yaml`:**
+    This agent's job is to create a character and save it to the state. We'll use the `output_key` property, which is a convenient shortcut that automatically saves the agent's final response to the specified state key.
+
+    ```yaml
+    # Filename: step1_character.yaml
+    name: character_agent
+    model: gemini-1.5-flash
+    instruction: |
+      You are a creative writer.
+      Based on the user's topic: "{user_topic}", invent a single, interesting character.
+      Describe the character in one sentence.
+    # This will save the agent's response to `state['character_description']`
+    output_key: character_description
+    ```
+
+2.  **Create `step2_setting.yaml`:**
+    This agent will read the character from the state and create a setting.
+
+    ```yaml
+    # Filename: step2_setting.yaml
+    name: setting_agent
+    model: gemini-1.5-flash
+    # The instruction reads the character description from the state.
+    instruction: |
+      You are a world-builder.
+      The main character of our story is: "{character_description}".
+      Based on this character, create an interesting setting for the story.
+      Describe the setting in one sentence.
+    output_key: setting_description
+    ```
+
+3.  **Create `step3_plot.yaml`:**
+    This final agent will read both the character and the setting from the state to create a plot.
+
+    ```yaml
+    # Filename: step3_plot.yaml
+    name: plot_agent
+    model: gemini-1.5-flash
+    instruction: |
+      You are a storyteller.
+      The main character is: "{character_description}".
+      The setting is: "{setting_description}".
+      Write a one-sentence plot for a story involving this character and setting.
+    ```
+
+### Step 3: Configure the Sequential Agent Orchestrator
+
+Now, let's configure the main `root_agent.yaml` to act as the `SequentialAgent` that runs our pipeline.
+
+1.  **Set up your environment variables** in the `.env` file.
+
+2.  **Update the `root_agent.yaml` file:**
+    Replace its contents with the following. This file defines the orchestrator.
+
+    ```yaml
+    # Filename: root_agent.yaml
+    agent_class: SequentialAgent
+    name: story_pipeline_agent
+    description: A pipeline that generates a story character, setting, and plot in sequence.
+    # The sub_agents will be executed in this exact order.
+    sub_agents:
+      - config_path: step1_character.yaml
+      - config_path: step2_setting.yaml
+      - config_path: step3_plot.yaml
+    ```
+    By setting `agent_class: SequentialAgent`, we've told the ADK that this agent's only job is to run its `sub_agents` in the specified order.
+
+### Step 4: Test the Pipeline
+
+1.  **Start the web server:**
+
+    From the `story-pipeline` directory, run `adk web`.
+
+2.  **Interact with the pipeline:**
+    *   Open the Dev UI. The `SequentialAgent` itself doesn't take instructions, but the sub-agents can read from the initial state. We'll set the initial topic there.
+    *   Go to the **"State"** tab in the Dev UI.
+    *   In the "Set State" input box, enter the following JSON and click "Set State":
+        ```json
+        {"user_topic": "a brave knight"}
+        ```
+    *   Now, go back to the **"Chat"** tab and simply send a message like "Start". The content of the message doesn't matter, as it's just to trigger the pipeline.
+    *   **Expected Response:** The final response will be from the last agent in the sequence (`plot_agent`), and it will be a one-sentence plot.
+
+3.  **Examine the Trace:**
+    *   The Trace view is essential here. You will see the `SequentialAgent` running, and nested inside it, you will see the three sub-agents (`character_agent`, `setting_agent`, `plot_agent`) executing one after another.
+    *   Click on the `setting_agent` and view its LLM prompt. You will see that the description generated by the `character_agent` was correctly inserted into its instruction.
+    *   Do the same for the `plot_agent` to see how it received the output from the first two steps.
+
+### Lab Summary
+
+You have successfully built a deterministic, multi-step pipeline using a `SequentialAgent`.
+
+You have learned to:
+*   Configure and use the `SequentialAgent` to enforce a specific execution order.
+*   Use the `output_key` property to easily save an agent's result to the session state.
+*   Pass data between agents in a sequence by reading from the state in an agent's `instruction`.
+*   Verify the step-by-step execution of a pipeline using the Trace View.
+
+This pattern is fundamental for creating reliable agents that perform structured tasks. In the next module, you'll learn how to handle repetitive tasks using the `LoopAgent`.

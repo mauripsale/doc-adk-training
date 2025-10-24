@@ -1,0 +1,94 @@
+# Copyright 2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Python Tests
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "samples/python/**"
+      - ".github/workflows/python-tests.yaml"
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    paths:
+      - "samples/python/**"
+      - ".github/workflows/python-tests.yaml"
+  schedule:
+    - cron: "0 0 * * 0"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        sample_dir: ${{ fromJson(needs.get_sample_dirs.outputs.sample_dirs) }}
+      fail-fast: false # Important: Don't stop if one matrix configuration fails
+
+    needs:
+      - get_sample_dirs
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Get Sample Directories
+        id: get_sample_dirs
+        run: |
+          SAMPLE_DIRS=$( find $PYTHON_DIR -type d -not -path "*/.venv*" -exec test -e '{}'/requirements.txt \; -print )
+          echo "sample_dirs=$SAMPLE_DIRS" >> $GITHUB_OUTPUT
+          echo "SAMPLE_DIRS: $SAMPLE_DIRS"  # For debugging
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest coverage
+          pip install -r ${{ matrix.sample_dir }}/requirements.txt
+          pip install -r ${{ matrix.sample_dir }}/requirements-test.txt
+
+      - name: Run pytest in ${{ matrix.sample_dir }}
+        run: |
+          cd ${{ matrix.sample_dir }}
+          pytest | tee pytest.txt
+
+      - name: Show failed tests and overall summary
+        run: |
+          grep -E "FAILED tests|ERROR tests|[0-9]+ passed," pytest.txt
+          failed_count=$(grep -E "FAILED tests|ERROR tests" pytest.txt | wc -l | tr -d '[:space:]')
+          if [[ $failed_count -gt 0 ]]; then
+            echo "$failed_count failed lines found! Task failed."
+            exit 1
+          fi
+
+      - name: Upload pytest test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: pytest-results-${{ matrix.python-version }}-${{ matrix.sample_dir }}
+          path: |
+            pytest.txt
+            ./htmlcov/
+          retention-days: 30
+        if: ${{ always() }}

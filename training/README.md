@@ -61,6 +61,8 @@ This part dives into the advanced features of the ADK, covering memory, file han
     *   [Theory](./module16-streaming/theory.md) | [Lab](./module16-streaming/lab.md)
 *   **Module 17: Evaluating Agent Performance**
     *   [Theory](./module17-evaluation/theory.md) | [Lab](./module17-evaluation/lab.md)
+*   **Module 26: Building a Custom Streaming Client**
+    *   [Theory](./module26-custom-streaming-client/theory.md) | [Lab](./module26-custom-streaming-client/lab.md)
 
 ### Part 5: Production & Deployment (Modules 18-20)
 

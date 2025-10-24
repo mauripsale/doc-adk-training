@@ -22,7 +22,7 @@ The primary configuration file for an agent is typically named `root_agent.yaml`
 name: my_first_agent
 
 # The specific LLM the agent will use for its reasoning.
-model: gemini-1.5-flash
+model: gemini-2.5-flash
 
 # A brief, human-readable summary of what the agent does.
 description: A simple agent that introduces itself.

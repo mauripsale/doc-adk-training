@@ -75,7 +75,7 @@ adk-training/
 We know this file will need a `sub_agents` section to link to our specialist.
 ```yaml
 name: router_agent
-model: gemini-1.5-flash
+model: gemini-2.5-flash
 instruction: |
   You are a language router...
 sub_agents:

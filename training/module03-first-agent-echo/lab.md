@@ -71,12 +71,12 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: echo_agent
-    model: gemini-1.5-flash
+    model: gemini-2.5-flash
     description: An agent that repeats the user's input.
     instruction: You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it. Do not add any extra words or explanations.
     ```
 
-    This configuration tells the agent its name, which LLM to use (`gemini-1.5-flash`), and a very specific instruction: to only repeat the user's input.
+    This configuration tells the agent its name, which LLM to use (`gemini-2.5-flash`), and a very specific instruction: to only repeat the user's input.
 
 ### Step 3: Run the Agent
 

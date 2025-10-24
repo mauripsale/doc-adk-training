@@ -138,7 +138,7 @@ Now we need to tell our agent about these new tools.
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: calculator_agent
-    model: gemini-1.5-flash
+    model: gemini-2.5-flash
     description: An agent that can perform basic arithmetic calculations.
     instruction: |
       You are a helpful calculator assistant.

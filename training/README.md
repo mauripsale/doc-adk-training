@@ -77,6 +77,15 @@ The final part of the course covers everything you need to know to take your age
 *   **Module 22: Intercepting Execution with Callbacks**
     *   [Theory](./module22-callbacks/theory.md) | [Lab](./module22-callbacks/lab.md)
 
+### Part 6: Advanced Tooling with MCP (Modules 23-24)
+
+This part covers the Model Context Protocol, an open standard for creating complex, stateful, and multi-turn tools.
+
+*   **Module 23: Introduction to MCP & Stateful Tools**
+    *   [Theory](./module23-intro-to-mcp/theory.md) | [Lab](./module23-intro-to-mcp/lab.md)
+*   **Module 24: Building a Custom MCP Tool**
+    *   [Theory](./module24-building-mcp-tools/theory.md) | [Lab](./module24-building-mcp-tools/lab.md)
+
 ---
 
 ## Getting Started

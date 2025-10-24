@@ -85,6 +85,8 @@ This part covers the Model Context Protocol, an open standard for creating compl
     *   [Theory](./module23-intro-to-mcp/theory.md) | [Lab](./module23-intro-to-mcp/lab.md)
 *   **Module 24: Building a Custom MCP Tool**
     *   [Theory](./module24-building-mcp-tools/theory.md) | [Lab](./module24-building-mcp-tools/lab.md)
+*   **Module 25: Deploying an MCP Server to Cloud Run**
+    *   [Theory](./module25-deploying-mcp-server-cloud-run/theory.md) | [Lab](./module25-deploying-mcp-server-cloud-run/lab.md)
 
 ---
 

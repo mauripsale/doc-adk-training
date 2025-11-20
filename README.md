@@ -8,7 +8,7 @@ This course was born from a specific need: to create a complete learning path th
 
 ## ✍️ About the Author
 
-This course was created and is maintained by **Maurizio Ipsale**, a Google Authorized Trainer and Google Developer Expert (GDE) in AI and Cloud. This project stems from a passion for empowering developers with the skills needed to build the next generation of AI agents.
+This course was created and is maintained by [**Maurizio Ipsale**](https://www.linkedin.com/in/maurizioipsale/), a Google Cloud Authorized Trainer and Google Developer Expert (GDE) in AI and Cloud. This project stems from a passion for empowering developers with the skills needed to build the next generation of AI agents.
 
 ## 🚧 Project Status 🚧
 

@@ -28,16 +28,16 @@ You will build a new agent that can answer questions about current events and to
 
 2.  **Create the agent project (Python approach):**
 
-    Use the `adk create` command to create a new Python agent named `researcher-agent`.
+    Use the `adk create` command to create a new Python agent named `researcher_agent`.
 
     ```shell
-    adk create --type=python researcher-agent
+    adk create --type=python researcher_agent
     ```
 
     **Alternative (YAML approach):**
 
     ```shell
-    adk create --type=config researcher-agent
+    adk create --type=config researcher_agent
     ```
 
 ### Step 2: Configure the Agent to Use Google Search
@@ -52,7 +52,7 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
 
 2.  **Set up your environment variables:**
 
-    Navigate into the `researcher-agent` directory and open the `.env` file. For the search tool to work, you **must** configure your agent to use Vertex AI.
+    Navigate into the `researcher_agent` directory and open the `.env` file. For the search tool to work, you **must** configure your agent to use Vertex AI.
 
     Update the `.env` file to look like this, filling in your project ID and desired location:
     ```
@@ -64,7 +64,7 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
 
 3.  **Define the agent's behavior and add the tool (Python approach):**
 
-    Open the `agent.py` file inside `researcher-agent` and replace its contents with the following:
+    Open the `agent.py` file inside `researcher_agent` and replace its contents with the following:
 
     ```python
     from google.adk.agents import LlmAgent
@@ -113,14 +113,15 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
 
 2.  **Start the web server:**
 
-    From the `adk-training` directory, run `adk web` with the agent name.
+    From the `adk-training` directory, run `adk web`.
 
     ```shell
-    adk web researcher-agent
+    adk web
     ```
 
 3.  **Interact with the Researcher Agent:**
     *   Open the Dev UI in your browser.
+    *   Select `researcher_agent` from the dropdown menu.
     *   Ask a question that the LLM wouldn't know from its training data:
         *   "Who won the last Super Bowl?"
         *   "What are the latest headlines about space exploration?"

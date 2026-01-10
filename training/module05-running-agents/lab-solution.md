@@ -12,7 +12,7 @@ In this lab, you will learn how to run and interact with your "Haiku Poet" agent
 ## Prerequisites
 
 *   You have successfully completed Module 4.
-*   You have the `haiku-poet-agent` configured in your `adk-training` directory.
+*   You have the `haiku_poet_agent` configured in your `adk-training` directory.
 *   Your virtual environment is active.
 
 ## Part 1: Interactive Development with `adk web`
@@ -26,13 +26,14 @@ This is the mode you've used so far. Let's explore its features more deeply.
     ```
 
 2.  **Start the web UI:**
-    Run the command from the parent directory, specifying which agent you want to run.
+    Run the command from the parent directory. When run from the parent, the ADK will discover all agents in the subdirectories.
     ```shell
-    adk web haiku-poet-agent
+    adk web
     ```
 
 3.  **Explore the Dev UI:**
     *   Open the UI in your browser (`http://127.0.0.1:8080`).
+    *   Select `haiku_poet_agent` from the dropdown menu if it's not already selected.
     *   Have a short conversation with your poet agent.
     *   **Trace View:** On the right side of the screen, click on the "Trace" tab. You will see a waterfall diagram. Click on the `LlmAgent` step to expand it. Here you can see the full prompt sent to the Gemini model, including your detailed instruction and the user's message. This view is critical for debugging why an agent behaves a certain way.
     *   **State View:** Click the "State" tab. This view shows the agent's short-term memory for the current conversation. We will explore this more in later modules.
@@ -47,7 +48,7 @@ Now, let's chat with the agent directly in the terminal.
 2.  **Start the command-line runner:**
     Again, run this from the parent `adk-training` directory.
     ```shell
-    adk run haiku-poet-agent
+    adk run haiku_poet_agent
     ```
 
 3.  **Chat with the agent:**
@@ -59,51 +60,54 @@ Now, let's chat with the agent directly in the terminal.
 
 ## Part 3: Running as a Service with `adk api_server`
 
-Finally, let's run the agent as a background service that other applications could talk to.
+Finally, let's run the agent as a background service. This mode is the foundation for production deployments where your agent acts as a backend API for other applications.
 
 1.  **Start the API server:**
     From the `adk-training` directory, run:
     ```shell
     adk api_server
     ```
-    The server will start and listen for HTTP requests, similar to `adk web`, but without the UI.
+    The server will start and listen for HTTP requests on `http://127.0.0.1:8000`.
 
-2.  **Interact with the API:**
-    *   Open a **new, separate terminal window**. You need a new window because the API server is currently running in and occupying your first one.
-    *   We will use the `curl` command to send HTTP requests to our agent.
-
-    *   **First, create a session.** This establishes a unique conversation context. Copy and paste the following command into the **new** terminal and press Enter:
-        ```shell
-        curl -X POST http://127.0.0.1:8000/apps/haiku-poet-agent/users/test_user/sessions/test_session
-        ```
-        You should receive a simple `{"status": "ok"}` response.
-
-    *   **Next, send a message to the agent within that session.** Copy and paste the following command into the same new terminal:
-        ```shell
+2.  **Interact with the API (Step A: The Intentional Failure):**
+    *   Open a **new, separate terminal window**.
+    *   Try to send a message to the agent immediately using `curl`:
+        ```bash
         curl -X POST http://127.0.0.1:8000/run_sse \
              -H "Content-Type: application/json" \
              -d '{
-                   "app_name": "haiku-poet-agent",
+                   "app_name": "haiku_poet_agent",
                    "user_id": "test_user",
-                   "session_id": "test_session",
-                   "new_message": {
-                     "role": "user",
-                     "parts": [{
-                       "text": "A beautiful sunset."
-                     }]
-                   }
+                   "session_id": "missing_session",
+                   "new_message": {"role": "user", "parts": [{"text": "Hello"}]}
                  }'
         ```
+    *   **The Result:** You will receive an error: `{"detail":"Session not found"}`.
+    *   **The Explanation:** Unlike `adk web` or `adk run`, which handle session creation for you behind the scenes, the `api_server` is a raw interface. It requires an existing session to store the conversation state. If you try to talk to a session ID that hasn't been created yet, it will fail.
 
-    **Understanding the `curl` commands:**
-    *   The first command uses the agent's folder name (`haiku-poet-agent`) and some placeholder IDs (`test_user`, `test_session`) to create a unique session endpoint.
-    *   The second command sends a JSON payload to the `/run_sse` endpoint, referencing the *same* `app_name`, `user_id`, and `session_id` to continue the conversation we just created.
+3.  **Create the Session (Step B: The Fix):**
+    *   Before sending a message, you must explicitly create the session resource. Run this command:
+        ```bash
+        curl -X POST http://127.0.0.1:8000/apps/haiku_poet_agent/users/test_user/sessions/test_session
+        ```
+    *   **The Result:** You should receive `{"status": "ok"}`. This tells the server to allocate memory (or database space) for a conversation named `test_session`.
 
-3.  **Analyze the Output:**
-    You will see a stream of JSON objects as the response. This is the raw event data that the Dev UI uses to render the chat and trace views. Look through the output, and you will find the agent's final haiku response.
+4.  **Send the Message (Step C: Success):**
+    *   Now, run the message command again, ensuring the `session_id` matches the one you just created (`test_session`):
+        ```bash
+        curl -X POST http://127.0.0.1:8000/run_sse \
+             -H "Content-Type: application/json" \
+             -d '{
+                   "app_name": "haiku_poet_agent",
+                   "user_id": "test_user",
+                   "session_id": "test_session",
+                   "new_message": {"role": "user", "parts": [{"text": "A beautiful sunset"}]}
+                 }'
+        ```
+    *   **The Result:** You will see a stream of JSON objects. Look for the events where `event.name == 'agent:response'` to find your haiku!
 
-4.  **Stop the API server:**
-    Go back to the first terminal where the `api_server` is running and press `Ctrl+C`.
+5.  **Stop the API server:**
+    Go back to the first terminal and press `Ctrl+C`.
 
 ### Self-Reflection Answers
 
@@ -124,9 +128,9 @@ Finally, let's run the agent as a background service that other applications cou
 
 You have now mastered the three ways to run an ADK agent:
 
-*   `adk web <agent_name>`: For interactive development and deep debugging with the Trace View.
+*   `adk web`: For interactive development and deep debugging with the Trace View.
 *   `adk run <agent_name>`: For quick tests and automated scripting in the terminal.
-*   `adk api_server <agent_name>`: For running your agent as a service to be integrated with other applications.
+*   `adk api_server`: For running your agent as a service to be integrated with other applications.
 
 This completes the foundational part of the course. You are now ready to start extending your agent's capabilities with tools.
 

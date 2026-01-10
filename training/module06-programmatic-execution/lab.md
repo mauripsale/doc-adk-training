@@ -19,15 +19,28 @@ This will teach you the canonical way to execute an agent as part of a larger Py
     cd /path/to/your/adk-training
     ```
 
-2.  **Create the main execution script:**
-    In the `adk-training` directory, create a new Python file named `run_haiku_agent.py`. This is where you will write the code to run your agent.
+2.  **Create a dedicated directory for your script:**
+    To keep your project clean, create a folder for this programmatic execution task.
+    ```shell
+    mkdir run_haiku_agent
+    cd run_haiku_agent
+    ```
+
+3.  **Create the execution script:**
+    Inside the `run_haiku_agent/` directory, create a new Python file named `run_haiku_agent.py`. This is where you will write the code to run your agent.
 
 ### Step 2: Complete the `run_haiku_agent.py` Script
 
-You will now complete the script to programmatically run your `haiku-poet-agent`. Open `run_haiku_agent.py` and follow the `# TODO` comments.
+You will now complete the script to programmatically run your `haiku_poet_agent`. Open `run_haiku_agent.py` and follow the `# TODO` comments.
 
 ```python
 import asyncio
+import sys
+import os
+
+# Add the parent directory to sys.path so we can import our agents
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import Session, InMemorySessionService
@@ -35,7 +48,7 @@ from google.genai import types
 
 # TODO: Step 1 - Import your agent
 # The ADK makes any agent in a subdirectory available as a Python module.
-# Import the `root_agent` from your `haiku-poet-agent` directory.
+# Import the `root_agent` from your `haiku_poet_agent` directory.
 # Example: from haiku_poet_agent import agent as haiku_agent_module
 
 async def main():
@@ -48,7 +61,7 @@ async def main():
 
     # TODO: Step 4 - Create a new session for your agent.
     # Use the session_service's `create_session` method.
-    # You need to provide the `app_name` (the folder name of your agent) and a `user_id`.
+    # You need to provide the `app_name` (the folder name of your agent: "haiku_poet_agent") and a `user_id`.
     
     # TODO: Step 5 - Package your query.
     # Create a query string, for example: "A quiet morning with a cup of coffee."
@@ -73,7 +86,7 @@ Once you have completed the script, you can execute it directly from your termin
 
 1.  **Ensure your virtual environment is active.**
 
-2.  **Run the script from your `adk-training` directory:**
+2.  **Run the script from your `run_haiku_agent` directory:**
     ```shell
     python run_haiku_agent.py
     ```
@@ -97,7 +110,7 @@ If you get stuck, you can find the complete code in the `lab-solution.md` file.
 You have successfully run an agent programmatically using the standard `Runner`. This is the foundation for integrating your agent into any larger Python application.
 
 You have learned to:
-*   Import an agent from a subdirectory as a Python module.
+*   Import an agent from a neighboring directory as a Python module.
 *   Instantiate an `InMemorySessionService` to manage session state.
 *   Instantiate the `Runner` and provide it with the necessary services.
 *   Create a `Session` programmatically for a specific agent app.

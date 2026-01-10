@@ -9,7 +9,11 @@ title: "Lab Solution"
 
 ### Overview
 
-Build your first AI agent with the Google Agent Development Kit (ADK). This lab starts from absolute zero. You'll create a simple "Echo" agent that takes any text you provide and repeats it back to you. This will teach you the fundamental workflow of creating, configuring, and running an agent. No prior ADK experience is needed!
+Build your first AI agent with the Google Agent Development Kit (ADK). In this lab, you'll create a "Parrot" agent. Its only purpose is to take any text you provide and repeat it back to you exactly, without answering questions or adding any commentary.
+
+### Expected Behavior
+*   **User:** "What time is it?" -> **Agent:** "What time is it?"
+*   **User:** "Help me with my homework." -> **Agent:** "Help me with my homework."
 
 ### Prerequisites
 
@@ -34,11 +38,11 @@ We will use the `adk` command-line tool to create the file structure for our new
     ```
 
 2.  **Create the agent project:**
-    Run the following command to create a new agent named `echo-agent`. This defaults to the Python-based approach.
+    Run the following command to create a new agent named `echo_agent`. This defaults to the Python-based approach.
     ```shell
-    adk create echo-agent
+    adk create echo_agent
     ```
-    This command creates a new directory named `echo-agent/` with an `agent.py` file and a `.env` file inside.
+    This command creates a new directory named `echo_agent/` with an `agent.py` file and a `.env` file inside.
 
 ### Step 2: Configure the Agent
 
@@ -70,8 +74,8 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
     root_agent = LlmAgent(
         name="echo_agent",
         model="gemini-2.5-flash",
-        description="An agent that repeats the user's input.",
-        instruction="You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it. Do not add any extra words or explanations."
+        description="A parrot agent that only repeats user input.",
+        instruction="You are a parrot. Your ONLY job is to repeat the user's input back to them exactly as they wrote it. DO NOT answer questions. DO NOT provide help. DO NOT add extra words. If the user asks a question, repeat the question back to them."
     )
     ```
 
@@ -81,7 +85,7 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
 
 1.  **Create the agent with the `--type=config` flag:**
     ```shell
-    adk create --type=config echo-agent
+    adk create --type=config echo_agent
     ```
     This creates a `root_agent.yaml` file instead of `agent.py`.
 
@@ -134,7 +138,7 @@ When you send a message:
 ### Common Issues & Solutions
 
 *   **Problem**: "Agent not found" or errors on startup.
-    *   **Solution**: Make sure you are running `adk web` from the *parent directory* of `echo-agent`.
+    *   **Solution**: Make sure you are running `adk web` from the *parent directory* of `echo_agent`.
 *   **Problem**: "Authentication error".
     *   **Solution**: Double-check that your `.env` file is correctly configured with your API key or GCP project.
 *   **Problem**: If using `agent.py`, "root_agent not found".

@@ -5,6 +5,15 @@ title: "Challenge Lab"
 
 # Lab 2: Environment Setup Challenge
 
+## Prerequisites
+Before you begin, ensure you have the following tools ready:
+*   **Code Editor (IDE):** You need a good environment to write your code. We recommend:
+    *   [VS Code](https://code.visualstudio.com/) (Local)
+    *   [Project IDX](https://idx.dev/) (Cloud-based)
+    *   [Google Cloud Shell Editor](https://shell.cloud.google.com/) (Cloud-based)
+*   **Python:** You must have Python installed, version **3.10 or higher**.
+*   **pip:** The Python package installer must be available.
+
 ## Goal
 Your task is to prepare your local machine for agent development. Try to complete the steps below using your existing knowledge. If you get stuck, the `lab-solution.md` file provides a detailed, step-by-step walkthrough.
 
@@ -100,6 +109,11 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+## Self-Reflection Questions
+*   Why is it important to use a virtual environment instead of installing packages globally?
+*   What are the security implications of storing API keys in a `.env` file versus hardcoding them in your script?
+*   How does an IDE (like VS Code or Cloud Shell Editor) improve your productivity compared to a basic text editor?
 
 <hr/>
 

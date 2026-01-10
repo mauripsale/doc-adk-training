@@ -6,14 +6,24 @@ title: "Challenge Lab"
 # Lab 3 Challenge: Build and Run the "Echo" Agent
 
 ## Goal
-Your task is to create, configure, and run a simple "Echo" agent using the ADK. The primary method uses Python for maximum flexibility, but a simpler YAML alternative is also provided.
+Your task is to create, configure, and run a simple "Echo" agent using the ADK. 
 
+**The Challenge:** Unlike a standard chatbot, this agent must act like a **parrot**. It should never answer questions or provide information; it must only repeat the user's input exactly as it was received.
+
+### Expected Behavior
+| User Input | Agent Response (Correct) | Agent Response (Wrong) |
+| :--- | :--- | :--- |
+| "Hello!" | "Hello!" | "Hi there, how can I help you?" |
+| "What is the capital of France?" | "What is the capital of France?" | "The capital of France is Paris." |
+| "12345" | "12345" | "You entered the numbers 1 through 5." |
+e
 ## Requirements
-1.  Use the `adk create` command to scaffold a new agent named `echo-agent`.
+1.  Use the `adk create` command to scaffold a new agent named `echo_agent`.
 2.  Follow the **Python Approach** below to define the agent's behavior.
-3.  Configure the `.env` file with your Google API key or Google Cloud project details.
-4.  Run the agent using the `adk web` command.
-5.  Interact with the agent in the Dev UI to verify that it correctly echoes your input.
+3.  **Instruction Strategy:** Craft an instruction that forces the agent to only echo and explicitly forbids it from answering questions or being helpful.
+4.  Configure the `.env` file with your Google API key or Google Cloud project details.
+5.  Run the agent using the `adk web` command.
+6.  Interact with the agent in the Dev UI to verify it passes the "Expected Behavior" tests.
 
 ### Python Approach (Primary)
 Modify your `agent.py` file to look like the following, filling in the `TODO` sections.
@@ -33,7 +43,7 @@ root_agent = LlmAgent(
 ### Alternative Approach: Using YAML Configuration
 If you prefer a simpler, config-based agent, you can use a YAML file instead of Python.
 
-1.  Create your agent using `adk create --type=config echo-agent`. This will create a `root_agent.yaml` file instead of `agent.py`.
+1.  Create your agent using `adk create --type=config echo_agent`. This will create a `root_agent.yaml` file instead of `agent.py`.
 2.  Fill in the `TODO` sections in your `root_agent.yaml` file.
 
 ```yaml

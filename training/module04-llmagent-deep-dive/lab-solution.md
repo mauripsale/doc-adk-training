@@ -23,15 +23,15 @@ Instead of echoing, we will turn our agent into a wise poet who transforms user 
 
 2.  **Duplicate the existing agent:**
 
-    Copy the `echo-agent` directory and rename the copy to `haiku-poet-agent`.
+    Copy the `echo_agent` directory and rename the copy to `haiku_poet_agent`.
 
     *   **macOS / Linux:**
         ```shell
-        cp -r echo-agent haiku-poet-agent
+        cp -r echo_agent haiku_poet_agent
         ```
     *   **Windows:**
         ```shell
-        xcopy echo-agent haiku-poet-agent /E /I
+        xcopy echo_agent haiku_poet_agent /E /I
         ```
 
 3.  **Ensure your virtual environment is active:**

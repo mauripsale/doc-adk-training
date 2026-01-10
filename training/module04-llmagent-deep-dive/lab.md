@@ -9,19 +9,19 @@ title: "Challenge Lab"
 Your task is to create a new "Haiku Poet" agent by duplicating and modifying the "Echo" agent from the previous lab. This will demonstrate how to build upon existing agents.
 
 ## Requirements
-1.  In your `adk-training` directory, duplicate the `echo-agent` directory and rename the copy to `haiku-poet-agent`.
-2.  Navigate into the new `haiku-poet-agent` sub-directory.
+1.  In your `adk-training` directory, duplicate the `echo_agent` directory and rename the copy to `haiku_poet_agent`.
+2.  Navigate into the new `haiku_poet_agent` sub-directory.
 3.  Follow the **Python Approach** below to modify the agent's behavior.
     *   Change the `name` to `haiku_poet_agent`.
     *   Update the `description`.
     *   Craft a new `instruction` that gives the agent the persona of a wise poet who transforms the user's topic into a haiku.
     *   Include at least two examples (few-shot prompts) in your instruction to guide the agent.
 4.  Return to the parent `adk-training` directory.
-5.  Run the new agent using the `adk web haiku-poet-agent` command.
+5.  Run the new agent using the `adk web haiku_poet_agent` command.
 6.  Interact with the agent in the Dev UI to verify that it correctly responds with a haiku.
 
 ### Python Approach (Primary)
-Modify the `agent.py` file inside your new `haiku-poet-agent` directory. You will need to update the `name`, `description`, and `instruction` arguments in the `LlmAgent` constructor.
+Modify the `agent.py` file inside your new `haiku_poet_agent` directory. You will need to update the `name`, `description`, and `instruction` arguments in the `LlmAgent` constructor.
 
 ### Alternative Approach: Using YAML Configuration
 If you are using a `root_agent.yaml` file:

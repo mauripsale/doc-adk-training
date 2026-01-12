@@ -72,7 +72,7 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     # or ensure the user understands the need for an ABSOLUTE path.
     # For this example, construct a path relative to this file,
     # assuming 'test_files' is in the same directory as agent.py.
-    TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files")
+    TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files/")
 
     # -- Agent Definition --
     # TODO: 3. Define the root_agent.

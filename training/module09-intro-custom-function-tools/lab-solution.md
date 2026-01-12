@@ -22,12 +22,12 @@ You will build an agent that can perform basic arithmetic by creating your own c
 
 2.  **Create the agent project:**
     ```shell
-    adk create calculator-agent
+    adk create calculator_agent
     ```
 
 3.  **Navigate into the new directory:**
     ```shell
-    cd calculator-agent
+    cd calculator_agent
     ```
 
 ### Step 2: Write the Custom Tool Functions
@@ -171,7 +171,7 @@ You will build an agent that can perform basic arithmetic by creating your own c
 
 ### Step 4: Test the Calculator Agent
 
-1.  **Start the web server:** `adk web`
+1.  **Start the web server:** `adk web` (run this from the `adk-training` parent directory).
 2.  **Interact with the agent** in the Dev UI and ask it to perform calculations. Check the Trace View to see the tools being executed.
     *   "What is 42 + 118?"
     *   "Multiply 15 by 3."

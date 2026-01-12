@@ -13,8 +13,8 @@ In this lab, you will build an agent that can perform basic arithmetic. You will
 
 1.  **Create the agent project:**
     ```shell
-    adk create calculator-agent
-    cd calculator-agent
+    adk create calculator_agent
+    cd calculator_agent
     ```
 
 2.  **Create the tools module:**
@@ -113,7 +113,7 @@ If the user asks a question that is not a calculation, politely state that you c
 
 ### Step 4: Test the Calculator Agent
 
-1.  **Start the web server:** `adk web`
+1.  **Start the web server:** `adk web` (run this from the `adk-training` parent directory).
 2.  **Interact with the agent** in the Dev UI and ask it to perform calculations. Check the Trace View to see the tools being executed.
     *   "What is 42 + 118?"
     *   "Multiply 15 by 3."

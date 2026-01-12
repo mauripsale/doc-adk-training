@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Personal Finance Assistant lab.
 
-### `finance-assistant/agent.py`
+### `finance_assistant/agent.py`
 
 ```python
 from __future__ import annotations

@@ -16,8 +16,8 @@ In this lab, you will build a **Personal Finance Assistant** with multiple, comp
 1.  **Create the agent project:**
     Choose the **Programmatic (Python script)** option when prompted.
     ```shell
-    adk create finance-assistant
-    cd finance-assistant
+    adk create finance_assistant
+    cd finance_assistant
     ```
 
 2.  **Set up your API key** in the `.env` file.
@@ -95,9 +95,10 @@ root_agent = None
 
 1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web finance-assistant
+    adk web
     ```
 2.  **Interact with the agent:**
+    *   Select `finance_assistant` from the dropdown menu.
     *   Test each of your tools with prompts like:
         *   "If I invest $10,000 at 6% for 5 years, how much will I have?"
         *   "What's the monthly payment on a $300,000 house over 30 years at 4.5%?"

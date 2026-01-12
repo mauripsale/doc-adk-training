@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Stateful File System Tool lab, aligned with the standard `adk web` workflow.
 
-### `mcp-agent/agent.py`
+### `mcp_agent/agent.py`
 
 ```python
 import os # Required for path operations
@@ -54,7 +54,7 @@ root_agent = LlmAgent(
 )
 ```
 
-### `mcp-agent/__init__.py`
+### `mcp_agent/__init__.py`
 
 This file should be created and can be left empty. It is required for the ADK to discover the `agent.py` file as a Python module.
 

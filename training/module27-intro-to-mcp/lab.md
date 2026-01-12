@@ -22,8 +22,8 @@ In this lab, you will learn how to connect your ADK agent to an external, statef
 
 2.  **Create the agent project:**
     ```shell
-    adk create mcp-agent
-    cd mcp-agent
+    adk create mcp_agent
+    cd mcp_agent
     ```
 
 ### Step 2: Create a Test Directory and File
@@ -31,7 +31,7 @@ In this lab, you will learn how to connect your ADK agent to an external, statef
 The MCP file system server needs a directory to operate on. Let's create one.
 
 1.  **Create a directory for the tool to access:**
-    Inside your `mcp-agent` project, create a directory named `test_files`.
+    Inside your `mcp_agent` project, create a directory named `test_files`.
     ```shell
     mkdir test_files
     ```
@@ -47,10 +47,10 @@ The MCP file system server needs a directory to operate on. Let's create one.
 Because the `MCPToolset` requires Python code to configure the connection, we must define our agent in an `agent.py` file.
 
 1.  **Create the `agent.py` file:**
-    In the `mcp-agent` directory, create a file named `agent.py`.
+    In the `mcp_agent` directory, create a file named `agent.py`.
 
 2.  **Create the `__init__.py` file:**
-    This empty file is crucial. It tells Python to treat the `mcp-agent` directory as a package, allowing `adk web` to discover and load your `agent.py`.
+    This empty file is crucial. It tells Python to treat the `mcp_agent` directory as a package, allowing `adk web` to discover and load your `agent.py`.
     ```shell
     touch __init__.py
     ```

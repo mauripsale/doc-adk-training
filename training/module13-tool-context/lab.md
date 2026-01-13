@@ -13,8 +13,8 @@ In this lab, you will build an agent that can remember and recall a piece of inf
 
 1.  **Create the agent project:**
     ```shell
-    adk create memory-agent
-    cd memory-agent
+    adk create memory_agent
+    cd memory_agent
     ```
 
 2.  **Create the tools module:**
@@ -93,7 +93,7 @@ root_agent = LlmAgent(
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web memory-agent
+    adk web
     ```
 3.  **Interact with the agent:**
     *   **Turn 1:** "Hi, my name is Alex."

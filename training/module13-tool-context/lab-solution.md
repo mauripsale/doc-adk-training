@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `memory.py` and `agent.py` files in the Memory Agent lab.
 
-### `memory-agent/tools/memory.py`
+### `memory_agent/tools/memory.py`
 
 ```python
 from google.adk.tools import ToolContext
@@ -51,7 +51,7 @@ def recall_name(tool_context: ToolContext) -> dict:
         return {"status": "not_found", "message": "I don't believe you've told me your name yet."}
 ```
 
-### `memory-agent/agent.py` (Primary Solution)
+### `memory_agent/agent.py` (Primary Solution)
 
 ```python
 from google.adk.agents import LlmAgent
@@ -81,7 +81,7 @@ You are a friendly assistant with a memory.
 )
 ```
 
-### `memory-agent/root_agent.yaml` (Alternative)
+### `memory_agent/root_agent.yaml` (Alternative)
 
 ```yaml
 # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
@@ -96,6 +96,7 @@ instruction: |
 tools:
   - name: tools.memory.remember_name
   - name: tools.memory.recall_name
+```
 
 ### Self-Reflection Answers
 
@@ -115,4 +116,3 @@ tools:
                 return {"status": "success", "message": "I have forgotten your name."}
             return {"status": "error", "message": "I didn't know your name to begin with."}
         ```
-```

@@ -10,10 +10,23 @@ L'analisi della documentazione `llms-full.txt` (v1.0) ha evidenziato quattro are
 2.  **Custom Agents (`BaseAgent` & `_run_async_impl`):** La v1.0 introduce i Custom Agents come standard per orchestrazioni complesse. Il corso si ferma agli agenti pre-definiti (Sequential, Parallel, Loop).
 3.  **Output Strutturati (`output_schema` & `output_key`):** L'uso di Pydantic per forzare output JSON e il salvataggio automatico nello stato di sessione tramite `output_key` sono funzionalità critiche per la stabilità del sistema, non ancora coperte.
 4.  **Controllo Esecuzione Avanzato (Callbacks):** I nuovi trigger di callback consentono di saltare l'esecuzione di agenti (`skip`) o terminare invocazioni, funzionalità non presenti nei moduli attuali.
+5.  **Agent Skills & SkillToolset:** ADK ha introdotto il supporto nativo per l'architettura delle "Agent Skills" (struttura a cartelle con `SKILL.md`), caricabili programmaticamente tramite `load_skill_from_dir` e `SkillToolset`.
 
 ---
 
 ## 📋 Roadmap della Revisione
+
+### Fase 0: Audit & Sanitize (Risoluzione Leak Soluzioni)
+
+Prima di introdurre nuovi concetti, è fondamentale "ripulire" i laboratori attuali dove le soluzioni sono trapelate nel codice di partenza e dove le domande di riflessione sono mal gestite.
+*   **Modulo 38 (Best Practices):**
+    *   *Problema:* Il file `lab.md` contiene già l'implementazione completa (es. `try/except`, `@retry`). Inoltre, le risposte alle *Self-Reflection Questions* sono state inserite per errore in fondo al file teorico `README.md` (sotto "Key Takeaways") anziché nel `lab-solution.md`.
+    *   *Azione:* Sostituire il codice nel `lab.md` con funzioni vuote (usando `pass` o commenti `TODO`). Spostare le risposte dal `README.md` al `lab-solution.md`.
+*   **Modulo 03 (First Agent):**
+    *   *Problema:* Le *Self-Reflection Questions* presenti nel `lab.md` non hanno una risposta nel `lab-solution.md`.
+    *   *Azione:* Aggiungere un paragrafo "Answers to Self-Reflection Questions" in fondo a `lab-solution.md`.
+*   **Modulo 28 (MCP Tools):**
+    *   *Problema:* Verificare e rimuovere eventuale logica risolutiva avanzata trapelata nello starter code di `lab.md`.
 
 ### Fase 1: Aggiornamento dei Fondamenti (Moduli 01 - 10)
 
@@ -45,6 +58,14 @@ L'analisi della documentazione `llms-full.txt` (v1.0) ha evidenziato quattro are
 *   **Modulo 26 (Callbacks):**
     *   **Revisione:** Introdurre `before_agent_callback`.
     *   **Laboratorio:** Implementare un meccanismo di caching: se il risultato è già nello stato, il callback usa `skip` per non invocare il modello LLM, risparmiando token e tempo.
+
+*   **Modulo 39 (Plugins):**
+    *   **Revisione:** Allineare la teoria alla doc v1.0, formalizzando l'ereditarietà da `BasePlugin` e i tre pattern operativi: *Observing, Intervening, Amending*.
+    *   **Focus:** Verificare che il `ReflectAndRetryToolPlugin` e l'aggancio al `Runner` usino le firme dei metodi aggiornate.
+
+*   **NUOVO Modulo 39.5: Integrazione Agent Skills**
+    *   **Contenuto:** Concetto di "Progressive Disclosure" del context. Architettura a tre livelli di una skill (`L1 Frontmatter`, `L2 Instructions` in `SKILL.md`, `L3 Resources` in `references/`, `assets/`, `scripts/`).
+    *   **Laboratorio:** Usare `google.adk.skills.load_skill_from_dir` e `google.adk.tools.skill_toolset.SkillToolset` per caricare la skill `adk-skill` che abbiamo appena creato, aggiungendola ai `tools` dell'agente. Mostrare come l'agente decide autonomamente quando leggere i file di riferimento associati alla skill.
 
 ### Fase 4: Finalizzazione e Best Practices (Modulo 38)
 

@@ -149,3 +149,8 @@ When you send a message:
 Fantastic! You have successfully built and interacted with your first AI agent. You have learned the core development loop: Create, Configure, and Run.
 
 In the next modules, you will learn how to give your agents more sophisticated instructions and powerful new capabilities.
+
+### Self-Reflection Answers
+- **Advantages of Python over YAML:** Python allows you to add dynamic logic, load complex tools, use advanced environment variable integration, and define custom agents by inheriting from `BaseAgent`. YAML is excellent for rapid prototyping and strictly instruction-based agents without complex orchestration.
+- **Importance of `.env` files:** It protects sensitive credentials (API keys) from being accidentally committed to version control systems like GitHub. It also makes it easier to swap credentials across different environments (dev, staging, production) without changing the source code.
+- **Using the "Events" tab:** The Events tab provides a detailed trace of the interaction between the ADK and the LLM. It shows the raw system instructions, the chat history, and any tool calls or errors. This is invaluable for debugging more complex agents to see exactly why a model might be behaving unexpectedly or failing to call a tool.

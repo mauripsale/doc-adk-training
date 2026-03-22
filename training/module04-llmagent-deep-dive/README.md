@@ -99,7 +99,44 @@ Crafting good instructions is a skill often called "prompt engineering." Here ar
 
 In the lab for this module, you will practice this skill by modifying the "Echo" agent's instruction to give it a completely new personality and behavior.
 
+### Advanced Configuration: Structured Output & State (v1.0)
+
+In many production scenarios, you don't just want a text response; you need **structured data**. The ADK v1.0 provides two powerful parameters for this:
+
+#### 1. Enforcing JSON with `output_schema`
+You can pass a Pydantic model to the `output_schema` parameter. This forces the LLM to respond *only* with a JSON object that matches that schema.
+
+```python
+from pydantic import BaseModel
+from google.adk.agents import LlmAgent
+
+class SentimentOutput(BaseModel):
+    sentiment: str
+    confidence: float
+
+analyzer_agent = LlmAgent(
+    name="sentiment_analyzer",
+    model="gemini-2.5-flash",
+    instruction="Analyze the sentiment of the user's message.",
+    output_schema=SentimentOutput # Force JSON output
+)
+```
+**CRITICAL LIMITATION:** When `output_schema` is set, the agent **cannot use tools** or delegate to other agents. Use it for data extraction, classification, or formatting tasks.
+
+#### 2. Passing Data with `output_key`
+The `output_key` parameter (a string) tells the ADK to take the final text of the agent's response and save it automatically into the session state dictionary (`ctx.session.state`).
+
+```python
+agent = LlmAgent(
+    # ...
+    output_key="analysis_result" # Saves output to state['analysis_result']
+)
+```
+This is essential for building multi-agent systems where one agent's output is needed as another agent's input.
+
 ### Key Takeaways
 - The `LlmAgent` is the "brain" of an ADK application, using an LLM to reason and decide on actions.
 - The `instruction` parameter is the most powerful tool for controlling an agent's behavior, defining its persona, goals, constraints, and process.
+- **`output_schema`** (v1.0): Allows enforcing a strict JSON structure for the agent's response using Pydantic. **Note:** Enabling this disables tool use and agent transfers.
+- **`output_key`** (v1.0): Automatically saves the agent's final response into the session state (`ctx.session.state`) under the specified key, facilitating data passing between agents.
 - Effective prompt engineering involves being specific, using simple language, providing examples (few-shot prompting), and iterating on your instructions.

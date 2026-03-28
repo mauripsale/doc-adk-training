@@ -20,7 +20,7 @@ The `SequentialAgent` is a **Workflow Agent**, meaning it is not powered by an L
 **Key Concepts:**
 *   **Execution Order:** Guaranteed to be top-to-bottom.
 *   **Shared State:** The `SequentialAgent` passes the *same* session state to each sub-agent. This is how you pass data between steps.
-*   **Data Flow with `output_key`:** An agent can define an `output_key` in its configuration. When it finishes, the ADK automatically saves its response to `state['your_key']`. The next agent in the sequence can then read this value by using `{your_key}` in its instruction prompt.
+*   **Data Flow with `output_key`:** An agent can define an `output_key` in its configuration. When it finishes, the ADK automatically saves its response (which can be a structured object if `output_schema` is used) to `state['your_key']`. The next agent in the sequence can then read this value by using `{your_key}` in its instruction prompt.
 
 **When to Use `SequentialAgent`:**
 *   When tasks MUST happen in a specific order.
@@ -32,5 +32,6 @@ The `SequentialAgent` is a **Workflow Agent**, meaning it is not powered by an L
 - The `SequentialAgent` is a deterministic workflow agent that executes sub-agents in a fixed order.
 - It is ideal for building multi-step pipelines where each step depends on the previous one.
 - Data is passed between agents in the sequence using the shared session state.
+- **Structured Output Passing:** By combining `output_schema` (Pydantic models) with `output_key`, you pass robust JSON objects between agents instead of fragile strings, avoiding manual parsing.
 - An agent's `output_key` is used to save its result to the state, and the next agent can read it using `{key}` syntax in its prompt.
 - **Advanced Level - Code Organization:** For larger Python-based multi-agent systems, it's a best practice to define your specialist sub-agents in separate Python modules (e.g., `specialists.py`) and then import them into your main `agent.py` file. This improves modularity and keeps your main pipeline definition clean.

@@ -14,7 +14,37 @@ This file contains the complete code for the `agent.py` script in the Smart Trav
 ```python
 from __future__ import annotations
 
+from pydantic import BaseModel, Field
 from google.adk.agents import Agent, ParallelAgent, SequentialAgent
+
+# ============================================================================ 
+# STRUCTURED DATA SCHEMAS
+# ============================================================================ 
+class FlightOption(BaseModel):
+    airline: str
+    departure_time: str
+    arrival_time: str
+    price: float
+
+class HotelOption(BaseModel):
+    name: str
+    rating: int
+    amenities: list[str]
+    price_per_night: float
+
+class ActivityOption(BaseModel):
+    name: str
+    description: str
+    cost: float
+
+class FlightOptionsList(BaseModel):
+    options: list[FlightOption]
+
+class HotelOptionsList(BaseModel):
+    options: list[HotelOption]
+
+class ActivityOptionsList(BaseModel):
+    options: list[ActivityOption]
 
 # ============================================================================ 
 # PARALLEL SEARCH AGENTS
@@ -28,14 +58,8 @@ flight_finder = Agent(
     instruction=(
         "You are a flight search specialist. Based on the user's travel request, "
         "suggest 2-3 realistic flight options.\n"
-        "\n"
-        "For each option, include:\n"
-        "- Airline\n"
-        "- Approximate departure/arrival times\n"
-        "- Estimated price\n"
-        "\n"
-        "Output ONLY the flight options."
     ),
+    output_schema=FlightOptionsList,
     output_key="flight_options"  # UNIQUE key to avoid conflicts!
 )
 
@@ -47,15 +71,8 @@ hotel_finder = Agent(
     instruction=(
         "You are a hotel search specialist. Based on the user's travel request, "
         "suggest 2-3 realistic hotel options.\n"
-        "\n"
-        "For each option, include:\n"
-        "- Hotel Name\n"
-        "- Star rating\n"
-        "- Key amenities\n"
-        "- Estimated price per night\n"
-        "\n"
-        "Output ONLY the hotel options."
     ),
+    output_schema=HotelOptionsList,
     output_key="hotel_options"  # UNIQUE key to avoid conflicts!
 )
 
@@ -67,15 +84,8 @@ activity_finder = Agent(
     instruction=(
         "You are a travel activity specialist. Based on the user's destination, "
         "suggest 3-4 must-do activities or attractions.\n"
-        "\n"
-        "For each activity, include:\n"
-        "- Name of attraction\n"
-        "- Brief description\n"
-        "- Best time to visit\n"
-        "- Estimated cost\n"
-        "\n"
-        "Output ONLY the activity list."
     ),
+    output_schema=ActivityOptionsList,
     output_key="activity_options"  # UNIQUE key to avoid conflicts!
 )
 
@@ -90,15 +100,15 @@ itinerary_builder = Agent(
     description="Compiles the final travel itinerary",
     instruction=(
         "You are an expert travel agent. Create a complete, day-by-day travel itinerary "
-        "based on the options provided by your team.\n"
+        "based on the structured options provided by your team.\n"
         "\n"
-        "**Flight Options:**\n"
+        "**Flight Options (JSON):**\n"
         "{flight_options}\n"
         "\n"
-        "**Hotel Options:**\n"
+        "**Hotel Options (JSON):**\n"
         "{hotel_options}\n"
         "\n"
-        "**Activity Options:**\n"
+        "**Activity Options (JSON):**\n"
         "{activity_options}\n"
         "\n"
         "Create a cohesive itinerary that:\n"
@@ -106,7 +116,7 @@ itinerary_builder = Agent(
         "2. Organizes the activities into a logical daily schedule.\n"
         "3. Adds practical travel tips for the destination.\n"
         "\n"
-        "Format the output as a beautiful, easy-to-read travel plan."
+        "Format the output as a beautiful, easy-to-read travel plan in markdown."
     )
 )
 
@@ -152,5 +162,3 @@ root_agent = travel_planning_system
         *   **Code Review:** Run a `SecurityScannerAgent`, `StyleCheckerAgent`, and `BugFinderAgent` in parallel on a pull request, then use a `SummaryAgent` to compile a final review report.
         *   **Medical Diagnosis:** Have specialist agents (Cardiologist, Neurologist, etc.) analyze a patient's chart concurrently, then have a Lead Doctor agent synthesize a diagnosis.
         *   **News Aggregation:** Search for "Politics", "Technology", and "Sports" news in parallel, then generate a "Daily Briefing" newsletter.
-
-```

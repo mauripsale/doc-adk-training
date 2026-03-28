@@ -44,14 +44,42 @@ User ───┼──── Agent 2 (hotels) ─────┼──→ Merge
 # In agent.py (Starter Code)
 
 from __future__ import annotations
+from pydantic import BaseModel, Field
 from google.adk.agents import Agent, ParallelAgent, SequentialAgent
+
+# ===== Structured Data Schemas (Provided for you) =====
+class FlightOption(BaseModel):
+    airline: str
+    departure_time: str
+    arrival_time: str
+    price: float
+
+class HotelOption(BaseModel):
+    name: str
+    rating: int
+    amenities: list[str]
+    price_per_night: float
+
+class ActivityOption(BaseModel):
+    name: str
+    description: str
+    cost: float
+
+class FlightOptionsList(BaseModel):
+    options: list[FlightOption]
+
+class HotelOptionsList(BaseModel):
+    options: list[HotelOption]
+
+class ActivityOptionsList(BaseModel):
+    options: list[ActivityOption]
 
 # ===== Specialist Agents (Provided for you) =====
 
-flight_finder = Agent(name="flight_finder", model="gemini-2.5-flash", ..., output_key="flight_options")
-hotel_finder = Agent(name="hotel_finder", model="gemini-2.5-flash", ..., output_key="hotel_options")
-activity_finder = Agent(name="activity_finder", model="gemini-2.5-flash", ..., output_key="activity_options")
-itinerary_builder = Agent(name="itinerary_builder", model="gemini-2.5-flash", ..., instruction="...{flight_options}...{hotel_options}...{activity_options}...")
+flight_finder = Agent(name="flight_finder", model="gemini-2.5-flash", output_schema=FlightOptionsList, output_key="flight_options")
+hotel_finder = Agent(name="hotel_finder", model="gemini-2.5-flash", output_schema=HotelOptionsList, output_key="hotel_options")
+activity_finder = Agent(name="activity_finder", model="gemini-2.5-flash", output_schema=ActivityOptionsList, output_key="activity_options")
+itinerary_builder = Agent(name="itinerary_builder", model="gemini-2.5-flash", instruction="...{flight_options}...{hotel_options}...{activity_options}...")
 
 # ============================================================================
 # FAN-OUT: PARALLEL DATA GATHERING

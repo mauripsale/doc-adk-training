@@ -18,7 +18,9 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 
-from google.adk.agents import Agent, InMemoryRunner
+from google.adk.agents import Agent
+from google.adk.apps.app import App
+from google.adk.runners import InMemoryRunner
 from google.adk.plugins import BasePlugin
 from google.adk.events import Event
 from google.genai import types
@@ -77,7 +79,7 @@ class MetricsCollectorPlugin(BasePlugin):
                     metrics = self.current_requests.pop(request_id)
                     metrics.end_time = time.time()
                     metrics.latency = metrics.end_time - metrics.start_time
-                    
+
                     self.metrics.total_requests += 1
                     self.metrics.successful_requests += 1
                     self.metrics.total_latency += metrics.latency
@@ -115,7 +117,7 @@ class PerformanceProfilerPlugin(BasePlugin):
                     'start_time': time.time()
                 }
                 print(f"⏱️ [PROFILER] Tool call '{self.current_profile['tool']}' started.")
-            
+
             elif event.event_type == 'tool_call_complete':
                 if self.current_profile:
                     duration = time.time() - self.current_profile['start_time']
@@ -135,24 +137,27 @@ root_agent = Agent(
 # In a real application, you would likely run this in a separate script.
 # For this lab, we include it to show how plugins are registered.
 def main():
-    """Demonstrates how to register plugins with the runner."""
-    
+    """Demonstrates how to register plugins with the App."""
+
     # Instantiate plugins
     metrics_plugin = MetricsCollectorPlugin()
     alerting_plugin = AlertingPlugin()
     profiler_plugin = PerformanceProfilerPlugin()
 
-    # Register plugins with the runner
-    runner = InMemoryRunner(
-        agent=root_agent,
+    # Register plugins with the App
+    app = App(
+        name="observability_app",
+        root_agent=root_agent,
         plugins=[metrics_plugin, alerting_plugin, profiler_plugin]
     )
-    
+
+    runner = InMemoryRunner(app=app)
+
     # The `adk web` command will automatically discover this runner
     # and use it, enabling all the plugins. When `adk web` starts, it looks
     # for a `main()` function in your `agent.py` to allow for this kind of
     # custom runner configuration.
-    print("Runner with observability plugins is configured.")
+    print("App with observability plugins is configured.")
     print("Run `adk web` and interact with the agent to see plugin output in the console.")
 
 if __name__ == "__main__":

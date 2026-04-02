@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Smart Travel Planner lab.
 
-### `travel-planner/agent.py`
+### `travel_planner/agent.py`
 
 ```python
 from __future__ import annotations

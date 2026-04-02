@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Content Moderation Assistant lab.
 
-### `content-moderator/agent.py`
+### `content_moderator/agent.py`
 
 ```python
 """

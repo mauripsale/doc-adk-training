@@ -143,7 +143,7 @@ root_agent = None
 
 1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web content-publisher
+    adk web content_publisher
     ```
 2.  **Interact with the system:**
     *   Give it a topic, like: "The future of electric vehicles".

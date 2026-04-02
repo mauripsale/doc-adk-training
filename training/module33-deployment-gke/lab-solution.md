@@ -17,15 +17,15 @@ After a successful build, the output will confirm the image was created and push
 #### `kubectl apply`
 When you apply the manifest, you should see a confirmation that the deployment and service were created:
 ```
-deployment.apps/echo-agent-deployment created
-service/echo-agent-service created
+deployment.apps/echo_agent-deployment created
+service/echo_agent-service created
 ```
 
 #### `kubectl get service --watch`
 This command will first show `<pending>` under the `EXTERNAL-IP` column. After a few minutes, GKE will provision a load balancer and the output will change to show a public IP address:
 ```
 NAME                 TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
-echo-agent-service   LoadBalancer   10.44.192.123   34.123.45.67    80:30123/TCP   2m30s
+echo_agent-service   LoadBalancer   10.44.192.123   34.123.45.67    80:30123/TCP   2m30s
 ```
 The `EXTERNAL-IP` is the public address of your agent.
 
@@ -41,11 +41,11 @@ When you navigate to the `http://<EXTERNAL-IP>` address in your browser, you sho
 
 *   **`CrashLoopBackOff`:**
     *   **Problem:** The container is starting and then immediately crashing. This is an error within the container itself.
-    *   **Solution:** Use `kubectl logs deployment/echo-agent-deployment` to view the logs from the crashing pod. The logs will show the error message from the `adk web` command (e.g., a missing environment variable, a syntax error in an agent file, etc.).
+    *   **Solution:** Use `kubectl logs deployment/echo_agent-deployment` to view the logs from the crashing pod. The logs will show the error message from the `adk web` command (e.g., a missing environment variable, a syntax error in an agent file, etc.).
 
 *   **Service IP remains `<pending>`:**
     *   **Problem:** GKE is having trouble creating the external load balancer. This can happen due to project quota issues or incorrect network configurations.
-    *   **Solution:** Use `kubectl describe service echo-agent-service` to see the events associated with the service. The "Events" section at the bottom will usually contain a detailed error message from the cloud load balancer controller explaining the problem.
+    *   **Solution:** Use `kubectl describe service echo_agent-service` to see the events associated with the service. The "Events" section at the bottom will usually contain a detailed error message from the cloud load balancer controller explaining the problem.
 
 ### Self-Reflection Answers
 

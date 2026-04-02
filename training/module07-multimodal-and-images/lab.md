@@ -96,7 +96,7 @@ class ProductCatalogAnalyzer:
 
         # TODO: 1. Create a new session for this analysis.
         # Use `self.session_service.create_session`, providing an `app_name`
-        # (e.g., "visual-catalog") and a `user_id`.
+        # (e.g., "visual_catalog") and a `user_id`.
         session = None # Replace this
 
         # TODO: 2. Call the `load_image_from_file` helper to get the `image_part`.

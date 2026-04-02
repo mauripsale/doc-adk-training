@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for both the `cart_server.py` and the `agent.py` client script for the Shopping Cart MCP lab.
 
-### `custom-mcp-server/cart_server.py`
+### `custom_mcp_server/cart_server.py`
 
 ```python
 # Filename: cart_server.py
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         print("\n[Server]: Shutting down.")
 ```
 
-### `custom-mcp-server/agent.py`
+### `custom_mcp_server/agent.py`
 
 ```python
 # Filename: agent.py

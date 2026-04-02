@@ -15,7 +15,7 @@ We will use the same streaming agent configuration from Module 22.
 
 1.  **Create the project directory and agent:**
     ```shell
-    mkdir custom-streaming-app
+    mkdir custom_streaming_app
     cd custom_streaming_app
     adk create --type=config streaming_agent
     ```
@@ -34,7 +34,7 @@ We will use the same streaming agent configuration from Module 22.
 
 ### Step 2: Create the Custom HTML/JavaScript Client
 
-**Exercise:** Navigate back to the `custom-streaming-app` directory. Create an `index.html` file. A skeleton is provided below. Your task is to complete the JavaScript logic for the `startStreaming` function based on the `# TODO` comments.
+**Exercise:** Navigate back to the `custom_streaming_app` directory. Create an `index.html` file. A skeleton is provided below. Your task is to complete the JavaScript logic for the `startStreaming` function based on the `# TODO` comments.
 
 ```html
 <!-- In index.html (Starter Code) -->
@@ -151,15 +151,15 @@ We will use the same streaming agent configuration from Module 22.
 ### Step 3: Run the Server and the Client
 
 1.  **Terminal 1 (ADK Server):**
-    *   Navigate to the `custom-streaming-app` directory.
+    *   Navigate to the `custom_streaming_app` directory.
     *   Run `adk api_server streaming_agent`.
     ```shell
-    cd /path/to/custom-streaming-app
+    cd /path/to/custom_streaming_app
     adk api_server streaming_agent
     ```
 
 2.  **Terminal 2 (Client Web Server):**
-    *   Navigate to the `custom-streaming-app` directory (where `index.html` is).
+    *   Navigate to the `custom_streaming_app` directory (where `index.html` is).
     *   Start a simple Python web server.
     ```shell
     python3 -m http.server 8081

@@ -73,7 +73,7 @@ root_agent = LlmAgent(
 
 3.  **Run the agent:**
     ```shell
-    adk web fact-finder-agent
+    adk web fact_finder_agent
     ```
     The ADK will automatically find the `root_agent` object in your `agent.py` file.
 

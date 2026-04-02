@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Best Practices Agent lab.
 
-### `best-practices-agent/agent.py`
+### `best_practices_agent/agent.py`
 
 ```python
 import time

@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This solution demonstrates how to use the `ReflectAndRetryToolPlugin` to automatically recover from tool usage errors (like incorrect tool names) without modifying the agent's prompt code.
 
-### `retry-agent/agent.py`
+### `retry_agent/agent.py`
 
 ```python
 from google.adk.agents import Agent

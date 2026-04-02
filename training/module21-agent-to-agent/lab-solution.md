@@ -7,9 +7,9 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete code for the two separate agent projects in the lab: the `research-specialist` (server) and the `a2a-orchestrator` (client).
+This file contains the complete code for the two separate agent projects in the lab: the `research_specialist` (server) and the `a2a_orchestrator` (client).
 
-### `research-specialist/agent.py`
+### `research_specialist/agent.py`
 
 ```python
 from google.adk.agents import Agent
@@ -45,7 +45,7 @@ a2a_app = to_a2a(root_agent, port=8001)
 # uvicorn agent:a2a_app --host localhost --port 8001
 ```
 
-### `a2a-orchestrator/agent.py`
+### `a2a_orchestrator/agent.py`
 
 ```python
 from google.adk.agents import Agent

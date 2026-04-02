@@ -34,7 +34,7 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 
     ```shell
     cd /path/to/your/adk-training
-    mkdir cloud-mcp-server
+    mkdir cloud_mcp_server
     cd cloud_mcp_server
     ```
 
@@ -162,7 +162,7 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 
 Now, create an ADK agent that connects to your newly deployed server.
 
-1.  **Create an `agent.py` file** in the same `cloud-mcp-server` directory.
+1.  **Create an `agent.py` file** in the same `cloud_mcp_server` directory.
 2.  **Add the following code**, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied.
 
     ```python
@@ -189,8 +189,8 @@ Now, create an ADK agent that connects to your newly deployed server.
     )
     ```
 3.  **Create `__init__.py` and `.env` files:**
-    Create an empty `__init__.py` file in the `cloud-mcp-server` directory.
-    Create a `.env` file in the `cloud-mcp-server` directory with the following content:
+    Create an empty `__init__.py` file in the `cloud_mcp_server` directory.
+    Create a `.env` file in the `cloud_mcp_server` directory with the following content:
     ```
     MODEL="gemini-2.5-flash"
     ```
@@ -237,10 +237,10 @@ Cloud Run services and Artifact Registry repositories can incur costs if left ru
         --async # Runs in background
     ```
 
-3.  **Delete the `cloud-mcp-server` directory:**
+3.  **Delete the `cloud_mcp_server` directory:**
     ```shell
     cd ..
-    rm -rf cloud-mcp-server
+    rm -rf cloud_mcp_server
     ```
 
 ### Self-Reflection Questions

@@ -120,7 +120,7 @@ def main():
     # function in your `agent.py` to allow for this kind of custom runner
     # configuration.
     print("App with observability plugins is configured.")
-    print("Run `adk web observability-agent` from the parent directory and interact with the agent to see plugin output in the console.")
+    print("Run `adk web observability_agent` from the parent directory and interact with the agent to see plugin output in the console.")
 
 if __name__ == "__main__":
     main()

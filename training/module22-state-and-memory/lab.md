@@ -199,7 +199,7 @@ root_agent = None
 1.  **Set up your API key** in the `.env` file.
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web personal-tutor
+    adk web personal_tutor
     ```
 3.  **Interact with the agent:**
     *   Go to the **State** tab in the Dev UI. Set the global app state by entering `{"app:course_version": "2.1"}` and clicking "Set State".

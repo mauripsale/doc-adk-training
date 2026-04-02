@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Essay Refinement System lab.
 
-### `essay-refiner/agent.py`
+### `essay_refiner/agent.py`
 
 ````python
 # Part of agent.py --> Follow https://google.github.io/adk-docs/get-started/quickstart/ to learn the setup

@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `index.html` custom chat client.
 
-### `ui-agent/index.html`
+### `ui_agent/index.html`
 
 ```html
 <!DOCTYPE html>
@@ -57,7 +57,7 @@ This file contains the complete code for the `index.html` custom chat client.
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        app_name: "ui-agent",
+                        app_name: "ui_agent",
                         session_id: sessionId,
                         new_message: {
                             role: "user",

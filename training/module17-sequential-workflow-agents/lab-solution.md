@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Blog Post Generator Pipeline lab.
 
-### `blog-pipeline/agent.py`
+### `blog_pipeline/agent.py`
 
 ```python
 from __future__ import annotations

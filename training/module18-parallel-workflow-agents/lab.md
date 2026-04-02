@@ -110,7 +110,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web travel-planner
+    adk web travel_planner
     ```
 3.  **Interact with the pipeline:**
     *   Send a travel request, like: "Plan a 7-day vacation to Honolulu".

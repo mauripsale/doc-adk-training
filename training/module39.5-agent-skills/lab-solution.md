@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Agent Skills lab.
 
-### `skills-agent/agent.py`
+### `skills_agent/agent.py`
 
 ```python
 import pathlib
@@ -21,7 +21,7 @@ from google.adk.code_executors.unsafe_local_code_executor import UnsafeLocalCode
 # 1. Load the skill from the directory you created.
 # We use pathlib to reliably point to the folder relative to this script.
 greeting_skill = load_skill_from_dir(
-    pathlib.Path(__file__).parent / "skills" / "greeting-skill"
+    pathlib.Path(__file__).parent / "skills" / "greeting_skill"
 )
 
 # 2. Create the SkillToolset.

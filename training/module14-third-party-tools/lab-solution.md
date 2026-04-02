@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` file in the Fact-finder Agent lab.
 
-### `fact-finder-agent/agent.py`
+### `fact_finder_agent/agent.py`
 
 ```python
 from google.adk.agents import LlmAgent

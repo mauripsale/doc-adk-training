@@ -69,7 +69,7 @@ root_agent = LlmAgent(
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web greeting-agent
+    adk web greeting_agent
     ```
 3.  **Interact with the router:**
     *   **Test Case 1:** "Say hello to me in Spanish."

@@ -80,7 +80,7 @@ Based on our design, we can plan the files we'll need to create in the next lab.
 
 ```
 adk-training/
-└── greeting-agent/              <-- New project directory
+└── greeting_agent/              <-- New project directory
     ├── .env                     <-- For API keys
     ├── agent.py                 <-- This will define our router_agent
     ├── __init__.py              <-- Makes the directory a Python package

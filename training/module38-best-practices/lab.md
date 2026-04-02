@@ -104,7 +104,7 @@ root_agent = None
     ```
 2.  **Set up your `.env` file** and start the Dev UI:
     ```shell
-    adk web best-practices-agent
+    adk web best_practices_agent
     ```
 3.  **Interact with the Agent and Observe the Patterns:**
     *   **Test Caching:**

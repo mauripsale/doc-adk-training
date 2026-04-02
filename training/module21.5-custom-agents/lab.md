@@ -124,7 +124,7 @@ root_agent = support_system
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web support-router
+    adk web support_router
     ```
 3.  **Interact with the system:**
     *   **Test 1 (Neutral):** Send "How do I reset my password?". You should get a helpful technical response from the `ai_support_bot`.

@@ -99,7 +99,7 @@ root_agent = Agent(...)
 
 ### Step 3: Run and Test Your Agent
 
-1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI: `adk web chuck-norris-agent`
+1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI: `adk web chuck_norris_agent`
 2.  **Interact with the agent:**
     *   Test its capabilities:
         *   "Tell me a random Chuck Norris joke"

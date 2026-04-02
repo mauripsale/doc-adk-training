@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete, simplified code for the `agent.py` script in the Document Processing Pipeline lab.
 
-### `doc-processor/agent.py`
+### `doc_processor/agent.py`
 
 ```python
 """

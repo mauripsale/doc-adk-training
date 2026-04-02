@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Research Assistant lab.
 
-### `research-assistant/agent.py`
+### `research_assistant/agent.py`
 
 ```python
 """

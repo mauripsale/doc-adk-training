@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete, working code for the `index.html` custom client.
 
-### `custom-streaming-app/index.html`
+### `custom_streaming_app/index.html`
 
 ```html
 <!DOCTYPE html>

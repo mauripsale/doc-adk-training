@@ -98,7 +98,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web blog-pipeline
+    adk web blog_pipeline
     ```
 3.  **Interact with the pipeline:**
     *   Send a topic to write about, like: "the history of the internet".

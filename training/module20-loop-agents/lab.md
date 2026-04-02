@@ -84,7 +84,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web essay-refiner
+    adk web essay_refiner
     ```
 3.  **Interact with the system:**
     *   Give it a topic, like: "The impact of artificial intelligence on society".

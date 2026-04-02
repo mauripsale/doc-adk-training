@@ -99,7 +99,7 @@ root_agent = Agent(
 
 2.  **Start the Dev UI:**
     ```shell
-    adk web research-assistant
+    adk web research_assistant
     ```
 
 3.  **Interact with the agent:**

@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Observability System with Plugins lab.
 
-### `observability-agent/agent.py`
+### `observability_agent/agent.py`
 
 ```python
 import asyncio

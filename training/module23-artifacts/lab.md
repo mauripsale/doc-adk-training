@@ -20,13 +20,13 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
 
 1.  **Create the agent project:**
     ```shell
-    adk create doc-processor
+    adk create doc_processor
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd doc-processor
+    cd doc_processor
     ```
 
 ### Step 2: Implement the Artifact Pipeline

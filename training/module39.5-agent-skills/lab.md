@@ -13,13 +13,13 @@ In this lab, you will create a simple ADK Skill on your file system and configur
 
 1.  **Create a new agent project:**
     ```shell
-    adk create skills-agent
+    adk create skills_agent
     ```
     Choose the **Programmatic (Python script)** option.
 
 2.  **Navigate to the directory:**
     ```shell
-    cd skills-agent
+    cd skills_agent
     ```
 
 ### Step 2: Create the Skill Directory

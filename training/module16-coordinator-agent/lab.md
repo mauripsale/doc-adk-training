@@ -13,8 +13,8 @@ In this lab, you will implement the multi-agent "Greeting Router" system. You wi
 
 1.  **Create the agent project:**
     ```shell
-    adk create greeting-agent
-    cd greeting-agent
+    adk create greeting_agent
+    cd greeting_agent
     ```
 
 ### Step 2: Create the Specialist Agent

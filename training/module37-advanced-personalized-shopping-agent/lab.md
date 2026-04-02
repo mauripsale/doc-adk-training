@@ -26,9 +26,9 @@ This agent will be the interface to the e-commerce website.
 
 1.  **Create the `web-agent` project** (programmatic).
     ```shell
-    cd capstone-shopping-system
-    adk create web-agent
-    cd web-agent
+    cd capstone_shopping_system
+    adk create web_agent
+    cd web_agent
     ```
 
 2.  **Create `requirements.txt`:**
@@ -123,9 +123,9 @@ This agent will be responsible for remembering user preferences.
 
 1.  **Create the `personalization-agent` project** (programmatic).
     ```shell
-    cd capstone-shopping-system
-    adk create personalization-agent
-    cd personalization-agent
+    cd capstone_shopping_system
+    adk create personalization_agent
+    cd personalization_agent
     ```
 
 2.  **Create `requirements.txt`:**
@@ -198,9 +198,9 @@ This is the main, user-facing agent that will coordinate the others.
 
 1.  **Create the `orchestrator-agent` project** (programmatic).
     ```shell
-    cd capstone-shopping-system
-    adk create orchestrator-agent
-    cd orchestrator-agent
+    cd capstone_shopping_system
+    adk create orchestrator_agent
+    cd orchestrator_agent
     ```
 
 2.  **Create `requirements.txt`:**

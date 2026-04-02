@@ -13,13 +13,13 @@ In this lab, you will build a **Best Practices Agent** that demonstrates several
 
 1.  **Create the agent project:**
     ```shell
-    adk create best-practices-agent
+    adk create best_practices_agent
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd best-practices-agent
+    cd best_practices_agent
     ```
 
 ### Step 2: Implement the Production-Ready Tools

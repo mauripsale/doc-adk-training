@@ -25,13 +25,13 @@ You will build a tutor that:
 
 1.  **Create the agent project:**
     ```shell
-    adk create personal-tutor
+    adk create personal_tutor
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd personal-tutor
+    cd personal_tutor
     ```
 
 ### Step 2: Implement the State-Management Tools

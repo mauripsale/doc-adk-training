@@ -25,7 +25,7 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     Make a fresh copy of the `echo-agent` from Module 3.
     ```shell
     cp -r echo-agent/ gke-echo-agent/
-    cd gke-echo-agent/
+    cd gke_echo_agent/
     ```
 
 2.  **Update Agent Model:**

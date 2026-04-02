@@ -29,13 +29,13 @@ In this lab, you will build a sophisticated **Content Publishing System** that d
 
 1.  **Create the agent project:**
     ```shell
-    adk create content-publisher
+    adk create content_publisher
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd content-publisher
+    cd content_publisher
     ```
 3.  **Create the `.env` file:**
     The search tools require a Vertex AI configuration. Create a `.env` file in this directory with the following content, replacing `<your_gcp_project>` with your actual Google Cloud project ID.

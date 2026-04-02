@@ -16,7 +16,7 @@ We will use the same streaming agent configuration from Module 22.
 1.  **Create the project directory and agent:**
     ```shell
     mkdir custom-streaming-app
-    cd custom-streaming-app
+    cd custom_streaming_app
     adk create --type=config streaming_agent
     ```
 

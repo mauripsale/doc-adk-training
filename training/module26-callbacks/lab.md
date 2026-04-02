@@ -15,13 +15,13 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 
 1.  **Create the agent project:**
     ```shell
-    adk create content-moderator
+    adk create content_moderator
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd content-moderator
+    cd content_moderator
     ```
 
 ### Step 2: Implement the Callbacks

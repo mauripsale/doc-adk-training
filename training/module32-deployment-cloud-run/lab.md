@@ -40,7 +40,7 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
     ```shell
     # Create the main project directory
     mkdir customer-support-cloud
-    cd customer-support-cloud
+    cd customer_support_cloud
 
     # Create the agent subdirectory
     adk create --type=config support_agent

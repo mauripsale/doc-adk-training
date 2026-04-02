@@ -35,7 +35,7 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     ```shell
     cd /path/to/your/adk-training
     mkdir cloud-mcp-server
-    cd cloud-mcp-server
+    cd cloud_mcp_server
     ```
 
 2.  **Create the `stateless_cart_server.py` file:**

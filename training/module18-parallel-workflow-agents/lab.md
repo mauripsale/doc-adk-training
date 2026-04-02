@@ -27,13 +27,13 @@ User ───┼──── Agent 2 (hotels) ─────┼──→ Merge
 
 1.  **Create a new project:**
     ```shell
-    adk create travel-planner
+    adk create travel_planner
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd travel-planner
+    cd travel_planner
     ```
 
 ### Step 2: Assemble the Fan-Out/Gather Pipeline

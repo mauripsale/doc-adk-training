@@ -19,7 +19,7 @@ In this lab, you will build your own simple, standalone MCP server from scratch.
 2.  **Create a new project directory:**
     ```shell
     mkdir custom-mcp-server
-    cd custom-mcp-server
+    cd custom_mcp_server
     ```
 
 ### Step 2: Implement the MCP Server

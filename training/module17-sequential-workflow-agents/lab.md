@@ -21,13 +21,13 @@ In this lab, you will build a multi-step content creation pipeline using a `Sequ
 
 1.  **Create a new project:**
     ```shell
-    adk create blog-pipeline
+    adk create blog_pipeline
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd blog-pipeline
+    cd blog_pipeline
     ```
 
 ### Step 2: Assemble the Pipeline

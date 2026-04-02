@@ -73,7 +73,7 @@ This method involves writing a custom Python script to deploy the agent.
 1.  **Get an Agent:** Copy the `multi_tool_agent` project to a new directory named `deploy-manual`.
     ```shell
     cp -r /path/to/multi_tool_agent deploy-manual
-    cd deploy-manual
+    cd deploy_manual
     ```
 2.  **Install Dependencies:**
     ```shell

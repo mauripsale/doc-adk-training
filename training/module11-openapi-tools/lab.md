@@ -16,8 +16,8 @@ In this lab, you will build an agent that can retrieve Chuck Norris jokes from a
 1.  **Create the agent project:**
     Choose the **Programmatic (Python script)** option when prompted.
     ```shell
-    adk create chuck-norris-agent
-    cd chuck-norris-agent
+    adk create chuck_norris_agent
+    cd chuck_norris_agent
     ```
 
 2.  **Set up your API key** in the `.env` file. (The Chuck Norris API is free, but the agent needs credentials for the Gemini model).

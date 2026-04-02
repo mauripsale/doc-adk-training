@@ -13,13 +13,13 @@ In this lab, you will build a comprehensive observability system for an agent us
 
 1.  **Create the agent project:**
     ```shell
-    adk create observability-agent
+    adk create observability_agent
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd observability-agent
+    cd observability_agent
     ```
 
 ### Step 2: Implement the Observability Plugins

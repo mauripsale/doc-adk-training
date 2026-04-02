@@ -13,13 +13,13 @@ In this lab, you will work with an agent that has been given misleading instruct
 
 1.  **Create a new agent project:**
     ```shell
-    adk create retry-agent
+    adk create retry_agent
     ```
     Choose the **Programmatic (Python script)** option.
 
 2.  **Navigate to the directory:**
     ```shell
-    cd retry-agent
+    cd retry_agent
     ```
 
 ### Step 2: The "Broken" Agent

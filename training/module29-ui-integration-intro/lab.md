@@ -13,8 +13,8 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 1.  **Create and navigate to the agent project:**
     ```shell
-    adk create ui-agent
-    cd ui-agent
+    adk create ui_agent
+    cd ui_agent
     ```
     Choose the **Programmatic (Python script)** option.
 

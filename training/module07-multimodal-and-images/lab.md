@@ -20,13 +20,13 @@ You will build a single `LlmAgent` that can:
 
 1.  **Create the agent project:**
     ```shell
-    adk create visual-catalog
+    adk create visual_catalog
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd visual-catalog
+    cd visual_catalog
     ```
 
 3.  **Install Dependencies:**

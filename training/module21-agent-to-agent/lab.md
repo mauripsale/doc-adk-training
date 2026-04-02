@@ -24,7 +24,7 @@ In this lab, you will build a distributed multi-agent system. You will create a 
     Navigate into the `research_specialist` directory and install `uvicorn`, which is needed to run the agent as a web server.
     ```shell
     cd research_specialist
-    pip install uvicorn
+    pip install uvicorn google-adk[a2a]
     cd ..
     ```
 

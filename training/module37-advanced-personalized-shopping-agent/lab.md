@@ -11,7 +11,7 @@ In this capstone lab, you will synthesize concepts from the entire course to bui
 ### Prerequisites
 *   A Google Cloud Project with billing enabled and the Vertex AI API enabled.
 *   `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
-*   `uvicorn` installed (`pip install uvicorn`).
+*   `uvicorn` installed (`pip install uvicorn google-adk[a2a]`).
 *   `web_agent_site` installed (`pip install web_agent_site`).
 
 ### Setup

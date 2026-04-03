@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Visual Product Catalog Analyzer lab, refactored to use a single agent and the standard `Runner`.
 
-### `visual-catalog/agent.py`
+### `visual_catalog/agent.py`
 
 ```python
 """
@@ -67,7 +67,7 @@ Describe the product type, key visual features (like color, material, and design
 
         # Create a new session for this specific analysis
         session = await self.session_service.create_session(
-            app_name="visual-catalog", user_id=f"user_{product_id}"
+            app_name="visual_catalog", user_id=f"user_{product_id}"
         )
 
         # Step 1: Load the image

@@ -27,13 +27,13 @@ User ───┼──── Agent 2 (hotels) ─────┼──→ Merge
 
 1.  **Create a new project:**
     ```shell
-    adk create travel-planner
+    adk create travel_planner
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd travel-planner
+    cd travel_planner
     ```
 
 ### Step 2: Assemble the Fan-Out/Gather Pipeline
@@ -44,14 +44,42 @@ User ───┼──── Agent 2 (hotels) ─────┼──→ Merge
 # In agent.py (Starter Code)
 
 from __future__ import annotations
+from pydantic import BaseModel, Field
 from google.adk.agents import Agent, ParallelAgent, SequentialAgent
+
+# ===== Structured Data Schemas (Provided for you) =====
+class FlightOption(BaseModel):
+    airline: str
+    departure_time: str
+    arrival_time: str
+    price: float
+
+class HotelOption(BaseModel):
+    name: str
+    rating: int
+    amenities: list[str]
+    price_per_night: float
+
+class ActivityOption(BaseModel):
+    name: str
+    description: str
+    cost: float
+
+class FlightOptionsList(BaseModel):
+    options: list[FlightOption]
+
+class HotelOptionsList(BaseModel):
+    options: list[HotelOption]
+
+class ActivityOptionsList(BaseModel):
+    options: list[ActivityOption]
 
 # ===== Specialist Agents (Provided for you) =====
 
-flight_finder = Agent(name="flight_finder", model="gemini-2.5-flash", ..., output_key="flight_options")
-hotel_finder = Agent(name="hotel_finder", model="gemini-2.5-flash", ..., output_key="hotel_options")
-activity_finder = Agent(name="activity_finder", model="gemini-2.5-flash", ..., output_key="activity_options")
-itinerary_builder = Agent(name="itinerary_builder", model="gemini-2.5-flash", ..., instruction="...{flight_options}...{hotel_options}...{activity_options}...")
+flight_finder = Agent(name="flight_finder", model="gemini-2.5-flash", output_schema=FlightOptionsList, output_key="flight_options")
+hotel_finder = Agent(name="hotel_finder", model="gemini-2.5-flash", output_schema=HotelOptionsList, output_key="hotel_options")
+activity_finder = Agent(name="activity_finder", model="gemini-2.5-flash", output_schema=ActivityOptionsList, output_key="activity_options")
+itinerary_builder = Agent(name="itinerary_builder", model="gemini-2.5-flash", instruction="...{flight_options}...{hotel_options}...{activity_options}...")
 
 # ============================================================================
 # FAN-OUT: PARALLEL DATA GATHERING
@@ -82,7 +110,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web travel-planner
+    adk web travel_planner
     ```
 3.  **Interact with the pipeline:**
     *   Send a travel request, like: "Plan a 7-day vacation to Honolulu".

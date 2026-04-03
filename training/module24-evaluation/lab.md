@@ -14,7 +14,7 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
 1.  **Navigate to your Calculator Agent directory:**
 
     ```shell
-    cd /path/to/your/adk-training/calculator-agent
+    cd /path/to/your/adk-training/calculator_agent
     ```
 
 2.  **Ensure your virtual environment is active** and your `.env` file is configured with your API key.
@@ -22,7 +22,7 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
 3.  **Start the web server:**
 
     ```shell
-    adk web calculator-agent
+    adk web calculator_agent
     ```
 
 ### Step 2: Record the "Golden Path" Conversation
@@ -171,13 +171,13 @@ While the Dev UI is great for creating and running evaluations interactively, yo
 
 1.  **Stop the `adk web` server.**
 2.  **Run the `adk eval` command:**
-    From your `calculator-agent` directory, run the following command:
+    From your `calculator_agent` directory, run the following command:
 
     ```shell
     adk eval . eval_results/calculator_tests.evalset.json
     ```
     *   **`adk eval`**: The main command.
-    *   **`.`**: The path to the agent to be tested (the current directory, `calculator-agent`).
+    *   **`.`**: The path to the agent to be tested (the current directory, `calculator_agent`).
     *   **`eval_results/calculator_tests.evalset.json`**: The path to the evaluation file to run.
 
 3.  **Analyze the Output:**

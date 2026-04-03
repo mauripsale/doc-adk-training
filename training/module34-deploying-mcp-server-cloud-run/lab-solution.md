@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `stateless_cart_server.py` and the `agent.py` client for the lab.
 
-### `cloud-mcp-server/stateless_cart_server.py`
+### `cloud_mcp_server/stateless_cart_server.py`
 
 ```python
 # Filename: stateless_cart_server.py
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     main()
 ```
 
-### `cloud-mcp-server/agent.py`
+### `cloud_mcp_server/agent.py`
 
 ```python
 # Filename: agent.py

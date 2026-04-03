@@ -7,14 +7,17 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete code for the two separate agent projects in the lab: the `research-specialist` (server) and the `a2a-orchestrator` (client).
+This file contains the complete code for the two separate agent projects in the lab: the `research_specialist` (server) and the `a2a_orchestrator` (client).
 
-### `research-specialist/agent.py`
+### `research_specialist/agent.py`
 
 ```python
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import GoogleSearchAgentTool
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # 1. Create an instance of the search tool.
 search_tool = GoogleSearchAgentTool()
@@ -45,11 +48,14 @@ a2a_app = to_a2a(root_agent, port=8001)
 # uvicorn agent:a2a_app --host localhost --port 8001
 ```
 
-### `a2a-orchestrator/agent.py`
+### `a2a_orchestrator/agent.py`
 
 ```python
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # 1. Create a proxy to the remote agent using RemoteA2aAgent.
 # The ADK will use the agent card to discover how to communicate with it.

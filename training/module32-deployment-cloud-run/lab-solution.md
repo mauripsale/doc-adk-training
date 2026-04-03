@@ -20,8 +20,8 @@ After running the `adk deploy cloud_run` command and waiting for the build and d
   ✓ Routing traffic...
   ✓ Setting IAM Policy...
 Done.
-Service [customer-support-cloud] revision [customer-support-cloud-00001-...] has been deployed and is serving 100 percent of traffic.
-Service URL: https://customer-support-cloud-xxxxxxxxxx-uc.a.run.app
+Service [customer_support_cloud] revision [customer_support_cloud-00001-...] has been deployed and is serving 100 percent of traffic.
+Service URL: https://customer_support_cloud-xxxxxxxxxx-uc.a.run.app
 ```
 
 The most important part is the **Service URL**.

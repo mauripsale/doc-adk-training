@@ -13,18 +13,18 @@ In this lab, you will build a comprehensive observability system for an agent us
 
 1.  **Create the agent project:**
     ```shell
-    adk create observability-agent
+    adk create observability_agent
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd observability-agent
+    cd observability_agent
     ```
 
 ### Step 2: Implement the Observability Plugins
 
-**Exercise:** Open `agent.py`. Skeletons for three plugins are provided. Your task is to implement the logic inside the `on_event_callback` method for each one, and then register them with the runner.
+**Exercise:** Open `agent.py`. Skeletons for three plugins are provided. Your task is to implement the logic inside the `on_event_callback` method for each one, and then register them with the App.
 
 ```python
 # In agent.py (Starter Code)
@@ -33,7 +33,9 @@ import time
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 
-from google.adk.agents import Agent, InMemoryRunner
+from google.adk.agents import Agent
+from google.adk.apps.app import App
+from google.adk.runners import InMemoryRunner
 from google.adk.plugins import BasePlugin
 from google.adk.events import Event
 
@@ -105,18 +107,20 @@ root_agent = Agent(
 
 # --- Main Execution Block ---
 def main():
-    """Demonstrates how to register plugins with the runner."""
+    """Demonstrates how to register plugins with the App."""
     # TODO: 5. Instantiate your three plugins.
     
-    # TODO: 6. Create an InMemoryRunner and pass your plugins
-    # to its `plugins` list.
+    # TODO: 6. Create an App instance and pass your plugins
+    # to its `plugins` list, along with the root_agent.
+    
+    # TODO: 7. Create an InMemoryRunner passing the app.
     
     # The `adk web` command will automatically discover this runner and use it,
     # enabling all the plugins. When `adk web` starts, it looks for a `main()`
     # function in your `agent.py` to allow for this kind of custom runner
     # configuration.
-    print("Runner with observability plugins is configured.")
-    print("Run `adk web observability-agent` from the parent directory and interact with the agent to see plugin output in the console.")
+    print("App with observability plugins is configured.")
+    print("Run `adk web observability_agent` from the parent directory and interact with the agent to see plugin output in the console.")
 
 if __name__ == "__main__":
     main()
@@ -137,7 +141,7 @@ You have successfully built a modular observability system using the ADK's Plugi
 *   Create custom plugins by inheriting from `BasePlugin`.
 *   Implement the `on_event_callback` method to intercept and process agent events.
 *   Filter events based on their `event_type` to implement specific logic.
-*   Register plugins with the `InMemoryRunner`.
+*   Register plugins with the `App` object.
 
 ### Self-Reflection Questions
 - What is the main advantage of using the Plugin System for observability instead of adding logging and metrics code directly inside your agent and tool functions?

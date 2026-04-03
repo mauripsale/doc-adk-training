@@ -71,7 +71,7 @@ from multi_tool_agent.agent import root_agent
 PROJECT_ID = "your-gcp-project-id"
 LOCATION = "us-central1"
 STAGING_BUCKET = "gs://your-unique-bucket-name"
-AGENT_DISPLAY_NAME = "my-multi-tool-agent"
+AGENT_DISPLAY_NAME = "my-multi_tool_agent"
 
 def main():
     # Initialize Vertex AI SDK

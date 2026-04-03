@@ -15,8 +15,8 @@ In this lab, you will learn how to integrate a tool from a popular third-party l
 
 1.  **Create the agent project:**
     ```shell
-    adk create --type=config fact-finder-agent
-    cd fact-finder-agent
+    adk create --type=config fact_finder_agent
+    cd fact_finder_agent
     ```
 
 2.  **Install LangChain dependencies:**
@@ -73,7 +73,7 @@ root_agent = LlmAgent(
 
 3.  **Run the agent:**
     ```shell
-    adk web fact-finder-agent
+    adk web fact_finder_agent
     ```
     The ADK will automatically find the `root_agent` object in your `agent.py` file.
 

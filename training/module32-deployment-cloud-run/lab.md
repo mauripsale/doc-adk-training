@@ -39,8 +39,8 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
 
     ```shell
     # Create the main project directory
-    mkdir customer-support-cloud
-    cd customer-support-cloud
+    mkdir customer_support_cloud
+    cd customer_support_cloud
 
     # Create the agent subdirectory
     adk create --type=config support_agent
@@ -95,7 +95,7 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
 Now for the main event. We will use a single command to package, containerize, and deploy our agent.
 
 1.  **Navigate back to the project root:**
-    Make sure you are in the `customer-support-cloud` directory (the parent of `support_agent`).
+    Make sure you are in the `customer_support_cloud` directory (the parent of `support_agent`).
 
     ```shell
     cd ..

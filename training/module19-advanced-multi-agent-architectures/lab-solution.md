@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Content Publishing System lab.
 
-### `content-publisher/agent.py`
+### `content_publisher/agent.py`
 
 ```python
 from __future__ import annotations

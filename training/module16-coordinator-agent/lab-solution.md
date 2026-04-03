@@ -11,7 +11,7 @@ This file contains the complete Python and YAML configurations for the "Greeting
 
 ### Python Approach (Primary)
 
-#### `greeting-agent/spanish_greeter_agent.py`
+#### `greeting_agent/spanish_greeter_agent.py`
 
 ```python
 from google.adk.agents import LlmAgent
@@ -28,7 +28,7 @@ Do not say anything else or try to answer questions. Just provide a simple, warm
 )
 ```
 
-#### `greeting-agent/agent.py` (The Coordinator)
+#### `greeting_agent/agent.py` (The Coordinator)
 
 ```python
 from google.adk.agents import LlmAgent
@@ -51,7 +51,7 @@ Do not greet the user yourself.
     
     ### YAML Approach (Alternative)
     
-    #### `greeting-agent/spanish_greeter.yaml`
+    #### `greeting_agent/spanish_greeter.yaml`
     
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
@@ -64,7 +64,7 @@ Do not greet the user yourself.
       Do not say anything else or try to answer questions. Just provide a simple, warm greeting.
     ```
     
-    #### `greeting-agent/root_agent.yaml` (The Coordinator)
+    #### `greeting_agent/root_agent.yaml` (The Coordinator)
     
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json

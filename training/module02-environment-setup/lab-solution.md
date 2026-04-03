@@ -38,8 +38,8 @@ pip3 --version
 
 1.  **Create Directory:**
     ```bash
-    mkdir adk-training
-    cd adk-training
+    mkdir adk_training
+    cd adk_training
     ```
 
 2.  **Create Virtual Environment:**

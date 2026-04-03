@@ -61,6 +61,7 @@ Learn how to go beyond single agents and build complex systems where multiple ag
 *   🤝 **[Module 19: Advanced Multi-Agent Architectures](./training/module19-advanced-multi-agent-architectures/)** (🧑‍💻 45 min / 👨‍🏫 75 min)
 *   🤝 **[Module 20: Loop Agents](./training/module20-loop-agents/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🤝 **[Module 21: Agent-to-Agent Communication](./training/module21-agent-to-agent/)** (🧑‍💻 50 min / 👨‍🏫 70 min)
+*   🤝 **[Module 21.5: Custom Agents](./training/module21.5-custom-agents/)** (🧑‍💻 45 min / 👨‍🏫 70 min)
 
 ### 🏭 Part 4: Production Readiness (Modules 22-26)
 This part covers the essential features for making your agents robust, observable, and reliable in a production environment.

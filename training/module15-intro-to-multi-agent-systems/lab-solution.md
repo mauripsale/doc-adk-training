@@ -13,7 +13,7 @@ This lab was a conceptual design exercise. There is no single "correct" solution
 
 Here is a more fleshed-out version of the agent designs as they would be implemented in Python files.
 
-#### `greeting-agent/agent.py` (The Router)
+#### `greeting_agent/agent.py` (The Router)
 
 ```python
 from google.adk.agents import LlmAgent
@@ -38,7 +38,7 @@ Your rules:
 )
 ```
 
-#### `greeting-agent/spanish_greeter_agent.py` (The Specialist)
+#### `greeting_agent/spanish_greeter_agent.py` (The Specialist)
 
 ```python
 from google.adk.agents import LlmAgent
@@ -69,7 +69,7 @@ Your rules:
 
 Here is how the same system would be designed using YAML configuration files.
 
-#### `greeting-agent/root_agent.yaml` (The Router)
+#### `greeting_agent/root_agent.yaml` (The Router)
 
 ```yaml
 name: router_agent
@@ -89,7 +89,7 @@ sub_agents:
   - config_path: spanish_greeter_agent.yaml
 ```
 
-#### `greeting-agent/spanish_greeter_agent.yaml` (The Specialist)
+#### `greeting_agent/spanish_greeter_agent.yaml` (The Specialist)
 
 ```yaml
 name: spanish_greeter_agent

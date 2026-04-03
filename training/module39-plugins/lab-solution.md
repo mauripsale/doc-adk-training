@@ -9,13 +9,15 @@ title: "Lab Solution"
 
 This solution demonstrates how to use the `ReflectAndRetryToolPlugin` to automatically recover from tool usage errors (like incorrect tool names) without modifying the agent's prompt code.
 
-### `retry-agent/agent.py`
+### `retry_agent/agent.py`
 
 ```python
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
-from google.adk.runner import Runner
+from google.adk.runners import InMemoryRunner
+from google.adk.apps.app import App
 from google.adk.plugins import ReflectAndRetryToolPlugin  # 1. Import
+from google.genai import types
 import asyncio
 
 # The actual tool
@@ -24,7 +26,7 @@ def secret_calculator(a: int, b: int) -> int:
     return a + b
 
 # The agent with MISLEADING instructions
-agent = Agent(
+root_agent = Agent(
     name="confused_agent",
     model="gemini-2.5-flash",
     # We lie to the agent about the tool name!
@@ -37,22 +39,24 @@ async def main():
     # We give the agent 3 chances to realize its mistake and try the correct tool name.
     retry_plugin = ReflectAndRetryToolPlugin(max_retries=3)
     
-    runner = Runner(
-        agent=agent,
-        # 3. Register the Plugin
+    # 3. Register the Plugin on the App
+    app = App(
+        name="retry_app",
+        root_agent=root_agent,
         plugins=[retry_plugin]
     )
+
+    runner = InMemoryRunner(app=app)
     
     print("User: What is 5 + 5?")
-    # The run() method will now automatically handle the retry loop internally.
-    result = await runner.run("What is 5 + 5?")
-    print(f"Agent: {result.text}")
-    
-    # Optional: Verify the retry steps
-    if hasattr(result, "trace"):
-        print("\n--- Execution Trace ---")
-        for step in result.trace:
-            print(f"- {step}")
+    # Running programmatically
+    async for event in runner.run_async(
+        user_id="test", 
+        session_id="1", 
+        new_message=types.Content(role="user", parts=[types.Part.from_text(text="What is 5 + 5?")])
+    ):
+        if event.is_final_response():
+            print(f"Agent: {event.content.parts[0].text}")
 
 if __name__ == "__main__":
     asyncio.run(main())

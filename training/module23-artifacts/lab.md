@@ -20,13 +20,13 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
 
 1.  **Create the agent project:**
     ```shell
-    adk create doc-processor
+    adk create doc_processor
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd doc-processor
+    cd doc_processor
     ```
 
 ### Step 2: Implement the Artifact Pipeline
@@ -118,7 +118,7 @@ root_agent = Agent(
 1.  **Set up your `.env` file** with your API key or Vertex AI project.
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web doc-processor
+    adk web doc_processor
     ```
     *   **Note on Persistence:** For this lab, the default `InMemoryArtifactService` is used, meaning artifacts will be lost if the `adk web` server is restarted. For persistent storage, a `GcsArtifactService` would be configured in the `Runner`.
 3.  **Interact with the agent:**

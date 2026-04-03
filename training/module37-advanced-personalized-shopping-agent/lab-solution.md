@@ -12,12 +12,12 @@ This solution provides the complete code for the distributed, multi-agent person
 
 ### Project Structure
 ```
-capstone-shopping-system/
-├── orchestrator-agent/
+capstone_shopping_system/
+├── orchestrator_agent/
 │   └── agent.py
-├── personalization-agent/
+├── personalization_agent/
 │   └── agent.py
-├── web-agent/
+├── web_agent/
 │   ├── Dockerfile
 │   └── agent.py
 └── deployment_plan.md
@@ -25,12 +25,15 @@ capstone-shopping-system/
 
 ---
 
-### 1. `web-agent/agent.py`
+### 1. `web_agent/agent.py`
 This agent exposes the webshop tools via an OpenAPI spec and an A2A server.
 
 ```python
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
+from dotenv import load_dotenv
+load_dotenv()
+
 from google.adk.tools import OpenAPIToolset
 from shared_libraries.init_env import get_webshop_env # Assumes shared lib
 
@@ -86,12 +89,15 @@ a2a_app = to_a2a(root_agent, port=8001)
 
 ---
 
-### 2. `personalization-agent/agent.py`
+### 2. `personalization_agent/agent.py`
 This agent manages user preferences using persistent state.
 
 ```python
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
+from dotenv import load_dotenv
+load_dotenv()
+
 from google.adk.tools import ToolContext
 
 # --- Stateful Tools ---
@@ -124,7 +130,7 @@ a2a_app = to_a2a(root_agent, port=8002)
 
 ---
 
-### 3. `orchestrator-agent/agent.py`
+### 3. `orchestrator_agent/agent.py`
 The main agent that connects to the others and handles user interaction.
 
 ```python
@@ -171,13 +177,13 @@ root_agent = Agent(
 #### Deployment Strategy
 This system consists of three independent services that must be deployed. We will use Google Cloud Run for its serverless nature, scalability, and ease of use.
 
-1.  **`web-agent` Service:** Deployed to Cloud Run.
-2.  **`personalization-agent` Service:** Deployed to Cloud Run.
-3.  **`orchestrator-agent` Service:** Deployed to Cloud Run as the main, user-facing endpoint.
+1.  **`web_agent` Service:** Deployed to Cloud Run.
+2.  **`personalization_agent` Service:** Deployed to Cloud Run.
+3.  **`orchestrator_agent` Service:** Deployed to Cloud Run as the main, user-facing endpoint.
 
 The orchestrator will need the URLs of the other two services, which can be passed as environment variables during deployment.
 
-#### Example `Dockerfile` for `web-agent`
+#### Example `Dockerfile` for `web_agent`
 ```dockerfile
 # Use the official Python image.
 FROM python:3.11-slim
@@ -197,22 +203,22 @@ COPY shared_libraries/ ./shared_libraries
 # Cloud Run provides the PORT environment variable.
 CMD ["uvicorn", "agent:a2a_app", "--host", "0.0.0.0", "--port", "$PORT"]
 ```
-*(A similar Dockerfile would be created for the `personalization-agent`)*
+*(A similar Dockerfile would be created for the `personalization_agent`)*
 
 ### Self-Reflection Answers
 
 1.  **This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?**
     *   **Answer:** This distributed A2A architecture offers significant advantages over a monolithic agent:
-        *   **Scalability:** Each specialist agent (e.g., `web-agent`, `personalization-agent`) can be scaled independently based on its specific load. If web searches are a bottleneck, only the `web-agent` needs more resources, not the entire system.
+        *   **Scalability:** Each specialist agent (e.g., `web_agent`, `personalization_agent`) can be scaled independently based on its specific load. If web searches are a bottleneck, only the `web_agent` needs more resources, not the entire system.
         *   **Maintainability:** Changes or updates to one specialist agent (e.g., updating the webshop's API or the personalization logic) only affect that agent, reducing the risk of regressions in other parts of the system. This modularity makes debugging and development easier.
-        *   **Reusability:** Specialist agents can be reused by other orchestrators or applications within the organization. For example, the `personalization-agent` could be used by a different agent designed for customer support or marketing.
+        *   **Reusability:** Specialist agents can be reused by other orchestrators or applications within the organization. For example, the `personalization_agent` could be used by a different agent designed for customer support or marketing.
 
-2.  **The `orchestrator-agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?**
-    *   **Answer:** Using a `before_tool_callback` for logging externalizes the concern of observability from the agent's primary business logic. The `orchestrator-agent`'s core instruction remains focused on *what* it needs to delegate and *to whom*. The `before_tool_callback` then transparently intercepts every `transfer_to_agent` call and *logs* that action *before* it happens, without modifying the orchestrator's reasoning flow. This clear separation makes the system more maintainable, as monitoring logic can be updated or changed independently of the agent's core decision-making process.
+2.  **The `orchestrator_agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?**
+    *   **Answer:** Using a `before_tool_callback` for logging externalizes the concern of observability from the agent's primary business logic. The `orchestrator_agent`'s core instruction remains focused on *what* it needs to delegate and *to whom*. The `before_tool_callback` then transparently intercepts every `transfer_to_agent` call and *logs* that action *before* it happens, without modifying the orchestrator's reasoning flow. This clear separation makes the system more maintainable, as monitoring logic can be updated or changed independently of the agent's core decision-making process.
 
-3.  **The `web-agent` abstracts the website behind an OpenAPI spec. Why is this a better design than having the orchestrator directly interact with the raw HTML of the website?**
+3.  **The `web_agent` abstracts the website behind an OpenAPI spec. Why is this a better design than having the orchestrator directly interact with the raw HTML of the website?**
     *   **Answer:** Abstracting the website behind an OpenAPI spec is a superior design for several reasons:
         *   **Simplified Reasoning for LLM:** The orchestrator's LLM only needs to understand a clean, structured API contract (e.g., `search(keywords: str)`) rather than parsing complex, messy, and constantly changing raw HTML. This dramatically simplifies the LLM's task, improving its reliability and accuracy.
-        *   **Decoupling:** It decouples the orchestrator from the website's front-end implementation details. If the website's HTML structure changes, only the `web-agent` needs to be updated, not the `orchestrator-agent` or its instructions.
+        *   **Decoupling:** It decouples the orchestrator from the website's front-end implementation details. If the website's HTML structure changes, only the `web_agent` needs to be updated, not the `orchestrator_agent` or its instructions.
         *   **Reliability:** Direct interaction with HTML is brittle and prone to breakage. A structured API provides a stable, machine-readable interface.
-        *   **Security:** The `web-agent` can act as a controlled gateway, ensuring that the orchestrator only performs allowed operations on the website.
+        *   **Security:** The `web_agent` can act as a controlled gateway, ensuring that the orchestrator only performs allowed operations on the website.

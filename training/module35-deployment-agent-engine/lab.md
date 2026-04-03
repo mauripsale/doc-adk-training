@@ -70,10 +70,10 @@ sidebar_position: 2
 This method involves writing a custom Python script to deploy the agent.
 
 ### Step 1: Prepare the Agent Project
-1.  **Get an Agent:** Copy the `multi_tool_agent` project to a new directory named `deploy-manual`.
+1.  **Get an Agent:** Copy the `multi_tool_agent` project to a new directory named `deploy_manual`.
     ```shell
-    cp -r /path/to/multi_tool_agent deploy-manual
-    cd deploy-manual
+    cp -r /path/to/multi_tool_agent deploy_manual
+    cd deploy_manual
     ```
 2.  **Install Dependencies:**
     ```shell
@@ -81,7 +81,7 @@ This method involves writing a custom Python script to deploy the agent.
     ```
 
 ### Step 2: Create the Deployment Script
-1.  In the `deploy-manual` directory, create a new file named `deploy.py`.
+1.  In the `deploy_manual` directory, create a new file named `deploy.py`.
 2.  **Action:** Write the Python code to deploy the agent. Use the skeleton below and fill in the `# TODO` sections. You will need to:
     *   Import `vertexai`, `agent_engines`, and your `root_agent`.
     *   Initialize the Vertex AI SDK with your project details.

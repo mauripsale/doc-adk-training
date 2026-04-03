@@ -52,8 +52,8 @@ This agent will be the interface to the e-commerce website.
     ```python
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
-from dotenv import load_dotenv
-load_dotenv()
+    from dotenv import load_dotenv
+    load_dotenv()
 
     from google.adk.tools import OpenAPIToolset
     from shared_libraries.init_env import get_webshop_env # Assumes shared lib
@@ -151,8 +151,8 @@ This agent will be responsible for remembering user preferences.
     ```python
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
-from dotenv import load_dotenv
-load_dotenv()
+    from dotenv import load_dotenv
+    load_dotenv()
 
     from google.adk.tools import ToolContext
 

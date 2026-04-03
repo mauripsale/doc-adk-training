@@ -154,5 +154,5 @@ Looking for the solution? Here's a hint (Base64 decode me):
 `L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMjEuNS1jdXN0b20tYWdlbnRzL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module21.5-custom-agents/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+    The direct link is: <a href="/doc-adk-training/module21_5-custom-agents/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
 </div>

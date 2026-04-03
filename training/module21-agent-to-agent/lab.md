@@ -37,6 +37,9 @@ In this lab, you will build a distributed multi-agent system. You will create a 
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import GoogleSearchAgentTool
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # TODO: 1. Create an instance of the GoogleSearchAgentTool.
 search_tool = ...
@@ -72,6 +75,9 @@ a2a_app = to_a2a(...)
 # In a2a_orchestrator/agent.py (Starter Code)
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # TODO: 1. Create a `RemoteA2aAgent` instance named `remote_researcher`.
 # - Give it a name and a description.

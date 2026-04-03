@@ -15,6 +15,9 @@ This file contains the complete code for the two separate agent projects in the 
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import GoogleSearchAgentTool
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # 1. Create an instance of the search tool.
 search_tool = GoogleSearchAgentTool()
@@ -50,6 +53,9 @@ a2a_app = to_a2a(root_agent, port=8001)
 ```python
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # 1. Create a proxy to the remote agent using RemoteA2aAgent.
 # The ADK will use the agent card to discover how to communicate with it.

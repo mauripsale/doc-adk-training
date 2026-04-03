@@ -38,7 +38,7 @@ pip3 --version
 
 1.  **Create Directory:**
     ```bash
-    mkdir adk-training
+    mkdir adk_training
     cd adk_training
     ```
 

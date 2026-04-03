@@ -30,7 +30,7 @@ Here are the primary callbacks for an `LlmAgent`:
 
 | Callback | Trigger | Control Action (Return Value) | Use Case |
 | :--- | :--- | :--- | :--- |
-| `before_agent_callback` | Before the agent starts. | `Content` object | Skip the entire agent run and return a canned response (e.g., for maintenance mode, or **caching** to skip the LLM call entirely). (e.g., for maintenance mode). |
+| `before_agent_callback` | Before the agent starts. | `Content` object | Skip the entire agent run and return a canned response (e.g., for maintenance mode, or **caching** to skip the LLM call entirely). |
 | `before_model_callback` | Before calling the LLM. | `LlmResponse` object | **Input Guardrail:** Block an inappropriate prompt and return a safety message. |
 | `after_model_callback` | After the LLM responds. | `LlmResponse` object | **Output Filtering:** Modify the LLM's response to remove sensitive information (PII) before the user sees it. |
 | `before_tool_callback` | Before a tool is executed. | `dict` | **Argument Validation:** Block a tool call with invalid arguments and return an error dictionary. |

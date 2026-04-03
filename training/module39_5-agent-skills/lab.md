@@ -115,5 +115,5 @@ Looking for the solution? Here's a hint (Base64 decode me):
 `L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzkuNS1hZ2VudC1za2lsbHMvbGFiLXNvbHV0aW9u`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module39.5-agent-skills/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+    The direct link is: <a href="/doc-adk-training/module39_5-agent-skills/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
 </div>

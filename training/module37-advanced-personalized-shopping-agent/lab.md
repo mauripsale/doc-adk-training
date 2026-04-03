@@ -11,12 +11,12 @@ In this capstone lab, you will synthesize concepts from the entire course to bui
 ### Prerequisites
 *   A Google Cloud Project with billing enabled and the Vertex AI API enabled.
 *   `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
-*   `uvicorn` installed (`pip install uvicorn`).
+*   `uvicorn` installed (`pip install uvicorn google-adk[a2a]`).
 *   `web_agent_site` installed (`pip install web_agent_site`).
 
 ### Setup
-1.  Create a main project directory for this lab (e.g., `capstone-shopping-system`).
-2.  Inside it, you will create three separate ADK agent projects: `orchestrator-agent`, `personalization-agent`, and `web-agent`.
+1.  Create a main project directory for this lab (e.g., `capstone_shopping_system`).
+2.  Inside it, you will create three separate ADK agent projects: `orchestrator_agent`, `personalization_agent`, and `web_agent`.
 3.  Copy the `shared_libraries` and data from the original `personalized-shopping` sample into a shared location accessible by all three agents.
 
 ---
@@ -24,11 +24,11 @@ In this capstone lab, you will synthesize concepts from the entire course to bui
 ### Exercise 1: Build and Expose the Web Agent
 This agent will be the interface to the e-commerce website.
 
-1.  **Create the `web-agent` project** (programmatic).
+1.  **Create the `web_agent` project** (programmatic).
     ```shell
-    cd capstone-shopping-system
-    adk create web-agent
-    cd web-agent
+    cd capstone_shopping_system
+    adk create web_agent
+    cd web_agent
     ```
 
 2.  **Create `requirements.txt`:**
@@ -52,6 +52,9 @@ This agent will be the interface to the e-commerce website.
     ```python
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
+from dotenv import load_dotenv
+load_dotenv()
+
     from google.adk.tools import OpenAPIToolset
     from shared_libraries.init_env import get_webshop_env # Assumes shared lib
 
@@ -111,7 +114,7 @@ This agent will be the interface to the e-commerce website.
     a2a_app = to_a2a(root_agent, port=8001)
     ```
 
-5.  **Navigate back to `capstone-shopping-system`:**
+5.  **Navigate back to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -121,11 +124,11 @@ This agent will be the interface to the e-commerce website.
 ### Exercise 2: Build and Expose the Personalization Agent
 This agent will be responsible for remembering user preferences.
 
-1.  **Create the `personalization-agent` project** (programmatic).
+1.  **Create the `personalization_agent` project** (programmatic).
     ```shell
-    cd capstone-shopping-system
-    adk create personalization-agent
-    cd personalization-agent
+    cd capstone_shopping_system
+    adk create personalization_agent
+    cd personalization_agent
     ```
 
 2.  **Create `requirements.txt`:**
@@ -148,6 +151,9 @@ This agent will be responsible for remembering user preferences.
     ```python
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
+from dotenv import load_dotenv
+load_dotenv()
+
     from google.adk.tools import ToolContext
 
     # --- Stateful Tools ---
@@ -186,7 +192,7 @@ This agent will be responsible for remembering user preferences.
     a2a_app = to_a2a(root_agent, port=8002)
     ```
 
-5.  **Navigate back to `capstone-shopping-system`:**
+5.  **Navigate back to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -196,11 +202,11 @@ This agent will be responsible for remembering user preferences.
 ### Exercise 3: Build the Orchestrator Agent
 This is the main, user-facing agent that will coordinate the others.
 
-1.  **Create the `orchestrator-agent` project** (programmatic).
+1.  **Create the `orchestrator_agent` project** (programmatic).
     ```shell
-    cd capstone-shopping-system
-    adk create orchestrator-agent
-    cd orchestrator-agent
+    cd capstone_shopping_system
+    adk create orchestrator_agent
+    cd orchestrator_agent
     ```
 
 2.  **Create `requirements.txt`:**
@@ -238,7 +244,7 @@ This is the main, user-facing agent that will coordinate the others.
     # TODO: 1. Define `remote_web_agent` as a `RemoteA2aAgent`.
     # - Name: "web_agent"
     # - Description: "A remote specialist for searching and clicking on the e-commerce website."
-    # - agent_card: Point to the web-agent server at `http://localhost:8001/a2a/web_agent/.well-known/agent-card.json`.
+    # - agent_card: Point to the web_agent server at `http://localhost:8001/a2a/web_agent/.well-known/agent-card.json`.
     remote_web_agent = RemoteA2aAgent(
         name="web_agent",
         description="A remote specialist for searching and clicking on the e-commerce website.",
@@ -248,7 +254,7 @@ This is the main, user-facing agent that will coordinate the others.
     # TODO: 2. Define `remote_personalization_agent` as a `RemoteA2aAgent`.
     # - Name: "personalization_agent"
     # - Description: "A remote specialist for saving and retrieving user preferences."
-    # - agent_card: Point to the personalization-agent server at `http://localhost:8002/a2a/personalization_agent/.well-known/agent-card.json`.
+    # - agent_card: Point to the personalization_agent server at `http://localhost:8002/a2a/personalization_agent/.well-known/agent-card.json`.
     remote_personalization_agent = RemoteA2aAgent(
         name="personalization_agent",
         description="A remote specialist for saving and retrieving user preferences.",
@@ -271,7 +277,7 @@ This is the main, user-facing agent that will coordinate the others.
     )
     ```
 
-5.  **Navigate back to `capstone-shopping-system`:**
+5.  **Navigate back to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -283,21 +289,21 @@ Enhance the Orchestrator to handle image-based searches.
 
 1.  **Challenge: Update the Orchestrator's `instruction` prompt.** Add logic to handle image uploads. If a user provides an image, instruct the agent to:
     a.  First, describe the item in the image.
-    b.  Then, use that text description to perform a search by delegating to the `web-agent`.
+    b.  Then, use that text description to perform a search by delegating to the `web_agent`.
 
 ---
 
 ### Exercise 5: Create a Deployment Plan
 Plan how you would deploy this distributed system.
 
-1.  **Challenge: Create a `Dockerfile`** for the `web-agent`. This file should define the steps to build a container image for your remote agent.
-2.  **Create a `deployment_plan.md` file.** In this file, briefly explain the steps you would take to deploy the `orchestrator-agent`, `web-agent`, and `personalization-agent` as separate services on Google Cloud Run.
+1.  **Challenge: Create a `Dockerfile`** for the `web_agent`. This file should define the steps to build a container image for your remote agent.
+2.  **Create a `deployment_plan.md` file.** In this file, briefly explain the steps you would take to deploy the `orchestrator_agent`, `web_agent`, and `personalization_agent` as separate services on Google Cloud Run.
 
 ### Running the System
 To test your full system, you will need to run all three agents in separate terminals:
-*   **Terminal 1 (`web-agent`):** `uvicorn agent:a2a_app --host localhost --port 8001`
-*   **Terminal 2 (`personalization-agent`):** `uvicorn agent:a2a_app --host localhost --port 8002`
-*   **Terminal 3 (`orchestrator-agent`):** `adk web orchestrator-agent`
+*   **Terminal 1 (`web_agent`):** `uvicorn agent:a2a_app --host localhost --port 8001`
+*   **Terminal 2 (`personalization_agent`):** `uvicorn agent:a2a_app --host localhost --port 8002`
+*   **Terminal 3 (`orchestrator_agent`):** `adk web orchestrator_agent`
 
 Interact with the Orchestrator in the Dev UI and use the Trace view to observe the A2A communication and delegation.
 
@@ -307,10 +313,10 @@ This is a complex lab with multiple deployments. It is crucial to delete the res
 
 #### For Local Development:
 1.  **Stop all running `uvicorn` and `adk web` processes** (Ctrl+C in each terminal).
-2.  **Delete the `capstone-shopping-system` directory:**
+2.  **Delete the `capstone_shopping_system` directory:**
     ```shell
     cd ..
-    rm -rf capstone-shopping-system
+    rm -rf capstone_shopping_system
     ```
 
 #### For Cloud Deployments (if you completed Exercise 5):
@@ -328,8 +334,8 @@ This is a complex lab with multiple deployments. It is crucial to delete the res
 
 ### Self-Reflection Questions
 - This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?
-- The `orchestrator-agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?
-- The `web-agent` abstracts the website behind an OpenAPI spec. Why is this a better design than having the orchestrator directly interact with the raw HTML of the website?
+- The `orchestrator_agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?
+- The `web_agent` abstracts the website behind an OpenAPI spec. Why is this a better design than having the orchestrator directly interact with the raw HTML of the website?
 
 <hr/>
 

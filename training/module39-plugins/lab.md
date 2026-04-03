@@ -13,13 +13,13 @@ In this lab, you will work with an agent that has been given misleading instruct
 
 1.  **Create a new agent project:**
     ```shell
-    adk create retry-agent
+    adk create retry_agent
     ```
     Choose the **Programmatic (Python script)** option.
 
 2.  **Navigate to the directory:**
     ```shell
-    cd retry-agent
+    cd retry_agent
     ```
 
 ### Step 2: The "Broken" Agent
@@ -31,7 +31,9 @@ This code defines a tool named `secret_calculator`. However, the agent's system 
 ```python
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
-from google.adk.runner import Runner
+from google.adk.runners import InMemoryRunner
+from google.adk.apps.app import App
+from google.genai import types
 import asyncio
 
 # The actual tool
@@ -40,7 +42,7 @@ def secret_calculator(a: int, b: int) -> int:
     return a + b
 
 # The agent with MISLEADING instructions
-agent = Agent(
+root_agent = Agent(
     name="confused_agent",
     model="gemini-2.5-flash",
     # We lie to the agent about the tool name!
@@ -49,16 +51,28 @@ agent = Agent(
 )
 
 async def main():
-    # TODO: Initialize the plugin here later
+    # TODO: 1. Import ReflectAndRetryToolPlugin from google.adk.plugins
     
-    runner = Runner(
-        agent=agent,
-        # TODO: Add plugins=[...] here later
+    # TODO: 2. Initialize the plugin here with max_retries=3
+    
+    # TODO: 3. Create an App instance, passing the root_agent and the plugins list
+    app = App(
+        name="retry_app",
+        root_agent=root_agent,
+        # Add your plugin here
     )
+
+    runner = InMemoryRunner(app=app)
     
     print("User: What is 5 + 5?")
-    result = await runner.run("What is 5 + 5?")
-    print(f"Agent: {result.text}")
+    # Running programmatically
+    async for event in runner.run_async(
+        user_id="test", 
+        session_id="1", 
+        new_message=types.Content(role="user", parts=[types.Part.from_text(text="What is 5 + 5?")])
+    ):
+        if event.is_final_response():
+            print(f"Agent: {event.content.parts[0].text}")
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -84,7 +98,7 @@ Now, let's fix this using the Plugin *instead* of fixing the prompt.
     Create an instance of `ReflectAndRetryToolPlugin` with `max_retries=3`.
 
 3.  **Register the Plugin:**
-    Update the `Runner` initialization to include your plugin instance in the `plugins` list.
+    Update the `App` initialization to include your plugin instance in the `plugins` list.
 
 ### Step 5: Verify Success
 
@@ -102,17 +116,6 @@ Now, let's fix this using the Plugin *instead* of fixing the prompt.
         4. Agent reasoned: "Oops, I should use 'secret_calculator'."
         5. Agent called `secret_calculator`.
         6. Success!
-
-3.  **(Optional) Prove the Retry:**
-    To see the actual "hidden" retry steps, you can inspect the execution trace. Add this to your `agent.py` after the result print:
-    ```python
-    # Check the execution trace
-    if hasattr(result, "trace"):
-        print("\n--- Execution Trace ---")
-        for step in result.trace:
-            print(f"- {step}")
-    ```
-    You should see an entry for the failed `super_calc` call followed by the successful `secret_calculator` call.
 
 ### Self-Reflection Questions
 - Why is it better to handle this with a Plugin rather than just fixing the prompt in this specific scenario? (Think about dynamic/unknown errors).

@@ -22,13 +22,13 @@ In this lab, you will build a self-improving agent system that uses a `LoopAgent
 
 1.  **Create the agent project:**
     ```shell
-    adk create essay-refiner
+    adk create essay_refiner
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd essay-refiner
+    cd essay_refiner
     ```
 
 ### Step 2: Assemble the Refinement System
@@ -84,7 +84,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web essay-refiner
+    adk web essay_refiner
     ```
 3.  **Interact with the system:**
     *   Give it a topic, like: "The impact of artificial intelligence on society".

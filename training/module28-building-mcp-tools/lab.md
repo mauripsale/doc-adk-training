@@ -18,8 +18,8 @@ In this lab, you will build your own simple, standalone MCP server from scratch.
 
 2.  **Create a new project directory:**
     ```shell
-    mkdir custom-mcp-server
-    cd custom-mcp-server
+    mkdir custom_mcp_server
+    cd custom_mcp_server
     ```
 
 ### Step 2: Implement the MCP Server
@@ -127,7 +127,7 @@ Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-2.5-fla
 
 ### Step 4: Test the Full System
 
-1.  **Start the ADK web server:** `adk web shopping-agent`
+1.  **Start the ADK web server:** `adk web shopping_agent`
 2.  **Check the console logs:** You should see logs from your `cart_server.py` as it starts up.
 3.  **Interact with the agent** in the Dev UI:
     *   "Please add 'milk' to my cart."

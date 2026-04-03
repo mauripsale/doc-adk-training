@@ -21,13 +21,13 @@ In this lab, you will build a multi-step content creation pipeline using a `Sequ
 
 1.  **Create a new project:**
     ```shell
-    adk create blog-pipeline
+    adk create blog_pipeline
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd blog-pipeline
+    cd blog_pipeline
     ```
 
 ### Step 2: Assemble the Pipeline
@@ -38,28 +38,45 @@ In this lab, you will build a multi-step content creation pipeline using a `Sequ
 # In agent.py (Starter Code)
 
 from __future__ import annotations
+from pydantic import BaseModel, Field
 from google.adk.agents import Agent, SequentialAgent
+
+# ===== Structured Data Schemas (Provided for you) =====
+class ResearchFindings(BaseModel):
+    topic: str = Field(description="The topic being researched")
+    facts: list[str] = Field(description="List of 5-7 key facts or insights")
+
+class BlogDraft(BaseModel):
+    title: str = Field(description="Engaging title for the blog post")
+    paragraphs: list[str] = Field(description="3-4 paragraphs of the draft")
+
+class EditorialFeedback(BaseModel):
+    improvements: list[str] = Field(description="List of specific improvements. Empty if none.")
+    is_ready: bool = Field(description="True if no revisions are needed, False otherwise")
 
 # ===== Specialist Agents (Provided for you) =====
 
 research_agent = Agent(
     name="researcher", model="gemini-2.5-flash",
-    instruction="...", # Gathers facts
+    instruction="...", # Gathers facts into structured output
+    output_schema=ResearchFindings,
     output_key="research_findings"
 )
 writer_agent = Agent(
     name="writer", model="gemini-2.5-flash",
-    instruction="...writes a draft based on {research_findings}...",
+    instruction="...writes a draft based on structured JSON {research_findings}...",
+    output_schema=BlogDraft,
     output_key="draft_post"
 )
 editor_agent = Agent(
     name="editor", model="gemini-2.5-flash",
-    instruction="...reviews the {draft_post}...",
+    instruction="...reviews the JSON {draft_post}...",
+    output_schema=EditorialFeedback,
     output_key="editorial_feedback"
 )
 formatter_agent = Agent(
     name="formatter", model="gemini-2.5-flash",
-    instruction="...applies {editorial_feedback} to the {draft_post}...",
+    instruction="...applies JSON {editorial_feedback} to the JSON {draft_post}...",
     output_key="final_post"
 )
 
@@ -81,7 +98,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web blog-pipeline
+    adk web blog_pipeline
     ```
 3.  **Interact with the pipeline:**
     *   Send a topic to write about, like: "the history of the internet".

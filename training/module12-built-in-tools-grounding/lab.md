@@ -18,13 +18,13 @@ In this lab, you will build a **Research Assistant** that can access up-to-date 
 
 1.  **Create the agent project:**
     ```shell
-    adk create research-assistant
+    adk create research_assistant
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd research-assistant
+    cd research_assistant
     ```
 
 3.  **Create the `.env` file:**
@@ -99,7 +99,7 @@ root_agent = Agent(
 
 2.  **Start the Dev UI:**
     ```shell
-    adk web research-assistant
+    adk web research_assistant
     ```
 
 3.  **Interact with the agent:**

@@ -13,8 +13,8 @@ In this lab, you will implement the multi-agent "Greeting Router" system. You wi
 
 1.  **Create the agent project:**
     ```shell
-    adk create greeting-agent
-    cd greeting-agent
+    adk create greeting_agent
+    cd greeting_agent
     ```
 
 ### Step 2: Create the Specialist Agent
@@ -69,7 +69,7 @@ root_agent = LlmAgent(
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web greeting-agent
+    adk web greeting_agent
     ```
 3.  **Interact with the router:**
     *   **Test Case 1:** "Say hello to me in Spanish."

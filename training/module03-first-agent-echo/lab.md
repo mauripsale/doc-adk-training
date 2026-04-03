@@ -16,6 +16,15 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
 | "Hello!" | "Hello!" | "Hi there, how can I help you?" |
 | "What is the capital of France?" | "What is the capital of France?" | "The capital of France is Paris." |
 | "12345" | "12345" | "You entered the numbers 1 through 5." |
+
+**The Challenge:** Unlike a standard chatbot, this agent must act like a **parrot**. It should never answer questions or provide information; it must only repeat the user's input exactly as it was received.
+
+### Expected Behavior
+| User Input | Agent Response (Correct) | Agent Response (Wrong) |
+| :--- | :--- | :--- |
+| "Hello!" | "Hello!" | "Hi there, how can I help you?" |
+| "What is the capital of France?" | "What is the capital of France?" | "The capital of France is Paris." |
+| "12345" | "12345" | "You entered the numbers 1 through 5." |
 e
 ## Requirements
 1.  Use the `adk create` command to scaffold a new agent named `echo_agent`.

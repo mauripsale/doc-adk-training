@@ -15,28 +15,31 @@ In this lab, you will build a distributed multi-agent system. You will create a 
 
 1.  **Create two separate agent projects** that will run independently.
     ```shell
-    adk create a2a-orchestrator
-    adk create research-specialist
+    adk create a2a_orchestrator
+    adk create research_specialist
     ```
     When prompted, choose the **Programmatic (Python script)** option for both.
 
 2.  **Install Server Dependencies:**
-    Navigate into the `research-specialist` directory and install `uvicorn`, which is needed to run the agent as a web server.
+    Navigate into the `research_specialist` directory and install `uvicorn`, which is needed to run the agent as a web server.
     ```shell
-    cd research-specialist
-    pip install uvicorn
+    cd research_specialist
+    pip install uvicorn google-adk[a2a]
     cd ..
     ```
 
 ### Step 2: Build the Research Specialist (The Server)
 
-**Exercise:** Navigate into the `research-specialist` directory. Open `agent.py` and implement the specialist agent and expose it as an A2A server.
+**Exercise:** Navigate into the `research_specialist` directory. Open `agent.py` and implement the specialist agent and expose it as an A2A server.
 
 ```python
-# In research-specialist/agent.py (Starter Code)
+# In research_specialist/agent.py (Starter Code)
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import GoogleSearchAgentTool
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # TODO: 1. Create an instance of the GoogleSearchAgentTool.
 search_tool = ...
@@ -66,12 +69,15 @@ a2a_app = to_a2a(...)
 
 ### Step 3: Build the Orchestrator (The Client)
 
-**Exercise:** Navigate into the `a2a-orchestrator` directory. Open `agent.py` and implement the orchestrator agent that consumes the remote service.
+**Exercise:** Navigate into the `a2a_orchestrator` directory. Open `agent.py` and implement the orchestrator agent that consumes the remote service.
 
 ```python
-# In a2a-orchestrator/agent.py (Starter Code)
+# In a2a_orchestrator/agent.py (Starter Code)
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+from dotenv import load_dotenv
+load_dotenv()
+
 
 # TODO: 1. Create a `RemoteA2aAgent` instance named `remote_researcher`.
 # - Give it a name and a description.
@@ -101,12 +107,12 @@ root_agent = Agent(
 This requires two separate terminals.
 
 1.  **Terminal 1 (Specialist Server):**
-    *   Navigate to the `research-specialist` directory.
+    *   Navigate to the `research_specialist` directory.
     *   Run `uvicorn agent:a2a_app --host localhost --port 8001`.
 
 2.  **Terminal 2 (Orchestrator Client):**
     *   Navigate to the parent `adk-training` directory.
-    *   Run `adk web a2a-orchestrator`.
+    *   Run `adk web a2a_orchestrator`.
 
 3.  **Interact with the System:**
     *   Open the Dev UI for the orchestrator (`http://localhost:8080`).

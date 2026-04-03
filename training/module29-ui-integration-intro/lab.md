@@ -13,8 +13,8 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 1.  **Create and navigate to the agent project:**
     ```shell
-    adk create ui-agent
-    cd ui-agent
+    adk create ui_agent
+    cd ui_agent
     ```
     Choose the **Programmatic (Python script)** option.
 
@@ -84,7 +84,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        app_name: "ui-agent",
+                        app_name: "ui_agent",
                         session_id: sessionId,
                         new_message: {
                             role: "user",
@@ -125,7 +125,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 ### Step 3: Run the Full-Stack Application
 
-1.  **Terminal 1 (Agent Server):** In the `ui-agent` directory, run `adk api_server ui-agent`.
+1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `adk api_server ui_agent`.
     *   **Note on CORS:** The ADK API server automatically handles Cross-Origin Resource Sharing (CORS), allowing your web page on port 8081 to make requests to your agent on port 8080.
 2.  **Terminal 2 (Client Server):** In the same directory, run `python3 -m http.server 8081`.
 

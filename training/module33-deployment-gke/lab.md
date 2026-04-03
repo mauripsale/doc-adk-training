@@ -22,10 +22,10 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
 ### Step 1: Prepare Your Project
 
 1.  **Copy the Echo Agent:**
-    Make a fresh copy of the `echo-agent` from Module 3.
+    Make a fresh copy of the `echo_agent` from Module 3.
     ```shell
-    cp -r echo-agent/ gke-echo-agent/
-    cd gke-echo-agent/
+    cp -r echo_agent/ gke_echo_agent/
+    cd gke_echo_agent/
     ```
 
 2.  **Update Agent Model:**
@@ -69,7 +69,7 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     RUN pip install --no-cache-dir -r requirements.txt
     COPY . .
     EXPOSE 8080
-    CMD ["adk", "api_server", "--host", "0.0.0.0", "echo-agent/"]
+    CMD ["adk", "api_server", "--host", "0.0.0.0", "echo_agent/"]
     ```
 
 ### Step 3: Build and Push the Container Image
@@ -84,7 +84,7 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
 2.  **Build and Push with Cloud Build:**
     ```shell
     gcloud builds submit \
-        --tag ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/echo-agent:v1
+        --tag ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/echo_agent:v1
     ```
 
 ### Step 4: Create and Deploy to a GKE Cluster
@@ -107,20 +107,20 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     apiVersion: apps/v1
     kind: Deployment
     metadata:
-      name: echo-agent-deployment
+      name: echo_agent-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: echo-agent
+      app: echo_agent
   template:
     metadata:
       labels:
-        app: echo-agent
+        app: echo_agent
 spec:
   containers:
-  - name: echo-agent
-    image: ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/echo-agent:v1
+  - name: echo_agent
+    image: ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/echo_agent:v1
     ports:
     - containerPort: 8080
     env:
@@ -134,11 +134,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-agent-service
+  name: echo_agent-service
 spec:
   type: LoadBalancer
   selector:
-    app: echo-agent
+    app: echo_agent
   ports:
   - protocol: TCP
     port: 80
@@ -157,7 +157,7 @@ spec:
 1.  **Get the External IP Address:**
     Run this command and wait until an "EXTERNAL-IP" is displayed. This can take a few minutes.
     ```shell
-    kubectl get service echo-agent-service --watch
+    kubectl get service echo_agent-service --watch
     ```
     Once you see an IP, press `Ctrl+C` to exit.
 
@@ -190,10 +190,10 @@ GKE clusters can incur significant costs if left running. It is crucial to delet
         --async # Runs in background
     ```
 
-3.  **Delete the `gke-echo-agent` directory:**
+3.  **Delete the `gke_echo_agent` directory:**
     ```shell
     cd ..
-    rm -rf gke-echo-agent
+    rm -rf gke_echo_agent
     ```
 
 ### Self-Reflection Questions

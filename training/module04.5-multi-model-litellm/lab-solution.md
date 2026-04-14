@@ -3,58 +3,76 @@ sidebar_position: 7
 title: "Lab Solution"
 ---
 
-# Lab 4.5 Solution: Switching Between LLM Providers
+# Lab 4.5 Solution: Professional Model Configuration
 
 ## Goal
 
-In this lab, we successfully demonstrated the model-agnostic nature of the ADK. By using the `LiteLlm` wrapper, we were able to run the same agent on a local model (Ollama/Mistral) and discuss how to switch to other cloud providers like OpenAI.
+In this lab, you learned how to transition from simple string-based model selection to a professional, enterprise-grade configuration using `Gemini` subclasses and `LiteLlm` abstractions.
 
-### `multi_model_agent/agent.py`
+### `support_analyzer/agent.py`
+
+Here is the complete code implementing the resilient subclass and the multi-model fallback logic:
 
 ```python
+import os
+from functools import cached_property
 from google.adk.agents import LlmAgent
-from google.adk.models import LiteLlm
+from google.adk.models import Gemini
+from google.adk.models.lite_llm import LiteLlm
+from google.genai import Client, types
 
-# Initialize the LiteLlm wrapper for a local model running via Ollama
-# The syntax is provider/model_name
-local_model = LiteLlm(model="ollama_chat/mistral")
+# Step 1: Define the ResilientGemini subclass
+class ResilientGemini(Gemini):
+    """
+    Expert pattern: Subclass Gemini to centralize production configurations
+    like project, location, and advanced retry logic.
+    """
+    @cached_property
+    def api_client(self) -> Client:
+        return Client(
+            project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
+            location="us-central1",
+            http_options=types.HttpOptions(
+                retry_options=types.HttpRetryOptions(
+                    max_delay=10, # Max seconds to wait between retries
+                    exp_base=2.0,  # Base for exponential backoff
+                    jitter=0.5,    # Jitter to prevent thundering herd
+                )
+            ),
+        )
 
-# Alternative: Define a cloud model (uncomment and add your API key to .env to use)
-# cloud_model = LiteLlm(model="openai/gpt-4o")
+# Step 2: Implement the model selection logic
+# This allows developers to toggle between cloud and local models via env vars.
+if os.getenv("USE_LOCAL_MODEL") == "1":
+    # Use LiteLLM abstraction for local development with Ollama
+    model_to_use = LiteLlm(model="ollama_chat/mistral")
+else:
+    # Use the professional, native Gemini subclass for production
+    model_to_use = ResilientGemini(model="gemini-2.5-flash")
 
 root_agent = LlmAgent(
-    name="multi_model_agent",
-    model=local_model,
+    name="support_analyzer_agent",
+    model=model_to_use,
     instruction="""
-        You are a helpful assistant.
-        Always begin your response by stating which provider and model is currently powering you.
-        For example: "I am powered by Mistral via Ollama."
+        You are a customer support analyzer. 
+        Analyze the incoming ticket and provide a structured JSON response.
     """
 )
 ```
 
-### Configuration: `.env` setup
+### Key Takeaways Explained
 
-To use models from other providers, your `.env` file must contain the appropriate API keys:
-
-```text
-# For OpenAI
-OPENAI_API_KEY=your_key_here
-
-# For Anthropic
-ANTHROPIC_API_KEY=your_key_here
-
-# For Ollama (Optional: only if running on a non-standard port/host)
-# OLLAMA_API_BASE=http://localhost:11434
-```
+1.  **Centralization via Subclassing:** By creating `ResilientGemini`, you avoid repeating complex `HttpRetryOptions` for every agent in your codebase. If you need to change the region from `us-central1` to `global`, you only update it in one place.
+2.  **The Thundering Herd Problem:** By adding `jitter=0.5`, you ensure that if multiple agent requests fail at the same time, they won't all retry at the exact same millisecond, which helps prevent overwhelming your API backend.
+3.  **Environment-Driven Architecture:** Using `os.getenv("USE_LOCAL_MODEL")` makes your code highly portable. You can run it on your laptop using Ollama and then deploy it to the cloud without changing a single line of code—only the environment variables change.
 
 ### Self-Reflection Answers
 
-1.  **How does the `LiteLlm` integration simplify the process of testing an agent with different models?**
-    *   **Answer:** It provides a unified interface. Without `LiteLlm`, you would have to rewrite your agent's code using different SDKs (e.g., switching from the Google GenAI SDK to the OpenAI SDK). With ADK + LiteLlm, you only change a single string in the `model` parameter, and the ADK handles all the underlying API translations.
+1.  **Why is "Jitter" important in a retry policy for a high-traffic production application?**
+    *   **Answer:** Without jitter, multiple failed requests would retry at the exact same intervals (e.g., exactly after 1s, 2s, 4s). In a high-traffic system, this creates "spikes" of traffic that can re-trigger rate limits or crash a recovering service. Jitter adds a random offset to each retry, spreading the load evenly over time.
 
-2.  **If you were deploying an agent to production, what are the security implications of using an external provider like OpenAI versus a local model like Ollama?**
-    *   **Answer:** Using an external provider (SaaS) means sending user data to a third-party server, which requires careful privacy agreements and handling of API keys. A local model (like Ollama) keeps all data within your infrastructure, which is highly secure and ideal for sensitive or regulated data, but it requires you to manage your own hardware/compute resources.
+2.  **What are the advantages of centralizing model configuration in a subclass instead of passing parameters to every agent instance?**
+    *   **Answer:** It follows the DRY (Don't Repeat Yourself) principle. It makes the code easier to maintain, reduces the risk of configuration errors (e.g., having different retry policies in different agents), and allows for global changes (like swapping the production GCP project) to be made instantaneously across the entire system.
 
-3.  **Why is it important for the ADK to remain "model-agnostic"?**
-    *   **Answer:** It prevents vendor lock-in. It allows developers to choose the best model for their specific use case (balancing cost, speed, and intelligence) and ensures that the agent logic is portable. If a new, superior model is released by any provider, an ADK agent can switch to it almost instantly.
+3.  **In which scenario would you prefer using the native `Gemini` class over the `LiteLlm` abstraction?**
+    *   **Answer:** Use the native `Gemini` class when you are building a production system on Google Cloud and need the highest performance, lowest latency, and access to Gemini-specific features (like native speech config, context caching, or advanced grounding) that might not be fully mapped or supported by the general LiteLLM abstraction.

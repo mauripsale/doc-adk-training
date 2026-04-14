@@ -8,7 +8,7 @@ title: "Challenge Lab"
 ## Goal
 Your task is to build and configure a new agent that can search the web to answer questions about current events.
 
-## Requirements
+## Lab Tasks
 
 1.  **Create a new agent** named `researcher_agent` using the `adk create` command, specifying the Python type.
 2.  **Enable the Vertex AI API** in your Google Cloud project.

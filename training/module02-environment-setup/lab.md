@@ -17,7 +17,19 @@ Before you begin, ensure you have the following tools ready:
 ## Goal
 Your task is to prepare your local machine for agent development. Try to complete the steps below using your existing knowledge. If you get stuck, the `lab-solution.md` file provides a detailed, step-by-step walkthrough.
 
-## Requirements
+## Lab Tasks
+
+### Step 0: Verify Python Version (Crucial)
+Before you start, you must ensure you are using a modern version of Python. The ADK and the Google Cloud libraries it depends on **require Python 3.10 or higher**. Using older versions (like 3.9) will result in numerous warnings and potential crashes.
+
+1.  Open your terminal.
+2.  Run the following command:
+    ```bash
+    python3 --version
+    ```
+3.  **Requirement:** If you see `Python 3.10.x` or higher, you are good to go. If you see an older version, please install a newer version of Python before continuing.
+
+### Step 1: Create the Project Structure
 1.  Create a project directory named `adk-training`.
 2.  Inside it, create and activate a Python virtual environment.
 3.  Install the `google-adk` and `python-dotenv` packages.
@@ -25,7 +37,7 @@ Your task is to prepare your local machine for agent development. Try to complet
 5.  Save the project dependencies to a `requirements.txt` file.
 6.  Verify your setup by creating a `verify_setup.py` file with the code below and running it successfully.
 
-### Step 4: Create a `.env` file
+### Creating a `.env` file
 
 Create a file named `.env` in your `adk-training` directory. This file will securely store your authentication credentials. Choose **one** of the two options below.
 

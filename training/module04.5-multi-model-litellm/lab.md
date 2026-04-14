@@ -3,63 +3,70 @@ sidebar_position: 6
 title: "Challenge Lab"
 ---
 
-# Lab 4.5 Challenge: Switching Between LLM Providers
+# Lab 4.5 Challenge: Professional Model Configuration
 
 ## Goal
-In this lab, you will learn how to make your ADK agents model-agnostic. You will build a single agent and test it using different models from different providers (e.g., Gemini and Ollama/Mistral) using the `LiteLlm` wrapper.
+In this lab, you will upgrade your **"Support Analyzer"** agent to a production-ready state. You will learn how to implement advanced retry logic using a custom `Gemini` subclass and how to provide a multi-model fallback using `LiteLlm`.
 
-## Requirements
+## Prerequisites
+1.  **Install LiteLLM:** 
+    ```shell
+    pip install litellm
+    ```
 
-1.  **Prepare the Environment:**
-    *   Install the required dependency:
-        ```shell
-        pip install litellm
-        ```
-    *   (Optional but recommended) Ensure you have [Ollama](https://ollama.com/) installed and running with the `mistral` model:
-        ```shell
-        ollama run mistral
-        ```
+## Lab Tasks
 
-2.  **Scaffold the Agent:**
-    *   Create a new agent named `multi_model_agent`:
-        ```shell
-        adk create multi_model_agent
-        ```
-    *   Navigate into the directory: `cd multi_model_agent`
+1.  **Create a Resilient Subclass:**
+    *   In your `support_analyzer/agent.py`, create a class named `ResilientGemini` that inherits from `Gemini`.
+    *   Override the `api_client` property.
+    *   Configure it with a `HttpRetryOptions` policy: `max_delay=10`, `exp_base=2.0`, and `jitter=0.5`.
 
-3.  **Implement the Agent using `LiteLlm`:**
-    *   Open `agent.py`.
-    *   Import `LiteLlm` from `google.adk.models`.
-    *   Define a `root_agent` that uses a `LiteLlm` instance instead of a string.
-    *   **Task 1:** Configure it to use `ollama_chat/mistral` (or another local model you have).
-    *   **Task 2:** Update your `.env` file with any necessary keys (if testing OpenAI/Anthropic).
+2.  **Implement Multi-Model Fallback:**
+    *   Update your agent's `model` logic.
+    *   If the environment variable `USE_LOCAL_MODEL` is set to `"1"`, use `LiteLlm` with `ollama_chat/mistral`.
+    *   Otherwise, use your new `ResilientGemini` class.
 
-4.  **Verify the Switch:**
-    *   Run the agent using `adk web multi_model_agent`.
-    *   Check your terminal logs. When using Ollama, you should see the local server receiving the requests.
-    *   Switch the `model` parameter back to a Gemini string (e.g., `"gemini-1.5-flash"`) and verify it still works.
+3.  **Verify the Configuration:**
+    *   Run the agent using `adk run support_analyzer`.
+    *   Verify it works as expected. (Note: You won't "see" the retries unless a network error occurs, but your code is now protected!).
 
-### Python Skeleton (`agent.py`)
+### Python Approach (Primary)
+Modify `agent.py` to use the advanced configuration patterns.
 
 ```python
+import os
+from functools import cached_property
 from google.adk.agents import LlmAgent
-from google.adk.models import LiteLlm
+from google.adk.models import Gemini
+from google.adk.models.lite_llm import LiteLlm
+from google.genai import Client, types
 
-# TODO: Initialize the LiteLlm wrapper for a local model
-local_model = LiteLlm(model="ollama_chat/mistral")
+# TODO: Step 1 - Define the ResilientGemini subclass
+class ResilientGemini(Gemini):
+    @cached_property
+    def api_client(self) -> Client:
+        # TODO: Implement Client with HttpRetryOptions
+        pass
 
-# TODO: Define the root agent
+# TODO: Step 2 - Implement the model selection logic
+if os.getenv("USE_LOCAL_MODEL") == "1":
+    # Use LiteLLM
+    model_to_use = ...
+else:
+    # Use your ResilientGemini
+    model_to_use = ...
+
 root_agent = LlmAgent(
-    name="multi_model_agent",
-    model=local_model, # Using the wrapper
-    instruction="You are a helpful assistant that knows which model is powering you."
+    name="support_analyzer_agent",
+    model=model_to_use,
+    instruction="Analyze customer support issues."
 )
 ```
 
-### Self-Reflection Questions
-- How does the `LiteLlm` integration simplify the process of testing an agent with different models?
-- If you were deploying an agent to production, what are the security implications of using an external provider like OpenAI versus a local model like Ollama?
-- Why is it important for the ADK to remain "model-agnostic"?
+## Self-Reflection Questions
+- Why is "Jitter" important in a retry policy for a high-traffic production application?
+- What are the advantages of centralizing model configuration in a subclass instead of passing parameters to every agent instance?
+- In which scenario would you prefer using the native `Gemini` class over the `LiteLlm` abstraction?
 
 <hr/>
 

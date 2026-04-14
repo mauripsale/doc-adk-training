@@ -28,6 +28,36 @@ A `Part` can contain:
 
 When you send a list of these parts to a vision-capable model like `gemini-2.5-flash`, the model can reason about the text and the image(s) together.
 
+#### Example: Building a Vision Agent
+To send an image to an agent programmatically, you package it into a list and run it via an `App`:
+
+```python
+from google.adk.agents import LlmAgent
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
+from google.genai import types
+
+# 1. Define the agent
+agent = LlmAgent(
+    name="vision_expert",
+    model="gemini-2.5-flash",
+    instruction="Describe the provided image in detail."
+)
+
+# 2. Wrap in an App
+app = App(name="vision_app", root_agent=agent)
+runner = InMemoryRunner(app=app)
+
+# 3. Construct the multimodal list
+multimodal_prompt = [
+    "What is in this picture?",
+    types.Part(inline_data=types.Blob(data=image_bytes, mime_type="image/jpeg"))
+]
+
+# 4. Run!
+# response = await runner.run_debug(multimodal_prompt)
+```
+
 ### Image Generation
 
 Beyond understanding images, some models can also **generate** them. Services like **Vertex AI Imagen** provide text-to-image capabilities. You can create a custom tool that takes a text description, calls the image generation API, and returns the resulting image.

@@ -7,12 +7,12 @@ title: "Lab Solution"
 
 ## Goal
 
-In this lab, you will learn how to run and interact with your "Haiku Poet" agent using the three primary execution modes provided by the ADK CLI: `adk web`, `adk run`, and `adk api_server`.
+In this lab, you will learn how to run and interact with your **"Support Analyzer"** agent using the three primary execution modes provided by the ADK CLI: `adk web`, `adk run`, and `adk api_server`.
 
 ## Prerequisites
 
 *   You have successfully completed Module 4.
-*   You have the `haiku_poet_agent` configured in your `adk-training` directory.
+*   You have the `support_analyzer` configured in your `adk-training` directory.
 *   Your virtual environment is active.
 
 ## Part 1: Interactive Development with `adk web`
@@ -33,10 +33,10 @@ This is the mode you've used so far. Let's explore its features more deeply.
 
 3.  **Explore the Dev UI:**
     *   Open the UI in your browser (`http://127.0.0.1:8080`).
-    *   Select `haiku_poet_agent` from the dropdown menu if it's not already selected.
-    *   Have a short conversation with your poet agent.
+    *   Select `support_analyzer` from the dropdown menu if it's not already selected.
+    *   Have a short conversation with your analyzer agent.
     *   **Trace View:** On the right side of the screen, click on the "Trace" tab. You will see a waterfall diagram. Click on the `LlmAgent` step to expand it. Here you can see the full prompt sent to the Gemini model, including your detailed instruction and the user's message. This view is critical for debugging why an agent behaves a certain way.
-    *   **State View:** Click the "State" tab. This view shows the agent's short-term memory for the current conversation. We will explore this more in later modules.
+    *   **State View:** Click the "State" tab. This view shows the agent's short-term memory for the current conversation. You should see the `last_ticket_analysis` key populated with JSON.
 
 ## Part 2: Headless Interaction with `adk run`
 
@@ -48,14 +48,13 @@ Now, let's chat with the agent directly in the terminal.
 2.  **Start the command-line runner:**
     Again, run this from the parent `adk-training` directory.
     ```shell
-    adk run haiku_poet_agent
+    adk run support_analyzer
     ```
 
 3.  **Chat with the agent:**
     *   You will see a prompt like `[user]:`.
-    *   Type a message, for example: `I'm learning about AI agents.`
-    *   The agent will respond directly in the terminal with a haiku.
-    *   You can have a continuous conversation.
+    *   Type a message, for example: `My bill is way too high this month!`
+    *   The agent will respond directly in the terminal with a JSON object.
     *   To exit, press `Ctrl+C`.
 
 ## Part 3: Running as a Service with `adk api_server`
@@ -76,7 +75,7 @@ Finally, let's run the agent as a background service. This mode is the foundatio
         curl -X POST http://127.0.0.1:8000/run_sse \
              -H "Content-Type: application/json" \
              -d '{
-                   "app_name": "haiku_poet_agent",
+                   "app_name": "support_analyzer",
                    "user_id": "test_user",
                    "session_id": "missing_session",
                    "new_message": {"role": "user", "parts": [{"text": "Hello"}]}
@@ -88,7 +87,7 @@ Finally, let's run the agent as a background service. This mode is the foundatio
 3.  **Create the Session (Step B: The Fix):**
     *   Before sending a message, you must explicitly create the session resource. Run this command:
         ```bash
-        curl -X POST http://127.0.0.1:8000/apps/haiku_poet_agent/users/test_user/sessions/test_session
+        curl -X POST http://127.0.0.1:8000/apps/support_analyzer/users/test_user/sessions/test_session
         ```
     *   **The Result:** You should receive `{"status": "ok"}`. This tells the server to allocate memory (or database space) for a conversation named `test_session`.
 
@@ -98,13 +97,13 @@ Finally, let's run the agent as a background service. This mode is the foundatio
         curl -X POST http://127.0.0.1:8000/run_sse \
              -H "Content-Type: application/json" \
              -d '{
-                   "app_name": "haiku_poet_agent",
+                   "app_name": "support_analyzer",
                    "user_id": "test_user",
                    "session_id": "test_session",
-                   "new_message": {"role": "user", "parts": [{"text": "A beautiful sunset"}]}
+                   "new_message": {"role": "user", "parts": [{"text": "I can't log in to my account."}]}
                  }'
         ```
-    *   **The Result:** You will see a stream of JSON objects. Look for the events where `event.name == 'agent:response'` to find your haiku!
+    *   **The Result:** You will see a stream of JSON objects. Look for the events where `event.name == 'agent:response'` to find your structured analysis!
 
 5.  **Stop the API server:**
     Go back to the first terminal and press `Ctrl+C`.

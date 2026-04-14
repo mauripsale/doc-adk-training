@@ -47,31 +47,29 @@ Crafting good instructions is a skill often called "prompt engineering." Here ar
 
 *   **Be Clear and Specific:** Ambiguity is the enemy. The more precise your instructions, the more reliable the agent's behavior will be.
 *   **Use Simple Language:** Write instructions as if you were talking to a person. Avoid jargon.
-*   **Provide Examples (Few-Shot Prompting):** One of the most powerful techniques is to include examples directly in the instruction.
+*   **Provide Examples (Few-Shot Prompting):** One of the most powerful techniques is to include examples directly in the instruction. This is especially useful for categorization tasks.
 
     **Python Example (`agent.py`):**
     ```python
     from google.adk.agents import LlmAgent
 
     root_agent = LlmAgent(
-        name="haiku_poet_agent",
+        name="support_classifier",
         model="gemini-2.5-flash",
         instruction="""
-          You are a wise and calm poet who only speaks in haikus (three lines with a 5, 7, 5 syllable structure).
-          Your purpose is to take the user's message and transform the core topic into a haiku.
-          Do not answer questions or have a conversation; only respond with a haiku inspired by the user's text.
+          You are a customer support triage agent. 
+          Your purpose is to read the user's message and categorize it into one of three departments: "billing", "technical", or "general".
+          You must also determine the urgency as "high" or "low".
+          Do not try to solve the user's problem; only respond with the categorization and urgency.
 
-          Example User Input: "I'm having trouble with my computer."
-          Example Agent Output:
-          Green light softly glows,
-          The screen is dark, cold, and vast,
-          Silence answers back.
+          Example User Input: "I was overcharged on my last invoice."
+          Example Agent Output: Category: billing, Urgency: high
 
-          Example User Input: "The weather is so nice today!"
-          Example Agent Output:
-          Golden sun shines bright,
-          A gentle breeze warms the skin,
-          Summer day feels right.
+          Example User Input: "How do I reset my password?"
+          Example Agent Output: Category: technical, Urgency: low
+          
+          Example User Input: "What are your business hours?"
+          Example Agent Output: Category: general, Urgency: low
         """
     )
     ```
@@ -79,25 +77,23 @@ Crafting good instructions is a skill often called "prompt engineering." Here ar
     **YAML Alternative (`root_agent.yaml`):**
     ```yaml
     instruction: |
-      You are a wise and calm poet who only speaks in haikus (three lines with a 5, 7, 5 syllable structure).
-      Your purpose is to take the user's message and transform the core topic into a haiku.
-      Do not answer questions or have a conversation; only respond with a haiku inspired by the user's text.
+      You are a customer support triage agent. 
+      Your purpose is to read the user's message and categorize it into one of three departments: "billing", "technical", or "general".
+      You must also determine the urgency as "high" or "low".
+      Do not try to solve the user's problem; only respond with the categorization and urgency.
 
-      Example User Input: "I'm having trouble with my computer."
-      Example Agent Output:
-      Green light softly glows,
-      The screen is dark, cold, and vast,
-      Silence answers back.
+      Example User Input: "I was overcharged on my last invoice."
+      Example Agent Output: Category: billing, Urgency: high
 
-      Example User Input: "The weather is so nice today!"
-      Example Agent Output:
-      Golden sun shines bright,
-      A gentle breeze warms the skin,
-      Summer day feels right.
+      Example User Input: "How do I reset my password?"
+      Example Agent Output: Category: technical, Urgency: low
+      
+      Example User Input: "What are your business hours?"
+      Example Agent Output: Category: general, Urgency: low
     ```
 *   **Iterate and Refine:** Your first instruction will rarely be your last. Test your agent with different inputs and refine the instruction based on its responses.
 
-In the lab for this module, you will practice this skill by modifying the "Echo" agent's instruction to give it a completely new personality and behavior.
+In the lab for this module, you will practice this skill by building a structured version of this Support Classifier agent.
 
 ### Advanced Configuration: Structured Output & State (v1.0)
 

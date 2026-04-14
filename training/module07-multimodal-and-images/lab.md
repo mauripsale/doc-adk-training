@@ -3,18 +3,18 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 7: Building a Visual Product Catalog Analyzer Challenge
+# Lab 7: Building a Visual Product Catalog Analyzer
 
 ## Goal
 
-In this lab, you will build a multimodal agent that can analyze a product image and generate a marketing description. This will teach you how to handle image inputs and perform a multi-step reasoning process with a single, vision-capable agent.
+In this lab, you will build a multimodal agent that can analyze a product image and generate a marketing description. This will teach you how to handle image inputs and perform programmatic execution with a vision-capable agent.
 
 ### The Architecture
 
-You will build a single `LlmAgent` that can:
-1.  Receive a prompt containing both an image and a text instruction.
-2.  Analyze the visual features of the image.
-3.  Use that analysis to generate a polished, marketing-ready product description based on the initial instruction.
+You will use the **App and Runner** pattern you learned in Module 6 to build a Python script that:
+1.  Loads local image files as `types.Part` objects.
+2.  Constructs a multimodal prompt containing both text and image data.
+3.  Executes the agent using `run_async`.
 
 ### Step 1: Create and Prepare the Project
 
@@ -22,41 +22,37 @@ You will build a single `LlmAgent` that can:
     ```shell
     adk create visual_catalog
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
-
 2.  **Navigate into the new directory:**
     ```shell
     cd visual_catalog
     ```
-
 3.  **Install Dependencies:**
-    This lab requires the `Pillow` library for image handling. Install it now:
+    This lab requires the `Pillow` library for image handling.
     ```shell
     pip install Pillow
     ```
-
 4.  **Set up your `.env` file.**
-    Create a `.env` file in this directory. Vision models require a Vertex AI configuration.
-    ```
+    Vision models require a Vertex AI configuration. Ensure your `.env` file looks like this:
+    ```text
     GOOGLE_GENAI_USE_VERTEXAI=1
-    GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-    GOOGLE_CLOUD_LOCATION=us-central1
+    GOOGLE_CLOUD_PROJECT="your-project-id"
+    GOOGLE_CLOUD_LOCATION="us-central1"
     ```
 
-### Step 2: Implement the Multimodal Agent
+### Step 2: Implement the Multimodal Script
 
-**Exercise:** Open `agent.py`. The full boilerplate code is provided below. Your task is to complete the core logic inside the `analyze_product` method by filling in the `# TODO` sections.
+**Exercise:** Create a file named `main.py` in your `visual_catalog` directory. Your task is to complete the core logic inside the `analyze_product` method by filling in the `# TODO` sections.
+
+> **Note on Sessions:** When using `run_async` programmatically, you must explicitly create a session in the runner's session service before sending a message, just as you did with `curl` in Module 5.
 
 ```python
-# In agent.py (Starter Code)
 import asyncio
 import os
-from typing import List, Dict
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
 from google.genai import types
-from google.adk.runners import Runner
-from google.adk.sessions import Session, InMemorySessionService # Import services
-import io
+from dotenv import load_dotenv
 
 # Helper function to load an image from a local file path
 def load_image_from_file(path: str) -> types.Part:
@@ -64,100 +60,86 @@ def load_image_from_file(path: str) -> types.Part:
     with open(path, 'rb') as f:
         image_bytes = f.read()
     
-    if path.lower().endswith('.png'):
-        mime_type = 'image/png'
-    elif path.lower().endswith(('.jpg', '.jpeg')):
-        mime_type = 'image/jpeg'
-    else:
-        mime_type = 'image/jpeg' # Default
+    mime_type = 'image/png' if path.lower().endswith('.png') else 'image/jpeg'
 
     return types.Part(
         inline_data=types.Blob(data=image_bytes, mime_type=mime_type)
     )
 
-class ProductCatalogAnalyzer:
-    """Analyze product images and create catalog entries."""
-
+class VisualCatalogApp:
     def __init__(self):
-        """Initialize product catalog analyzer."""
-        self.catalog: List[Dict] = []
-        self.catalog_agent = Agent(
-            model='gemini-2.5-flash', name='catalog_agent',
-            instruction="You are a product catalog writer. Analyze the provided image and generate a compelling marketing description."
+        # 1. Define the Intelligence
+        self.agent = LlmAgent(
+            model='gemini-2.5-flash',
+            name='catalog_writer',
+            instruction="You are a professional product catalog writer. Analyze the image and write a compelling description."
         )
-        # Create the session service and the runner
-        self.session_service = InMemorySessionService()
-        self.runner = Runner(session_service=self.session_service)
+        # 2. Build the Infrastructure
+        self.app = App(name="visual_catalog", root_agent=self.agent)
+        self.runner = InMemoryRunner(app=self.app)
 
     async def analyze_product(self, product_id: str, image_path: str):
-        """Analyze a product image and create a catalog entry."""
         print(f"\n--- Analyzing Product: {product_id} ---")
+        user_id = "catalog_admin"
+        session_id = f"sess_{product_id}"
 
+        # TODO: 1. Create the session explicitly in the session service
+        # Hint: Use self.runner.session_service.create_session(...)
+        ...
 
-        # TODO: 1. Create a new session for this analysis.
-        # Use `self.session_service.create_session`, providing an `app_name`
-        # (e.g., "visual_catalog") and a `user_id`.
-        session = None # Replace this
+        # TODO: 2. Load the image using the helper function
+        image_part = ...
 
-        # TODO: 2. Call the `load_image_from_file` helper to get the `image_part`.
-        image_part = None # Replace this
+        # TODO: 3. Create the multimodal message (types.Content object)
+        msg = types.Content(
+            role="user",
+            parts=[
+                types.Part(text=f"Analyze this image for product {product_id}."),
+                image_part
+            ]
+        )
 
-        # TODO: 3. Create the `analysis_query`, which must be a list containing
-        # a text part (e.g., "Analyze this image and write a marketing description.")
-        # and the `image_part`.
-        analysis_query = [] # Replace this
-
-        # TODO: 4. Call the `catalog_agent` by using `self.runner.run_async`.
-        # You must pass the `session` object, the `analysis_query` as the `new_message`,
-        # and the `catalog_agent` as the `agent`.
-        analysis_result = await self.runner.run_async(...) # Replace this
-        catalog_text = analysis_result.content.parts[0].text
-        print(f"✅ Catalog Entry Generated:\n{catalog_text}\n")
-
-        self.catalog.append({'product_id': product_id, 'catalog_entry': catalog_text})
+        # TODO: 4. Run the agent using run_async
+        print("📸 Sending image to Gemini...")
+        async for event in self.runner.run_async(
+            user_id=user_id,
+            session_id=session_id,
+            new_message=msg
+        ):
+            if event.is_final_response():
+                print(f"✅ Description:\n{event.content.parts[0].text}\n")
 
 async def main():
-    """Main entry point to run a demo."""
-    from dotenv import load_dotenv
     load_dotenv()
+    catalog = VisualCatalogApp()
 
-    analyzer = ProductCatalogAnalyzer()
-
-    # Use local images directly
+    # Images are expected to be in the parent directory for this lab
     products = [
-        ('PROD-001', '../../headphones.jpg'),
-        ('PROD-002', '../../laptop.jpg'),
+        ('HEADPHONES-01', '../headphones.jpg'),
+        ('LAPTOP-02', '../laptop.jpg'),
     ]
 
-    for product_id, image_path in products:
-        await analyzer.analyze_product(product_id, image_path)
-        await asyncio.sleep(1)
+    for product_id, path in products:
+        if os.path.exists(path):
+            await catalog.analyze_product(product_id, path)
+            await asyncio.sleep(1)
+        else:
+            print(f"⚠️ Image not found: {path}")
 
 if __name__ == '__main__':
     asyncio.run(main())
 ```
 
-### Step 3: Run and Test the Vision Agent
-
-1.  **Run the agent script directly** after completing the `TODO`s.
-    ```shell
-    python agent.py
-    ```
-2.  **Analyze the Output:** You should see the script use the local images and then print the final marketing copy generated by the agent for each product.
-
-### Having Trouble?
-If you get stuck, you can find the complete, working code in the `lab-solution.md` file.
-
 ### Lab Summary
-You have successfully built a multimodal agent that can see and understand images! You have learned to:
-*   Create multimodal prompts by combining text and image `types.Part` objects.
-*   Correctly initialize a `Runner` with a `SessionService` for programmatic execution.
-*   Build a single agent that can perform a multi-step task: analyzing an image and then generating creative text based on that analysis.
+You have successfully built a multimodal agent! You have learned:
+*   How to package image bytes into a `types.Part` object.
+*   The importance of explicitly creating a **Session** when using `run_async` programmatically.
+*   How to construct a structured `types.Content` object for complex inputs.
 
 ### Self-Reflection Questions
-- What are the benefits of using a single agent for this task versus the previous two-agent approach? What are the potential downsides?
-- The `load_image_from_file` helper function reads the image as bytes. Why is it necessary to also provide a `mime_type` (like 'image/jpeg') when creating the `types.Part` object?
-- How could you extend this project to handle video input? What kind of new agent or tool would you need to build?
+- Why did we have to call `create_session` manually this time, whereas in Module 6's `run_debug` we didn't?
+- How does the `InMemoryRunner` simplify the setup of the `SessionService` compared to a base `Runner`?
+- If you wanted to analyze a PDF document instead of an image, which `mime_type` would you use in the `types.Blob`?
 
 <hr/>
 

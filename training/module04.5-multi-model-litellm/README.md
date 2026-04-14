@@ -1,64 +1,83 @@
 ---
 sidebar_position: 5
-title: "Module 4.5: Multi-Model Support with LiteLLM"
+title: "Module 4.5: Professional Model Configuration & Resiliency"
 ---
 
-# Module 4.5: Multi-Model Support with LiteLLM
+# Module 4.5: Professional Model Configuration & Resiliency
 
 ## Theory
 
-### Beyond Gemini: The Power of Choice
+Until now, we've passed models to our agents using simple strings (e.g., `model="gemini-2.5-flash"`). While this is great for prototyping, building **production-grade** agents requires a more robust approach to handle network flakiness, rate limits, and regional deployments.
 
-One of the greatest strengths of the Google Agent Development Kit (ADK) is its model-agnostic architecture. While it is optimized for Google Gemini models, production-grade applications often require flexibility. You might want to:
-*   Use a **local model** (via Ollama) for privacy or cost savings during development.
-*   Use a **specialized model** from another provider (like Anthropic Claude or OpenAI GPT) for specific tasks where they might excel.
-*   Avoid **vendor lock-in** by making your agent easily portable across different cloud providers.
+In this module, we will explore the three levels of model configuration in the ADK, inspired by enterprise best practices.
 
-The ADK achieves this through a first-class integration with **LiteLLM**, a universal wrapper that translates ADK's standard calls into the specific APIs of over 100+ LLM providers.
-
-### How it Works: The `LiteLlm` Wrapper
-
-Instead of passing a simple string (like `"gemini-1.5-flash"`) to the `model` parameter of an agent, you can pass an instance of the `LiteLlm` class.
-
-#### Example: Using Ollama (Local)
-If you have Ollama running locally with the `mistral` model:
-
+### Level 1: Simple Strings (Prototype)
+The simplest way. Ideal for learning and quick tests.
 ```python
-from google.adk.models import LiteLlm
-from google.adk.agents import LlmAgent
-
-root_agent = LlmAgent(
-    name="local_assistant",
-    model=LiteLlm(model="ollama_chat/mistral"), # Provider/Model syntax
-    instruction="You are a helpful local assistant."
-)
+agent = LlmAgent(model="gemini-2.5-flash", ...)
 ```
 
-#### Example: Using OpenAI
-```python
-from google.adk.models import LiteLlm
-from google.adk.agents import LlmAgent
+### Level 2: The `Gemini` Class (Professional)
+By importing `Gemini` from `google.adk.models`, you gain access to the model's underlying connection settings, most importantly **Retry Logic**.
 
-root_agent = LlmAgent(
-    name="gpt_assistant",
-    model=LiteLlm(model="openai/gpt-4o"),
-    instruction="You are a helpful assistant powered by GPT."
+In production, LLM APIs can occasionally time out or return rate-limit errors (429). The `Gemini` class allows you to define a retry policy so the agent doesn't just crash when a request fails.
+
+```python
+from google.adk.models import Gemini
+from google.genai import types
+
+resilient_model = Gemini(
+    model='gemini-2.5-flash',
+    # Automatically retry failed requests up to 3 times
+    retry_options=types.HttpRetryOptions(initial_delay=1, attempts=3)
 )
+
+agent = LlmAgent(model=resilient_model, ...)
 ```
 
-### Configuration and Environment Variables
+### Level 3: Custom Subclasses (Enterprise Expert)
+For large projects, you often want to centralize configurations like the Google Cloud project ID, specific regions, or advanced HTTP options across all your agents. The expert pattern is to **subclass** the `Gemini` model.
 
-Each provider requires its own set of credentials. LiteLLM looks for standard environment variables in your `.env` file:
+This allows you to lock in production settings (like forcing the `global` location or adding "Jitter" to retries to prevent server hammering) in a single reusable class.
 
-| Provider | Model Prefix | Required Variable |
-| :--- | :--- | :--- |
-| **Ollama** | `ollama_chat/` | `OLLAMA_API_BASE` (Defaults to http://localhost:11434) |
-| **OpenAI** | `openai/` | `OPENAI_API_KEY` |
-| **Anthropic** | `anthropic/` | `ANTHROPIC_API_KEY` |
-| **Groq** | `groq/` | `GROQ_API_KEY` |
+```python
+from functools import cached_property
+from google.adk.models import Gemini
+from google.genai import Client, types
+import os
+
+class ProductionGemini(Gemini):
+    """Custom model subclass for enterprise deployments."""
+    
+    @cached_property
+    def api_client(self) -> Client:
+        return Client(
+            project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
+            location="us-central1", # Centralize your deployment region
+            http_options=types.HttpOptions(
+                retry_options=types.HttpRetryOptions(
+                    max_delay=10, # Maximum time to wait between retries
+                    exp_base=2.0,  # Exponential backoff base
+                    jitter=0.5,    # Random delay to avoid thundering herd
+                )
+            ),
+        )
+
+# Use your expert class anywhere in your app
+agent = LlmAgent(model=ProductionGemini(model="gemini-2.5-flash"), ...)
+```
+
+---
+
+### When to use LiteLLM?
+While the `Gemini` class offers the best performance and deepest integration with Google services, you should use the **`LiteLlm`** class (from `google.adk.models.lite_llm`) when your primary goal is **Model Agnosticism**. 
+
+Use `LiteLlm` if you need to:
+1.  Run **local models** (via Ollama) during development to save costs.
+2.  Switch between different cloud providers (OpenAI, Anthropic) without changing your code structure.
 
 ### Key Takeaways
-- The ADK is **model-agnostic** thanks to the `LiteLlm` integration.
-- You can switch providers by simply changing the `model` parameter to a `LiteLlm` instance.
-- This allows for local development (Ollama), cost optimization, and high portability.
-- **Dependencies:** To use this feature, you must install the litellm library: `pip install litellm`.
+- **Resiliency is mandatory:** Never deploy an agent without a retry policy.
+- **The `Gemini` class** is the key to configuring retries, locations, and custom project settings.
+- **Subclassing `Gemini`** is an expert pattern for centralizing production configurations.
+- **`LiteLlm`** is the tool for maximum portability across providers.

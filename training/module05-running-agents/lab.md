@@ -6,16 +6,16 @@ title: "Challenge Lab"
 # Lab 5: Exploring Different Execution Modes Challenge
 
 ## Goal
-Your task is to run and interact with your "Haiku Poet" agent using the three primary execution modes provided by the ADK CLI. **Always run these commands from your main `adk-training` directory.**
+Your task is to run and interact with your **"Support Analyzer"** agent using the three primary execution modes provided by the ADK CLI. **Always run these commands from your main `adk-training` directory.**
 
-## Requirements
+## Lab Tasks
 1.  **`adk web`:**
     *   Run the command `adk web`.
     *   **Note:** When running from the parent directory, you don't need to specify the agent name; the Dev UI will allow you to select any agent in the subdirectories.
-    *   Interact with your `haiku_poet_agent` in the Dev UI and inspect the "Trace" view to see the full prompt sent to the LLM.
+    *   Interact with your `support_analyzer` in the Dev UI and inspect the "Trace" view to see the full prompt sent to the LLM.
 2.  **`adk run`:**
     *   Stop the web server (`Ctrl+C`).
-    *   Run the command `adk run haiku_poet_agent`.
+    *   Run the command `adk run support_analyzer`.
     *   Interact with the agent directly in your terminal.
 3.  **`adk api_server`:**
     *   Stop the command-line runner.
@@ -26,7 +26,7 @@ Your task is to run and interact with your "Haiku Poet" agent using the three pr
         curl -X POST http://127.0.0.1:8000/run_sse \
              -H "Content-Type: application/json" \
              -d '{
-                   "app_name": "haiku_poet_agent",
+                   "app_name": "support_analyzer",
                    "user_id": "test_user",
                    "session_id": "missing_session",
                    "new_message": {"role": "user", "parts": [{"text": "Hello"}]}
@@ -35,20 +35,20 @@ Your task is to run and interact with your "Haiku Poet" agent using the three pr
         Observe the error response. Why did it fail?
     *   **Step B (The Fix):** Create the session explicitly.
         ```bash
-        curl -X POST http://127.0.0.1:8000/apps/haiku_poet_agent/users/test_user/sessions/test_session
+        curl -X POST http://127.0.0.1:8000/apps/support_analyzer/users/test_user/sessions/test_session
         ```
     *   **Step C (Success):** Now send the message again, targeting the session you just created (`test_session`).
         ```bash
         curl -X POST http://127.0.0.1:8000/run_sse \
              -H "Content-Type: application/json" \
              -d '{
-                   "app_name": "haiku_poet_agent",
+                   "app_name": "support_analyzer",
                    "user_id": "test_user",
                    "session_id": "test_session",
-                   "new_message": {"role": "user", "parts": [{"text": "A quiet lake"}]}
+                   "new_message": {"role": "user", "parts": [{"text": "I am so happy with your service!"}]}
                  }'
         ```
-    *   Verify that you receive a stream of JSON responses containing your haiku.
+    *   Verify that you receive a stream of JSON responses containing the structured analysis (category, sentiment, summary).
 
 ### Self-Reflection Questions
 - In what scenarios would the detailed "Trace View" in `adk web` be more useful than the simple chat interface of `adk run`?

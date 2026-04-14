@@ -3,137 +3,72 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 6 Solution: Programmatic Execution with the ADK Runner
+# Lab 6 Solution: Programmatic Execution: Apps and Runners
 
 ## Goal
 
-In this lab, you learned how to run an ADK agent programmatically from within a Python script, using the standard `Runner`. You imported and ran the **Haiku Poet agent** you built in Module 4.
+In this lab, you learned how to run an ADK agent programmatically from within a Python script using the modern `App` and `Runner` architecture. You wrapped the **Support Analyzer** agent (from Module 4) in an `App` and executed it for two different users to demonstrate session isolation.
 
-This demonstrated the canonical way to execute an agent as part of a larger Python application, without using the `adk` command-line tools.
+### `support_analyzer/main.py`
 
-### Step 1: Prepare the Project
-
-1.  **Navigate to your `adk-training` directory:**
-    ```shell
-    cd /path/to/your/adk-training
-    ```
-
-2.  **Create the dedicated directory and script:**
-    ```shell
-    mkdir run_haiku_agent
-    cd run_haiku_agent
-    # Create run_haiku_agent.py inside this folder
-    ```
-
-### Step 2: Complete the `run_haiku_agent.py` Script
-
-Here is the complete `run_haiku_agent.py` script:
+Here is the complete `main.py` script:
 
 ```python
 import asyncio
-import sys
-import os
+from dotenv import load_dotenv
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
+from agent import root_agent
 
-# Add the parent directory to sys.path so we can import our agents
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+load_dotenv()
 
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
+# 1. Create the App container.
+# This separates infrastructure (App) from intelligence (Agent).
+app = App(name="support_app", root_agent=root_agent)
 
-# Import the root_agent from your haiku_poet_agent directory.
-from haiku_poet_agent.agent import root_agent as haiku_agent
+# 2. Initialize the Runner.
+# We use InMemoryRunner which automatically sets up session management.
+runner = InMemoryRunner(app=app)
 
 async def main():
-    # Create a Session Service.
-    session_service = InMemorySessionService()
-
-    # Initialize the Runner, passing in the session service.
-    runner = Runner(
-        app_name="haiku_poet_agent",
-        agent=haiku_agent,
-        session_service=session_service
-    )
-
-    # Create a new session for your agent.
-    session = await session_service.create_session(
-        app_name="haiku_poet_agent",
-        user_id="user123",
-    )
+    print("--- User A (Alice) ---")
+    # 3. Run for Alice (Billing Issue)
+    # The runner uses the user_id to isolate this conversation.
+    # run_debug automatically prints the agent response to the terminal.
+    events_a = await runner.run_debug("I was overcharged $50.", user_id="Alice")
     
-    # Package your query.
-    query_string = "A quiet morning with a cup of coffee."
-    new_message = types.Content(
-        parts=[types.Part(text=query_string)],
-        role="user",
-    )
-
-    # Run the agent.
-    # We pass the user_id and session_id (which the runner uses to fetch the session from the service)
-    async for event in runner.run_async(
-        user_id="user123", 
-        session_id=session.id, 
-        new_message=new_message
-    ):
-        # Print the text from the final agent response.
+    # Optional: If you need to access the text in code, iterate through events:
+    for event in events_a:
         if event.is_final_response():
-            if event.content and event.content.parts:
-                print(event.content.parts[0].text)
+            print(f"DEBUG: Alice's JSON: {event.content.parts[0].text}")
+
+    print("\n--- User B (Bob) ---")
+    # 4. Run for Bob (Technical Issue)
+    # Even with the same Runner, Bob's state is separate from Alice's.
+    await runner.run_debug("My wifi is not working.", user_id="Bob")
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### Step 3: Run the Script
+### Key Components Explained
 
-1.  **Ensure your virtual environment is active.**
-
-2.  **Run the script from your `run_haiku_agent` directory:**
-    ```shell
-    python run_haiku_agent.py
-    ```
-
-### Step 4: Observe the Output
-
-If your script is correct, you will see the haiku response printed directly to your console.
-
-### Lab Summary
-
-You have successfully run an agent programmatically using the standard `Runner`. This is the foundation for integrating your agent into any larger Python application.
+1.  **`App`**: This is the container for your agent. In a production app, this is where you would register global plugins (like for logging or monitoring) or configure context caching. It represents the "Building" the agent lives in.
+2.  **`InMemoryRunner`**: This is the engine that executes the code. It's "In-Memory" because it stores all the conversation history (sessions) in the computer's RAM. If you restart the script, the history is lost. For production, you would use a `Runner` connected to a database.
+3.  **`user_id`**: This is the most important parameter for multi-user apps. By passing `"Alice"` or `"Bob"`, the Runner knows which specific "drawer" of memory to open.
+4.  **`run_debug()`**: A high-level helper that simplifies execution by handling the async event stream and automatically printing responses. It returns a **list of `Event` objects**.
 
 ### Self-Reflection Answers
 
-1.  **Why is it important to decouple the `Runner` from the `SessionService`? What advantage does this give you in a production environment?**
-    *   **Answer:** Decoupling `Runner` from `SessionService` promotes a modular architecture, making the `Runner` stateless and reusable across different session management strategies. In a production environment, this allows you to easily swap `InMemorySessionService` for persistent alternatives like `FirestoreSessionService` or custom implementations without modifying the core `Runner` logic. This flexibility is crucial for scaling, handling failures, and integrating with diverse backend systems where session state needs to be reliably stored and retrieved.
+1.  **Why is the `App` class considered "infrastructure" while the `Agent` is considered "intelligence"?**
+    *   **Answer:** The `Agent` contains the prompt, the model choice, and the logical rules (the "Employee"). The `App` contains the operational settings like which database to use, which plugins are active, and the name of the overall service (the "Office"). This separation allows you to use the same Agent logic in different Apps.
 
-2.  **The `runner.run_async` method returns a stream of events. Why is this streaming approach useful in a real-world application compared to a function that just returns the final string?**
-    *   **Answer:** The streaming approach of `runner.run_async` is highly beneficial in real-world applications for several reasons:
-        *   **Real-time Feedback:** It allows for immediate partial responses (e.g., streaming LLM output word-by-word), improving the user experience by reducing perceived latency.
-        *   **Progress Indicators:** Developers can use intermediate events (like tool calls or agent thoughts) to display progress indicators or provide more context to the user about what the agent is doing.
-        *   **Handling Long-Running Tasks:** For agents performing complex or long-running tasks, streaming prevents the client from blocking indefinitely, allowing it to process information incrementally.
+2.  **What would happen if you didn't provide a `user_id` to the runner (or provided the same one for both Alice and Bob)?**
+    *   **Answer:** If you use the same `user_id` (or leave it as the default), the Runner will treat both messages as part of the **same conversation**. Alice's billing problem and Bob's technical problem would be mixed together in the chat history, likely confusing the LLM.
 
-3.  **How would you modify this script to have a continuous conversation with the agent instead of just sending one message? (Hint: Think about loops and reusing the session object).**
-    *   **Answer:** To have a continuous conversation, you would wrap the query and `runner.run_async` call within an asynchronous loop. Before each iteration, you would take new user input, and then reuse the same `session.id` to maintain context.
+3.  **In a production web server (like FastAPI), where would you put the code to instantiate the `Runner`?**
+    *   **Answer:** You should instantiate the `Runner` as a **global variable** (or a singleton) at the start of your application. You should **not** create a new Runner inside every request handler, as that would be inefficient and you would lose the benefit of internal session management.
 
-        ```python
-        # ... (imports and main setup)
-            while True:
-                user_input = input("\n[User]: ")
-                if user_input.lower() == "exit":
-                    break
+### Lab Summary
 
-                new_message = types.Content(
-                    parts=[types.Part(text=user_input)],
-                    role="user",
-                )
-
-                print("[Agent]: ", end="")
-                async for event in runner.run_async(
-                    user_id="user123", 
-                    session_id=session.id, 
-                    new_message=new_message
-                ):
-                    if event.is_final_response():
-                        if event.content and event.content.parts:
-                            print(event.content.parts[0].text)
-        ```
+You have now moved from testing agents in a UI to controlling them with code. This is the first step toward building real-world, scalable agentic applications.

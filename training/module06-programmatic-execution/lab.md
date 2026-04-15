@@ -26,7 +26,12 @@ Complete the `main.py` script by following the conceptual comments below. Refer 
 
 ```python
 import asyncio
+import logging
 from dotenv import load_dotenv
+
+# Optional: Suppress noisy ADK/httpx logs for cleaner terminal output
+logging.getLogger("google.adk").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 # TODO: Step 1 - Bring in your "Intelligence" (the Agent) 
 # and your "Infrastructure" components (App and InMemoryRunner).
@@ -54,6 +59,7 @@ async def main():
     # The debug method returns a list of Events. 
     # Loop through them to find the one that marks the "final response" 
     # and print the content text to the console.
+    # Hint: use `event.is_final_response()` and `event.content.parts[0].text`
 
     print("\n--- User B (Bob) ---")
     # TODO: Step 6 - Process a message for Bob (Technical issue: "My wifi is slow").

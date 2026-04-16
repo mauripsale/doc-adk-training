@@ -18,56 +18,33 @@ Make sure you have an IDE installed and open.
 *   **Project IDX:** Excellent cloud-based alternative.
 *   **Cloud Shell Editor:** Built into Google Cloud.
 
-### Check Python Version
+### Check uv
 ```bash
-python --version
-# OR (on some systems)
-python3 --version
+uv --version
 ```
-**Requirement:** You must see `Python 3.10.x` or higher. If you have an older version, please upgrade Python before continuing.
-
-### Check pip
-```bash
-pip --version
-# OR
-pip3 --version
-```
-**Requirement:** `pip` must be installed to manage Python packages.
+**Requirement:** You must see the `uv` version printed. If not, follow the installation instructions in the lab challenge. `uv` handles Python installation automatically, so you no longer need to worry about checking your Python version manually!
 
 ## Step 2: Create the Project Structure
 
-1.  **Create Directory:**
+Using `uv` makes project initialization incredibly fast and simple.
+
+1.  **Initialize Project with Python 3.10+:**
     ```bash
-    mkdir adk-training
+    uv init adk-training --python 3.10
+    ```
+    This creates the directory, sets up a `pyproject.toml` file, and prepares the structure. **Crucially, the `--python 3.10` flag tells `uv` to use Python 3.10. If you don't have it installed on your machine, `uv` will download it for you automatically!**
+
+2.  **Navigate into the directory:**
+    ```bash
     cd adk-training
     ```
 
-2.  **Create Virtual Environment:**
-    Using a virtual environment is mandatory to avoid conflicts.
-    ```bash
-    # macOS/Linux
-    python3 -m venv venv
-    
-    # Windows
-    python -m venv venv
-    ```
-
-3.  **Activate Virtual Environment:**
-    ```bash
-    # macOS/Linux
-    source venv/bin/activate
-    
-    # Windows
-    .\venv\Scripts\activate
-    ```
-    **Verification:** Your terminal prompt should now show `(venv)`.
-
 ## Step 3: Install Packages
 
-Install the Google ADK and the dotenv library:
+Use `uv` to add your dependencies. This command will automatically create a virtual environment (`.venv`), resolve the fastest dependency tree, and lock the versions in `uv.lock`.
 
 ```bash
-pip install google-adk python-dotenv
+uv add google-adk python-dotenv
 ```
 
 ## Step 4: Configure Authentication
@@ -89,10 +66,10 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 
 ## Step 5: Run Verification
 
-Create `verify_setup.py` and run it:
+Create `verify_setup.py` and run it using `uv run`. `uv run` ensures the script is executed using the exact Python version (3.10) and dependencies stored in your virtual environment.
 
 ```bash
-python verify_setup.py
+uv run python verify_setup.py
 ```
 
 **Expected Output:**
@@ -103,9 +80,9 @@ python verify_setup.py
 
 ## Self-Reflection Answers
 
-*   **Why is Python 3.10+ required?**
-    The ADK uses modern Python features like advanced type hints and improved asynchronous handling that are only available in version 3.10 and later.
-*   **Why use a virtual environment?**
-    It isolates your project. If you have another project that needs an older version of a library, the virtual environment prevents them from breaking each other.
-*   **Why use an IDE instead of a simple text editor?**
-    IDEs like VS Code provide syntax highlighting, error detection, and debugging tools that are essential when building complex AI agents.
+*   **Why is `uv` considered a major upgrade over traditional tools like `pip` and `venv`?**
+    `uv` is written in Rust, making it extremely fast. It unifies project management, virtual environments, and dependency locking into a single tool, eliminating the need to juggle `pip`, `venv`, and `requirements.txt` manually. It even handles downloading the correct Python version for you.
+*   **What is the purpose of the `uv.lock` file generated in your project directory?**
+    The `uv.lock` file records the exact version of every dependency (and sub-dependency) installed. If you share your project, `uv sync` reads this file to recreate an identical environment, preventing "it works on my machine" bugs.
+*   **What are the security implications of storing API keys in a `.env` file versus hardcoding them in your script?**
+    Hardcoding keys makes them visible to anyone viewing your source code, and they will likely be committed to version control (like GitHub) by accident. A `.env` file is meant to be ignored by git (`.gitignore`), keeping your secrets local and safe.

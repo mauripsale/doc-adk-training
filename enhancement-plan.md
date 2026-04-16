@@ -16,12 +16,11 @@ Questo documento delinea la strategia per elevare la qualità pedagogica e tecni
 ### 🔹 Sezione 1: Fondamentali (Update Tecnico)
 *   [x] **Refactoring base completato:** Passaggio a "Support Analyzer" e architettura App/Runner per i moduli 1-7.
 *   [x] **Validazione Modulo 06:** Risolti bug nell'utilizzo di `run_debug` e ripulita la console usando lo Student Evaluator.
-*   [ ] **Modulo 02 (Environment):** Sostituire `pip` con **`uv`** come package manager consigliato (più veloce, deterministico e standard moderno). Introdurre anche `Makefile` base.
+*   [x] **Modulo 02 (Environment):** Sostituito `pip` con **`uv`** come package manager consigliato. Introdotto il concetto di gestione automatica della versione Python (3.10+).
 
-### 🔹 Sezione 2: Tools & Capabilities (Coesione Narrativa)
-*   **Narrative Shift:** Unificare tutti i moduli della Sezione 2 attorno allo scenario **"Support & Logistics"**.
-    *   *Modulo 09 (Custom Tools):* Invece di esempi generici, costruire un tool che interroga un database mock di ordini.
-    *   *Modulo 11 (OpenAPI):* Sostituire Chuck Norris con un'API reale (o simulata) di tracciamento spedizioni.
+### 🔹 Sezione 2: Tools & Capabilities (Standardizzazione)
+*   **Modulo 09 (Custom Tools):** Mantenere l'esempio del "Calculator Agent" in quanto ottimo per comprendere i fondamenti dei tool, ma aggiornare le istruzioni per usare il nuovo scaffolding `uv init` e testarlo con `uv run adk run`. Semplificare la registrazione tool (niente più `FunctionTool(fn=...)`, ma passaggio diretto della funzione come da ADK moderno).
+*   **Modulo 11 (OpenAPI):** (Da definire, valutare se mantenere Chuck Norris o passare a un'API più business-oriented).
 *   **Modulo 13.5 (Novità): "Enterprise Persistence with Firestore":** Spiegare come registrare e usare un `FirestoreSessionService` per non perdere la memoria al riavvio del server.
 
 ### 🔹 Sezione 3: Multi-Agent Systems
@@ -55,7 +54,7 @@ Riscriveremo questo modulo per essere la "Bibbia" del developer ADK:
 ---
 
 ## ✅ Prossimi Passi Immediati (In Corso)
-1.  [x] Validare il Modulo 06 post-refactoring.
-2.  [ ] Aggiornare il Modulo 02 per includere `uv`, `pyproject.toml` e `Makefile` (Iniziato).
-3.  [ ] Iniziare il refactoring della Sezione 2 (Tools) verso la narrativa unificata.
+1.  [x] Upgrade a `uv` e Python 3.10 per il Modulo 02 completato.
+2.  [ ] **Modulo 09:** Refactoring del lab Calculator (aggiornamento all'API ADK moderna `tools=[my_func]` e uso di `uv`).
+3.  [ ] Valutazione Modulo 09 tramite `adk-student-evaluator`.
 4.  [ ] Creare lo skeleton del Modulo 38 basato su questo piano.

@@ -7,28 +7,19 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete, step-by-step guide to creating the "Calculator" agent.
-
-### Goal
-
-You will build an agent that can perform basic arithmetic by creating your own custom function tools in Python and integrating them into a Python-based agent.
+This file contains the complete, step-by-step guide to creating the "Calculator" agent using modern ADK practices.
 
 ### Step 1: Create the Calculator Agent Project
 
-1.  **Navigate to your training directory:**
+1.  **Initialize the project:**
     ```shell
-    cd /path/to/your/adk-training
-    ```
-
-2.  **Create the agent project:**
-    ```shell
-    adk create calculator_agent
-    ```
-
-3.  **Navigate into the new directory:**
-    ```shell
+    uv init calculator_agent --python 3.10
     cd calculator_agent
+    uv add google-adk python-dotenv
     ```
+
+2.  **Set up authentication:**
+    Create a `.env` file in your `calculator_agent` directory and add your `GOOGLE_API_KEY` (or Vertex AI configuration).
 
 ### Step 2: Write the Custom Tool Functions
 
@@ -104,6 +95,7 @@ You will build an agent that can perform basic arithmetic by creating your own c
             A dictionary with the result or an error if division by zero occurs.
         """
         if b == 0:
+            # Crucial: Returning a structured error instead of crashing the Python process
             return {"status": "error", "message": "Cannot divide by zero."}
         result = a / b
         return {"status": "success", "result": result}
@@ -111,91 +103,68 @@ You will build an agent that can perform basic arithmetic by creating your own c
 
 ### Step 3: Configure the Agent to Use the Tools
 
-1.  **Set up your environment variables** in the `.env` file.
+Open `agent.py` and replace its contents with the following. Notice how we pass the raw Python functions directly into the `tools` list. The ADK automatically converts them into LLM-compatible tools based on their docstrings and type hints.
 
-2.  **Update the `agent.py` file (Python approach):**
-    Open `agent.py` and replace its contents with the following:
+```python
+from google.adk.agents import LlmAgent
 
-    ```python
-    from google.adk.agents import LlmAgent
-    from google.adk.tools import FunctionTool
+# Import the functions from your tools module
+from tools.calculator import add, subtract, multiply, divide
 
-    # Import the functions from your tools module
-    from .tools.calculator import add, subtract, multiply, divide
-
-    # Create a FunctionTool for each function
-    add_tool = FunctionTool(fn=add)
-    subtract_tool = FunctionTool(fn=subtract)
-    multiply_tool = FunctionTool(fn=multiply)
-    divide_tool = FunctionTool(fn=divide)
-
-    root_agent = LlmAgent(
-        name="calculator_agent",
-        model="gemini-2.5-flash",
-        description="An agent that can perform basic arithmetic calculations.",
-        instruction="""
-    You are a helpful calculator assistant.
-    When the user asks you to perform a calculation (add, subtract, multiply, or divide), you MUST use the appropriate tool.
-    Clearly state the result of the calculation to the user.
-    If the user asks a question that is not a calculation, politely state that you can only perform math.
-    """,
-        tools=[
-            add_tool,
-            subtract_tool,
-            multiply_tool,
-            divide_tool,
-        ],
-    )
-    ```
-
-    **Alternative (YAML approach):**
-
-    If you had created a `config` type agent, you would open `root_agent.yaml` and replace its contents with the following:
-
-    ```yaml
-    # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
-    name: calculator_agent
-    model: gemini-2.5-flash
-    description: An agent that can perform basic arithmetic calculations.
-    instruction: |
-      You are a helpful calculator assistant.
-      When the user asks you to perform a calculation (add, subtract, multiply, or divide), you MUST use the appropriate tool.
-      Clearly state the result of the calculation to the user.
-      If the user asks a question that is not a calculation, politely state that you can only perform math.
-    tools:
-      - name: tools.calculator.add
-      - name: tools.calculator.subtract
-      - name: tools.calculator.multiply
-      - name: tools.calculator.divide
-    ```
+root_agent = LlmAgent(
+    name="calculator_agent",
+    model="gemini-2.5-flash",
+    description="An agent that can perform basic arithmetic calculations.",
+    instruction="""
+You are a helpful calculator assistant.
+When the user asks you to perform a calculation (add, subtract, multiply, or divide), you MUST use the appropriate tool.
+Clearly state the result of the calculation to the user.
+If the user asks a question that is not a calculation, politely state that you can only perform math.
+""",
+    tools=[
+        add,
+        subtract,
+        multiply,
+        divide,
+    ],
+)
+```
 
 ### Step 4: Test the Calculator Agent
 
-1.  **Start the web server:** `adk web` (run this from the `adk-training` parent directory).
-2.  **Interact with the agent** in the Dev UI and ask it to perform calculations. Check the Trace View to see the tools being executed.
-    *   "What is 42 + 118?"
-    *   "Multiply 15 by 3."
-    *   "What is 10 divided by 0?"
-    *   "What is the capital of France?" (Should be gracefully declined).
+You can now start the agent using the modern ADK CLI command:
+
+```bash
+uv run adk run agent.py
+```
+
+Interact with the agent in the terminal and ask it to perform calculations:
+*   "What is 42 + 118?"
+*   "Multiply 15 by 3."
+*   "What is 10 divided by 0?"
+*   "What is the capital of France?" (Should be gracefully declined).
 
 ### Self-Reflection Answers
 
-1.  **The docstring for each function is critical. What do you think would happen if you removed the docstrings from your calculator functions? Would the agent still be able to use them?**
-    *   **Answer:** If you remove the docstrings, the agent (LLM) loses the primary description of what the tool does and how to use it. While the function name and type hints provide *some* information, the docstring provides the context. Without it, the agent might struggle to understand *when* to call the tool or might misinterpret its purpose, leading to unreliable behavior or failure to use the tool at all.
+1.  **What do you think would happen if you removed the docstrings from your calculator functions? Would the agent still be able to use them?**
+    *   **Answer:** If you remove the docstrings, the LLM receives an empty description for the tool. While it *might* occasionally guess what a tool named `add` does based purely on the name and parameters, its behavior will become highly unpredictable. It might use the wrong tool, pass incorrect arguments, or refuse to use it entirely. The docstring is the LLM's only instruction manual for your function.
 
 2.  **Why is it a good practice to return a dictionary with a `status` key from a tool function, especially for operations that can fail (like division)?**
-    *   **Answer:** Returning a dictionary allows you to provide structured feedback to the agent. The `status` key gives the agent an explicit signal about whether the operation succeeded (`success`) or failed (`error`). If it failed, you can include an `error` message (like "Cannot divide by zero") which the agent can then read and explain to the user. This makes the agent more robust and capable of handling edge cases gracefully.
+    *   **Answer:** If `divide(10, 0)` simply raised a Python `ZeroDivisionError`, your entire script (and the agent) would crash. By returning `{"status": "error", "message": "..."}`, you handle the error gracefully. The LLM receives this error message and can formulate a polite response to the user (e.g., "I'm sorry, but I cannot divide by zero.").
 
 3.  **How would you add a new tool to this agent, for example, a function to calculate the square root of a number? What steps would you need to take?**
-    *   **Answer:** You would need to follow the same three steps:
-        1.  **Write the function:** Add a `sqrt(n: float) -> dict` function to `tools/calculator.py` with a clear docstring.
-        2.  **Import it:** Import the `sqrt` function in your `agent.py`.
-        3.  **Register it:** Wrap it in a `FunctionTool` and add it to the `tools` list in the `LlmAgent` definition.
+    *   **Answer:**
+        1.  Open `tools/calculator.py` and write the new function: `def square_root(a: float) -> dict:`
+        2.  Add type hints and a clear docstring explaining its purpose.
+        3.  Implement the logic (e.g., using `math.sqrt(a)`).
+        4.  Return the structured dictionary.
+        5.  Open `agent.py`, update the import statement to include `square_root`.
+        6.  Add `square_root` to the `tools=[]` list in the `root_agent` definition.
 
 ### Lab Summary
 
 You have successfully built an agent with custom capabilities, learning to:
 *   Organize tool code into a separate Python module.
 *   Write well-defined Python functions with type hints and docstrings to serve as tools.
-*   Reference and register your custom tools in both `agent.py` and `root_agent.yaml`.
+*   Register your custom tools directly in `agent.py` without needing extra wrappers.
 *   Write instructions that effectively guide the agent on how and when to use its new tools.

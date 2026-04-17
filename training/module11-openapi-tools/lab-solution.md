@@ -3,95 +3,56 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 11 Solution: Building a Chuck Norris Fact Assistant
+# Lab 11 Solution: Building a "Global Market Analyst" Agent
 
 ## Goal
 
-This file contains the complete code for the `agent.py` script in the Chuck Norris Fact Assistant lab.
+This file contains the complete, working code for the **Global Market Analyst** that can automatically convert currencies using an OpenAPI specification.
 
-### `chuck_norris_agent/agent.py`
+### Complete `agent.py` Code
+
+Here is the fully implemented `agent.py` file. Notice how the `/latest` path is defined in the `FRANKFURTER_SPEC` dictionary and how we initialize the `OpenAPIToolset`.
 
 ```python
-"""
-Chuck Norris Fact Assistant - OpenAPI Tools Demonstration
-
-This agent demonstrates how to use OpenAPIToolset to automatically
-generate tools from an API specification without writing tool functions.
-"""
-
-from google.adk.agents import Agent
+# agent.py
+import json
+from google.adk.agents import LlmAgent
 from google.adk.tools.openapi_tool import OpenAPIToolset
 
 # ============================================================================
 # OPENAPI SPECIFICATION
 # ============================================================================
-
-# Chuck Norris API OpenAPI Specification
-# Based on: https://api.chucknorris.io/
-CHUCK_NORRIS_SPEC = {
+FRANKFURTER_SPEC = {
     "openapi": "3.0.0",
     "info": {
-        "title": "Chuck Norris API",
-        "description": "Free JSON API for hand curated Chuck Norris facts",
+        "title": "Frankfurter Currency API",
+        "description": "Free API for current and historical foreign exchange rates",
         "version": "1.0.0"
     },
-    "servers": [
-        {
-            "url": "https://api.chucknorris.io/jokes"
-        }
-    ],
+    "servers": [{"url": "https://api.frankfurter.app"}],
     "paths": {
-        "/random": {
+        "/latest": {
             "get": {
-                "operationId": "get_random_joke",
-                "summary": "Get a random Chuck Norris joke",
-                "description": "Retrieve a random joke from the database. Can optionally filter by category.",
+                "operationId": "get_latest_rates",
+                "summary": "Get latest exchange rates",
                 "parameters": [
                     {
-                        "name": "category",
+                        "name": "amount",
                         "in": "query",
-                        "description": "Filter jokes by category (optional)",
                         "required": False,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "icon_url": {"type": "string"},
-                                        "id": {"type": "string"},
-                                        "url": {"type": "string"},
-                                        "value": {"type": "string"}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/search": {
-            "get": {
-                "operationId": "search_jokes",
-                "summary": "Search for jokes",
-                "description": "Free text search for jokes containing the query term.",
-                "parameters": [
+                        "schema": {"type": "number"}
+                    },
                     {
-                        "name": "query",
+                        "name": "from",
                         "in": "query",
-                        "description": "Search query (3+ characters required)",
-                        "required": True,
-                        "schema": {
-                            "type": "string",
-                            "minLength": 3
-                        }
+                        "required": False,
+                        "schema": {"type": "string"}
+                    },
+                    {
+                        "name": "to",
+                        "in": "query",
+                        "required": False,
+                        "schema": {"type": "string"}
                     }
                 ],
                 "responses": {
@@ -99,46 +60,7 @@ CHUCK_NORRIS_SPEC = {
                         "description": "Successful response",
                         "content": {
                             "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "total": {"type": "integer"},
-                                        "result": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "icon_url": {"type": "string"},
-                                                    "id": {"type": "string"},
-                                                    "url": {"type": "string"},
-                                                    "value": {"type": "string"}
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/categories": {
-            "get": {
-                "operationId": "get_categories",
-                "summary": "Get all joke categories",
-                "description": "Retrieve list of available joke categories.",
-                "responses": {
-                    "200": {
-                        "description": "Successful response",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "string"
-                                    }
-                                }
+                                "schema": {"type": "object"}
                             }
                         }
                     }
@@ -151,50 +73,54 @@ CHUCK_NORRIS_SPEC = {
 # ============================================================================
 # OPENAPI TOOLSET
 # ============================================================================
+# Convert the Python dictionary to a JSON string for the ADK
+spec_string = json.dumps(FRANKFURTER_SPEC)
 
-# Create OpenAPIToolset from specification
-chuck_norris_toolset = OpenAPIToolset(spec_dict=CHUCK_NORRIS_SPEC)
+# Initialize the Toolset
+currency_toolset = OpenAPIToolset(
+    spec_str=spec_string,
+    spec_str_type="json"
+)
 
 # ============================================================================
 # AGENT DEFINITION
 # ============================================================================
-
-root_agent = Agent(
-    name="chuck_norris_agent",
+root_agent = LlmAgent(
+    name="market_analyst",
     model="gemini-2.5-flash",
-    description="A Chuck Norris fact assistant that can retrieve jokes/facts from the Chuck Norris API.",
+    description="A specialist in global currency exchange rates.",
     instruction="""
-    You are a fun Chuck Norris fact assistant!
-
-    CAPABILITIES:
-    - Get random Chuck Norris jokes (optionally filtered by category)
-    - Search for jokes containing specific keywords
-    - List all available joke categories
-
-    WORKFLOW:
-    - For random requests -> use get_random_joke
-    - For specific topics -> use search_jokes with query
-    - To see categories -> use get_categories
-    - For category-specific random -> use get_random_joke with category parameter
-
-    IMPORTANT:
-    - Always extract the 'value' field from the API response (that's the actual joke).
-    - If a search finds 0 results, suggest trying a different keyword.
-    """,
-    tools=[chuck_norris_toolset]
+You are an expert Global Market Analyst.
+Use the `get_latest_rates` tool to convert currencies and check exchange rates for the user.
+Always state the amount, the original currency, and the converted currency clearly.
+""",
+    tools=[currency_toolset]
 )
 ```
 
-### Self-Reflection Answers
+### Running the Agent
 
-1.  **What are the main advantages of using `OpenAPIToolset` compared to writing a custom Python function for each API endpoint?**
-    *   **Answer:** The `OpenAPIToolset` dramatically reduces code volume and maintenance effort. Instead of manually writing boilerplate code to construct HTTP requests, handle parameters, and parse responses for every single endpoint, you simply provide a declarative specification. This ensures that your agent's tools are always perfectly synchronized with the API's capabilities, reducing the risk of implementation errors.
+1.  Make sure your project is initialized and dependencies are installed:
+    ```bash
+    uv init market_analyst --python 3.10
+    cd market_analyst
+    uv add google-adk python-dotenv
+    ```
+2.  Make sure your `.env` file contains your `GOOGLE_API_KEY`.
+3.  Run the interactive terminal:
+    ```bash
+    uv run adk run agent.py
+    ```
 
-2.  **The `operationId` in the OpenAPI spec is very important. What do you think would happen if two different paths in the spec had the same `operationId`?**
-    *   **Answer:** The ADK uses the `operationId` to generate the name of the tool function (e.g., `get_random_joke`). If two paths shared the same `operationId`, the ADK would attempt to create two functions with the same name, causing a conflict. The second one would likely overwrite the first, or the system would throw an error during initialization. Unique `operationId`s are essential for distinguishing tools.
+---
 
-3.  **Many modern web services publish their own OpenAPI specifications. How does this widespread adoption of the OpenAPI standard make it easier to build powerful, integrated AI agents?**
-    *   **Answer:** The ubiquity of the OpenAPI standard means that millions of existing APIs are "agent-ready" right out of the box. Developers can instantly connect their agents to services like Stripe, GitHub, Twilio, or internal enterprise systems just by downloading the `openapi.json` file. This transforms the process of building integrations from a manual coding task into a configuration task, rapidly expanding the potential capabilities of AI agents.
+## Self-Reflection Answers
 
-4.  **The agent's instructions often need to specify which part of a tool's JSON response is important (e.g., "extract the 'value' field"). Why is this necessary, and what does it tell you about how the agent perceives the data it receives from a tool?**
-    *   **Answer:** APIs often return verbose JSON objects containing metadata (like IDs, URLs, or timestamps) that isn't relevant to the user's question. The agent sees the entire raw JSON response. Without specific instructions, the agent might get "distracted" by this noise or simply dump the raw JSON to the user. Instructing the agent to focus on a specific field (like `value` for the joke text) helps it filter the information and provide a clean, human-readable answer. It highlights that while agents are smart, they still benefit from guidance on how to interpret and present data.
+1.  **What are the main advantages of using `OpenAPIToolset` compared to writing a custom Python function?**
+    *   **Answer:** Speed and maintainability. You don't have to write HTTP boilerplate code (`requests.get(...)`), handle URL encoding, or parse JSON responses manually. Furthermore, if the API provider updates their service, you just update the spec file (or download their new one) and your tools are automatically updated without changing your Python logic.
+
+2.  **What do you think would happen if two different paths in the spec had the same `operationId`?**
+    *   **Answer:** The ADK uses the `operationId` as the unique name for the tool (e.g., `get_latest_rates`). If there were duplicates, the tool registration would either fail with an error or overwrite the previous tool, leading to unpredictable agent behavior. `operationId` must always be unique across the entire spec.
+
+3.  **How does the widespread adoption of the OpenAPI standard make it easier to build powerful AI agents?**
+    *   **Answer:** Because almost all modern enterprise applications and SaaS platforms (like Stripe, GitHub, Salesforce) publish OpenAPI specifications, you can theoretically connect an ADK agent to *any* of them in minutes just by loading their spec file into an `OpenAPIToolset`. It bridges the gap between AI and traditional software ecosystems effortlessly.

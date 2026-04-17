@@ -18,10 +18,11 @@ Questo documento delinea la strategia per elevare la qualità pedagogica e tecni
 *   [x] **Validazione Modulo 06:** Risolti bug nell'utilizzo di `run_debug` e ripulita la console usando lo Student Evaluator.
 *   [x] **Modulo 02 (Environment):** Sostituito `pip` con **`uv`** come package manager consigliato. Introdotto il concetto di gestione automatica della versione Python (3.10+).
 
-### 🔹 Sezione 2: Tools & Capabilities (Standardizzazione)
-*   **Modulo 09 (Custom Tools):** Mantenere l'esempio del "Calculator Agent" in quanto ottimo per comprendere i fondamenti dei tool, ma aggiornare le istruzioni per usare il nuovo scaffolding `uv init` e testarlo con `uv run adk run`. Semplificare la registrazione tool (niente più `FunctionTool(fn=...)`, ma passaggio diretto della funzione come da ADK moderno).
-*   **Modulo 11 (OpenAPI):** (Da definire, valutare se mantenere Chuck Norris o passare a un'API più business-oriented).
-*   **Modulo 13.5 (Novità): "Enterprise Persistence with Firestore":** Spiegare come registrare e usare un `FirestoreSessionService` per non perdere la memoria al riavvio del server.
+### 🔹 Sezione 2: Tools & Capabilities (Standardizzazione Finance/Wealth)
+*   [x] **Modulo 09 (Custom Tools):** Mantenuto l'esempio del "Calculator Agent" ma allineato a `uv` e alla sintassi ADK moderna (passaggio diretto funzioni nell'array `tools`).
+*   [x] **Modulo 10 (Advanced Tools):** Evoluzione del Calculator in "Wealth Planner". Introdotto `ToolContext` (per leggere lo state) e `FunctionTool` per l'Human-in-the-Loop (conferma su esecuzione finto trade).
+*   [x] **Modulo 11 (OpenAPI):** Sostituito Chuck Norris con "Global Market Analyst" (API Frankfurter). Spiegato l'approccio enterprise al wrapping di REST APIs senza boilerplate manuale.
+*   [ ] **Modulo 13.5 (Novità): "Enterprise Persistence with Firestore":** Spiegare come registrare e usare un `FirestoreSessionService` per non perdere la memoria al riavvio del server.
 
 ### 🔹 Sezione 3: Multi-Agent Systems
 *   **Modulo 15 (Orchestrazione):** Introdurre il pattern **"Researcher-specialist"** visto nel Lead Qualifier: un agente principale che delega la ricerca informativa a un sub-agente dedicato con `google_search`.
@@ -54,7 +55,6 @@ Riscriveremo questo modulo per essere la "Bibbia" del developer ADK:
 ---
 
 ## ✅ Prossimi Passi Immediati (In Corso)
-1.  [x] Upgrade a `uv` e Python 3.10 per il Modulo 02 completato.
-2.  [ ] **Modulo 09:** Refactoring del lab Calculator (aggiornamento all'API ADK moderna `tools=[my_func]` e uso di `uv`).
-3.  [ ] Valutazione Modulo 09 tramite `adk-student-evaluator`.
-4.  [ ] Creare lo skeleton del Modulo 38 basato su questo piano.
+1.  [x] Refactoring Moduli 09, 10, 11 (Completato narrativa Finance/Wealth).
+2.  [ ] **Novità:** Introdurre il Modulo 13.5 (Firestore Persistence).
+3.  [ ] Creare lo skeleton del Modulo 38 basato su questo piano.

@@ -28,3 +28,32 @@ La soluzione fornita (`lab-solution.md`) è perfetta. Mostra lo snippet JSON Ope
 
 ## 💡 Suggestions for Improvement
 Il modulo è ora solido. L'unico suggerimento (già applicato durante la risoluzione dei bug) era quello di aggiungere l'hint sul blocco `content` nel lab. Non ci sono altre criticità.
+
+---
+# 🎓 Student Evaluation Report: Module 12 - Built-in Tools (Grounding)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 2
+* **Clarity of Instructions (lab.md):** 1
+* **Code Completeness:** 1
+* **Solution Quality (lab-solution.md):** 1
+* **Overall Difficulty:** 5 (Unsolvable as written)
+
+## 🧑‍💻 The Student Experience
+L'esperienza è stata frustrante e bloccante. Ho provato a seguire pedissequamente le istruzioni del `lab.md` che mi chiedevano di importare e instanziare `GoogleSearchAgentTool`. Tuttavia, l'ambiente Python (gestito con `uv` e ADK 1.30+) ha restituito immediatamente un `ImportError: cannot import name 'GoogleSearchAgentTool'`. 
+Ho dovuto abbandonare l'esperimento e guardare la soluzione, solo per scoprire che anche essa usava lo stesso codice obsoleto (oltre al vecchio `FunctionTool` che avevamo già eliminato nei moduli precedenti).
+
+## 🚧 Friction Points & Bugs
+*   **`GoogleSearchAgentTool` non esiste più:** Questo wrapper è stato rimosso o rinominato nelle versioni recenti dell'ADK. (Stuck Protocol attivato).
+*   **Limitazione obsoleta:** L'intero modulo (README e Lab) ruota attorno a una limitazione architetturale ("A current limitation of the ADK is that built-in tools cannot be directly combined with custom function tools") che **non è più vera**. I test confermano che ora è possibile passare `google_search` e una funzione custom Python direttamente nello stesso array `tools=[]` di un `LlmAgent`.
+*   **Workflow vecchio:** Il modulo usa ancora `adk create` e `adk web` invece del nuovo standard `uv init` e `uv run adk run`.
+
+## 🏁 Solution Review
+La soluzione è rotta perché si basa su un'API inesistente. Insegna un pattern di "workaround" (creare un sub-agente wrapper) che non serve più, complicando inutilmente la curva di apprendimento per l'uso basilare del grounding.
+
+## 💡 Suggestions for Improvement
+1.  **Riscrivere il README.md:** Eliminare l'intera sezione su `GoogleSearchAgentTool`. Spiegare invece che aggiungere il Web Grounding a un agente è banale quanto aggiungere `from google.adk.tools import google_search` al suo array di tool, accanto alle funzioni custom. Sottolineare che questo abilita un RAG potentissimo "gratis".
+2.  **Riscrivere il lab.md e lab-solution.md:**
+    *   Aggiornare lo scaffolding a `uv init ... --python 3.10`.
+    *   Rimuovere il wrapper e i `FunctionTool`. L'array dei tool diventerà semplicemente: `tools=[google_search, extract_key_facts, format_research_notes]`.
+    *   Aggiornare i comandi di test a `uv run adk run agent.py`.

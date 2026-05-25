@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     name: Deploy to GitHub Pages
@@ -24,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
           cache-dependency-path: doc/package-lock.json
 
@@ -36,6 +39,8 @@ jobs:
           # Copy all root markdown files needed for the overview page
           cp README.md timetable-*.md variant-*.md CONTRIBUTING.md training/
           # Fix relative links in all copied markdown files for Docusaurus
+          # This ensures that links like [Module 1](./training/module01) 
+          # work when the file is moved into the training/ folder.
           sed -i 's|(./training/|(./|g' training/*.md
         working-directory: .
 
@@ -49,3 +54,4 @@ jobs:
           publish_dir: ./doc/build
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+          force_orphan: true

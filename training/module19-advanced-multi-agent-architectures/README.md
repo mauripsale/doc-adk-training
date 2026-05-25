@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 19
 title: "Module 19: Advanced Multi-Agent Architectures"
 ---
 

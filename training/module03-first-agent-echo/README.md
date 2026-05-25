@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 3
 title: "Module 3: Your First Agent: The \"Echo\" Agent"
 ---
 

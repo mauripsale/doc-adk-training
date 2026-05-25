@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 11
 title: "Module 11: OpenAPI Tools"
 ---
 

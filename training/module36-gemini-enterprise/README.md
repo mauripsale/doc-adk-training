@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 36
 title: "Module 36: Gemini Enterprise (formerly AgentSpace)"
 ---
 

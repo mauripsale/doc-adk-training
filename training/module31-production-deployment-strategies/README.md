@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 31
 title: "Module 31: Production Deployment Strategies"
 ---
 

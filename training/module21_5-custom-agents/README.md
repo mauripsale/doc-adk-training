@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 21.5
 title: "Module 21.5: Custom Agents - Building Complex Orchestrators"
 ---
 

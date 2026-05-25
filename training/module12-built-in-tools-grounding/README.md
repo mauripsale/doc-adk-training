@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 12
 title: "Module 12: Built-in Tools and Grounding"
 ---
 

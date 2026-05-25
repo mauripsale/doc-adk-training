@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 38
 title: "Module 38: Best Practices & Production Patterns"
 ---
 

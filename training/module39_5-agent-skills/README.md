@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 39.5
 title: "Module 39.5: Agent Skills"
 ---
 

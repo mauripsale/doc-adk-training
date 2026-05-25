@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 14
 title: "Module 14: Integrating Third-Party Tools"
 ---
 

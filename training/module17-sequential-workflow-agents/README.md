@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 17
 title: "Module 17: Sequential Workflows - Building Agent Pipelines"
 ---
 

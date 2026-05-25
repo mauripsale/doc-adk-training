@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 29
 title: "Module 29: Introduction to UI Integration"
 ---
 

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 15
 title: "Module 15: Introduction to Multi-Agent Systems"
 ---
 

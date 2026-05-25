@@ -29,11 +29,11 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     ```
 
 2.  **Update Agent Model:**
-    Open `root_agent.yaml` and ensure the model is set to `gemini-2.5-flash`.
+    Open `root_agent.yaml` and ensure the model is set to `gemini-3.5-flash`.
     ```yaml
     # In root_agent.yaml
     name: echo_agent
-    model: gemini-2.5-flash # Ensure this is gemini-2.5-flash
+    model: gemini-3.5-flash # Ensure this is gemini-3.5-flash
     description: "An agent that repeats the user's input."
     instruction: "You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it."
     ```

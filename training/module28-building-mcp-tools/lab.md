@@ -108,7 +108,7 @@ from mcp import StdioServerParameters
 PATH_TO_SERVER = os.path.abspath("./cart_server.py")
 
 root_agent = LlmAgent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='shopping_agent',
     instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
     tools=[
@@ -123,7 +123,7 @@ root_agent = LlmAgent(
     ],
 )
 ```
-Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-2.5-flash"`.
+Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-3.5-flash"`.
 
 ### Step 4: Test the Full System
 

@@ -11,15 +11,21 @@ In this lab, you will build an agent that can perform basic arithmetic. You will
 
 ### Step 1: Create the Project and File Structure
 
-1.  **Create the agent project:**
-    ```shell
-    adk create calculator_agent
+We will use `uv` to create a modern Python environment for our agent.
+
+1.  **Initialize the agent project:**
+    ```bash
+    uv init calculator_agent --python 3.10
     cd calculator_agent
+    uv add google-adk python-dotenv
     ```
 
-2.  **Create the tools module:**
+2.  **Setup Authentication:**
+    Create a `.env` file in your `calculator_agent` directory and add your `GOOGLE_API_KEY` (or Vertex AI settings).
+
+3.  **Create the tools module:**
     It's good practice to organize your tool code in a separate module. The empty `__init__.py` file tells Python to treat the `tools` directory as a package, which allows us to import functions from it.
-    ```shell
+    ```bash
     mkdir tools
     touch tools/__init__.py
     touch tools/calculator.py
@@ -83,22 +89,19 @@ def divide(a: int, b: int) -> dict:
 
 ### Step 3: Configure the Agent in `agent.py`
 
-**Exercise:** Open `agent.py` and complete the configuration. You need to import your new tools, wrap them in `FunctionTool`, and add them to your agent's definition.
+**Exercise:** Create `agent.py` and complete the configuration. You need to import your new functions and pass them directly to the agent's definition.
 
 ```python
 # In agent.py
 from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
 
 # TODO: Import the four functions from your .tools.calculator module.
 # Hint: Since 'tools' is a package within the same directory as 'agent.py',
-# you should use a relative import like: `from .tools.calculator import add, subtract, multiply, divide`
-
-# TODO: Create a FunctionTool for each of your imported functions.
+# you should use an import like: `from tools.calculator import add, subtract, multiply, divide`
 
 root_agent = LlmAgent(
     name="calculator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An agent that can perform basic arithmetic calculations.",
     instruction="""
 You are a helpful calculator assistant.
@@ -106,15 +109,21 @@ When the user asks you to perform a calculation (add, subtract, multiply, or div
 Clearly state the result of the calculation to the user.
 If the user asks a question that is not a calculation, politely state that you can only perform math.
 """,
-    # TODO: Add the four FunctionTool objects you created to this list.
+    # TODO: Add the four imported functions directly to this list.
+    # (The ADK will automatically wrap them into FunctionTools)
     tools=[]
 )
 ```
 
 ### Step 4: Test the Calculator Agent
 
-1.  **Start the web server:** `adk web` (run this from the `adk-training` parent directory).
-2.  **Interact with the agent** in the Dev UI and ask it to perform calculations. Check the Trace View to see the tools being executed.
+You can test your new agent directly using the ADK CLI's interactive mode.
+
+1.  **Run the agent in interactive mode:**
+    ```bash
+    uv run adk run agent.py
+    ```
+2.  **Interact with the agent** in the terminal:
     *   "What is 42 + 118?"
     *   "Multiply 15 by 3."
     *   "What is 10 divided by 0?"
@@ -129,7 +138,7 @@ If you get stuck, you can find the complete, working code and configuration in t
 You have successfully built an agent with custom capabilities! You have learned to:
 *   Organize tool code into a separate Python module.
 *   Write well-defined Python functions with type hints and docstrings to serve as tools.
-*   Import and register your custom tools in the `agent.py` file using `FunctionTool`.
+*   Import and register your custom tools directly in the `agent.py` file.
 *   Write instructions that effectively guide the agent on how and when to use its new tools.
 
 ### Self-Reflection Questions

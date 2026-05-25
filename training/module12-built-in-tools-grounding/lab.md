@@ -7,49 +7,38 @@ title: "Challenge Lab"
 
 ## Goal
 
-### Goal
-
-In this lab, you will build a **Research Assistant** that can access up-to-date information from the internet. You will learn how to use the `GoogleSearchAgentTool` wrapper to combine web search with your own custom tools.
+In this lab, you will build a **Research Assistant** that can access up-to-date information from the internet and process it using custom Python logic. You will learn how to mix built-in tools like `google_search` directly with your own custom tools.
 
 ### Prerequisites
-*   **Note on Costs:** This lab requires the Vertex AI API, which may incur small costs on your Google Cloud bill.
+*   **Vertex AI:** While `google_search` can work with AI Studio keys, the ADK standardizes on Vertex AI for grounding in enterprise scenarios. Ensure your `.env` is configured correctly (refer to Module 2).
 
 ### Step 1: Create and Prepare the Project
 
-1.  **Create the agent project:**
-    ```shell
-    adk create research_assistant
-    ```
-    When prompted, choose the **Programmatic (Python script)** option.
+We will use the `uv` workflow to initialize our research project.
 
-2.  **Navigate into the new directory:**
-    ```shell
+1.  **Initialize the project:**
+    ```bash
+    uv init research_assistant --python 3.10
     cd research_assistant
+    uv add google-adk python-dotenv
     ```
 
-3.  **Create the `.env` file:**
-    The `GoogleSearchAgentTool` requires a Vertex AI configuration. Create a `.env` file in this directory with the following content, replacing `<your_gcp_project>` with your actual Google Cloud project ID.
-    ```
-    GOOGLE_GENAI_USE_VERTEXAI=1
-    GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-    GOOGLE_CLOUD_LOCATION=us-central1
-    ```
+2.  **Configure Authentication:** Ensure your `.env` file has your project ID and location set for Vertex AI.
 
 ### Step 2: Define the Agent and Tools
 
-**Exercise:** Open `agent.py`. The custom tools have been provided for you. Your task is to complete the agent definition by instantiating the search tool and writing the agent's instructions.
+**Exercise:** Create `agent.py`. The custom tools are provided below. Your task is to complete the agent definition by importing the built-in search tool and orchestrating the workflow.
 
 ```python
-# In agent.py (Starter Code)
-
+# In agent.py
 from datetime import datetime
-from google.adk.agents import Agent
-from google.adk.tools import FunctionTool, GoogleSearchAgentTool
+from google.adk.agents import LlmAgent
+from google.adk.tools import google_search
 
-# --- Custom Tools (Provided for you) ---
+# --- Custom Tools (Provided) ---
 
 def format_research_notes(topic: str, findings: str) -> dict:
-    """Formats research findings into a document."""
+    """Formats research findings into a structured document."""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     document = f"""
 # Research Report: {topic}
@@ -60,53 +49,41 @@ Generated: {timestamp}
     """.strip()
     return {"status": "success", "document": document}
 
-def extract_key_facts(text: str, num_facts: int = 5) -> list[str]:
-    """Extract key facts from text (simplified)."""
+def extract_key_facts(text: str, num_facts: int = 5) -> dict:
+    """Extracts key sentences from a block of text."""
     sentences = text.split('.')
-    return [s.strip() for s in sentences if s.strip()][:num_facts]
+    facts = [s.strip() for s in sentences if len(s.strip()) > 10][:num_facts]
+    return {"status": "success", "facts": facts}
 
 # --- Agent Definition ---
 
-# TODO: 1. Create an instance of the GoogleSearchAgentTool.
-search_tool = ...
+# TODO: Define the `root_agent`.
+# 1. Use 'gemini-3.5-flash'.
+# 2. Add 'google_search', 'extract_key_facts', and 'format_research_notes' to tools.
+# 3. Write instructions for a research workflow:
+#    - Use search to find current info.
+#    - Extract key facts from search results.
+#    - Format and present the final document.
 
-# TODO: 2. Define the `root_agent`.
-root_agent = Agent(
-    model='gemini-2.5-flash',
-    name='research_assistant',
-    description='Conducts web research and compiles findings',
-    instruction="""
-    # TODO: 3. Write an instruction that tells the agent to perform the research
-    # workflow in the correct order:
-    # 1. Use search_tool to find information.
-    # 2. Use extract_key_facts on the search results.
-    # 3. Use format_research_notes on the extracted facts.
-    # 4. Present the final document as the answer.
-    """,
-    tools=[
-        # TODO: 4. Add the `search_tool` and the two custom tools
-        # (`extract_key_facts`, `format_research_notes`) to this list.
-    ]
+root_agent = LlmAgent(
+    ...
 )
 ```
 
 ### Step 3: Run and Test the Research Assistant
 
-1.  **Navigate to the parent directory:**
-    ```shell
-    cd ..
+1.  **Start the agent in interactive mode:** 
+    ```bash
+    uv run adk run agent.py
     ```
 
-2.  **Start the Dev UI:**
-    ```shell
-    adk web research_assistant
-    ```
+2.  **Interact with the agent:**
+    *   "What are the latest AI developments from Google in 2025?"
+    *   "Who won the most recent major sports championship?"
 
-3.  **Interact with the agent:**
-    *   Give the agent a research topic, like "What are the latest developments in AI in 2025?"
-
-4.  **Analyze the Trace View:**
-    *   Expand the trace for your query. You should see a sequence of tool calls: `GoogleSearchAgentTool`, then `extract_key_facts`, then `format_research_notes`.
+3.  **Observe the output:**
+    *   Notice how the agent uses the internet to find information beyond its training data.
+    *   The agent should first perform a search, then extract facts, and finally present a formatted Markdown report.
 
 ### Having Trouble?
 
@@ -114,14 +91,15 @@ If you get stuck, you can find the complete, working code in the `lab-solution.m
 
 ### Lab Summary
 
-You have successfully built an agent that can access real-world, current information from the internet and process it using custom logic. You have learned:
-*   How to use the `GoogleSearchAgentTool` wrapper to combine built-in search with custom `FunctionTool`s.
-*   How to write an instruction that orchestrates a sequence of different tool types.
+You have successfully built an agent that bridges the knowledge gap of LLMs using built-in grounding tools. You have learned:
+*   How to easily enable web search using the **`google_search`** built-in tool.
+*   How to **mix built-in and custom tools** seamlessly in a single agent.
+*   How to write instructions that guide an agent through a complex research and formatting workflow.
 
 ### Self-Reflection Questions
-- The `GoogleSearchAgentTool` is a workaround for a current limitation. Why is it architecturally cleaner to have a wrapper like this instead of building the search logic directly into your own custom tool?
-- Our `extract_key_facts` tool is very simple. How could you make it more robust? (Hint: Could another LLM be used for this task?)
-- The agent's instruction defines a specific, sequential workflow. What might happen if you didn't specify the order of the tool calls in the instruction?
+- Why is `google_search` considered a "built-in" tool while `format_research_notes` is a "custom" tool?
+- What are the benefits of having the model perform the search inside its own environment rather than you writing a Python script to scrape Google results?
+- How does providing a specific "workflow" in the instructions (Search -> Extract -> Format) improve the reliability of the agent's output?
 
 <hr/>
 

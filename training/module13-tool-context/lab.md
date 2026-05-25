@@ -76,7 +76,7 @@ from google.adk.tools import FunctionTool
 
 root_agent = LlmAgent(
     name="memory_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An agent that can remember and recall the user's name.",
     instruction="""
 # TODO: Write an instruction that tells the agent:

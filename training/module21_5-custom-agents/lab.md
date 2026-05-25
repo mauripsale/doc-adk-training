@@ -46,13 +46,13 @@ from typing import AsyncGenerator, Literal
 
 ai_support = Agent(
     name="ai_support_bot",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a helpful customer support AI. Answer the user's technical questions clearly."
 )
 
 human_escalation = Agent(
     name="human_escalation_team",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a human support representative. A customer is frustrated. Apologize profusely and tell them a human agent will call them immediately at the number on their account."
 )
 

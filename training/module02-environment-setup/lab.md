@@ -11,33 +11,29 @@ Before you begin, ensure you have the following tools ready:
     *   [VS Code](https://code.visualstudio.com/) (Local)
     *   [Project IDX](https://idx.dev/) (Cloud-based)
     *   [Google Cloud Shell Editor](https://shell.cloud.google.com/) (Cloud-based)
-*   **Python:** You must have Python installed, version **3.10 or higher**.
-*   **pip:** The Python package installer must be available.
+*   **uv:** You must install the `uv` package manager. If you don't have it, install it via your terminal:
+    *   macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+    *   Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 
 ## Goal
-Your task is to prepare your local machine for agent development. Try to complete the steps below using your existing knowledge. If you get stuck, the `lab-solution.md` file provides a detailed, step-by-step walkthrough.
+Your task is to prepare your local machine for enterprise agent development using modern tools. Try to complete the steps below using your existing knowledge. If you get stuck, the `lab-solution.md` file provides a detailed, step-by-step walkthrough.
 
 ## Lab Tasks
 
-### Step 0: Verify Python Version (Crucial)
-Before you start, you must ensure you are using a modern version of Python. The ADK and the Google Cloud libraries it depends on **require Python 3.10 or higher**. Using older versions (like 3.9) will result in numerous warnings and potential crashes.
+### Step 0: Ensure Python 3.10+ (Crucial)
+Before you start, you must ensure you are using a modern version of Python. The ADK **requires Python 3.10 or higher**. Using older versions (like 3.9) will result in numerous warnings and potential crashes.
 
-1.  Open your terminal.
-2.  Run the following command:
+Fortunately, `uv` makes this easy. Even if your system doesn't have Python 3.10, you can tell `uv` to install and use it for your project.
+
+### Step 1: Create the Project Structure with `uv`
+1.  Use `uv` to initialize a new Python project named `adk-training`. Use the `--python 3.10` flag to guarantee you meet the ADK's requirements:
     ```bash
-    python3 --version
+    uv init adk-training --python 3.10
     ```
-3.  **Requirement:** If you see `Python 3.10.x` or higher, you are good to go. If you see an older version, please install a newer version of Python before continuing.
+2.  Navigate into the `adk-training` directory.
+3.  Use `uv add` to install the `google-adk` and `python-dotenv` packages. Notice how `uv` automatically creates a virtual environment (`.venv`) for you and locks the dependencies in `uv.lock`.
 
-### Step 1: Create the Project Structure
-1.  Create a project directory named `adk-training`.
-2.  Inside it, create and activate a Python virtual environment.
-3.  Install the `google-adk` and `python-dotenv` packages.
-4.  Create a `.env` file and configure your authentication method.
-5.  Save the project dependencies to a `requirements.txt` file.
-6.  Verify your setup by creating a `verify_setup.py` file with the code below and running it successfully.
-
-### Creating a `.env` file
+### Step 2: Configure Authentication
 
 Create a file named `.env` in your `adk-training` directory. This file will securely store your authentication credentials. Choose **one** of the two options below.
 
@@ -57,7 +53,7 @@ Create a file named `.env` in your `adk-training` directory. This file will secu
     GOOGLE_CLOUD_LOCATION="us-central1"
     ```
 
-### Verification Script
+### Step 3: Verification Script
 
 Create a file named `verify_setup.py` and add the following content:
 
@@ -65,11 +61,15 @@ Create a file named `verify_setup.py` and add the following content:
 # verify_setup.py
 import asyncio
 import os
+import logging
 from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
+
+# Suppress noisy ADK logs
+logging.getLogger("google.adk").setLevel(logging.WARNING)
 
 async def main():
     # Load environment variables from the .env file
@@ -82,7 +82,7 @@ async def main():
         # Define a simple ADK agent
         agent = LlmAgent(
             name="verify_agent",
-            model="gemini-2.5-flash",
+            model="gemini-3.5-flash",
             instruction="You are a helpful assistant. Respond with a short confirmation."
         )
 
@@ -122,10 +122,20 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+### Step 4: Run the Verification
+
+Execute the script using `uv run`. This command ensures that your script runs within the virtual environment that `uv` created, without you needing to manually activate it!
+
+```bash
+uv run python verify_setup.py
+```
+
+> **Note:** You might see a `UserWarning` regarding an `[EXPERIMENTAL]` feature (like `PLUGGABLE_AUTH`). You can safely ignore this; it is just the ADK informing you of its internal development state and does not affect your lab.
+
 ## Self-Reflection Questions
-*   Why is it important to use a virtual environment instead of installing packages globally?
+*   Why is `uv` considered a major upgrade over traditional tools like `pip` and `venv`?
+*   What is the purpose of the `uv.lock` file generated in your project directory?
 *   What are the security implications of storing API keys in a `.env` file versus hardcoding them in your script?
-*   How does an IDE (like VS Code or Cloud Shell Editor) improve your productivity compared to a basic text editor?
 
 <hr/>
 

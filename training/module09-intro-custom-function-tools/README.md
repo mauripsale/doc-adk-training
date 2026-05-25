@@ -79,35 +79,20 @@ The LLM will receive this dictionary and use its contents to formulate the final
 
 ### Registering Tools with Your Agent
 
-You can register your custom functions as tools using either the Python-based or YAML-based approach.
-
-**Python (Primary Approach):**
-In your `agent.py`, you directly import your functions and wrap them in a `FunctionTool`.
+In modern ADK versions, registering your custom functions as tools is incredibly simple. You just import your functions and pass them directly into the agent's `tools` list. The ADK automatically wraps them.
 
 ```python
 # In agent.py
 from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
 from .tools.calculator import add, subtract # Import your functions
 
 root_agent = LlmAgent(
     # ... other params
     tools=[
-        FunctionTool(fn=add),
-        FunctionTool(fn=subtract),
+        add,       # The ADK automatically converts this Python function
+        subtract,  # into an LLM-compatible Tool!
     ]
 )
-```
-
-**YAML (Alternative Approach):**
-In `root_agent.yaml`, you reference the functions using their module path.
-
-```yaml
-# In root_agent.yaml
-# ... other params
-tools:
-  - name: tools.calculator.add
-  - name: tools.calculator.subtract
 ```
 
 In the lab for this module, you will put all these principles into practice by building a set of calculator functions and integrating them into a new "Calculator" agent.
@@ -117,7 +102,7 @@ In the lab for this module, you will put all these principles into practice by b
 - The ADK automatically generates a tool schema from your function's signature (name, parameters, type hints) and its docstring.
 - A well-defined tool function must have a descriptive name, clear type hints for all parameters, and a detailed docstring explaining its purpose and usage.
 - All custom tool functions must return a dictionary.
-- Tools are registered in your agent's definition, with the Python-based approach being the primary method.
+- Tools are easily registered by passing the function reference directly into the agent's `tools` list.
 
 ## Limitations: Mixing Tool Types
 
@@ -136,7 +121,7 @@ You cannot simply list both `google_search` and your own `custom_function` in th
 # This approach is NOT currently supported
 root_agent = Agent(
     name="MixedToolAgent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     tools=[google_search, custom_function], # Mixing types may cause issues
 )
 ```

@@ -3,132 +3,141 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 10: Building a Personal Finance Assistant Challenge
+# Lab 10: Building a "Wealth Planner" Agent Challenge
 
 ## Goal
 
-### Goal
+In this lab, you will evolve your basic Calculator into a **Wealth Planner**. You will learn how to make tools context-aware (reading from session state) and how to implement **Human-in-the-Loop** confirmation for sensitive actions.
 
-In this lab, you will build a **Personal Finance Assistant** with multiple, complex function tools. This will teach you how to implement robust tools and see the ADK's parallel execution feature in action.
+### Step 1: Prepare the Project
 
-### Step 1: Create the Agent Project
+We will continue using the `uv` workflow.
 
-1.  **Create the agent project:**
-    Choose the **Programmatic (Python script)** option when prompted.
-    ```shell
-    adk create finance_assistant
-    cd finance_assistant
+1.  **Initialize the project:**
+    ```bash
+    uv init wealth_planner --python 3.10
+    cd wealth_planner
+    uv add google-adk python-dotenv
     ```
 
-2.  **Set up your API key** in the `.env` file.
+2.  **Create the tools module:**
+    ```bash
+    mkdir tools
+    touch tools/__init__.py
+    touch tools/finance.py
+    ```
 
-### Step 2: Implement the Financial Tools
+3.  **Setup Authentication:** Ensure your `.env` file is ready.
 
-**Exercise:** Open `agent.py`. A skeleton with three financial tool functions is provided. Your task is to implement the logic for each function based on the `# TODO` comments. You will need to perform calculations, validate inputs, and return a structured dictionary.
+### Step 2: Implement Advanced Tools
+
+**Exercise:** Open `tools/finance.py` and implement the two functions below.
 
 ```python
-# In agent.py (Starter Code)
+# In tools/finance.py
+from google.adk.tools import ToolContext
 
-from __future__ import annotations
-from google.adk.agents import Agent
-
-def calculate_compound_interest(
-    principal: float,
-    annual_rate: float,
-    years: int,
-    compounds_per_year: int = 1
-) -> dict:
+def get_savings_projection(years: int, tool_context: ToolContext) -> dict:
     """
-    Calculate compound interest for savings or investments.
-    Formula: A = P(1 + r/n)^(nt)
-    ...
-    """
-    # TODO: 1. Validate that principal, annual_rate, and years are positive.
-    # If not, return an error dictionary: {'status': 'error', 'report': '...'}
+    Calculates projected savings over a period of years.
     
-    # TODO: 2. Calculate the final amount and interest earned.
+    Use this tool when the user asks how much they will have saved in the future.
     
-    # TODO: 3. Create a human-readable report string.
+    Args:
+        years: The number of years to project.
+    """
+    # TODO: Read the 'monthly_budget' from the tool_context.state.
+    # If it's not set, return an error asking the user to set it first.
+    budget = ... 
     
-    # TODO: 4. Return a success dictionary with the report.
-    return {'status': 'pending', 'report': 'Implementation needed.'}
+    # TODO: Calculate: total = budget * 12 * years
+    # Return a success dictionary with the result.
+    pass
 
-
-def calculate_loan_payment(
-    loan_amount: float,
-    annual_rate: float,
-    years: int
-) -> dict:
+def execute_investment_plan(amount: float) -> dict:
     """
-    Calculate monthly loan payments using the standard amortization formula.
-    ...
+    Simulates executing a long-term investment plan.
+    
+    Use this tool ONLY when the user explicitly asks to "execute", "start", 
+    or "invest" a specific amount of money.
+    
+    Args:
+        amount: The total amount of money to invest.
     """
-    # TODO: 1. Validate inputs.
-    # TODO: 2. Calculate the monthly payment.
-    # TODO: 3. Create a human-readable report.
-    # TODO: 4. Return a success dictionary.
-    return {'status': 'pending', 'report': 'Implementation needed.'}
-
-
-def calculate_monthly_savings(
-    target_amount: float,
-    years: int,
-    annual_return: float = 0.05
-) -> dict:
-    """
-    Calculate monthly savings needed to reach a financial goal.
-    ...
-    """
-    # TODO: 1. Validate inputs.
-    # TODO: 2. Calculate the required monthly savings.
-    # TODO: 3. Create a human-readable report.
-    # TODO: 4. Return a success dictionary.
-    return {'status': 'pending', 'report': 'Implementation needed.'}
-
-
-# TODO: Define the root_agent. Give it an appropriate instruction and
-# register the three tool functions you just implemented.
-root_agent = None
+    # This tool is "sensitive" and will require confirmation.
+    return {
+        "status": "success", 
+        "message": f"Investment of ${amount} has been successfully initiated!"
+    }
 ```
 
-### Step 3: Run and Test Your Assistant
+### Step 3: Configure the Agent with HITL
 
-1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
-    ```shell
-    adk web
+**Exercise:** Create `agent.py`. You will need to wrap the sensitive tool in a `FunctionTool` to enable the `require_confirmation` feature.
+
+```python
+# In agent.py
+from google.adk.agents import LlmAgent
+from google.adk.tools import FunctionTool
+from tools.finance import get_savings_projection, execute_investment_plan
+
+# TODO: Create a FunctionTool for the investment plan with confirmation enabled.
+# Hint: Pass the function as the first argument, and use require_confirmation=True.
+investment_tool = FunctionTool(
+    ...,
+    require_confirmation=...
+)
+
+root_agent = LlmAgent(
+    name="wealth_planner",
+    model="gemini-3.5-flash",
+    instruction="""
+You are a professional Wealth Planner.
+Your goal is to help users project their savings and execute investment plans.
+
+Rules:
+1. To project savings, you MUST use `get_savings_projection`.
+2. If the tool says the budget is missing, ask the user: "What is your monthly budget?"
+3. To invest money, use the `execute_investment_plan` tool.
+4. If a user tells you their budget (e.g., "My budget is $500"), simply acknowledge it. 
+""",
+    tools=[
+        get_savings_projection, # Direct passing is fine for simple tools
+        investment_tool          # Use the wrapped tool for HITL
+    ]
+)
+```
+
+### Step 4: Test and Observe Parallel Execution
+
+1.  **Run the agent:**
+    ```bash
+    uv run adk run agent.py
     ```
-2.  **Interact with the agent:**
-    *   Select `finance_assistant` from the dropdown menu.
-    *   Test each of your tools with prompts like:
-        *   "If I invest $10,000 at 6% for 5 years, how much will I have?"
-        *   "What's the monthly payment on a $300,000 house over 30 years at 4.5%?"
-        *   "How much do I need to save each month to get $50,000 in 3 years?"
-    *   Check the **Events** tab to see the `FunctionCall` and `FunctionResponse`.
 
-### Step 4: Test Parallel Tool Execution
+2.  **Advanced CLI Testing (Parallelism):**
+    Try asking two independent things at once:
+    > "Project my savings for 5 years and also calculate 452 * 12." 
+    *(Assuming you added the multiply tool from Mod 09)*. 
+    
+    Observe in the logs how both tools are triggered.
 
-Now, see the agent's advanced capabilities in action. Send a single prompt that requires two separate calculations.
-
-**Try this prompt:**
-> "I want to know the monthly payment for a $25,000 car loan over 5 years at 7% interest. Also, tell me how much my $5,000 investment will be worth in 10 years at 8% annual return."
-
-**Observe the Events Tab:** Expand the events for the last turn. You should see that the agent made two `FunctionCall`s—one for `calculate_loan_payment` and one for `calculate_compound_interest`—**in the same turn**. This is parallel execution!
-
-### Having Trouble?
-
-If you get stuck, you can find the complete, working code in the `lab-solution.md` file.
+3.  **Test Confirmation (HITL):**
+    Try: > "I want to invest $5000 now."
+    
+    In the terminal (or Dev UI `adk web`), you will see a prompt asking for permission. Only if you say **"yes"** will the tool actually execute.
 
 ### Lab Summary
 
-You have successfully built an advanced agent with multiple, complex function tools. You have learned:
-*   How to implement robust tools with input validation and structured error handling.
-*   How to write tools that produce user-friendly reports.
-*   How to trigger and verify parallel tool execution for more efficient agent responses.
+You have successfully built an enterprise-ready financial agent! You have learned:
+*   How to use **`ToolContext`** to bridge the gap between your tools and the session state.
+*   How to implement **Human-in-the-Loop** confirmation for sensitive actions using `FunctionTool`.
+*   How the ADK handles **Parallel Execution** for complex user queries.
 
 ### Self-Reflection Questions
-- Why is it a good practice for a tool to perform its own input validation, even though the LLM is usually good at providing the correct arguments?
-- In the parallel execution test, the two tool calls are independent. Can you think of a scenario where a user's query might seem like it could be parallelized, but actually requires the tools to be run sequentially?
-- How does providing a pre-formatted, human-readable `report` in the tool's return dictionary simplify the agent's `instruction` prompt?
+- Why is it more secure to read the `user_id` or `budget` from `ToolContext` rather than asking the LLM to provide it as a tool argument?
+- What happens if the user denies the confirmation for the investment tool? How does the LLM react?
+- How does parallel execution help with "latency-sensitive" tools (like calling a slow external API)?
 
 <hr/>
 

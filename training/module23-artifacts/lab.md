@@ -102,7 +102,7 @@ async def create_report(document_name: str, tool_context: ToolContext) -> str:
 # pipeline in the correct order (extract -> summarize -> chart -> report) and 
 # register the four async tools.
 root_agent = Agent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='document_processor',
     instruction="""
     # Your instruction here...

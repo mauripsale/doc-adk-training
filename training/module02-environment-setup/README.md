@@ -11,19 +11,26 @@ title: "Module 2: Setting Up Your Development Environment"
 
 Before diving into building agents, it's crucial to set up a proper development environment. A well-structured environment ensures that your project's dependencies are isolated, preventing conflicts with other Python projects on your system. It makes your project self-contained and easily reproducible by others.
 
-The standard and recommended way to achieve this in Python is by using a **virtual environment**.
+The standard and recommended way to achieve this in Python is by using a **virtual environment** and a modern package manager.
 
-### What is a Virtual Environment?
+### Python 3.10+ Requirement
 
-A virtual environment is an isolated directory that contains a specific version of Python and its own set of installed packages. When you activate a virtual environment, your system's shell is configured to use the Python interpreter and packages from that directory, rather than the global ones.
+The ADK uses modern Python features like advanced type hints and improved asynchronous handling. Therefore, **it requires Python version 3.10 or higher**. Using older versions (like 3.9) will result in warnings, missing features, and potential crashes.
 
-**Key Benefits:**
+### Enter `uv`: The Modern Standard
 
-*   **Dependency Isolation:** You can install the exact versions of libraries your project needs (like `google-adk`) without affecting any other project. If Project A needs version 1.0 of a library and Project B needs version 2.0, a virtual environment prevents them from clashing.
-*   **Reproducibility:** You can easily generate a `requirements.txt` file that lists all the packages and their exact versions using the command `pip freeze > requirements.txt`. Anyone else can then create an identical environment by installing the packages from that file.
-*   **System Cleanliness:** It keeps your global Python installation clean and free from project-specific packages, which helps prevent system-wide issues.
+While older tutorials might teach you to use `python -m venv` and `pip`, enterprise agent development has largely moved to **`uv`**.
 
-In this course, we will be using `venv`, the standard virtual environment tool that comes built-in with Python 3.
+`uv` is an extremely fast Python package and project manager written in Rust. It replaces `pip`, `venv`, and other tools with a single, unified interface that is orders of magnitude faster.
+
+**Key Benefits of `uv`:**
+
+*   **Speed:** It resolves dependencies and installs packages in a fraction of the time of traditional tools.
+*   **Deterministic Builds:** It automatically manages a `uv.lock` file (similar to `package-lock.json` in Node.js) ensuring that every developer on your team gets the *exact* same package versions, preventing "it works on my machine" bugs.
+*   **Automatic Environments:** When you use commands like `uv run`, it automatically detects or creates the virtual environment for you. You rarely need to manually "activate" environments anymore.
+*   **Python Version Management:** Crucially for our 3.10+ requirement, `uv` can automatically download and use the correct Python version if you specify it during initialization (e.g., `uv init --python 3.10`), even if you don't have it installed globally!
+
+In this course, we will use `uv` as the foundation of our enterprise-ready scaffolding.
 
 ### Authentication: Connecting to Google Services
 
@@ -46,10 +53,11 @@ The **Google Cloud CLI (gcloud)** is the primary tool for handling this. By runn
 
 When you run your ADK agent, the underlying Google client libraries automatically find and use these credentials, so you don't have to manage API keys directly in your code. This method is more secure and robust for production environments.
 
-In the following lab, you will put these concepts into practice by creating a virtual environment, installing the ADK, and setting up your chosen authentication method.
+In the following lab, you will put these concepts into practice by initializing a project with `uv`, installing the ADK, and setting up your chosen authentication method.
 
 ### Key Takeaways
+- **Python 3.10 or higher** is strictly required for modern ADK features.
 - A **virtual environment** is essential for isolating project dependencies and ensuring reproducibility.
-- The `venv` module is the standard tool for creating virtual environments in Python.
+- **`uv`** is the modern, enterprise-standard tool for managing Python projects, replacing `pip` and `venv`.
 - You can authenticate with Google services using either a simple **API Key** from Google AI Studio or through **Google Cloud Authentication** with the `gcloud` CLI.
 - Using a `.env` file to manage your API key or project settings is a standard and secure practice.

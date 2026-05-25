@@ -15,7 +15,7 @@ Your task is to build and configure a new agent that can search the web to answe
 3.  **Configure the `.env` file** inside the `researcher_agent` directory to use Vertex AI, providing your project ID and a location.
 4.  **Modify the `agent.py` file** (Python approach):
     *   Define an `LlmAgent` named `root_agent`.
-    *   Set the `model` to `gemini-2.5-flash`.
+    *   Set the `model` to `gemini-3.5-flash`.
     *   Write a clear `instruction` that directs the agent to use a search tool for any questions about recent or up-to-date information.
     *   Add the `google_search` tool to the `tools` list.
 5.  **Run the agent** from your main `adk-training` directory using the `adk web` command (without specifying the agent name).

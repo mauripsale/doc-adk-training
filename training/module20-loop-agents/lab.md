@@ -50,9 +50,9 @@ def exit_loop(tool_context: ToolContext):
     # Return a minimal valid content part so the backend always produces a valid LlmResponse.
     return {"text": "Loop exited successfully."}
 
-initial_writer = LlmAgent(name="InitialWriter", model="gemini-2.5-flash", ..., output_key="current_essay")
-critic = LlmAgent(name="Critic", model="gemini-2.5-flash", ..., output_key="critique")
-refiner = LlmAgent(name="Refiner", model="gemini-2.5-flash", ..., tools=[exit_loop], output_key="current_essay")
+initial_writer = LlmAgent(name="InitialWriter", model="gemini-3.5-flash", ..., output_key="current_essay")
+critic = LlmAgent(name="Critic", model="gemini-3.5-flash", ..., output_key="critique")
+refiner = LlmAgent(name="Refiner", model="gemini-3.5-flash", ..., tools=[exit_loop], output_key="current_essay")
 
 # =====================================================
 # ASSEMBLE THE AGENT SYSTEM

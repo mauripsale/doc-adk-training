@@ -57,25 +57,25 @@ class EditorialFeedback(BaseModel):
 # ===== Specialist Agents (Provided for you) =====
 
 research_agent = Agent(
-    name="researcher", model="gemini-2.5-flash",
+    name="researcher", model="gemini-3.5-flash",
     instruction="...", # Gathers facts into structured output
     output_schema=ResearchFindings,
     output_key="research_findings"
 )
 writer_agent = Agent(
-    name="writer", model="gemini-2.5-flash",
+    name="writer", model="gemini-3.5-flash",
     instruction="...writes a draft based on structured JSON {research_findings}...",
     output_schema=BlogDraft,
     output_key="draft_post"
 )
 editor_agent = Agent(
-    name="editor", model="gemini-2.5-flash",
+    name="editor", model="gemini-3.5-flash",
     instruction="...reviews the JSON {draft_post}...",
     output_schema=EditorialFeedback,
     output_key="editorial_feedback"
 )
 formatter_agent = Agent(
-    name="formatter", model="gemini-2.5-flash",
+    name="formatter", model="gemini-3.5-flash",
     instruction="...applies JSON {editorial_feedback} to the JSON {draft_post}...",
     output_key="final_post"
 )

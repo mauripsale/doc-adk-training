@@ -70,7 +70,7 @@ class VisualCatalogApp:
     def __init__(self):
         # 1. Define the Intelligence
         self.agent = LlmAgent(
-            model='gemini-2.5-flash',
+            model='gemini-3.5-flash',
             name='catalog_writer',
             instruction="You are a professional product catalog writer. Analyze the image and write a compelling description."
         )

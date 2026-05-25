@@ -3,77 +3,61 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 11: Building a Chuck Norris Fact Assistant Challenge
+# Lab 11: Building a "Global Market Analyst" Challenge
 
 ## Goal
 
-### Goal
-
-In this lab, you will build an agent that can retrieve Chuck Norris jokes from a public REST API. You will learn how to use the `OpenAPIToolset` to automatically generate the necessary tools from an OpenAPI specification.
+In this lab, you will build an agent that can retrieve live currency exchange rates from a public REST API. You will learn how to use the `OpenAPIToolset` to automatically generate the necessary tools from an OpenAPI specification.
 
 ### Step 1: Create the Agent Project
 
-1.  **Create the agent project:**
-    Choose the **Programmatic (Python script)** option when prompted.
+We will continue using the modern `uv` workflow.
+
+1.  **Initialize the project:**
     ```shell
-    adk create chuck_norris_agent
-    cd chuck_norris_agent
+    uv init market_analyst --python 3.10
+    cd market_analyst
+    uv add google-adk python-dotenv
     ```
 
-2.  **Set up your API key** in the `.env` file. (The Chuck Norris API is free, but the agent needs credentials for the Gemini model).
+2.  **Set up your API key** in the `.env` file for the Gemini model. (The Frankfurter Currency API we are using is completely free and requires no authentication).
 
 ### Step 2: Define the OpenAPI Specification
 
-**Exercise:** Open `agent.py`. A more complete skeleton for the OpenAPI specification is provided below. Your task is to complete the spec for the `/random` endpoint's `get` operation. You can find the necessary information from the API documentation at [https://api.chucknorris.io/](https://api.chucknorris.io/).
+**Exercise:** Open `agent.py`. A skeleton for the OpenAPI specification is provided below. Your task is to complete the spec for the `/latest` endpoint's `get` operation. You can deduce the necessary parameters from the Frankfurter API documentation (or the theory section).
 
 ```python
-# In agent.py (Starter Code)
-
-from google.adk.agents import Agent
+# In agent.py
+import json
+from google.adk.agents import LlmAgent
 from google.adk.tools.openapi_tool import OpenAPIToolset
 
 # ============================================================================
 # OPENAPI SPECIFICATION
 # ============================================================================
 # The `operationId` is critical. The ADK uses it to generate the tool's name
-# (e.g., `operationId: "get_random_joke"` becomes the `get_random_joke` tool).
+# (e.g., `operationId: "get_latest_rates"` becomes the `get_latest_rates` tool).
 
-CHUCK_NORRIS_SPEC = {
+FRANKFURTER_SPEC = {
     "openapi": "3.0.0",
     "info": {
-        "title": "Chuck Norris API",
-        "description": "Free JSON API for hand curated Chuck Norris facts",
+        "title": "Frankfurter Currency API",
+        "description": "Free API for current and historical foreign exchange rates",
         "version": "1.0.0"
     },
-    "servers": [{"url": "https://api.chucknorris.io/jokes"}],
+    "servers": [{"url": "https://api.frankfurter.app"}],
     "paths": {
-        "/random": {
+        "/latest": {
             "get": {
-                # TODO: Complete this section for the "/random" endpoint.
-                # - The operationId should be "get_random_joke".
-                # - The summary should be "Get a random Chuck Norris joke".
-                # - It needs a "parameters" list with one optional query
-                #   parameter named "category".
+                # TODO: Complete this section for the "/latest" endpoint.
+                # - The operationId should be "get_latest_rates".
+                # - The summary should be "Get latest exchange rates".
+                # - It needs a "parameters" list with three query parameters:
+                #   1. "amount" (type: number)
+                #   2. "from" (type: string)
+                #   3. "to" (type: string)
                 # - It needs a "responses" section for a "200" status code.
-            }
-        },
-        # The other paths are provided for you.
-        "/search": {
-            "get": {
-                "operationId": "search_jokes",
-                "summary": "Search for jokes",
-                "parameters": [{
-                    "name": "query", "in": "query", "required": True,
-                    "schema": {"type": "string", "minLength": 3}
-                }],
-                "responses": {"200": {"description": "Successful response"}}
-            }
-        },
-        "/categories": {
-            "get": {
-                "operationId": "get_categories",
-                "summary": "Get all joke categories",
-                "responses": {"200": {"description": "Successful response"}}
+                #   Make sure the 200 response includes a 'content' mapping for 'application/json'
             }
         }
     }
@@ -84,29 +68,32 @@ CHUCK_NORRIS_SPEC = {
 # ============================================================================
 
 # TODO: Create an OpenAPIToolset instance from the spec dictionary.
-chuck_norris_toolset = OpenAPIToolset(...)
+# Hint: Use json.dumps(FRANKFURTER_SPEC) as the spec_str and "json" as the type.
+currency_toolset = ...
 
 # ============================================================================
 # AGENT DEFINITION
 # ============================================================================
 
 # TODO: Define the root_agent.
-# - Give it a name, model ('gemini-2.5-flash'), and description.
-# - Write an instruction to be a fun Chuck Norris fact assistant.
-# - Register the `chuck_norris_toolset` in its `tools` list.
-root_agent = Agent(...)
+# - Give it the name "market_analyst", model "gemini-3.5-flash".
+# - Write an instruction to be a helpful currency converter.
+# - Register the `currency_toolset` in its `tools` list.
+root_agent = LlmAgent(...)
 ```
 
 ### Step 3: Run and Test Your Agent
 
-1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI: `adk web chuck_norris_agent`
+1.  **Start the agent in terminal mode:** 
+    ```bash
+    uv run adk run agent.py
+    ```
 2.  **Interact with the agent:**
     *   Test its capabilities:
-        *   "Tell me a random Chuck Norris joke"
-        *   "Find jokes about computers"
-        *   "What joke categories exist?"
-        *   "Give me a random movie joke"
-    *   Inspect the **Events** tab to see the `FunctionCall` for your auto-generated tools.
+        *   "Convert 100 USD to EUR."
+        *   "How many Japanese Yen (JPY) can I get for 50 British Pounds (GBP)?"
+        *   "Convert 500 AUD to USD and EUR." *(Notice if it calls the API twice or handles it smartly!)*
+    *   Observe the logs to see the agent constructing and executing the HTTP requests perfectly based on your spec.
 
 ### Having Trouble?
 
@@ -115,15 +102,14 @@ If you get stuck, you can find the complete, working code in the `lab-solution.m
 ### Lab Summary
 
 You have successfully integrated a live REST API into your agent without writing a single manual tool function. You have learned:
-*   How to read API documentation to create an OpenAPI specification.
+*   How to translate API documentation into an OpenAPI specification.
 *   How to use `OpenAPIToolset` to automatically generate tools from a spec.
 *   How to instruct your agent to use the new, auto-generated tools.
 
 ### Self-Reflection Questions
-- What are the main advantages of using `OpenAPIToolset` compared to writing a custom Python function for each API endpoint?
+- What are the main advantages of using `OpenAPIToolset` compared to writing a custom Python function (like `requests.get(...)`) for each API endpoint?
 - The `operationId` in the OpenAPI spec is very important. What do you think would happen if two different paths in the spec had the same `operationId`?
-- Many modern web services publish their own OpenAPI specifications. How does this widespread adoption of the OpenAPI standard make it easier to build powerful, integrated AI agents?
-- The agent's instructions often need to specify which part of a tool's JSON response is important (e.g., "extract the 'value' field"). Why is this necessary, and what does it tell you about how the agent perceives the data it receives from a tool?
+- Many modern web services publish their own OpenAPI specifications (often as a URL like `api.example.com/openapi.json`). How does this widespread adoption of the OpenAPI standard make it easier to build powerful, integrated AI agents?
 
 <hr/>
 

@@ -26,7 +26,7 @@ A `Part` can contain:
 *   **Text:** `types.Part.from_text("Describe this image")`
 *   **Image Data:** `types.Part(inline_data=types.Blob(data=image_bytes, mime_type='image/png'))`
 
-When you send a list of these parts to a vision-capable model like `gemini-2.5-flash`, the model can reason about the text and the image(s) together.
+When you send a list of these parts to a vision-capable model like `gemini-3.5-flash`, the model can reason about the text and the image(s) together.
 
 #### Example: Building a Vision Agent
 To send an image to an agent programmatically, you package it into a list and run it via an `App`:
@@ -40,7 +40,7 @@ from google.genai import types
 # 1. Define the agent
 agent = LlmAgent(
     name="vision_expert",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="Describe the provided image in detail."
 )
 

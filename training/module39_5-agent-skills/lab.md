@@ -81,7 +81,7 @@ my_skill_toolset = None
 # TODO: 3. Configure the Agent.
 # Add your `my_skill_toolset` to the agent's `tools` list.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="skill_user_agent",
     description="An agent that can use specialized skills.",
     # Add tools here

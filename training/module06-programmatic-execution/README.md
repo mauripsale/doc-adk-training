@@ -71,9 +71,11 @@ runner = InMemoryRunner(app=app)
 async def main():
     # 3. Execute!
     # Tip: run_debug() is a helper for simple testing in v1.18+
-    # it wraps the complex async loop and returns a simple response object.
-    response = await runner.run_debug("I have a billing problem.")
-    print(f"Agent Response: {response.text}")
+    # it wraps the complex async loop and returns a list of Event objects.
+    events = await runner.run_debug("I have a billing problem.")
+    for event in events:
+        if event.is_final_response():
+            print(f"Agent Response: {event.content.parts[0].text}")
 
 if __name__ == "__main__":
     asyncio.run(main())

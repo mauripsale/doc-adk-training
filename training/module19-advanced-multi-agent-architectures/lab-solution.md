@@ -28,7 +28,7 @@ search_tool = GoogleSearchAgentTool()
 # =====================================================
 news_fetcher = Agent(
     name="news_fetcher",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Fetches current news articles using Google Search",
     instruction=(
         "You are a news researcher. Based on the user's topic, search for "
@@ -49,7 +49,7 @@ news_fetcher = Agent(
 
 news_summarizer = Agent(
     name="news_summarizer",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Summarizes key news points",
     instruction=(
         "Summarize the news articles into 2-3 key takeaways.\n"
@@ -78,7 +78,7 @@ news_pipeline = SequentialAgent(
 # =====================================================
 social_monitor = Agent(
     name="social_monitor",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Monitors social media trends using Google Search",
     instruction=(
         "You are a social media analyst. Based on the user's topic, search for "
@@ -102,7 +102,7 @@ social_monitor = Agent(
 
 sentiment_analyzer = Agent(
     name="sentiment_analyzer",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Analyzes social sentiment",
     instruction=(
         "Analyze the social media data and extract key insights.\n"
@@ -131,7 +131,7 @@ social_pipeline = SequentialAgent(
 # =====================================================
 expert_finder = Agent(
     name="expert_finder",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Finds expert opinions using Google Search",
     instruction=(
         "You are an expert opinion researcher. Based on the user's topic, search for "
@@ -155,7 +155,7 @@ expert_finder = Agent(
 
 quote_extractor = Agent(
     name="quote_extractor",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Extracts quotable insights",
     instruction=(
         "Extract the most impactful quotes and insights from expert opinions.\n"
@@ -196,7 +196,7 @@ parallel_research = ParallelAgent(
 # =====================================================
 article_writer = Agent(
     name="article_writer",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Writes article draft from all research",
     instruction=(
         "You are a professional writer. Write an engaging article using ALL "
@@ -224,7 +224,7 @@ article_writer = Agent(
 
 article_editor = Agent(
     name="article_editor",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Edits article for clarity and impact",
     instruction=(
         "You are an editor. Review and improve the article below.\n"
@@ -244,7 +244,7 @@ article_editor = Agent(
 
 article_formatter = Agent(
     name="article_formatter",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Formats article for publication",
     instruction=(
         "Format the article for publication with proper markdown.\n"

@@ -7,7 +7,7 @@ async def main():
         print("Attempting to connect to the LLM service...")
 
         # LlmAgent requires a name, model, and instruction.
-        agent = LlmAgent(name="verify_agent", model="gemini-2.5-flash", instruction="You are a helpful assistant.")
+        agent = LlmAgent(name="verify_agent", model="gemini-3.5-flash", instruction="You are a helpful assistant.")
 
         response = await agent.invoke("hello")
 

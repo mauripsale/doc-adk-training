@@ -48,12 +48,12 @@ langchain_tool_instance = None
 wikipedia_tool = None
 
 # TODO: 3. Define the `root_agent` as an `LlmAgent`.
-# - Give it a name, model (`gemini-2.5-flash`), and description.
+# - Give it a name, model (`gemini-3.5-flash`), and description.
 # - Write an instruction to use the Wikipedia tool for factual questions.
 # - Add your wrapped `wikipedia_tool` to its `tools` list.
 root_agent = LlmAgent(
     name="fact_finder_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An agent that can look up information on Wikipedia.",
     instruction="""# Your instruction here...""",
     tools=[

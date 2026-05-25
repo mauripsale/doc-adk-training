@@ -121,7 +121,7 @@ You cannot simply list both `google_search` and your own `custom_function` in th
 # This approach is NOT currently supported
 root_agent = Agent(
     name="MixedToolAgent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     tools=[google_search, custom_function], # Mixing types may cause issues
 )
 ```

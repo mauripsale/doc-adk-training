@@ -81,7 +81,7 @@ currency_tools = OpenAPIToolset(
 # 3. Add to Agent
 agent = LlmAgent(
     name="global_market_analyst",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a market analyst. Use your tools to convert currencies.",
     tools=[currency_tools] # Automatically registers `get_latest_rates`
 )

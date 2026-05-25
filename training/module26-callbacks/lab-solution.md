@@ -174,7 +174,7 @@ def generate_text(topic: str, word_count: int, tool_context: ToolContext) -> Dic
 
 root_agent = Agent(
     name="content_moderator",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Content moderation assistant with safety guardrails and caching.",
     instruction="You are a helpful assistant. Keep your answers brief.",
     tools=[generate_text],

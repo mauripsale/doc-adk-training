@@ -66,7 +66,7 @@ recall_tool = FunctionTool(fn=recall_name)
 
 root_agent = LlmAgent(
     name="memory_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An agent that can remember and recall the user's name.",
     instruction="""
 You are a friendly assistant with a memory.
@@ -86,7 +86,7 @@ You are a friendly assistant with a memory.
 ```yaml
 # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
 name: memory_agent
-model: gemini-2.5-flash
+model: gemini-3.5-flash
 description: An agent that can remember and recall the user's name.
 instruction: |
   You are a friendly assistant with a memory.

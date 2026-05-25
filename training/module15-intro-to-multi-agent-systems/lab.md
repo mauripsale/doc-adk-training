@@ -94,7 +94,7 @@ from google.adk.agents import LlmAgent
 from . import spanish_greeter_agent
 
 root_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a language router...",
     sub_agents=[spanish_greeter_agent.agent]
 )
@@ -107,7 +107,7 @@ from google.adk.agents import LlmAgent
 
 agent = LlmAgent(
     name="spanish_greeter_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An expert at providing friendly greetings in Spanish.",
     instruction="You are a friendly assistant who only speaks Spanish..."
 )

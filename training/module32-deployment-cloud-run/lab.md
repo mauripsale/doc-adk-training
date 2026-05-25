@@ -53,7 +53,7 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
     *   **`billing_agent.yaml`:**
         ```yaml
         name: billing_agent
-        model: gemini-2.5-flash
+        model: gemini-3.5-flash
         description: "Handles questions about billing, invoices, and payments."
         instruction: "You are a billing support agent. Politely answer questions about billing and payment issues."
         ```
@@ -61,7 +61,7 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
     *   **`tech_support_agent.yaml`:**
         ```yaml
         name: tech_support_agent
-        model: gemini-2.5-flash
+        model: gemini-3.5-flash
         description: "Handles technical support questions and troubleshooting."
         instruction: "You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions."
         ```
@@ -69,7 +69,7 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
     *   **`root_agent.yaml`:**
         ```yaml
         name: router_agent
-        model: gemini-2.5-flash
+        model: gemini-3.5-flash
         description: "The main customer support router."
         instruction: |
           You are the customer support router.

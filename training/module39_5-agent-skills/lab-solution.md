@@ -37,7 +37,7 @@ my_skill_toolset = SkillToolset(
 # 3. Configure the Agent.
 # The toolset is passed just like any other tool.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="skill_user_agent",
     description="An agent that can use specialized skills.",
     tools=[my_skill_toolset]

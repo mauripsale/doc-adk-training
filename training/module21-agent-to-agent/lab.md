@@ -51,7 +51,7 @@ search_tool = ...
 #   orchestrator tool calls like `transfer_to_agent`.
 # - Includes the `search_tool` in its `tools` list.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="research_specialist",
     description="A specialist agent that conducts web research and fact-checking.",
     instruction="""
@@ -93,7 +93,7 @@ remote_researcher = RemoteA2aAgent(
 # - Its instruction should tell it to delegate research tasks to the `remote_researcher`.
 # - Add the `remote_researcher` to its `sub_agents` list.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="orchestrator_agent",
     description="A coordinator agent that delegates tasks to remote specialists.",
     instruction="""...""",

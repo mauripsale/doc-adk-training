@@ -76,7 +76,7 @@ currency_toolset = ...
 # ============================================================================
 
 # TODO: Define the root_agent.
-# - Give it the name "market_analyst", model "gemini-2.5-flash".
+# - Give it the name "market_analyst", model "gemini-3.5-flash".
 # - Write an instruction to be a helpful currency converter.
 # - Register the `currency_toolset` in its `tools` list.
 root_agent = LlmAgent(...)

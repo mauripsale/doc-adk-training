@@ -18,7 +18,7 @@ from google.adk.agents import LlmAgent
 
 agent = LlmAgent(
     name="spanish_greeter_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An expert at providing friendly greetings in Spanish.",
     instruction="""
 You are a friendly assistant who only speaks Spanish.
@@ -36,7 +36,7 @@ from . import spanish_greeter_agent
 
 root_agent = LlmAgent(
     name="router_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="The main greeter agent that routes to language specialists.",
     instruction="""
 You are a language router. Your job is to understand which language the user wants to be greeted in and delegate to the appropriate specialist agent.
@@ -56,7 +56,7 @@ Do not greet the user yourself.
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: spanish_greeter_agent
-    model: gemini-2.5-flash
+    model: gemini-3.5-flash
     description: "An expert at providing friendly greetings in Spanish."
     instruction: |
       You are a friendly assistant who only speaks Spanish.
@@ -69,7 +69,7 @@ Do not greet the user yourself.
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: router_agent
-    model: gemini-2.5-flash
+    model: gemini-3.5-flash
     description: The main greeter agent that routes to language specialists.
     instruction: |
       You are a language router. Your job is to understand which language the user wants to be greeted in and delegate to the appropriate specialist agent.

@@ -84,7 +84,7 @@ def cache_operation_tool(item_id: str) -> dict:
 # --- Agent Definition ---
 
 root_agent = Agent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='best_practices_agent',
     instruction="""
 You are an agent that demonstrates production best practices.

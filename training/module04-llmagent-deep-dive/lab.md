@@ -39,7 +39,7 @@ class SupportAnalysis(BaseModel):
 
 root_agent = LlmAgent(
     name="support_analyzer_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="...", # TODO: Update instructions for categorization, sentiment, and summary
     output_schema=...,  # TODO: Link the schema
     output_key=...      # TODO: Set the output key

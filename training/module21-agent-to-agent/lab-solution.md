@@ -25,7 +25,7 @@ search_tool = GoogleSearchAgentTool()
 # 2. Define the specialist agent.
 # This agent's job is to perform web research.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="research_specialist",
     description="A specialist agent that conducts web research and fact-checking using Google Search.",
     instruction="""
@@ -70,7 +70,7 @@ remote_researcher = RemoteA2aAgent(
 # 2. Define the orchestrator agent.
 # This agent's job is to delegate tasks to the appropriate specialist.
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="orchestrator_agent",
     description="A coordinator agent that delegates tasks to remote specialists.",
     instruction="""

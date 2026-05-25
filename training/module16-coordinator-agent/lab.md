@@ -27,7 +27,7 @@ from google.adk.agents import LlmAgent
 
 agent = LlmAgent(
     name="spanish_greeter_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="""
 # TODO: Write a clear description that explains this agent's capability
 # (e.g., "An expert at providing friendly greetings in Spanish.").
@@ -52,7 +52,7 @@ from google.adk.agents import LlmAgent
 
 root_agent = LlmAgent(
     name="router_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="The main greeter agent that routes to language specialists.",
     instruction="""
 # TODO: Write an instruction that tells the agent its job is to delegate

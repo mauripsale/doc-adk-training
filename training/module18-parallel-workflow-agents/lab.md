@@ -76,10 +76,10 @@ class ActivityOptionsList(BaseModel):
 
 # ===== Specialist Agents (Provided for you) =====
 
-flight_finder = Agent(name="flight_finder", model="gemini-2.5-flash", output_schema=FlightOptionsList, output_key="flight_options")
-hotel_finder = Agent(name="hotel_finder", model="gemini-2.5-flash", output_schema=HotelOptionsList, output_key="hotel_options")
-activity_finder = Agent(name="activity_finder", model="gemini-2.5-flash", output_schema=ActivityOptionsList, output_key="activity_options")
-itinerary_builder = Agent(name="itinerary_builder", model="gemini-2.5-flash", instruction="...{flight_options}...{hotel_options}...{activity_options}...")
+flight_finder = Agent(name="flight_finder", model="gemini-3.5-flash", output_schema=FlightOptionsList, output_key="flight_options")
+hotel_finder = Agent(name="hotel_finder", model="gemini-3.5-flash", output_schema=HotelOptionsList, output_key="hotel_options")
+activity_finder = Agent(name="activity_finder", model="gemini-3.5-flash", output_schema=ActivityOptionsList, output_key="activity_options")
+itinerary_builder = Agent(name="itinerary_builder", model="gemini-3.5-flash", instruction="...{flight_options}...{hotel_options}...{activity_options}...")
 
 # ============================================================================
 # FAN-OUT: PARALLEL DATA GATHERING

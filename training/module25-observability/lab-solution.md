@@ -127,7 +127,7 @@ class PerformanceProfilerPlugin(BasePlugin):
 # --- Agent Definition ---
 
 root_agent = Agent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='observability_agent',
     instruction="You are a helpful assistant. Your responses are being monitored for quality and performance.",
 )

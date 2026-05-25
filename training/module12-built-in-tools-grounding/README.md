@@ -40,7 +40,7 @@ def my_custom_tool(item_id: str) -> dict:
 # You can mix built-in and custom tools freely!
 agent = LlmAgent(
     name="grounded_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="Search the web and check our warehouse.",
     tools=[
         google_search, 

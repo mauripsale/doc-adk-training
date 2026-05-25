@@ -58,7 +58,7 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 # --- Agent Definition ---
 
 # TODO: Define the `root_agent`.
-# 1. Use 'gemini-2.5-flash'.
+# 1. Use 'gemini-3.5-flash'.
 # 2. Add 'google_search', 'extract_key_facts', and 'format_research_notes' to tools.
 # 3. Write instructions for a research workflow:
 #    - Use search to find current info.

@@ -45,7 +45,7 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 # --- Agent Definition ---
 
 root_agent = LlmAgent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='research_assistant',
     description='Conducts web research and compiles findings',
     instruction="""

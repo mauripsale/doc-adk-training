@@ -27,7 +27,7 @@ from google.adk.events import Event, EventActions
 APP_NAME = "doc_writing_app_v3"
 USER_ID = "dev_user_01"
 SESSION_ID_BASE = "loop_exit_tool_session"
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-3.5-flash"
 STATE_INITIAL_TOPIC = "initial_topic"
 
 # --- State Keys ---

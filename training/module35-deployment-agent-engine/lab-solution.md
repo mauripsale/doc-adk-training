@@ -49,7 +49,7 @@ def check_prime(number: int) -> dict:
     return {"is_prime": is_prime}
 
 root_agent = LlmAgent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="multi_tool_agent",
     instruction="You roll dice and answer questions about prime numbers.",
     tools=[

@@ -26,7 +26,7 @@ We will use the same streaming agent configuration from Module 22.
     *   Replace the contents of `root_agent.yaml` with:
         ```yaml
         name: streaming_conversational_agent
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         instruction: |
           You are a friendly and talkative assistant. Keep your answers concise.
         streaming: True

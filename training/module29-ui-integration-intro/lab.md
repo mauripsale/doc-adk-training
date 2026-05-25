@@ -24,7 +24,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
     from google.adk.agents import Agent
 
     root_agent = Agent(
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         name="ui_agent",
         instruction="You are a helpful and friendly assistant.",
     )

@@ -92,7 +92,7 @@ from mcp import StreamableHTTPConnectionParams
 MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL"
 
 root_agent = LlmAgent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='cloud_shopping_agent',
     instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
     tools=[

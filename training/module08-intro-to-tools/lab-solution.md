@@ -72,7 +72,7 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
 
     root_agent = LlmAgent(
         name="researcher_agent",
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         description="An agent that can research current events using Google Search.",
         instruction=(
             "You are a helpful research assistant. "
@@ -93,7 +93,7 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
     ```yaml
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: researcher_agent
-    model: gemini-2.5-flash
+    model: gemini-3.5-flash
     description: An agent that can research current events using Google Search.
     instruction: |
       You are a helpful research assistant.

@@ -77,7 +77,7 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     # -- Agent Definition --
     # TODO: 3. Define the root_agent.
     # Instantiate an LlmAgent with the following properties:
-    # - model: 'gemini-2.5-flash'
+    # - model: 'gemini-3.5-flash'
     # - name: 'filesystem_agent'
     # - instruction: 'You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.'
     # - tools: A list containing one item: the MCPToolset.

@@ -31,7 +31,7 @@ from . import billing_agent_module, tech_support_module
 
 root_agent = LlmAgent(
     name="coordinator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="You are a router...",
     # ...
     sub_agents=[
@@ -47,7 +47,7 @@ In the parent's `root_agent.yaml` file, you use the `sub_agents` key and `config
 ```yaml
 # In the coordinator's root_agent.yaml
 name: coordinator_agent
-model: gemini-2.5-flash
+model: gemini-3.5-flash
 instruction: You are a router...
 # ...
 sub_agents:

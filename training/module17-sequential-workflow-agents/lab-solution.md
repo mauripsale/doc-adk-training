@@ -34,7 +34,7 @@ class EditorialFeedback(BaseModel):
 # Gathers key facts about the topic
 research_agent = Agent(
     name="researcher",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Researches a topic and gathers key information",
     instruction=(
         "You are a research assistant. Your task is to gather key facts and information "
@@ -48,7 +48,7 @@ research_agent = Agent(
 # Writes blog post draft from structured research
 writer_agent = Agent(
     name="writer",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Writes a blog post draft based on research findings",
     instruction=(
         "You are a creative blog writer. Write an engaging blog post based on "
@@ -71,7 +71,7 @@ writer_agent = Agent(
 # Reviews the structured draft and suggests improvements
 editor_agent = Agent(
     name="editor",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Reviews blog post draft and provides editorial feedback",
     instruction=(
         "You are an experienced editor. Review the blog post draft below and provide "
@@ -92,7 +92,7 @@ editor_agent = Agent(
 # Applies edits and formats as markdown
 formatter_agent = Agent(
     name="formatter",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Applies editorial feedback and formats the final blog post",
     instruction=(
         "You are a formatter. Create the final version of the blog post by applying "

@@ -7,14 +7,14 @@ title: "Module 4.5: Professional Model Configuration & Resiliency"
 
 ## Theory
 
-Until now, we've passed models to our agents using simple strings (e.g., `model="gemini-2.5-flash"`). While this is great for prototyping, building **production-grade** agents requires a more robust approach to handle network flakiness, rate limits, and regional deployments.
+Until now, we've passed models to our agents using simple strings (e.g., `model="gemini-3.5-flash"`). While this is great for prototyping, building **production-grade** agents requires a more robust approach to handle network flakiness, rate limits, and regional deployments.
 
 In this module, we will explore the three levels of model configuration in the ADK, inspired by enterprise best practices.
 
 ### Level 1: Simple Strings (Prototype)
 The simplest way. Ideal for learning and quick tests.
 ```python
-agent = LlmAgent(model="gemini-2.5-flash", ...)
+agent = LlmAgent(model="gemini-3.5-flash", ...)
 ```
 
 ### Level 2: The `Gemini` Class (Professional)
@@ -27,7 +27,7 @@ from google.adk.models import Gemini
 from google.genai import types
 
 resilient_model = Gemini(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     # Automatically retry failed requests up to 3 times
     retry_options=types.HttpRetryOptions(initial_delay=1, attempts=3)
 )
@@ -64,7 +64,7 @@ class ProductionGemini(Gemini):
         )
 
 # Use your expert class anywhere in your app
-agent = LlmAgent(model=ProductionGemini(model="gemini-2.5-flash"), ...)
+agent = LlmAgent(model=ProductionGemini(model="gemini-3.5-flash"), ...)
 ```
 
 ---

@@ -33,7 +33,7 @@ When starting a new feature, choosing the right agent primitive is the most crit
 
 ### 2. Performance Optimization
 
-*   **Model Selection:** Choose the right model for the job. Use cheaper, faster models (like `gemini-2.5-flash`) for simple tasks like classification or routing, and more powerful models (`gemini-3-pro-preview`) for complex reasoning.
+*   **Model Selection:** Choose the right model for the job. Use cheaper, faster models (like `gemini-3.5-flash`) for simple tasks like classification or routing, and more powerful models (`gemini-3.1-pro-preview`) for complex reasoning.
 *   **Token Usage:** Keep instructions concise and clear old conversation history periodically to manage the context window. Use `max_output_tokens` to prevent unnecessarily long and expensive responses.
 *   **Caching:** Cache the results of expensive or frequently called tool functions, especially those that call external APIs.
 *   **Parallelism:** Use a `ParallelAgent` for independent, non-sequential tasks to significantly reduce overall latency.

@@ -113,7 +113,7 @@ from tools.calculator import add, subtract, multiply, divide
 
 root_agent = LlmAgent(
     name="calculator_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An agent that can perform basic arithmetic calculations.",
     instruction="""
 You are a helpful calculator assistant.

@@ -29,7 +29,7 @@ wikipedia_tool = LangchainTool(tool=langchain_tool_instance)
 # 3. Define the ADK agent and include the wrapped tool in its tools list.
 root_agent = LlmAgent(
     name="fact_finder_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="An agent that can look up information on Wikipedia.",
     instruction="""You are a helpful fact-finding assistant.
 If the user asks a question about a specific topic, person, or event, you MUST use the Wikipedia tool to find an accurate answer.

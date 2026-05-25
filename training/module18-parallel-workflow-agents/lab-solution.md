@@ -53,7 +53,7 @@ class ActivityOptionsList(BaseModel):
 # ===== Parallel Branch 1: Flight Finder =====
 flight_finder = Agent(
     name="flight_finder",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Searches for available flights",
     instruction=(
         "You are a flight search specialist. Based on the user's travel request, "
@@ -66,7 +66,7 @@ flight_finder = Agent(
 # ===== Parallel Branch 2: Hotel Finder =====
 hotel_finder = Agent(
     name="hotel_finder",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Searches for available hotels",
     instruction=(
         "You are a hotel search specialist. Based on the user's travel request, "
@@ -79,7 +79,7 @@ hotel_finder = Agent(
 # ===== Parallel Branch 3: Activity Finder =====
 activity_finder = Agent(
     name="activity_finder",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Searches for local activities and attractions",
     instruction=(
         "You are a travel activity specialist. Based on the user's destination, "
@@ -96,7 +96,7 @@ activity_finder = Agent(
 # ===== Merger Agent: Itinerary Builder =====
 itinerary_builder = Agent(
     name="itinerary_builder",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Compiles the final travel itinerary",
     instruction=(
         "You are an expert travel agent. Create a complete, day-by-day travel itinerary "

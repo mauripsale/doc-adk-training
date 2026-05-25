@@ -79,7 +79,7 @@ investment_tool = FunctionTool(
 
 root_agent = LlmAgent(
     name="wealth_planner",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="""
 You are a professional Wealth Planner for Cymbal Bank.
 Your goal is to help users project their savings and execute investment plans.

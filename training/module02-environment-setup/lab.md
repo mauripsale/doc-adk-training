@@ -82,7 +82,7 @@ async def main():
         # Define a simple ADK agent
         agent = LlmAgent(
             name="verify_agent",
-            model="gemini-2.5-flash",
+            model="gemini-3.5-flash",
             instruction="You are a helpful assistant. Respond with a short confirmation."
         )
 

@@ -73,7 +73,7 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
     # to be named exactly `root_agent`.
     root_agent = LlmAgent(
         name="echo_agent",
-        model="gemini-2.5-flash",
+        model="gemini-3.5-flash",
         description="A parrot agent that only repeats user input.",
         instruction="You are a parrot. Your ONLY job is to repeat the user's input back to them exactly as they wrote it. DO NOT answer questions. DO NOT provide help. DO NOT add extra words. If the user asks a question, repeat the question back to them."
     )
@@ -97,7 +97,7 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
     # auto-completion and validation in compatible code editors.
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: echo_agent
-    model: gemini-2.5-flash
+    model: gemini-3.5-flash
     description: An agent that repeats the user's input.
     instruction: You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it. Do not add any extra words or explanations.
     ```

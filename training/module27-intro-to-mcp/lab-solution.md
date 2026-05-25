@@ -27,7 +27,7 @@ TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "t
 
 # -- Agent Definition --
 root_agent = LlmAgent(
-    model='gemini-2.5-flash',
+    model='gemini-3.5-flash',
     name='filesystem_agent',
     instruction='You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.',
     tools=[

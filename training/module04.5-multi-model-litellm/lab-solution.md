@@ -48,7 +48,7 @@ if os.getenv("USE_LOCAL_MODEL") == "1":
     model_to_use = LiteLlm(model="ollama_chat/mistral")
 else:
     # Use the professional, native Gemini subclass for production
-    model_to_use = ResilientGemini(model="gemini-2.5-flash")
+    model_to_use = ResilientGemini(model="gemini-3.5-flash")
 
 root_agent = LlmAgent(
     name="support_analyzer_agent",

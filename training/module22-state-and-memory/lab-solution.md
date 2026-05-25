@@ -204,7 +204,7 @@ def search_past_lessons(
 
 root_agent = Agent(
     name="personal_tutor",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="Personal learning tutor that tracks your progress, preferences, and learning history.",
     instruction="""
     You are a personalized learning tutor (Course Version {app:course_version?}) with memory of the user's progress.

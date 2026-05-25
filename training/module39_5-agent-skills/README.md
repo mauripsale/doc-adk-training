@@ -59,7 +59,7 @@ my_skill_toolset = SkillToolset(
 
 # 3. Give the entire toolset to the Agent
 agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="skill_user_agent",
     description="An agent that can use specialized skills.",
     tools=[my_skill_toolset]

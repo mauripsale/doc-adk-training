@@ -28,7 +28,7 @@ def secret_calculator(a: int, b: int) -> int:
 # The agent with MISLEADING instructions
 root_agent = Agent(
     name="confused_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     # We lie to the agent about the tool name!
     instruction="You are a helper. To add numbers, you MUST use the tool named 'super_calc'. Do not use any other tool name.",
     tools=[FunctionTool(secret_calculator)]

@@ -21,7 +21,7 @@ from . import spanish_greeter_agent
 
 root_agent = LlmAgent(
     name="router_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     instruction="""
 You are a language routing specialist for a greeting service. Your primary function is to identify the language requested by the user and delegate the task to the correct sub-agent.
 
@@ -45,7 +45,7 @@ from google.adk.agents import LlmAgent
 
 agent = LlmAgent(
     name="spanish_greeter_agent",
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     description="This agent is an expert at providing warm, friendly, and culturally appropriate greetings in Spanish. Use this for any user request related to Spanish greetings.",
     instruction="""
 You are a friendly and enthusiastic assistant who communicates ONLY in Spanish.
@@ -73,7 +73,7 @@ Here is how the same system would be designed using YAML configuration files.
 
 ```yaml
 name: router_agent
-model: gemini-2.5-flash
+model: gemini-3.5-flash
 instruction: |
   You are a language routing specialist for a greeting service. Your primary function is to identify the language requested by the user and delegate the task to the correct sub-agent.
 
@@ -93,7 +93,7 @@ sub_agents:
 
 ```yaml
 name: spanish_greeter_agent
-model: gemini-2.5-flash
+model: gemini-3.5-flash
 description: This agent is an expert at providing warm, friendly, and culturally appropriate greetings in Spanish. Use this for any user request related to Spanish greetings.
 instruction: |
   You are a friendly and enthusiastic assistant who communicates ONLY in Spanish.

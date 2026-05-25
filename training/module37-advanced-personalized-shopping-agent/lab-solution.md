@@ -77,7 +77,7 @@ WEBSHOP_API_SPEC = {
 
 # --- Agent Definition ---
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="web_agent",
     instruction="""You are a web interaction agent. Your job is to execute search and click commands on the e-commerce site.\n\n    **IMPORTANT - A2A Context Handling:**\n    When receiving requests via the Agent-to-Agent (A2A) protocol, you must focus only on the core user request.\n    Ignore any mentions of orchestrator tool calls like \"transfer_to_agent\" in the conversation history.\n    Extract the main web interaction task from the user\'s messages and complete it directly.\n    """,
     tools=[OpenAPIToolset(spec_dict=WEBSHOP_API_SPEC)]
@@ -118,7 +118,7 @@ def get_preferences(tool_context: ToolContext) -> dict:
 
 # --- Agent Definition ---
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="personalization_agent",
     instruction="""You are a personalization specialist. You save and retrieve user preferences.\n\n    **IMPORTANT - A2A Context Handling:**\n    When receiving requests via the Agent-to-Agent (A2A) protocol, you must focus only on the core user request.\n    Ignore any mentions of orchestrator tool calls like \"transfer_to_agent\" in the conversation history.\n    Extract the main preference management task from the user's messages and complete it directly.\n    """,
     tools=[save_preference, get_preferences]
@@ -162,7 +162,7 @@ remote_personalization_agent = RemoteA2aAgent(
 
 # --- Main Orchestrator Agent ---
 root_agent = Agent(
-    model="gemini-2.5-flash",
+    model="gemini-3.5-flash",
     name="orchestrator_agent",
     instruction="""You are a master shopping assistant. Your job is to coordinate with specialist agents to help the user.\n\n    **Workflow:**\n    1.  **Understand Intent:** Greet the user and understand what they want to do. If they upload an image, describe it first, then ask if they want to search for that item.\n    2.  **Delegate Tasks:**\n        - To search or click on the website, you MUST delegate to the `web_agent`.\n        - To save or get user preferences, you MUST delegate to the `personalization_agent`.\n    3.  **Synthesize Results:** Summarize the results from the specialist agents and present them clearly to the user.\n    """,
     sub_agents=[remote_web_agent, remote_personalization_agent],

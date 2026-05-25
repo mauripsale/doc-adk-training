@@ -175,7 +175,7 @@ Now, create an ADK agent that connects to your newly deployed server.
     MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL"
 
     root_agent = LlmAgent(
-        model='gemini-2.5-flash',
+        model='gemini-3.5-flash',
         name='cloud_shopping_agent',
         instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
         tools=[
@@ -192,7 +192,7 @@ Now, create an ADK agent that connects to your newly deployed server.
     Create an empty `__init__.py` file in the `cloud_mcp_server` directory.
     Create a `.env` file in the `cloud_mcp_server` directory with the following content:
     ```
-    MODEL="gemini-2.5-flash"
+    MODEL="gemini-3.5-flash"
     ```
 
 ### Step 5: Test the Full Cloud-Based System

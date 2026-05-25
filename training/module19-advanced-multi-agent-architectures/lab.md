@@ -63,53 +63,53 @@ search_tool = GoogleSearchAgentTool()
 
 # --- Branch 1: News ---
 news_fetcher = Agent(
-    name="news_fetcher", model="gemini-2.5-flash", tools=[search_tool],
+    name="news_fetcher", model="gemini-3.5-flash", tools=[search_tool],
     instruction="You are a news researcher. Use the GoogleSearchAgentTool to find 3-4 current news articles about the user's topic.",
     output_key="raw_news"
 )
 news_summarizer = Agent(
-    name="news_summarizer", model="gemini-2.5-flash",
+    name="news_summarizer", model="gemini-3.5-flash",
     instruction="Summarize the news articles from {raw_news} into 2-3 key takeaways.",
     output_key="news_summary"
 )
 
 # --- Branch 2: Social Media ---
 social_monitor = Agent(
-    name="social_monitor", model="gemini-2.5-flash", tools=[search_tool],
+    name="social_monitor", model="gemini-3.5-flash", tools=[search_tool],
     instruction="You are a social media analyst. Use the GoogleSearchAgentTool to find trending discussions and public sentiment about the user's topic.",
     output_key="raw_social"
 )
 sentiment_analyzer = Agent(
-    name="sentiment_analyzer", model="gemini-2.5-flash",
+    name="sentiment_analyzer", model="gemini-3.5-flash",
     instruction="Analyze the social media data from {raw_social} and extract key insights on trends and sentiment.",
     output_key="social_insights"
 )
 
 # --- Branch 3: Expert Opinion ---
 expert_finder = Agent(
-    name="expert_finder", model="gemini-2.5-flash", tools=[search_tool],
+    name="expert_finder", model="gemini-3.5-flash", tools=[search_tool],
     instruction="You are an expert opinion researcher. Use the GoogleSearchAgentTool to find what industry experts or academics are saying about the user's topic.",
     output_key="raw_experts"
 )
 quote_extractor = Agent(
-    name="quote_extractor", model="gemini-2.5-flash",
+    name="quote_extractor", model="gemini-3.5-flash",
     instruction="Extract the most impactful quotes from the expert opinions in {raw_experts}.",
     output_key="expert_quotes"
 )
 
 # --- Content Creation ---
 article_writer = Agent(
-    name="article_writer", model="gemini-2.5-flash",
+    name="article_writer", model="gemini-3.5-flash",
     instruction="You are a professional writer. Write an engaging article using the research provided in {news_summary}, {social_insights}, and {expert_quotes}.",
     output_key="draft_article"
 )
 article_editor = Agent(
-    name="article_editor", model="gemini-2.5-flash",
+    name="article_editor", model="gemini-3.5-flash",
     instruction="You are an editor. Review and improve the draft article from {draft_article} for clarity, flow, and impact.",
     output_key="edited_article"
 )
 article_formatter = Agent(
-    name="article_formatter", model="gemini-2.5-flash",
+    name="article_formatter", model="gemini-3.5-flash",
     instruction="Format the article from {edited_article} for publication with proper markdown, including a title and headings.",
     output_key="published_article"
 )

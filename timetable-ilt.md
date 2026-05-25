@@ -7,7 +7,7 @@
 | 📖 [Module 2: Setting Up Your Development Environment](./training/module02-environment-setup/) | Medium | 60 |
 | 📖 [Module 3: Your First Agent: The "Echo" Agent](./training/module03-first-agent-echo/) | Low | 55 |
 | 📖 [Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-llmagent-deep-dive/) | Low | 50 |
-| 📖 [Module 4.5: Professional Model Configuration & Resiliency](./training/module04.5-multi-model-litellm/) | Medium | 45 |
+| 📖 [Module 4.5: Professional Model Configuration & Resiliency](./training/module04_5-multi-model-litellm/) | Medium | 45 |
 | 📖 [Module 5: Running and Interacting with Agents](./training/module05-running-agents/) | Medium | 50 |
 | 📖 [Module 6: Running an Agent Programmatically](./training/module06-programmatic-execution/) | Medium | 55 |
 | 📖 [Module 7: Multimodal and Images 📸](./training/module07-multimodal-and-images/) | High | 60 |
@@ -18,7 +18,7 @@
 | 🛠️ [Module 11: OpenAPI Tools](./training/module11-openapi-tools/) | High | 55 |
 | 🛠️ [Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/) | Medium | 45 |
 | 🛠️ [Module 13: Tool Context](./training/module13-tool-context/) | High | 65 |
-| 🛠️ [Module 13.5: Enterprise Persistence with Firestore](./training/module13.5-firestore-persistence/) | High | 45 |
+| 🛠️ [Module 13.5: Enterprise Persistence with Firestore](./training/module13_5-firestore-persistence/) | High | 45 |
 | 🛠️ [Module 14: Third-Party Tools](./training/module14-third-party-tools/) | Medium | 40 |
 | **Day 3: Multi-Agent Systems** | | **410** |
 | 🤖🤖 [Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/) | Low | 30 |

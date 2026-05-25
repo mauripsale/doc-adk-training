@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 24
 title: "Module 24: Evaluating Agent Performance"
 ---
 

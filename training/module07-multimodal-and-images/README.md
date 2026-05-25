@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 7
 title: "Module 7: Multimodal and Image Processing"
 ---
 

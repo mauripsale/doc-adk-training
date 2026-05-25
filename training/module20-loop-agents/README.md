@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 20
 title: "Module 20: Iterative Refinement with Loop Agents"
 ---
 

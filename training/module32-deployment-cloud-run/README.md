@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 32
 title: "Module 32: Deployment to Cloud Run"
 ---
 

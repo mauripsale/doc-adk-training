@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 34
 title: "Module 34: Deploying an MCP Server to Cloud Run"
 ---
 

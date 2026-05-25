@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 23
 title: "Module 23: Handling Files with Artifacts"
 ---
 

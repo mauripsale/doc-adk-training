@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 18
 title: "Module 18: Parallel Processing with ParallelAgent"
 ---
 

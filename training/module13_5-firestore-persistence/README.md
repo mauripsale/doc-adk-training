@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 13.5
 title: "Module 13.5: Enterprise Persistence with Firestore"
 ---
 

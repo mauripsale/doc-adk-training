@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 21
 title: "Module 21: Agent-to-Agent Communication"
 ---
 

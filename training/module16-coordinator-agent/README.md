@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 16
 title: "Module 16: Building a Coordinator/Dispatcher Agent"
 ---
 

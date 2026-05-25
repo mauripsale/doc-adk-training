@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 27
 title: "Module 27: Introduction to MCP & Stateful Tools"
 ---
 

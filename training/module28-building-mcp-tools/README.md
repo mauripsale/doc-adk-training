@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 28
 title: "Module 28: Building a Custom MCP Tool"
 ---
 

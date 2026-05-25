@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 4
 title: "Module 4: Core Agent Concepts: `LlmAgent` Deep Dive"
 ---
 

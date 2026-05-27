@@ -3,104 +3,83 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 21.5 Solution: Building a Smart Support Router
+# Lab 21.5 Solution: Building a Smart Support Router with Dynamic Workflows
 
 ## Goal
 
-This file contains the complete code for the `agent.py` script in the Smart Support Router lab.
+This file contains the complete code for the `agent.py` script in the Smart Support Router lab using the ADK 2.0 Dynamic Workflow pattern.
 
-### `support_router/agent.py`
+### `support_router_v2/agent.py`
 
 ```python
 from __future__ import annotations
-from pydantic import BaseModel, Field
-from google.adk.agents import Agent, BaseAgent
-from google.adk.agents.invocation_context import InvocationContext
-from google.adk.events import Event
+from pydantic import BaseModel
+from google.adk import Agent, Workflow, Context, Event
+from google.adk.workflow import node
 from typing import AsyncGenerator, Literal
 
-# ===== Specialist Agents (Provided for you) =====
+# ===== 1. Specialist Agent Nodes =====
 
 ai_support = Agent(
     name="ai_support_bot",
     model="gemini-3.5-flash",
-    instruction="You are a helpful customer support AI. Answer the user's technical questions clearly."
+    instruction="You are a helpful customer support AI. Answer technical questions clearly."
 )
 
 human_escalation = Agent(
     name="human_escalation_team",
     model="gemini-3.5-flash",
-    instruction="You are a human support representative. A customer is frustrated. Apologize profusely and tell them a human agent will call them immediately at the number on their account."
+    instruction="You are a human rep. Frustrated customer. apologize and promise a call."
 )
 
-# ===== 1. Define Sentiment Schema =====
-class SentimentClassification(BaseModel):
-    sentiment: Literal["angry", "neutral", "happy"] = Field(
-        description="The sentiment of the user's message."
-    )
+# ===== 2. Classifier Agent Node =====
 
-# ===== 2. Create the Classifier Agent =====
+class SentimentClassification(BaseModel):
+    sentiment: Literal["angry", "neutral", "happy"]
+
 classifier = Agent(
     name="classifier",
     model="gemini-3.5-flash",
     instruction="Classify the sentiment of the user's latest message.",
-    output_schema=SentimentClassification,
-    output_key="user_sentiment"  # Saves JSON to state['user_sentiment']
+    output_schema=SentimentClassification
 )
 
-# ===== 3. Build the Custom Router =====
-class SmartRouterAgent(BaseAgent):
+# ===== 3. Build the Dynamic Workflow (The Orchestrator) =====
+
+@node(rerun_on_resume=True)
+async def support_router_workflow(ctx: Context, node_input: str):
+    # Step 3a: Run the classifier node.
+    # In ADK 2.0, run_node returns the node's output directly!
+    # No more manual digging into session state.
+    classification: SentimentClassification = await ctx.run_node(classifier, node_input)
     
-    def __init__(self, name: str, classifier: Agent, ai_support: Agent, human_escalation: Agent, **kwargs):
-        super().__init__(name=name, **kwargs)
-        self.classifier = classifier
-        self.ai_support = ai_support
-        self.human_escalation = human_escalation
+    # Step 3b: Routing Logic.
+    # Use standard Python logic to choose the next node in the graph.
+    if classification.sentiment == "angry":
+        chosen_agent = human_escalation
+    else:
+        chosen_agent = ai_support
+    
+    # Step 3c: Execute the chosen specialist agent and return its result.
+    # By returning the result of run_node, the workflow engine automatically
+    # handles the event emission to the user.
+    return await ctx.run_node(chosen_agent, node_input)
 
-    async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
-        
-        # Step 3a: Run the classifier SILENTLY.
-        # We execute the generator, but we DO NOT `yield` its events.
-        # We just want it to do its job and save the structured output to the state.
-        async for _ in self.classifier.run_async(ctx):
-            pass 
-        
-        # Step 3b: Read the classification from the state.
-        sentiment_data = ctx.session.state.get("user_sentiment")
-        
-        # Step 3c: Routing Logic.
-        # We access the 'sentiment' key from the dictionary returned by the Pydantic schema
-        if sentiment_data and sentiment_data.get("sentiment") == "angry":
-            chosen_agent = self.human_escalation
-            # Optional: Add an internal trace event so developers can see the routing decision
-            yield Event(author=self.name, content="[System Log] Routing to Human Escalation due to angry sentiment.")
-        else:
-            chosen_agent = self.ai_support
-            
-        # Step 3d: Execute the chosen agent and stream its response to the user.
-        # We MUST yield these events so the UI receives the final answer.
-        async for event in chosen_agent.run_async(ctx):
-            yield event
+# ===== 4. Register the Workflow as the Root =====
 
-# ===== COMPLETE SYSTEM =====
-support_system = SmartRouterAgent(
+root_agent = Workflow(
     name="SupportSystem",
-    classifier=classifier,
-    ai_support=ai_support,
-    human_escalation=human_escalation
+    edges=[("START", support_router_workflow)]
 )
-
-# Set the root agent for the ADK
-root_agent = support_system
 ```
 
 ### Self-Reflection Answers
 
-1.  **Why did we build a custom `SmartRouterAgent` instead of just giving an `LlmAgent` a tool called `escalate_to_human`? (Think about control and determinism).**
-    *   **Answer:** If we gave an `LlmAgent` an escalation tool, we would be relying entirely on the LLM's unpredictable reasoning to decide *when* to use it. A custom `BaseAgent` provides **deterministic control**. We enforce a strict, unbreakable rule: *If sentiment == angry, route to human*. This guarantees that angry customers are *always* escalated without fail, avoiding the risk of a conversational AI trying to argue with a frustrated user instead of calling the tool.
+1.  **How is `ctx.run_node()` in ADK 2.0 different from the way we passed data between agents in ADK 1.x?**
+    *   **Answer:** In ADK 1.x, you had to set an `output_key` on an agent and then manually retrieve that data from the `ctx.session.state` dictionary in the parent agent. In ADK 2.0, `ctx.run_node()` returns the result of the node execution directly (as a string or a Pydantic object), making the data flow much more intuitive and "Pythonic".
 
-2.  **In Step 3a, why did we loop over `self.classifier.run_async(ctx)` but intentionally *not* yield the events? What would happen if we did yield them?**
-    *   **Answer:** The `classifier` agent generates text (the JSON string `{"sentiment": "angry"}`). If we yielded those events, the user would see raw JSON pop up in their chat interface before receiving the actual response. By running the generator but swallowing the events (`async for _ in ... pass`), we allow the agent to execute its internal side-effects (saving the output to `ctx.session.state` via `output_key`), but we hide the messy intermediate generation from the final user.
+2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
+    *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.
 
-3.  **How could you extend this custom agent to also include a Loop Agent? (e.g., if the AI support bot's answer isn't helpful, loop back to the user for clarification before escalating).**
-    *   **Answer:** You could create a `LoopAgent` that contains the `ai_support` agent and a `UserClarificationAgent`. In your `SmartRouterAgent`'s `_run_async_impl`, instead of routing directly to `self.ai_support`, you would route to the `self.support_loop_agent` you instantiated. The custom agent orchestrator doesn't care if its sub-components are simple `LlmAgent`s, `SequentialAgent`s, or complex `LoopAgent`s—it just calls `run_async()` on whichever component it decides should handle the execution.
+3.  **Can a dynamic workflow call another dynamic workflow?**
+    *   **Answer:** Yes! In ADK 2.0, every `Workflow` and every `@node` function is just a **Node**. This allows for deep nesting and modularity: you can build complex systems by composing many small, testable dynamic workflows together.

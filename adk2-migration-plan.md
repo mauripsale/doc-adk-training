@@ -29,10 +29,10 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 *   [ ] **Collaborative Workflows:** Introdurre i nuovi pattern di collaborazione nativa di ADK 2.0.
 
 ### 🔹 Fase 4: Produzione & Best Practices
-*   [ ] **Modulo 38 (Best Practices):**
+*   [x] **Modulo 38 (Best Practices):**
     *   **Error Handling:** Insegnare a propagare le eccezioni per farle gestire dal framework (RetryConfig).
     *   **Telemetry:** Spiegare i nuovi campi `node_info` negli Eventi.
-*   [ ] **Modulo 13.5 (Firestore):** Verificare la compatibilità del nuovo schema `Event` (campi `node_info` e `output`) con il servizio di persistenza.
+*   [ ] **Modulo 13_5 (Firestore):** Verificare la compatibilità del nuovo schema `Event` (campi `node_info` e `output`) con il servizio di persistenza.
 
 ---
 
@@ -42,8 +42,8 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 | :--- | :--- | :--- |
 | 02 | ⏳ In Attesa | Da aggiornare versione ADK |
 | 21.5 | ✅ Completato | Migrato a Dynamic Workflows (@node) |
-| 13.5 | ⏳ In Attesa | Da verificare schema Firestore |
-| 38 | ⏳ In Attesa | Da aggiornare pattern Error Handling |
+| 13_5 | ⏳ In Attesa | Da verificare schema Firestore |
+| 38 | ✅ Completato | Aggiornato a Framework-Level Resilience |
 
 ---
 

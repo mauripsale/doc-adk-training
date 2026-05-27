@@ -1,6 +1,6 @@
 ---
 sidebar_position: 38
-title: "Module 38: Best Practices & Production Patterns"
+title: "Module 38: Best Practices & Production Patterns (ADK 2.0)"
 ---
 
 # Module 38: Best Practices & Production Patterns
@@ -9,52 +9,60 @@ title: "Module 38: Best Practices & Production Patterns"
 
 ### From Prototype to Production
 
-Building a working agent is the first step. Building a **production-ready** agent requires a focus on architecture, performance, security, and reliability. This module summarizes the essential best practices for taking your agent from a prototype to a robust, scalable, and maintainable application.
+Building a working agent is the first step. Building a **production-ready** agent requires a focus on architecture, performance, security, and reliability. This module summarizes the essential best practices for taking your agent from a prototype to a robust, scalable, and maintainable application, aligned with the **ADK 2.0 Workflow Runtime**.
 
-### 1. Architectural Best Practices
+### 1. Architectural Best Practices: Thinking in Graphs
 
-#### The Agent Decision Matrix (ADK v1.0)
+In ADK 2.0, every component is a **Node** in a **Workflow Graph**. Choosing the right structure is your most critical design decision.
 
-When starting a new feature, choosing the right agent primitive is the most critical architectural decision. Use this matrix to guide your design:
-
-| Agent Primitive | When to use it | Key Characteristics |
+| Pattern | When to use it | Key Characteristics |
 | :--- | :--- | :--- |
-| **`LlmAgent`** | For natural language tasks, reasoning, and dynamic tool calling. | Non-deterministic, flexible. The LLM decides what to do next based on the prompt and available tools. |
-| **`SequentialAgent`** | For strict, step-by-step pipelines where Step B *must* happen after Step A. | Deterministic routing. Data is passed robustly via state variables (`output_key`) and structured schemas. |
-| **`ParallelAgent`** | For independent data gathering tasks (Fan-Out pattern). | Fast execution (limited by the slowest sub-agent). Requires unique `output_key`s to avoid state race conditions. |
-| **`LoopAgent`** | For iterative refinement tasks (e.g., Critic -> Refiner pattern). | Requires a termination condition (`max_iterations` and/or a tool calling `tool_context.actions.escalate = True`). |
-| **`CustomAgent`**<br/>*(Inherits `BaseAgent`)* | For dynamic, hard-coded business logic and programmatic routing based on state. | Maximum control. You write the `_run_async_impl` engine yourself, executing sub-agents silently or yielding them. |
+| **`LlmAgent`** | Natural language reasoning and dynamic tool calling. | Non-deterministic, flexible. Best for high-level decision making. |
+| **`Workflow` (Static) ** | Fixed, predictable pipelines (Sequential/Parallel). | Deterministic. Reduced latency and cost by avoiding LLM routing where logic is known. |
+| **`@node` (Dynamic)** | Complex, code-based orchestration (Loops, If/Else). | Maximum control. Allows arbitrary Python logic between agent executions. |
 
+*   **Small, Focused Tools:** Design your tools to follow the single-responsibility principle. A tool should do one thing well.
+*   **Progressive Disclosure with Skills:** Don't overload an agent with 50 tools. Group related tools into **Skills** and only activate them when needed.
+*   **Deterministic Routing:** If you *know* that Step B always follows Step A, don't ask an LLM to decide. Use a `Workflow` or a Dynamic `@node`.
 
-*   **Small, Focused Tools:** Design your tools to follow the single-responsibility principle. A tool should do one thing well. This makes them easier to test, debug, and for the LLM to reason about.
-*   **Clear, Structured Instructions:** Your agent's `instruction` is its constitution. Use clear language, define a specific persona and goal, and provide examples (few-shot prompting) to guide its behavior.
-*   **Separate Logic from Configuration:** Use Python-based agents (`agent.py`) for any agent that has tools or complex logic. Use YAML (`root_agent.yaml`) only for very simple, instruction-only agents.
-*   **Use Multi-Agent Systems for Complexity:** Don't build monolithic agents. Break down complex problems into smaller, specialized agents and orchestrate them using the matrix above.
+### 2. Resilience: Framework-Level Error Handling
 
-### 2. Performance Optimization
+ADK 2.0 changes the way we handle failures. Instead of writing complex `try...except` logic inside every tool, we now leverage the **Workflow Runtime**.
 
-*   **Model Selection:** Choose the right model for the job. Use cheaper, faster models (like `gemini-3.5-flash`) for simple tasks like classification or routing, and more powerful models (`gemini-3.1-pro-preview`) for complex reasoning.
-*   **Token Usage:** Keep instructions concise and clear old conversation history periodically to manage the context window. Use `max_output_tokens` to prevent unnecessarily long and expensive responses.
-*   **Caching:** Cache the results of expensive or frequently called tool functions, especially those that call external APIs.
-*   **Parallelism:** Use a `ParallelAgent` for independent, non-sequential tasks to significantly reduce overall latency.
+#### The "Let it Fail" Pattern
+In ADK 1.x, you were taught to catch all exceptions in tools. In ADK 2.0, you should **allow standard exceptions to propagate** out of your tools. 
 
-### 3. Security Best Practices
+**Why?**
+1.  **Automatic Retries:** If a tool fails with an exception, the ADK framework can automatically retry the execution based on a `RetryConfig`.
+2.  **Human-in-the-Loop (HITL):** Broad `except Exception:` blocks can accidentally trap `NodeInterruptedError`, which the framework uses to pause workflows for user input.
 
-*   **Input Validation:** Never trust user input. Validate and sanitize all inputs in your tool functions to prevent injection attacks (e.g., SQL injection, XSS).
-*   **Secrets Management:** **Never** hardcode API keys or other secrets in your code. Use a `.env` file for local development and a secure secret manager (like Google Secret Manager) in production.
-*   **Authentication & Authorization:** Secure your agent's API endpoints. Use the authentication provided by your deployment platform (e.g., Cloud Run IAM) or implement your own middleware.
-*   **Human-in-the-Loop (HITL):** For tools that perform destructive or sensitive actions, implement an approval workflow using `before_tool_callback` to require human confirmation.
+#### Configuring Retries
+You can configure retry logic globally or per-node in your Workflow:
 
-### 4. Error Handling & Resilience
+```python
+from google.adk.workflow import RetryConfig
 
-*   **Comprehensive Error Handling:** Your tool functions should have robust `try...except` blocks to catch errors and return a structured error message to the agent.
-*   **Retries with Exponential Backoff:** For tools that call external APIs that might fail intermittently, implement a retry mechanism with exponential backoff.
-*   **Circuit Breaker Pattern:** To prevent a failing external service from causing cascading failures in your system, use a circuit breaker that temporarily stops calls to the failing service.
-*   **Graceful Degradation:** Design your agent to provide a useful, albeit limited, response even if one of its tools fails. For example, a product recommendation agent could fall back to showing "popular items" if the personalization service is down.
+# Framework handles retries for you!
+my_agent_node = Agent(
+    ...,
+    retry_config=RetryConfig(max_attempts=3, initial_delay=2.0)
+)
+```
+
+### 3. Performance Optimization
+
+*   **Model Selection Hierarchy:** Use `gemini-3.5-flash` for routing, classification, and simple tool calling. Save `gemini-3.1-pro-preview` for complex multi-step reasoning.
+*   **Caching with `before_agent_callback`:** Implement a caching layer to skip LLM calls entirely if a similar request was recently processed.
+*   **Async Everything:** Always use `async` tool definitions to prevent blocking the event loop during I/O-bound tasks (API calls, DB queries).
+
+### 4. Security & Safety
+
+*   **Fail-Closed Validation:** Use Pydantic schemas for both `input_schema` and `output_schema`. If validation fails, the node fails immediately (preventing prompt injection or malformed data from propagating).
+*   **Secrets Management:** Use Google Secret Manager or `.env` files. **Never** log sensitive data or return it in an agent response.
+*   **HITL for Side Effects:** Any tool that performs a destructive action (deleting data, making a payment) **must** yield a `RequestInput` for human confirmation.
 
 ### Key Takeaways
-- **Architecture:** Build modular systems with small, focused tools and specialized agents.
-- **Performance:** Optimize by selecting the right model, managing token usage, caching results, and using parallelism.
-*   **Caching:** Use the `before_agent_callback` to skip LLM calls entirely when a cached answer exists.
-- **Security:** Always validate inputs, manage secrets securely, implement authentication, and use Human-in-the-Loop for sensitive operations.
-- **Resilience:** Build robust error handling into your tools, use retries for flaky APIs, and design for graceful degradation using ADK Plugins.
+- **Think in Nodes:** Break logic into discrete, testable nodes orchestrated by a Workflow.
+- **Framework Resilience:** Propagate exceptions to enable ADK 2.0 automatic retries and HITL.
+- **Model Efficiency:** Match the model capability to the task complexity.
+- **Strict Schemas:** Use Pydantic to enforce "fail-closed" security at every node boundary.

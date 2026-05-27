@@ -3,148 +3,131 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.5: Building a Smart Support Router Challenge
+# Lab 21.5: Building a Smart Support Router with Dynamic Workflows
 
 ## Goal
 
-### Goal
+In this lab, you will build a sophisticated orchestration system using a **Dynamic Workflow**. You will create a `support_router_workflow` node that intercepts user requests, uses a fast LLM node to classify the sentiment (angry, neutral, happy), and then programmatically routes the request to the appropriate specialist agent node.
 
-In this lab, you will build a complex orchestration system using a **Custom Agent**. You will create a `SmartRouterAgent` that intercepts user requests, uses a fast LLM to classify the sentiment (angry, neutral, happy), and then deterministically routes the request to the appropriate specialist agent based on that sentiment.
-
-This is a powerful pattern for customer support systems, where angry customers need immediate human escalation, while neutral queries can be handled by an AI.
+This exercise demonstrates the power of ADK 2.0: using standard Python logic to orchestrate multiple AI components with deterministic control.
 
 ### Step 1: Create the Project Structure
 
 1.  **Create a new project:**
     ```shell
-    adk create support_router
+    adk create support_router_v2
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
+    Choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
-    cd support_router
+    cd support_router_v2
     ```
 
-### Step 2: Implement the Custom Router
+3.  **Upgrade your environment:**
+    Ensure you are using ADK 2.0 or higher:
+    ```shell
+    uv pip install -U "google-adk>=2.1.0"
+    ```
 
-**Exercise:** Open `agent.py`. The two specialist agents (`ai_support` and `human_escalation`) have been provided for you. 
+### Step 2: Implement the Dynamic Router
 
-Your task is to implement the `SmartRouterAgent` class, which must inherit from `BaseAgent` and override its `_run_async_impl` method. 
+**Exercise:** Open `agent.py`. The two specialist agents (`ai_support` and `human_escalation`) have been provided for you as starter nodes.
+
+Your task is to implement the `support_router_workflow` function using the `@node` decorator and the `ctx.run_node()` method.
 
 ```python
 # In agent.py (Starter Code)
 
 from __future__ import annotations
-from pydantic import BaseModel, Field
-from google.adk.agents import Agent, BaseAgent
-from google.adk.agents.invocation_context import InvocationContext
-from google.adk.events import Event, EventActions
+from pydantic import BaseModel
+from google.adk import Agent, Workflow, Context, Event
+from google.adk.workflow import node
 from typing import AsyncGenerator, Literal
 
-# ===== Specialist Agents (Provided for you) =====
+# ===== Specialist Agent Nodes =====
 
 ai_support = Agent(
     name="ai_support_bot",
     model="gemini-3.5-flash",
-    instruction="You are a helpful customer support AI. Answer the user's technical questions clearly."
+    instruction="You are a helpful customer support AI. Answer technical questions clearly."
 )
 
 human_escalation = Agent(
     name="human_escalation_team",
     model="gemini-3.5-flash",
-    instruction="You are a human support representative. A customer is frustrated. Apologize profusely and tell them a human agent will call them immediately at the number on their account."
+    instruction="You are a human rep. Frustrated customer. apologize and promise a call."
 )
 
 # ===== 1. Define Sentiment Schema =====
 
-# TODO: We need a fast classification agent. Let's force it to output structured data.
-# Define a Pydantic BaseModel called `SentimentClassification` with a single field 
-# `sentiment` that must be a Literal of "angry", "neutral", or "happy".
+# Define a Pydantic model for structured classification
 class SentimentClassification(BaseModel):
-    pass
+    sentiment: Literal["angry", "neutral", "happy"]
 
-# ===== 2. Create the Classifier Agent =====
-
-# TODO: Create a very fast `LlmAgent` named `classifier`.
-# Give it an instruction to "Classify the sentiment of the user's latest message."
-# Use your `SentimentClassification` schema for its `output_schema` and 
-# set `output_key="user_sentiment"`.
-classifier = None
-
-# ===== 3. Build the Custom Router =====
-
-# TODO: Create the `SmartRouterAgent` class inheriting from `BaseAgent`.
-class SmartRouterAgent(BaseAgent):
-    
-    # Accept our sub-components in the constructor
-    def __init__(self, name: str, classifier: Agent, ai_support: Agent, human_escalation: Agent, **kwargs):
-        super().__init__(name=name, **kwargs)
-        self.classifier = classifier
-        self.ai_support = ai_support
-        self.human_escalation = human_escalation
-
-    # TODO: Implement the engine
-    async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
-        pass
-        
-        # Step 3a: Run the classifier agent to determine sentiment.
-        # Hint: Use `async for event in self.classifier.run_async(ctx):` but DO NOT yield 
-        # these events to the user. We just want the classifier to populate the state silently.
-        
-        # Step 3b: Read the classification from the state.
-        # Hint: `ctx.session.state.get("user_sentiment")`
-        
-        # Step 3c: Routing Logic.
-        # If the sentiment dict has a "sentiment" value of "angry", choose the `human_escalation` agent.
-        # Otherwise, choose the `ai_support` agent.
-        
-        # Step 3d: Execute the chosen agent.
-        # Hint: Use `async for event in chosen_agent.run_async(ctx):` and this time, 
-        # YOU MUST yield the event so the user sees the final response!
-
-# ===== COMPLETE SYSTEM =====
-
-# Instantiate your custom router
-support_system = SmartRouterAgent(
-    name="SupportSystem",
-    classifier=classifier,
-    ai_support=ai_support,
-    human_escalation=human_escalation
+# Create the classifier agent node
+classifier = Agent(
+    name="classifier",
+    model="gemini-3.5-flash",
+    instruction="Classify the sentiment of the user's latest message.",
+    output_schema=SentimentClassification
 )
 
-# Set the root agent for the ADK
-root_agent = support_system
-```
+# ===== 2. Build the Dynamic Workflow =====
 
-*(Note: The full implementation is available in the `lab-solution.md` if you need a hint.)*
+# TODO: Implement the orchestrator node
+# 1. Use the @node(rerun_on_resume=True) decorator.
+# 2. Accept 'ctx: Context' and 'node_input: str' as arguments.
+@node(rerun_on_resume=True)
+async def support_router_workflow(ctx: Context, node_input: str):
+    # Step 2a: Run the classifier node.
+    # Hint: result = await ctx.run_node(classifier, node_input)
+    # The result will be an instance of SentimentClassification!
+    classification = None 
+    
+    # Step 2b: Routing Logic.
+    # Use a standard Python 'if' statement to choose the target agent.
+    # If sentiment is "angry", choose human_escalation.
+    # Otherwise, choose ai_support.
+    chosen_agent = None 
+    
+    # Step 2c: Execute the chosen agent and return the result.
+    # Hint: return await ctx.run_node(chosen_agent, node_input)
+    return None
+
+# ===== 3. Register the System =====
+
+# TODO: Create a Workflow named "SupportSystem" 
+# and link the "START" edge to your support_router_workflow.
+root_agent = Workflow(
+    name="SupportSystem",
+    edges=[("START", ...)]
+)
+```
 
 ### Step 3: Run and Test the Router
 
-1.  **Set up your `.env` file.**
-2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
+1.  **Start the Dev UI:**
     ```shell
-    adk web support_router
+    adk web .
     ```
-3.  **Interact with the system:**
-    *   **Test 1 (Neutral):** Send "How do I reset my password?". You should get a helpful technical response from the `ai_support_bot`.
-    *   **Test 2 (Angry):** Send "THIS APP IS TERRIBLE! I WANT A REFUND NOW!". You should instantly get an apology and an escalation message from the `human_escalation_team`.
-4.  **Examine the Trace View:**
-    *   Look closely at the Trace. Notice how the `classifier` agent runs first, but its output is hidden from the main chat interface. 
-    *   Then, notice how your custom router decides which agent to execute next based on the hidden state.
+2.  **Test the routing:**
+    *   **Input:** "My internet is down, help!" -> Should route to `ai_support_bot`.
+    *   **Input:** "THIS IS DISGUSTING! I WANT TO CANCEL EVERYTHING!" -> Should route to `human_escalation_team`.
+3.  **Inspect the Workflow Graph:**
+    In the Dev UI, open the **Graph View**. You will see the visual representation of your dynamic execution: the flow from the router node to the specific specialist agent.
 
 ### Lab Summary
 
-You have successfully built a sophisticated routing orchestrator using a Custom Agent! You have learned:
-*   How to inherit from `BaseAgent` and override `_run_async_impl`.
-*   How to execute sub-agents silently to populate the session state.
-*   How to read from the `InvocationContext` (`ctx.session.state`) to make deterministic routing decisions.
-*   How to yield events from a delegated sub-agent back to the user interface.
+By completing this lab, you have mastered the fundamental orchestration pattern of ADK 2.0:
+*   Using **`@node`** to turn standard Python functions into workflow components.
+*   Leveraging **`ctx.run_node()`** to execute agents and retrieve structured results directly.
+*   Implementing **Programmable Routing** that combines AI classification with deterministic business rules.
 
 ### Self-Reflection Questions
-- Why did we build a custom `SmartRouterAgent` instead of just giving an `LlmAgent` a tool called `escalate_to_human`? (Think about control and determinism).
-- In Step 3a, why did we loop over `self.classifier.run_async(ctx)` but intentionally *not* yield the events? What would happen if we did yield them?
-- How could you extend this custom agent to also include a Loop Agent? (e.g., if the AI support bot's answer isn't helpful, loop back to the user for clarification before escalating).
+- How is `ctx.run_node()` in ADK 2.0 different from the way we passed data between agents in ADK 1.x?
+- Why is it important to set `rerun_on_resume=True` for the orchestrator node?
+- Can a dynamic workflow call another dynamic workflow? (Hint: Yes, every workflow is just a node!)
 
 <hr/>
 

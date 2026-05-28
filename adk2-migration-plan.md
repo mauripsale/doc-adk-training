@@ -13,7 +13,7 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 ## 📅 Roadmap degli Interventi
 
 ### 🔹 Fase 1: Fondamentali & Setup
-*   [ ] **Modulo 02 (Environment):** Aggiornare i requisiti a Python 3.10+ e `google-adk>=2.1.0`.
+*   [x] **Modulo 02 (Environment):** Aggiornare i requisiti a Python 3.10+ e `google-adk>=2.1.0`.
 *   [ ] **Modulo 06 (Programmatic):** Introdurre il concetto di `Context` e come il runtime v2 gestisce gli eventi.
 
 ### 🔹 Fase 2: Orchestrazione Moderna (Il core di ADK 2.0)
@@ -40,7 +40,7 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 
 | Modulo | Stato | Note |
 | :--- | :--- | :--- |
-| 02 | ⏳ In Attesa | Da aggiornare versione ADK |
+| 02 | ✅ Completato | Richiede ADK 2.1.0+ e Python 3.10+ |
 | 21.5 | ✅ Completato | Migrato a Dynamic Workflows (@node) |
 | 13_5 | ⏳ In Attesa | Da verificare schema Firestore |
 | 38 | ✅ Completato | Aggiornato a Framework-Level Resilience |

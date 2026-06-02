@@ -17,21 +17,21 @@ In this lab, you will implement the multi-agent "Greeting Router" system. You wi
     cd greeting_agent
     ```
 
-### Step 2: Create the Specialist Agent
+### Step 2: Create the Specialist Agent Node
 
 **Exercise:** Create a new file named `spanish_greeter_agent.py`. In this file, use the skeleton below to define the configuration for the `spanish_greeter_agent`.
 
 ```python
 # In spanish_greeter_agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
-agent = LlmAgent(
+agent = Agent(
     name="spanish_greeter_agent",
     model="gemini-3.5-flash",
     description="""
 # TODO: Write a clear description that explains this agent's capability
 # (e.g., "An expert at providing friendly greetings in Spanish.").
-# This is critical for the router to find it.
+# This is critical for the router node to find it in the graph.
 """,
     instruction="""
 # TODO: Write an instruction that tells the agent its only job is to
@@ -40,27 +40,32 @@ agent = LlmAgent(
 )
 ```
 
-### Step 3: Configure the Coordinator (Router) Agent
+### Step 3: Configure the Coordinator and Workflow
 
-**Exercise:** Now, open the main `agent.py` file and use the skeleton below to configure it to act as the router.
+**Exercise:** Now, open the main `agent.py` file and use the skeleton below to configure the coordinator node and the root workflow.
 
 ```python
 # In agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent, Workflow
 
 # TODO: Import the `agent` object from your `spanish_greeter_agent` module.
 
-root_agent = LlmAgent(
+coordinator = Agent(
     name="router_agent",
     model="gemini-3.5-flash",
     description="The main greeter agent that routes to language specialists.",
     instruction="""
 # TODO: Write an instruction that tells the agent its job is to delegate
-# to the `spanish_greeter_agent` for Spanish greetings and that it
-# should *not* greet the user itself.
+# to the `spanish_greeter_agent` for Spanish greetings.
 """,
-    # TODO: Add the `sub_agents` list and include the imported spanish greeter agent.
+    # TODO: Register the specialist for discovery
     sub_agents=[]
+)
+
+# TODO: Create the root Workflow
+root_agent = Workflow(
+    name="GreetingSystem",
+    edges=[("START", coordinator)]
 )
 ```
 

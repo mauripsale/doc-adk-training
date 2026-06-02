@@ -24,16 +24,16 @@ load_dotenv()
 
 # 1. Create the App container.
 # This separates infrastructure (App) from intelligence (Agent).
+# In ADK 2.0, root_agent is passed as a named argument.
 app = App(name="support_app", root_agent=root_agent)
 
 # 2. Initialize the Runner.
-# We use InMemoryRunner which automatically sets up session management.
+# We pass the 'app' instance to the Runner.
 runner = InMemoryRunner(app=app)
 
 async def main():
     print("--- User A (Alice) ---")
     # 3. Run for Alice (Billing Issue)
-    # The runner uses the user_id to isolate this conversation.
     # run_debug automatically prints the agent response to the terminal.
     events_a = await runner.run_debug("I was overcharged $50.", user_id="Alice")
     

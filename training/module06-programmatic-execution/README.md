@@ -61,18 +61,19 @@ from google.adk.runners import InMemoryRunner
 from agent import root_agent # Your agent from Module 04
 
 # 1. Wrap the agent in an App
+# In ADK 2.0, 'root_agent' is a required named argument.
 app = App(name="my_support_app", root_agent=root_agent)
 
 # 2. Instantiate a Runner for that App
-# InMemoryRunner is great for development as it handles 
-# session storage in local memory.
+# The Runner now takes the 'app' instance directly.
 runner = InMemoryRunner(app=app)
 
 async def main():
     # 3. Execute!
-    # Tip: run_debug() is a helper for simple testing in v1.18+
-    # it wraps the complex async loop and returns a list of Event objects.
-    events = await runner.run_debug("I have a billing problem.")
+    # Tip: run_debug() is the recommended method for programmatic testing.
+    # It handles the async event stream and returns a list of Event objects.
+    events = await runner.run_debug("I have a billing problem.", user_id="user_123")
+    
     for event in events:
         if event.is_final_response():
             print(f"Agent Response: {event.content.parts[0].text}")

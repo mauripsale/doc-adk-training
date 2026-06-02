@@ -41,10 +41,10 @@ Using `uv` makes project initialization incredibly fast and simple.
 
 ## Step 3: Install Packages
 
-Use `uv` to add your dependencies. This command will automatically create a virtual environment (`.venv`), resolve the fastest dependency tree, and lock the versions in `uv.lock`.
+Use `uv` to add your dependencies. We explicitly require version 2.1.0 or higher for the Graph Runtime.
 
 ```bash
-uv add google-adk python-dotenv
+uv add "google-adk>=2.1.0" python-dotenv
 ```
 
 ## Step 4: Configure Authentication

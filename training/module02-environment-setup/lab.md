@@ -31,7 +31,11 @@ Fortunately, `uv` makes this easy. Even if your system doesn't have Python 3.10,
     uv init adk-training --python 3.10
     ```
 2.  Navigate into the `adk-training` directory.
-3.  Use `uv add` to install the `google-adk` and `python-dotenv` packages. Notice how `uv` automatically creates a virtual environment (`.venv`) for you and locks the dependencies in `uv.lock`.
+3.  Use `uv add` to install the modern ADK and dotenv:
+    ```bash
+    uv add "google-adk>=2.1.0" python-dotenv
+    ```
+    Notice how `uv` automatically creates a virtual environment (`.venv`) and locks the dependencies in `uv.lock`.
 
 ### Step 2: Configure Authentication
 

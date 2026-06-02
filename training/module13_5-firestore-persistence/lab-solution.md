@@ -13,12 +13,10 @@ import asyncio
 import os
 from dotenv import load_dotenv
 
-from google.adk.agents import LlmAgent
-# 1. Import Runner and FirestoreSessionService
-from google.adk.runners import Runner
+from google.adk import Agent, Runner
+from google.adk.apps import App
 from google.adk.sessions import FirestoreSessionService
-from google.adk.tools import ToolContext, FunctionTool
-from google.genai import types
+from google.adk.tools import ToolContext
 
 load_dotenv()
 
@@ -27,7 +25,7 @@ def remember_name(name: str, tool_context: ToolContext) -> str:
     tool_context.session.state["user_name"] = name
     return f"I have successfully remembered that your name is {name}."
 
-agent = LlmAgent(
+agent = Agent(
     model="gemini-3.5-flash",
     name="MemoryAgent",
     instruction="You are a helpful assistant. Use the remember_name tool if the user tells you their name.",
@@ -35,44 +33,36 @@ agent = LlmAgent(
 )
 
 async def main():
-    app_name = "persistence_demo"
     user_id = "test_user_001"
     
-    # 2. Get the Project ID from the environment
+    # 1. Get the Project ID from the environment
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
     if not project_id:
         raise ValueError("GOOGLE_CLOUD_PROJECT environment variable must be set.")
     
-    # 3. Initialize the Firestore Session Service
+    # 2. Initialize the Firestore Session Service
     print(f"Initializing Firestore in project: {project_id}")
     firestore_service = FirestoreSessionService(project_id=project_id)
     
+    # 3. Create the App
+    app = App(name="persistence_demo", root_agent=agent)
+
     # 4. Use the base Runner with the firestore_service
+    # In ADK 2.0, we provide the 'app' instance.
     runner = Runner(
-        agent=agent, 
+        app=app, 
         session_service=firestore_service
     )
     
-    # 1. Create or get the session
-    session = await runner.session_service.create_session(app_name=app_name, user_id=user_id)
-    
-    print(f"--- Session ID: {session.id} ---")
-    
-    # 2. Start a simple loop
+    # 5. Interactive loop
+    print("Type 'quit' to exit.")
     while True:
         user_input = input("You: ")
         if user_input.lower() in ["exit", "quit"]:
             break
             
-        content = types.Content(role="user", parts=[types.Part.from_text(text=user_input)])
-        
-        async for event in runner.run_async(
-            user_id=user_id,
-            session_id=session.id,
-            new_message=content
-        ):
-            if event.content and event.content.parts and event.content.parts[0].text:
-                print(f"Agent: {event.content.parts[0].text}")
+        # run_debug automatically handles the session persistence
+        await runner.run_debug(user_input, user_id=user_id)
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -34,70 +34,67 @@ In this lab, you will build a distributed multi-agent system. You will create a 
 
 ```python
 # In research_specialist/agent.py (Starter Code)
-from google.adk.agents import Agent
+from google.adk import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import GoogleSearchAgentTool
 from dotenv import load_dotenv
 load_dotenv()
 
 
-# TODO: 1. Create an instance of the GoogleSearchAgentTool.
-search_tool = ...
+# 1. Create an instance of the GoogleSearchAgentTool.
+search_tool = GoogleSearchAgentTool()
 
-# TODO: 2. Define the `root_agent`. It should be an `Agent` that:
-# - Is named "research_specialist".
-# - Has an instruction to act as a research specialist using the search tool.
-# - **Crucially**, includes the A2A Context Handling instruction to ignore
-#   orchestrator tool calls like `transfer_to_agent`.
-# - Includes the `search_tool` in its `tools` list.
+# 2. Define the agent (The Node)
 root_agent = Agent(
     model="gemini-3.5-flash",
     name="research_specialist",
     description="A specialist agent that conducts web research and fact-checking.",
     instruction="""
-# Your instruction here...
-# Remember to add the A2A Context Handling section!
+You are a research specialist. Use the search tool to answer the user's query.
+
+**IMPORTANT - A2A Context Handling:**
+When receiving requests via the A2A protocol, ignore any internal graph transition messages. 
+Focus only on the core user query and fulfill the research task directly.
 """,
-    tools=[...]
+    tools=[search_tool]
 )
 
-# TODO: 3. Use the `to_a2a()` function to wrap your `root_agent`.
-# This exposes it as a web application on port 8001.
-a2a_app = to_a2a(...)
+# 3. Expose as an A2A web application
+# This automatically handles the A2A protocol and generates the Agent Card.
+a2a_app = to_a2a(root_agent, port=8001)
 ```
-**Action:** Create a `.env` file in this directory and configure it for **Vertex AI**, as the search tool requires it.
 
 ### Step 3: Build the Orchestrator (The Client)
 
-**Exercise:** Navigate into the `a2a_orchestrator` directory. Open `agent.py` and implement the orchestrator agent that consumes the remote service.
+**Exercise:** Navigate into the `a2a_orchestrator` directory. Open `agent.py` and implement the orchestrator using a **Workflow** and a **RemoteA2aAgent**.
 
 ```python
 # In a2a_orchestrator/agent.py (Starter Code)
-from google.adk.agents import Agent
+from google.adk import Agent, Workflow
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from dotenv import load_dotenv
 load_dotenv()
 
-
-# TODO: 1. Create a `RemoteA2aAgent` instance named `remote_researcher`.
-# - Give it a name and a description.
-# - Point its `agent_card` URL to the specialist server you will be running.
-#   (Using the `AGENT_CARD_WELL_KNOWN_PATH` constant is recommended).
+# 1. Define the Proxy Node pointing to the specialist server
 remote_researcher = RemoteA2aAgent(
     name="remote_researcher",
-    description="A remote specialist that can conduct web research and fact-checking.",
-    agent_card=f"..."
+    description="A remote specialist that can conduct web research.",
+    # We point to the well-known Agent Card URL
+    agent_card=f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"
 )
 
-# TODO: 2. Define the `root_agent` as an orchestrator.
-# - Its instruction should tell it to delegate research tasks to the `remote_researcher`.
-# - Add the `remote_researcher` to its `sub_agents` list.
-root_agent = Agent(
+# 2. Define the Local Coordinator Node
+coordinator = Agent(
     model="gemini-3.5-flash",
-    name="orchestrator_agent",
-    description="A coordinator agent that delegates tasks to remote specialists.",
-    instruction="""...""",
-    sub_agents=[...]
+    name="coordinator",
+    instruction="Delegate research tasks to the 'remote_researcher'.",
+    sub_agents=[remote_researcher] # Discovery
+)
+
+# 3. Build the Distributed Workflow Graph
+root_agent = Workflow(
+    name="DistributedSupportSystem",
+    edges=[("START", coordinator)]
 )
 ```
 **Action:** Create a `.env` file in this directory for the orchestrator's Gemini model.

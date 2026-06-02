@@ -13,25 +13,26 @@ Complex problems often require multiple steps or areas of expertise. Instead of 
 
 For processes that follow a fixed, predictable sequence, the ADK provides the `SequentialAgent`.
 
-### `SequentialAgent`: Building Pipelines
+### Sequential Workflows in ADK 2.0
 
-The `SequentialAgent` is a **Workflow Agent**, meaning it is not powered by an LLM. It is a deterministic controller that executes its `sub_agents` one after another, in the exact order they are defined. It's the foundation for creating multi-step pipelines where the output of one step becomes the input for the next.
+In ADK 2.0, there is no separate `SequentialAgent` class. Instead, you build a sequential pipeline by defining a **linear set of edges** within a **`Workflow`**.
+
+A `Workflow` is a deterministic controller that executes nodes according to the graph structure you define. When edges are linear (A -> B -> C), the ADK executes them one after another, in the exact order specified.
 
 **Key Concepts:**
-*   **Execution Order:** Guaranteed to be top-to-bottom.
-*   **Shared State:** The `SequentialAgent` passes the *same* session state to each sub-agent. This is how you pass data between steps.
-*   **Data Flow with `output_key`:** An agent can define an `output_key` in its configuration. When it finishes, the ADK automatically saves its response (which can be a structured object if `output_schema` is used) to `state['your_key']`. The next agent in the sequence can then read this value by using `{your_key}` in its instruction prompt.
+*   **Linear Edges:** Define a sequence like `[("START", node1), (node1, node2), (node2, node3)]`.
+*   **Automatic Data Flow:** By default, the output of `node1` is passed as the `node_input` to `node2`.
+*   **Shared State and `output_key`:** While data is passed directly between nodes, you can still use `output_key` to save a node's result into the global `ctx.session.state`. This allows later nodes to access data from much earlier steps using the `{key}` syntax in their prompts.
 
-**When to Use `SequentialAgent`:**
+**When to Use a Sequential Workflow:**
 *   When tasks MUST happen in a specific order.
 *   When each step depends on the previous step's output.
 *   When you need predictable, deterministic execution.
-*   For building pipelines (e.g., ETL, content creation, review processes).
+*   For building professional content creation or data processing pipelines.
 
 ### Key Takeaways
-- The `SequentialAgent` is a deterministic workflow agent that executes sub-agents in a fixed order.
-- It is ideal for building multi-step pipelines where each step depends on the previous one.
-- Data is passed between agents in the sequence using the shared session state.
-- **Structured Output Passing:** By combining `output_schema` (Pydantic models) with `output_key`, you pass robust JSON objects between agents instead of fragile strings, avoiding manual parsing.
-- An agent's `output_key` is used to save its result to the state, and the next agent can read it using `{key}` syntax in its prompt.
-- **Advanced Level - Code Organization:** For larger Python-based multi-agent systems, it's a best practice to define your specialist sub-agents in separate Python modules (e.g., `specialists.py`) and then import them into your main `agent.py` file. This improves modularity and keeps your main pipeline definition clean.
+- **Sequential is a structure, not a class:** Use `Workflow` with linear edges.
+- **Predictable execution:** Guaranteed order of operations.
+- **Direct and Indirect Data Flow:** Pass data directly via node inputs or indirectly via `output_key` and session state.
+- **Structured Pass-through:** Use Pydantic models in `output_schema` to pass robust JSON objects between nodes.
+

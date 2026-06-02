@@ -30,18 +30,28 @@ Switching from in-memory to Firestore requires almost zero changes to your actua
 
 Instead of `InMemoryRunner`, you use the base `Runner` class and explicitly pass an instance of `FirestoreSessionService`.
 
-```python
-from google.adk import Agent, Runner
-from google.adk.sessions import FirestoreSessionService
+**Installation:**
+```bash
+uv add "google-adk[gcp]>=2.1.0"
+```
 
-# 1. Initialize the Firestore Session Service
+**Code Pattern:**
+```python
+from google.adk.apps import App
+from google.adk.sessions import FirestoreSessionService
+from google.adk import Runner
+
+# 1. Wrap your agent/workflow in an App
+app = App(name="persistence_demo", root_agent=my_agent)
+
+# 2. Initialize the Firestore Session Service
 firestore_service = FirestoreSessionService(
     project_id="your-gcp-project-id"
 )
 
-# 2. Use the base Runner instead of InMemoryRunner
+# 3. Create a Runner and inject the service
 runner = Runner(
-    agent=my_agent, # or my_workflow
+    app=app,
     session_service=firestore_service
 )
 ```

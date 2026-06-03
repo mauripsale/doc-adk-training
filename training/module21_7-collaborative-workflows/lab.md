@@ -88,3 +88,19 @@ You have implemented a Collaborative Workflow!
 - You learned how to use the **`collaborators`** parameter.
 - You observed **Native Hand-offs** in action.
 - You realized that agents can act as peers, sharing responsibility for the user's session.
+
+### Self-Reflection Questions
+- What is the main difference between a Collaborative Workflow and a Coordinator Agent?
+- Why is it necessary to assign collaborators retroactively in Python when dealing with circular references?
+- Can you think of an enterprise scenario where peer-to-peer hand-offs are safer than a central router?
+
+<hr/>
+
+### 🕵️ Hidden Solution 🕵️
+
+Looking for the solution? Here's a hint (Base64 decode me):
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMjFfNy1jb2xsYWJvcmF0aXZlLXdvcmtmbG93cy9sYWItc29sdXRpb24=`
+
+<div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
+    The direct link is: <a href="/doc-adk-training/module21_7-collaborative-workflows/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+</div>

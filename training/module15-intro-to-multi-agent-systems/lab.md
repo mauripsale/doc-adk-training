@@ -80,32 +80,40 @@ Based on our design, we can plan the files we'll need to create in the next lab.
 
 ```
 adk-training/
-└── greeting_agent/              <-- New project directory
-    ├── .env                     <-- For API keys
-    ├── agent.py                 <-- This will define our router_agent
-    ├── __init__.py              <-- Makes the directory a Python package
-    └── spanish_greeter_agent.py <-- This will define our specialist agent
+└── greeting_system/              <-- New project directory
+    ├── .env                      <-- For API keys
+    ├── agent.py                  <-- This will define our Workflow and Router node
+    ├── __init__.py               <-- Makes the directory a Python package
+    └── spanish_greeter_agent.py  <-- This will define our Specialist node
 ```
 
-**`agent.py` (The Router):**
-We know this file will need to import the sub-agent and add it to the `sub_agents` list.
+**`agent.py` (The Router and Workflow):**
+We know this file will need to define the `Workflow` and register the sub-nodes.
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent, Workflow
 from . import spanish_greeter_agent
 
-root_agent = LlmAgent(
+# The Router Node
+router = Agent(
+    name="router_agent",
     model="gemini-3.5-flash",
     instruction="You are a language router...",
-    sub_agents=[spanish_greeter_agent.agent]
+    sub_agents=[spanish_greeter_agent.agent] # Registration for discovery
+)
+
+# The System Graph
+root_agent = Workflow(
+    name="GreetingSystem",
+    edges=[("START", router)]
 )
 ```
 
 **`spanish_greeter_agent.py` (The Specialist):**
 This will be a standard agent definition file.
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
-agent = LlmAgent(
+agent = Agent(
     name="spanish_greeter_agent",
     model="gemini-3.5-flash",
     description="An expert at providing friendly greetings in Spanish.",
@@ -115,15 +123,12 @@ agent = LlmAgent(
 
 ### Lab Summary
 
-You have successfully designed a multi-agent system on paper! This conceptual work is a vital skill for building complex, maintainable agentic applications.
+You have successfully designed a multi-agent system on paper! 
+- You learned to break down a problem into specialized **Nodes**.
+- You defined how nodes are registered via **`sub_agents`** and orchestrated via **`Workflow`**.
+- You mapped the flow of control within a **Graph**.
 
-You have learned to:
-*   Break down a problem into specialized agent roles.
-*   Define the purpose, instructions, and descriptions for each agent.
-*   Map the flow of information and control between agents.
-*   Plan the file structure for a multi-agent project using the Python-first approach.
-
-In the next module, you will bring this design to life by implementing this Greeting Router system.
+In the next module, you will bring this design to life by implementing this Greeting System.
 
 ### Self-Reflection Questions
 - What is the most important piece of information that allows the `router_agent` to decide which specialist to delegate to?

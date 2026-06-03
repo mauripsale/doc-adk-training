@@ -14,141 +14,77 @@ In this lab, you will build a sophisticated **Content Publishing System** that d
 ### The Architecture
 
 1.  **Phase 1: Parallel Research (Fan-Out)**
-    Three independent, sequential pipelines will run concurrently:
-    *   **News Pipeline:** Fetches current events, then summarizes the key points.
-    *   **Social Pipeline:** Gathers trending topics, then analyzes the insights.
-    *   **Expert Pipeline:** Finds expert opinions, then extracts key quotes.
+    Three independent, sequential sub-workflows will run concurrently:
+    *   **News Workflow:** Fetches current events, then summarizes the key points.
+    *   **Social Workflow:** Gathers trending topics, then analyzes the insights.
+    *   **Expert Workflow:** Finds expert opinions, then extracts key quotes.
 
-2.  **Phase 2: Sequential Content Creation (Gather)**
-    A final sequential pipeline will run after all research is complete:
-    *   **Writer Agent:** Combines the summaries from all three research pipelines into a draft article.
+2.  **Phase 2: Content Creation (Gather)**
+    Once all sub-workflows complete at a **JoinNode**, a final sequence of agents runs:
+    *   **Writer Agent:** Combines all research into a draft.
     *   **Editor Agent:** Reviews and improves the draft.
-    *   **Formatter Agent:** Formats the final article for publication.
+    *   **Formatter Agent:** Formats the final article.
 
-### Step 1: Create and Prepare the Project
+### Step 2: Assemble the Nested Workflows
 
-1.  **Create the agent project:**
-    ```shell
-    adk create content_publisher
-    ```
-    When prompted, choose the **Programmatic (Python script)** option.
-
-2.  **Navigate into the new directory:**
-    ```shell
-    cd content_publisher
-    ```
-3.  **Create the `.env` file:**
-    The search tools require a Vertex AI configuration. Create a `.env` file in this directory with the following content, replacing `<your_gcp_project>` with your actual Google Cloud project ID.
-    ```
-    GOOGLE_GENAI_USE_VERTEXAI=1
-    GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-    GOOGLE_CLOUD_LOCATION=us-central1
-    ```
-
-### Step 2: Assemble the Multi-Agent System
-
-**Exercise:** Open `agent.py`. All eight of the individual specialist agents have been provided for you below. Your task is to assemble them into the complete, multi-level architecture described above by completing the `TODO` sections at the bottom.
+**Exercise:** Open `agent.py`. Your task is to assemble the agents into **Sub-Workflows** and then combine them into a **Root Workflow**.
 
 ```python
 # In agent.py (Starter Code)
 
-from __future__ import annotations
-from google.adk.agents import Agent, ParallelAgent, SequentialAgent
-from google.adk.tools import GoogleSearchAgentTool
+from google.adk import Agent, Workflow
+from google.adk.workflow import JoinNode
 
-# ===== SHARED TOOLS =================================
-search_tool = GoogleSearchAgentTool()
-
-# ===== SPECIALIST AGENTS (Provided for you) =====
-
-# --- Branch 1: News ---
-news_fetcher = Agent(
-    name="news_fetcher", model="gemini-3.5-flash", tools=[search_tool],
-    instruction="You are a news researcher. Use the GoogleSearchAgentTool to find 3-4 current news articles about the user's topic.",
-    output_key="raw_news"
-)
-news_summarizer = Agent(
-    name="news_summarizer", model="gemini-3.5-flash",
-    instruction="Summarize the news articles from {raw_news} into 2-3 key takeaways.",
-    output_key="news_summary"
-)
-
-# --- Branch 2: Social Media ---
-social_monitor = Agent(
-    name="social_monitor", model="gemini-3.5-flash", tools=[search_tool],
-    instruction="You are a social media analyst. Use the GoogleSearchAgentTool to find trending discussions and public sentiment about the user's topic.",
-    output_key="raw_social"
-)
-sentiment_analyzer = Agent(
-    name="sentiment_analyzer", model="gemini-3.5-flash",
-    instruction="Analyze the social media data from {raw_social} and extract key insights on trends and sentiment.",
-    output_key="social_insights"
-)
-
-# --- Branch 3: Expert Opinion ---
-expert_finder = Agent(
-    name="expert_finder", model="gemini-3.5-flash", tools=[search_tool],
-    instruction="You are an expert opinion researcher. Use the GoogleSearchAgentTool to find what industry experts or academics are saying about the user's topic.",
-    output_key="raw_experts"
-)
-quote_extractor = Agent(
-    name="quote_extractor", model="gemini-3.5-flash",
-    instruction="Extract the most impactful quotes from the expert opinions in {raw_experts}.",
-    output_key="expert_quotes"
-)
-
-# --- Content Creation ---
-article_writer = Agent(
-    name="article_writer", model="gemini-3.5-flash",
-    instruction="You are a professional writer. Write an engaging article using the research provided in {news_summary}, {social_insights}, and {expert_quotes}.",
-    output_key="draft_article"
-)
-article_editor = Agent(
-    name="article_editor", model="gemini-3.5-flash",
-    instruction="You are an editor. Review and improve the draft article from {draft_article} for clarity, flow, and impact.",
-    output_key="edited_article"
-)
-article_formatter = Agent(
-    name="article_formatter", model="gemini-3.5-flash",
-    instruction="Format the article from {edited_article} for publication with proper markdown, including a title and headings.",
-    output_key="published_article"
-)
+# [Specialist Agents are provided for you...]
 
 # =====================================================
-# ASSEMBLE THE MULTI-AGENT SYSTEM
+# ASSEMBLE THE SUB-WORKFLOWS
 # =====================================================
 
-# TODO: 1. Create the three sequential research pipelines.
-# - `news_pipeline` should contain `news_fetcher` then `news_summarizer`.
-# - `social_pipeline` should contain `social_monitor` then `sentiment_analyzer`.
-# - `expert_pipeline` should contain `expert_finder` then `quote_extractor`.
-news_pipeline = SequentialAgent(...)
-social_pipeline = SequentialAgent(...)
-expert_pipeline = SequentialAgent(...)
+# TODO: 1. Create the three sequential research sub-workflows.
+# Use linear edges for each.
+news_workflow = Workflow(
+    name="NewsWorkflow",
+    edges=[("START", news_fetcher, news_summarizer)]
+)
 
-# TODO: 2. Create the parallel research phase. This `ParallelAgent` should
-# contain the three sequential pipelines you just defined.
-parallel_research = ParallelAgent(...)
+# TODO: Create social_workflow and expert_workflow
+social_workflow = Workflow(...)
+expert_workflow = Workflow(...)
 
-# TODO: 3. Create the final `SequentialAgent` for the entire system.
-# It should run the `parallel_research` phase first, followed by the
-# `article_writer`, `article_editor`, and `article_formatter` in order.
-content_publishing_system = SequentialAgent(...)
+# =====================================================
+# ASSEMBLE THE ROOT WORKFLOW
+# =====================================================
 
-# TODO: 4. Set the `root_agent` to be your final `content_publishing_system`.
-root_agent = None
+# TODO: 2. Create a JoinNode to synchronize the research branches.
+research_joiner = JoinNode(name="research_joiner")
+
+# TODO: 3. Create the root workflow.
+# - Fan-out from START to each sub-workflow, then to the joiner.
+# - From joiner, run writer -> editor -> formatter.
+root_agent = Workflow(
+    name="ContentPublishingSystem",
+    edges=[
+        # Parallel Research Phase
+        ("START", news_workflow, research_joiner),
+        ("START", ..., ...),
+        ("START", ..., ...),
+        
+        # Sequential Creation Phase
+        (research_joiner, article_writer, article_editor, article_formatter)
+    ]
+)
 ```
 
 ### Step 3: Run and Test the System
 
-1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
+1.  **Start the Dev UI:**
     ```shell
-    adk web content_publisher
+    adk web .
     ```
-2.  **Interact with the system:**
-    *   Give it a topic, like: "The future of electric vehicles".
-3.  **Analyze the Trace:**
-    *   This is the most important step. Expand the trace to see the nested structure. Verify that the three research pipelines run in parallel, and that the content creation agents run sequentially after the parallel phase is complete.
+2.  **Analyze the Trace:**
+    Expand the trace in the Dev UI. You will see "sub-traces" for each of the three research workflows. Notice how they run in parallel, and how the root workflow waits for all of them at the `research_joiner` before proceeding to the writer.
+
 
 ### Having Trouble?
 

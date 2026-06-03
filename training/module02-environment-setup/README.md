@@ -16,7 +16,7 @@ Before diving into building agents, it's crucial to set up a proper development 
 The ADK uses modern Python features like advanced type hints and improved asynchronous handling. 
 
 *   **Python Requirement:** Strictly **3.10 or higher**.
-*   **ADK Requirement:** This course is built for **ADK 2.1.0+**, which introduces the **Workflow Graph Runtime**. Older versions of the library are not compatible with the advanced orchestration patterns taught in later modules.
+*   **ADK Requirement:** This course is built for **google-adk >= 2.1.0**, which introduces the **Workflow Graph Runtime**. Older versions (1.x) are not compatible with the advanced orchestration patterns taught in this course.
 
 ### Enter `uv`: The Modern Standard
 

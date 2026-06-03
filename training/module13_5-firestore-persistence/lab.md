@@ -32,10 +32,13 @@ Create a file named `agent.py` and paste the following starter code. Notice that
 # agent.py (Starter Code)
 import asyncio
 import os
-from google.adk import Agent, Context, Event
+from google.adk import Agent
+from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.tools import ToolContext
-from google.genai import types
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def remember_name(name: str, tool_context: ToolContext) -> str:
     """Saves the user's name to memory."""
@@ -50,25 +53,20 @@ agent = Agent(
 )
 
 async def main():
-    app_name = "persistence_demo"
     user_id = "test_user_001"
     
     # --- STARTER CODE USES IN-MEMORY RUNNER ---
-    runner = InMemoryRunner(agent=agent, app_name=app_name)
+    app = App(name="persistence_demo", root_agent=agent)
+    runner = InMemoryRunner(app=app)
     
-    # 1. Create or get the session
-    session = await runner.session_service.create_session(app_name=app_name, user_id=user_id)
-    print(f"--- Session ID: {session.id} ---")
-    
-    # 2. Basic interactive loop
+    # Basic interactive loop using run_debug
+    print("Type 'quit' to exit.")
     while True:
         user_input = input("You: ")
         if user_input.lower() in ["exit", "quit"]: break
             
-        content = types.Content(role="user", parts=[types.Part.from_text(text=user_input)])
-        async for event in runner.run_async(user_id=user_id, session_id=session.id, new_message=content):
-            if event.content and event.content.parts and event.content.parts[0].text:
-                print(f"Agent: {event.content.parts[0].text}")
+        # run_debug handles the session and prints to console automatically
+        await runner.run_debug(user_input, user_id=user_id)
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -95,7 +93,10 @@ if __name__ == "__main__":
     ```
 2.  Retrieve your Project ID: `project_id = os.getenv("GOOGLE_CLOUD_PROJECT")`.
 3.  Instantiate the service: `fs = FirestoreSessionService(project_id=project_id)`.
-4.  Replace `InMemoryRunner` with `Runner(agent=agent, session_service=fs)`.
+4.  Replace `InMemoryRunner` with the base `Runner`, passing both `app` and `session_service`.
+    ```python
+    runner = Runner(app=app, session_service=fs)
+    ```
 
 ### Step 5: Verify Persistence
 

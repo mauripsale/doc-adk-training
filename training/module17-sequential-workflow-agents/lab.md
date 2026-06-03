@@ -9,7 +9,7 @@ title: "Challenge Lab"
 
 ### Goal
 
-In this lab, you will build a multi-step content creation pipeline using a `SequentialAgent`. This will demonstrate how to chain multiple specialist agents together, passing data from one to the next.
+In this lab, you will build a multi-step content creation pipeline using an ADK 2.0 **Workflow**. This will demonstrate how to chain multiple specialist agents together in a linear graph, passing data from one to the next.
 
 ### The Pipeline Stages
 1.  **Research Agent:** Gathers key facts about a topic.
@@ -32,14 +32,14 @@ In this lab, you will build a multi-step content creation pipeline using a `Sequ
 
 ### Step 2: Assemble the Pipeline
 
-**Exercise:** Open `agent.py`. The four specialist agents (`research_agent`, `writer_agent`, etc.) have been provided for you. Your task is to assemble them into a functioning pipeline.
+**Exercise:** Open `agent.py`. The four specialist agents (`research_agent`, `writer_agent`, etc.) have been provided for you. Your task is to assemble them into a functioning pipeline using a `Workflow`.
 
 ```python
 # In agent.py (Starter Code)
 
 from __future__ import annotations
 from pydantic import BaseModel, Field
-from google.adk.agents import Agent, SequentialAgent
+from google.adk import Agent, Workflow
 
 # ===== Structured Data Schemas (Provided for you) =====
 class ResearchFindings(BaseModel):
@@ -82,13 +82,12 @@ formatter_agent = Agent(
 
 # ===== Create the Sequential Pipeline =====
 
-# TODO: 1. Create a `SequentialAgent` named `blog_creation_pipeline`.
-# TODO: 2. In the `sub_agents` list, add the four specialist agents
-# in the correct logical order: research -> write -> edit -> format.
+# TODO: 1. Create a `Workflow` named `blog_creation_pipeline`.
+# TODO: 2. Define the `edges` to connect the agents in the correct
+# logical order: START -> research -> write -> edit -> format.
 blog_creation_pipeline = None
 
-# TODO: 3. The ADK requires a `root_agent` to be defined.
-# Set the `root_agent` to be your `blog_creation_pipeline`.
+# TODO: 3. Set the `root_agent` to be your `blog_creation_pipeline`.
 root_agent = None
 ```
 *(Note: The full agent instructions are in the `lab-solution.md` if you need to inspect them, but you don't need to change them for this exercise.)*
@@ -103,7 +102,7 @@ root_agent = None
 3.  **Interact with the pipeline:**
     *   Send a topic to write about, like: "the history of the internet".
 4.  **Examine the Trace and State Tabs:**
-    *   **Trace View:** Expand the trace to see the `SequentialAgent` running its four sub-agents in order.
+    *   **Trace View:** Expand the trace to see the `Workflow` running its four nodes in order.
     *   **State View:** After the run, inspect the state to see the output of each step (`research_findings`, `draft_post`, etc.).
 
 ### Having Trouble?
@@ -112,13 +111,13 @@ If you get stuck, you can find the complete, working code in the `lab-solution.m
 
 ### Lab Summary
 
-You have successfully built a deterministic, multi-agent pipeline. You have learned to:
-*   Configure a `SequentialAgent` to orchestrate multiple sub-agents.
-*   Understand how `output_key` and state variables (`{key}`) are used to pass data between agents in a sequence.
+You have successfully built a deterministic, multi-agent pipeline using an ADK 2.0 Workflow. You have learned to:
+*   Configure a `Workflow` with linear edges to orchestrate multiple sub-agents.
+*   Understand how `output_key` and state variables (`{key}`) are used to pass data between nodes in a sequence.
 *   Analyze the execution of a pipeline using the Trace and State views.
 
 ### Self-Reflection Questions
-- The `SequentialAgent` is deterministic. What does this mean, and why is it a desirable property for a workflow like content creation?
+- A `Workflow` with linear edges is deterministic. What does this mean, and why is it a desirable property for a workflow like content creation?
 - What do you think would happen if you forgot to add the `output_key` to the `research_agent`? How would the `writer_agent` behave?
 - How could you modify this pipeline to include a human-in-the-loop? For example, what if you wanted a human to approve the `draft_post` before the `editor_agent` runs?
 

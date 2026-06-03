@@ -31,61 +31,48 @@ This design pattern offers significant advantages:
 *   **Reusability:** A well-defined "Billing Agent" can be reused in other applications across your organization.
 *   **Scalability:** It's easier to reason about and scale a system of smaller, collaborating components than one giant, complex agent.
 
-### How Agents Collaborate in the ADK
+### How Agents Collaborate in ADK 2.0: The Workflow Runtime
 
-The ADK provides several core mechanisms, or "primitives," that allow agents to work together.
+In ADK 2.0, multi-agent collaboration is managed by the **Workflow Runtime**. Instead of a simple hierarchy, your application is a **Graph** where each agent is a **Node**.
 
-#### 1. **Hierarchy (`sub_agents`)**
-The most fundamental concept is the parent-child relationship. You can define a "parent" agent and assign it a list of `sub_agents`. This creates a tree-like structure that forms the basis for collaboration.
+#### 1. **The Graph Structure (`Workflow`)**
+The `Workflow` class is the container for your multi-agent system. You define the relationships between nodes using **Edges**. 
 
-#### Defining Agent Hierarchy
+#### 2. **Registration vs. Execution**
+*   **Registration:** You still use the `sub_agents` list when defining an `Agent` or `Workflow`. This tells the framework which nodes are part of the system for discovery and telemetry.
+*   **Execution:** The actual collaboration happens via **Routing**. 
+    *   **Agent Transfer:** An agent can decide to transfer control to another node in the graph.
+    *   **Programmatic Routing:** A `@node` or a deterministic `Workflow` can call `ctx.run_node(specialist_agent)` to delegate a task and receive the result.
 
-You can define this parent-child relationship using either the Python-based or YAML-based approach.
-
-**Python (Primary Approach):**
-In your parent agent's `agent.py`, you import the sub-agent and add it to the `sub_agents` list.
+#### 3. **The "Specialist" Pattern**
+This is the most common MAS architecture. You have:
+*   **Specialist Nodes:** Agents or tools focused on a single domain (e.g., `billing_expert`, `tech_support`).
+*   **Orchestrator Node:** A node (often an `Agent` or a `@node` function) that analyzes the user input and routes the request to the appropriate specialist.
 
 ```python
-# In parent agent's agent.py
-from google.adk.agents import LlmAgent
-from . import spanish_greeter_agent # Assuming sub-agent is in a sibling module
+from google.adk import Agent, Workflow
 
-root_agent = LlmAgent(
-    # ... other params
-    sub_agents=[spanish_greeter_agent.agent]
+# Specialists
+billing_expert = Agent(name="billing_expert", ...)
+tech_support = Agent(name="tech_support", ...)
+
+# The Orchestrator (Router)
+# It uses sub_agents for registration/discovery
+router = Agent(
+    name="router",
+    instruction="Route requests to 'billing' or 'technical' experts.",
+    sub_agents=[billing_expert, tech_support]
+)
+
+# The Workflow Graph
+root_agent = Workflow(
+    name="SupportSystem",
+    edges=[("START", router)]
 )
 ```
 
-**YAML (Alternative Approach):**
-In your parent agent's `root_agent.yaml`, you reference the sub-agent's configuration file.
-
-```yaml
-# In parent agent's root_agent.yaml
-# ... other params
-sub_agents:
-  - config_path: spanish_greeter.yaml
-```
-
-#### 2. **LLM-Driven Delegation (Agent Transfer)**
-This is the most dynamic form of collaboration. A parent `LlmAgent` can be instructed to analyze a user's request and then **transfer** control of the conversation to the most appropriate `sub_agent`.
-
-> **Analogy: The Call Transfer**
-> Think of Agent Transfer like a call transfer at a switchboard. The initial receptionist (the router agent) understands your need and connects you to the right department (the specialist agent). Once the call is transferred, the receptionist is no longer part of that conversation; the specialist now has direct control and continues the interaction with you.
-
-For this to work:
-*   The parent agent needs a clear `instruction` on how to route tasks.
-*   Each sub-agent needs a good `description` of its capabilities so the parent agent's LLM can make an informed choice.
-
-#### 3. **Explicit Invocation (`AgentTool`)**
-An agent can be wrapped in an `AgentTool`, which makes it look and feel like a regular function tool to another agent. A parent agent can then "call" the sub-agent to perform a task, wait for the result, and then continue its own reasoning process.
-
-#### 4. **Shared State**
-Agents in a system can communicate passively by reading and writing to the shared `session.state`. One agent can perform a task and save the result to the state, and a subsequent agent can then read that result to perform the next step in a process.
-
-In the upcoming modules, you will get hands-on experience with these patterns, starting with the most common one: building a coordinator agent that delegates tasks to a team of specialists.
-
 ### Key Takeaways
-- Multi-Agent Systems (MAS) break down complex problems into smaller, specialized agents that collaborate.
-- This approach improves modularity, maintainability, reusability, and scalability compared to monolithic agents.
-- The ADK supports several collaboration patterns, including LLM-driven delegation (agent transfer), explicit invocation (`AgentTool`), and communication via shared state.
-- A clear hierarchy defined by `sub_agents` is the foundation for building multi-agent systems in the ADK.
+- **Think in Graphs:** Multi-agent systems are collections of nodes orchestrated by a Workflow.
+- **Specialization is Key:** Each node should have a narrow, well-defined purpose.
+- **Workflow Runtime:** ADK 2.0 manages the transitions and state sharing between nodes automatically.
+- **Modularity:** Breaking a large problem into multiple nodes makes your AI application easier to test, debug, and scale.

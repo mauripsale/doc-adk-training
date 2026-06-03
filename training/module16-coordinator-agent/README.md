@@ -13,106 +13,62 @@ The most common and intuitive multi-agent design pattern is the **Coordinator/Di
 
 This pattern is incredibly effective for building modular and maintainable systems. The coordinator provides a single point of entry, while the specialists handle the complex, domain-specific logic.
 
-### Implementing the Coordinator Pattern in ADK
+### Implementing the Coordinator Pattern in ADK 2.0
 
-The ADK is designed with this pattern in mind and makes it straightforward to implement using a combination of Python code and carefully crafted instructions.
+In ADK 2.0, the Coordinator is a **Node** within a **Workflow Graph**. 
 
-#### 1. Establishing the Hierarchy (`sub_agents`)
+#### 1. Establishing the Graph (`Workflow`)
 
-The first step is to define the parent-child relationship. The coordinator agent is the parent, and the specialist agents are its children.
+The coordinator agent is usually the first node in the graph, connected to the `"START"` edge.
 
 **Python (Primary Approach):**
-In the coordinator's `agent.py`, you import the sub-agent's module and add its agent object to the `sub_agents` list.
+In your `agent.py`, you define the specialist agents and the coordinator, then register them in a `Workflow`.
 
 ```python
-# In the coordinator's agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent, Workflow
 from . import billing_agent_module, tech_support_module
 
-root_agent = LlmAgent(
+# The Coordinator Node
+coordinator = Agent(
     name="coordinator_agent",
     model="gemini-3.5-flash",
     instruction="You are a router...",
-    # ...
+    # Registering specialists for discovery
     sub_agents=[
         billing_agent_module.agent,
         tech_support_module.agent
     ]
 )
+
+# The Workflow Graph
+root_agent = Workflow(
+    name="SupportSystem",
+    edges=[("START", coordinator)]
+)
 ```
 
-**YAML (Alternative Approach):**
-In the parent's `root_agent.yaml` file, you use the `sub_agents` key and `config_path` to link to the specialist agents' YAML files.
+#### 2. The Key to Routing: `description`
 
-```yaml
-# In the coordinator's root_agent.yaml
-name: coordinator_agent
-model: gemini-3.5-flash
-instruction: You are a router...
-# ...
-sub_agents:
-  - config_path: billing_agent.yaml
-  - config_path: tech_support_agent.yaml
-```
-
-#### 2. The Key to Delegation: `description`
-
-How does the coordinator's LLM know which specialist to choose? It relies on the `description` field of each sub-agent.
-
-When the coordinator agent runs, the ADK framework provides the LLM with not only the user's query and the coordinator's own instruction, but also a list of the available sub-agents and their descriptions.
+The coordinator node uses the **`description`** field of its registered `sub_agents` to make routing decisions. The Workflow Runtime provides this metadata to the coordinator's LLM automatically.
 
 **`billing_agent_module.py`:**
 ```python
-# ...
-agent = LlmAgent(
+agent = Agent(
     name="billing_agent",
-    description="Handles all questions related to billing, invoices, payments, and subscriptions.",
+    description="Handles all questions related to billing, invoices, and payments.",
     instruction="You are a billing expert..."
 )
 ```
 
-**`tech_support_module.py`:**
-```python
-# ...
-agent = LlmAgent(
-    name="tech_support_agent",
-    description="Assists users with technical problems, error messages, and troubleshooting.",
-    instruction="You are a technical support specialist..."
-)
-```
-The LLM uses these descriptions like a function's docstring to decide which "tool" (in this case, which sub-agent) is the best fit for the user's request. A clear, concise, and accurate description is therefore critical for reliable routing.
+#### 3. The Magic of Agent Transfer
 
-#### 3. The Coordinator's `instruction`
+When the coordinator node decides to delegate, it triggers an **Agent Transfer**. The ADK 2.0 Workflow Runtime intercepts this request, pauses the coordinator node, and activates the chosen specialist node in the graph. 
 
-The final piece of the puzzle is the coordinator's own `instruction`. This instruction must explicitly tell the agent that its job is to delegate.
-
-```python
-# In the coordinator's agent.py
-# ...
-root_agent = LlmAgent(
-    # ...
-    instruction="""
-You are the primary customer support assistant.
-Your main job is to understand the user's problem and delegate it to the correct specialist.
-- If the user has a question about a payment or an invoice, delegate to the `billing_agent`.
-- If the user is reporting an error or can't log in, delegate to the `tech_support_agent`.
-Do not attempt to answer billing or technical questions yourself. Always delegate.
-"""
-)
-```
-This instruction, combined with the sub-agents' descriptions, gives the LLM all the information it needs to make an intelligent routing decision.
-
-#### 4. The Magic of Agent Transfer
-
-When the coordinator's LLM decides to delegate, it invokes a special built-in function called `transfer_to_agent`, specifying the `name` of the target agent. The ADK framework intercepts this and automatically transfers control of the conversation to the chosen sub-agent. The sub-agent then takes over and responds to the user directly.
-
-> **Note on `transfer_to_agent`:** While it acts as a delegation mechanism, `transfer_to_agent` is internally treated as a special kind of built-in tool. The LLM implicitly "calls" this tool when its reasoning, based on the coordinator's instruction and sub-agent descriptions, leads it to delegate. This connects the multi-agent delegation pattern directly to the Function Calling mechanism you learned in earlier modules.
-
-In the following lab, you will implement the "Greeting Router" you designed in the previous module, putting all these concepts into practice.
+Because both nodes are part of the same **Workflow**, the specialist automatically has access to the conversation context and responds directly to the user.
 
 ### Key Takeaways
-- The Coordinator/Dispatcher is a common multi-agent pattern where a central agent routes tasks to specialists.
-- In the ADK, this is implemented by defining a parent agent with a list of `sub_agents`.
-- The coordinator's LLM uses the `description` of each sub-agent to make intelligent routing decisions.
-- A clear `instruction` is needed to tell the coordinator that its primary job is to delegate, not to perform tasks itself.
-- The `transfer_to_agent` function is the mechanism by which the coordinator hands off control to a sub-agent.
+- The **Coordinator** is a node that manages the entry point of a Workflow.
+- **Agent Transfer** is the mechanism for handing off control between nodes in the graph.
+- Clear **descriptions** are the "API" that allow the coordinator to discover and use other nodes.
+- **Workflow Orchestration:** The `Workflow` class ties everything together, defining the "START" point and the pool of available nodes.
+

@@ -7,58 +7,58 @@ title: "Module 20: Iterative Refinement with Loop Agents"
 
 ## Theory
 
-### The Need for Iteration
+### Iterative Refinement in ADK 2.0
 
-Many complex tasks aren't solved in a single pass. They require a process of iterative refinement: creating a draft, reviewing it, making improvements, and repeating until the result meets a quality standard. Examples include:
-*   Refining a piece of code until it passes all tests.
-*   Improving an essay based on editorial feedback.
-*   Developing a plan and adjusting it based on new information.
+In ADK 2.0, the legacy `LoopAgent` is superseded by **Dynamic Workflows** using the **`@node`** decorator. This allows you to use standard Python `for` or `while` loops to orchestrate iterative tasks.
 
-While you could try to prompt a single `LlmAgent` to do this, it's not reliable. For robust, predictable looping, the ADK provides the `LoopAgent`.
+This approach is more flexible because you have full control over the termination logic, and you can easily implement safety features like `max_iterations`.
 
-### The `LoopAgent`
+### The Dynamic Loop Pattern
 
-The `LoopAgent` is a workflow agent that executes its `sub_agents` sequentially, over and over again, until a termination condition is met.
+The most common pattern for iteration is the **Critic -> Refiner** loop. Instead of a dedicated class, you define it as a function:
 
-**Key Concepts:**
-*   **Execution:** In each iteration, sub-agents run in order, just like in a `SequentialAgent`.
-*   **Shared State:** The `LoopAgent` passes the same session state to its `sub_agents` on every iteration. This is crucial, as it allows agents to read the output of the previous iteration and write a refined result back to the same state key.
+```python
+from google.adk import node, Context, Agent
 
-### The Critic -> Refiner Pattern
+# 1. Define the specialist nodes
+critic = Agent(name="critic", ...)
+refiner = Agent(name="refiner", ...)
 
-The most common and powerful pattern for a `LoopAgent` is the **Critic -> Refiner** loop:
+# 2. Define the Orchestrator Node with a Python loop
+@node
+async def refinement_workflow(ctx: Context, initial_draft: str):
+    current_work = initial_draft
+    
+    # Standard Python loop for max_iterations
+    for i in range(5):
+        print(f"--- Iteration {i+1} ---")
+        
+        # Call the Critic node
+        feedback = await ctx.run_node(critic, input=current_work)
+        
+        # Termination Condition
+        if "APPROVED" in feedback:
+            break
+            
+        # Call the Refiner node to improve the work
+        current_work = await ctx.run_node(refiner, input={
+            "work": current_work, 
+            "feedback": feedback
+        })
+        
+    return current_work
+```
 
-1.  **Critic Agent:** Evaluates the current state of the work (e.g., an essay draft) against a set of criteria. It then outputs its feedback.
-2.  **Refiner Agent:** Reads the original work and the critic's feedback. It then applies the feedback to create an improved version of the work, overwriting the previous version in the state.
-3.  **Repeat:** The loop continues, with the Critic evaluating the newly refined work in the next iteration.
+### Why Dynamic Loops are Superior
 
-This creates a self-improving system where the quality of the output gets progressively better with each loop.
-
-### Terminating a Loop
-
-An infinite loop is a bug. Every `LoopAgent` MUST have a way to stop.
-
-1.  **`max_iterations` (Safety Net):**
-    This is a required safeguard. You must specify the maximum number of times the loop can run.
-    ```python
-    loop = LoopAgent(
-        sub_agents=[critic, refiner],
-        max_iterations=5  # Stops after 5 iterations MAX
-    )
-    ```
-
-2.  **Smart Termination (Exit Tool):**
-    For intelligent control, you can create a tool that signals the loop to stop.
-    *   The **Critic** agent can be instructed to output a specific phrase (e.g., "APPROVED") when the work is complete.
-    *   The **Refiner** agent can be instructed to call an `exit_loop` tool when it sees this approval phrase.
-    *   The `exit_loop` tool uses `tool_context.actions.escalate = True` to tell the `LoopAgent` to terminate immediately. This is the official v1.0 pattern for "breaking" out of a loop from within a tool call.
-    > **Note on Tool Output:** Even when a tool signals the end of an agent's execution (e.g., via `tool_context.actions.escalate = True`), it must still return a valid, albeit minimal, dictionary output (e.g., `{"text": "Loop exited successfully."}`). This ensures the backend always produces a valid `LlmResponse` and completes the request's lifecycle gracefully.
-
-Using both `max_iterations` and an exit tool is the best practice for creating robust and efficient loops.
+1.  **Python Native:** No need to learn custom "Loop" classes; just use `for` or `while`.
+2.  **Explicit Logic:** You can easily add complex exit conditions (e.g., "stop if the quality score is > 0.8" or "stop if the changes are minimal").
+3.  **Resilience:** You can use standard try/except blocks inside the loop to handle errors in specific iterations.
+4.  **Transparency:** In the Dev UI, each call to `ctx.run_node()` creates a new entry in the trace, allowing you to see exactly how the work improved over time.
 
 ### Key Takeaways
-- The `LoopAgent` is a workflow agent for tasks that require iterative refinement.
-- It repeatedly executes its sub-agents until a termination condition is met.
-- The "Critic -> Refiner" pattern is a common and powerful way to structure a `LoopAgent` for self-improving tasks.
-- **Explicit Escalation:** Using `tool_context.actions.escalate = True` within a tool is the most robust way to exit a loop based on logic (e.g., quality check passed) rather than just reaching a count.
-- All `LoopAgent`s must have a termination condition, which should include a `max_iterations` safety net and, ideally, a smart termination mechanism using an exit tool.
+- **Iterative tasks** require multiple passes of review and refinement.
+- **Dynamic Workflows (`@node`)** are the modern way to implement loops in ADK 2.0.
+- **Safety First:** Always use a `max_iterations` limit to prevent infinite loops and excessive API costs.
+- **Node-to-Node passing:** The output of one iteration is manually passed as the input to the next via `ctx.run_node()`.
+

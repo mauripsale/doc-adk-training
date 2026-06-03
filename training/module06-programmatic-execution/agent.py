@@ -1,60 +1,46 @@
 import asyncio
-from google.adk.agents import Agent
+from google.adk import Agent
+from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
-from google.adk.sessions import Session
 from google.genai import types
 
 import os
 from dotenv import load_dotenv
 
-# 1. Load environment variables from the agent directory's .env file
+# 1. Load environment variables
 load_dotenv()
-model_name = os.getenv("MODEL")
+model_name = os.getenv("MODEL", "gemini-3.5-flash")
 
 # Create an async main function
 async def main():
-
-    # 2. Set or load other variables
-    app_name = 'my_agent_app'
-    user_id_1 = 'user1'
-
-    # 3. Define Your Agent
+    # 2. Define Your Agent
     root_agent = Agent(
         model=model_name,
         name="trivia_agent",
-        instruction="Answer questions.",
+        instruction="Answer questions concisely.",
     )
+
+    # 3. Create the App
+    app = App(name="trivia_app", root_agent=root_agent)
 
     # 4. Create a Runner
-    runner = InMemoryRunner(
-        agent=root_agent,
-        app_name=app_name,
-    )
+    runner = InMemoryRunner(app=app)
 
-    # 5. Create a session
-    my_session = await runner.session_service.create_session(
-        app_name=app_name, user_id=user_id_1
-    )
-
-    # 6. Prepare a function to package a user's message as
-    # genai.types.Content, run it asynchronously, and iterate
-    # through the response 
-    async def run_prompt(session: Session, new_message: str):
-        content = types.Content(
-                role='user', parts=[types.Part.from_text(text=new_message)]
-            )
-        print('** User says:', content.model_dump(exclude_none=True))
+    # 5. Prepare a function to run the agent
+    async def run_prompt(user_id: str, new_message: str):
+        print(f'** User ({user_id}) says: {new_message}')
+        # In ADK 2.0, we use run_debug for simple string interactions
+        # or run_async for full control over the event stream.
         async for event in runner.run_async(
-            user_id=user_id_1,
-            session_id=session.id,
-            new_message=content,
+            user_id=user_id,
+            new_message=new_message,
         ):
-            if event.content.parts and event.content.parts[0].text:
+            if event.is_final_response():
                 print(f'** {event.author}: {event.content.parts[0].text}')
 
-    # 7. Use this function on a new query
-    query = "What is the capital of France?"
-    await run_prompt(my_session, query)
+    # 6. Run queries
+    await run_prompt("user1", "What is the capital of France?")
+    await run_prompt("user2", "What is the capital of Italy?")
 
 if __name__ == "__main__":
     asyncio.run(main())

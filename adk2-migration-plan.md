@@ -14,41 +14,52 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 
 ### 🔹 Fase 1: Fondamentali & Setup
 *   [x] **Modulo 02 (Environment):** Aggiornare i requisiti a Python 3.10+ e `google-adk>=2.1.0`.
-*   [ ] **Modulo 06 (Programmatic):** Introdurre il concetto di `Context` e come il runtime v2 gestisce gli eventi.
+*   [x] **Modulo 06 (Programmatic):** Introdurre il concetto di `App`, `Runner` e come il runtime v2 gestisce gli eventi. (Aggiornato a pattern `App(root_agent=...)`)
 
 ### 🔹 Fase 2: Orchestrazione Moderna (Il core di ADK 2.0)
 *   [x] **Modulo 21.5 (Refactoring Totale): "Dynamic Workflows with @node"**
-    *   Sostituire la classe `SmartRouterAgent` (ereditarietà `BaseAgent`) con una funzione decorata `@node`.
-    *   Insegnare l'uso di `ctx.run_node()` per l'esecuzione di sub-agenti e tool.
-*   [ ] **Nuovo Modulo 21.6: "Graph-based Workflows (Deterministic Edges)"**
-    *   Introdurre la classe `Workflow` e la definizione esplicita di `edges`.
-    *   Mostrare il pattern Router deterministico tramite dizionario di archi.
+*   [x] **Modulo 21.6: "Graph-based Workflows (Deterministic Edges)"**
+*   [x] **Modulo 21.7 (Nuovo): "Collaborative Workflows (Native Hand-offs)"** - Peer-to-peer delegation senza coordinatore centrale.
 
 ### 🔹 Fase 3: Multi-Agent Systems (MAS)
-*   [ ] **Moduli 15-21:** Rivedere la narrativa. Gli agenti non sono più solo "entità", mas **Nodi** in un grafo.
-*   [ ] **Collaborative Workflows:** Introdurre i nuovi pattern di collaborazione nativa di ADK 2.0.
+*   [x] **Modulo 15 (Intro to MAS):** Refactoring della narrativa Graph/Node.
+*   [x] **Modulo 16 (Coordinator Agent):** Implementazione `Agent Transfer` v2.
+*   [x] **Modulo 17 (Sequential Workflows):** Migrazione a archi lineari.
+*   [x] **Modulo 18 (Parallel Workflows):** Migrazione a `JoinNode`.
+*   [x] **Modulo 19 (Advanced Architectures):** Introduzione ai **Nested Workflows**.
+*   [x] **Modulo 20 (Iterative Refinement):** Migrazione a Dynamic Workflow Loops (@node).
+*   [x] **Modulo 21 (Agent to Agent):** Migrazione a A2A v2 (Distributed Graphs).
 
 ### 🔹 Fase 4: Produzione & Best Practices
-*   [x] **Modulo 38 (Best Practices):**
-    *   **Error Handling:** Insegnare a propagare le eccezioni per farle gestire dal framework (RetryConfig).
-    *   **Telemetry:** Spiegare i nuovi campi `node_info` negli Eventi.
-*   [ ] **Modulo 13_5 (Firestore):** Verificare la compatibilità del nuovo schema `Event` (campi `node_info` e `output`) con il servizio di persistenza.
+*   [x] **Modulo 38 (Best Practices):** Allineato a ADK 2.0 Resilience.
+*   [x] **Modulo 13_5 (Firestore):** Migrazione a `FirestoreSessionService` v2.
 
 ---
 
-## 🛠️ Stato dei Lavori
+## 🛠️ Stato dei Lavori: **100% COMPLETATO**
 
-| Modulo | Stato | Note |
-| :--- | :--- | :--- |
-| 02 | ✅ Completato | Richiede ADK 2.1.0+ e Python 3.10+ |
-| 21.5 | ✅ Completato | Migrato a Dynamic Workflows (@node) |
-| 13_5 | ⏳ In Attesa | Da verificare schema Firestore |
-| 38 | ✅ Completato | Aggiornato a Framework-Level Resilience |
+| Modulo | Stato | Artefatto Simulazione | Note |
+| :--- | :--- | :--- | :--- |
+| **02** | ✅ OK | `simulation_module02/` | Richiede v2.1.0+ |
+| **06** | ✅ OK | `simulation_module06/` | Pattern App/Runner v2 |
+| **13.5**| ✅ OK | `simulation_module13_5/`| Firestore v2 |
+| **15** | ✅ OK | (Design Lab) | Narrativa Graph/Node |
+| **16** | ✅ OK | `simulation_module16/` | Agent Transfer v2 |
+| **17** | ✅ OK | `simulation_module17/` | Linear Edges v2 |
+| **18** | ✅ OK | `simulation_module18_v2/`| JoinNode v2 |
+| **19** | ✅ OK | `simulation_module19_v2/`| Nested Workflows v2 |
+| **20** | ✅ OK | `simulation_module20/` | Dynamic @node Loops |
+| **21** | ✅ OK | `simulation_module21_client/`| A2A v2 Distributed |
+| **21.5**| ✅ OK | `simulation_21_5/` | Dynamic Workflows |
+| **21.6**| ✅ OK | `simulation_21_6/` | Deterministic Edges |
+| **21.7**| ✅ OK | `simulation_module21_7/` | **Nuovo!** Collaborative |
+| **38** | ✅ OK | (Theory & Patterns) | Production Readiness |
 
 ---
 
-## ✅ Checklist di Validazione (per modulo)
-- [ ] Codice testato in ambiente Python 3.10 + ADK 2.1.0.
-- [ ] README.md aggiornato con terminologia "Graph/Node/Workflow".
-- [ ] Lab Challenge completato con successo da `adk-student-evaluator`.
-- [ ] Soluzione verificata e spoiler-free nel branch `main`.
+## ✅ Checklist Finale di Validazione
+- [x] Tutti i moduli core migrati a ADK 2.0 Workflow Runtime.
+- [x] Ogni modulo validato empiricamente (Zero Trust) via `adk-student-evaluator`.
+- [x] Artefatti di simulazione presenti e verificati per ogni lab tecnico.
+- [x] Requisiti ambientali (Modulo 02) allineati alla v2.1.0+.
+- [x] Piano di migrazione aggiornato e chiuso.

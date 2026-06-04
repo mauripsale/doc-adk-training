@@ -33,6 +33,7 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 ### 🔹 Fase 4: Produzione & Best Practices
 *   [x] **Modulo 38 (Best Practices):** Allineato a ADK 2.0 Resilience.
 *   [x] **Modulo 13_5 (Firestore):** Migrazione a `FirestoreSessionService` v2.
+*   [x] **Modulo 25 (Observability):** Integrazione nativa con **OpenTelemetry** e **Cloud Trace**. Focus su `node_info` per il debug dei grafi.
 
 ---
 

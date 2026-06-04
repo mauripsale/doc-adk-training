@@ -48,21 +48,41 @@ A comprehensive observability strategy is built on four pillars, all of which ca
                       +-----------------+
 ```
 
-#### How Plugins Work
+### Enterprise Telemetry in ADK 2.0
 
-1.  You create a class that inherits from `google.adk.plugins.BasePlugin`.
-2.  You implement the `async def on_event_callback(self, *, event: Event, **kwargs)` method.
-3.  This method is automatically called by the runner for **every event** that occurs during the agent's execution.
-4.  Inside this method, you can inspect the event and perform actions like logging to a file, incrementing a metric counter, or sending an alert.
-5.  You register your plugin globally when you instantiate the `App`: `App(root_agent=..., plugins=[MyMetricsPlugin()])`.
+While custom plugins are great for specific logic, ADK 2.0 introduces native support for **OpenTelemetry (OTel)**. This allows you to export performance data and traces to industry-standard backends like **Google Cloud Trace** and **Cloud Monitoring**.
 
-This event-driven, plugin-based architecture is the foundation for building sophisticated, enterprise-grade monitoring for your agents.
+#### 1. The "Graph-Aware" Trace
+In a complex ADK 2.0 Workflow, every event now carries a **`node_info`** field. When using OTel, these details are automatically attached to the spans, allowing you to see:
+*   Which node in the graph is currently executing.
+*   The exact input and output of that node.
+*   How long each node took to process (latency profiling).
+
+#### 2. Configuring Cloud Trace
+To enable enterprise telemetry, you use the `google.adk.telemetry` module. You define which exporters you want and pass them to the framework setup.
+
+```python
+from google.adk.telemetry.google_cloud import get_gcp_exporters
+from google.adk.telemetry.setup import maybe_set_otel_providers
+
+# 1. Configure the GCP Exporters
+# Requires: pip install "google-adk[gcp]>=2.1.0"
+otel_hooks = get_gcp_exporters(
+    enable_cloud_tracing=True,
+    enable_cloud_metrics=True
+)
+
+# 2. Initialize the OTel Providers
+maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
+
+# 3. Your App now automatically sends telemetry!
+app = App(name="production_agent", root_agent=my_agent)
+```
 
 ### Key Takeaways
-- The ADK **Plugin System** provides a modular way to add observability features like logging, metrics, and tracing without modifying the agent's core logic.
-- Plugins are classes that inherit from `BasePlugin` and implement the `on_event_callback` method to intercept and process all events during an agent's execution.
-- This event-driven architecture allows for a clean separation of concerns between the agent's business logic and its monitoring infrastructure.
-- You register plugins by passing them to the `App`'s constructor: `App(plugins=[...])`.
-- **Advantage of Plugin System:** The primary benefit of using the Plugin System for observability is the **Separation of Concerns**. Observability code (e.g., sending metrics to Prometheus, logging to Splunk) is completely isolated from the agent's business logic. This makes both systems easier to test, update, and maintain, promotes reusability of plugins across different agents, and keeps the agent's core logic clean and focused on its primary task.
-- **Performance Considerations for `on_event_callback`:** In a high-traffic production system, the code within `on_event_callback` must be as fast and efficient as possible, as the agent's runtime will await its completion. It's crucial to avoid blocking synchronous I/O operations (e.g., disk writes, blocking API calls) and to minimize processing. Costly operations should be delegated to asynchronous processing (using `await`) or separate threads/processes (e.g., a queue worker) to prevent slowing down the entire agent execution.
-- **Tracking LLM Tokens:** To extend the `MetricsCollectorPlugin` to track LLM token usage, you would inspect `llm_call_complete` events (or `request_complete` if token data is propagated there). The `Event` object or its `response.usage_metadata` attribute typically contains `prompt_token_count` and `candidates_token_count`. This data can then be added to the `RequestMetrics` for the corresponding `invocation_id` and aggregated.
+- **Standardized Pillars**: Use OTel for Traces, Metrics, and Logs.
+- **Graph Visibility**: The `node_info` field in ADK 2.0 events provides deep insights into Workflow execution.
+- **Custom vs. Native**:
+    *   Use **Plugins** for business-specific logic (e.g., custom alerting, session-level metrics).
+    *   Use **Native Telemetry** for infrastructure monitoring and performance profiling.
+- **Separation of Concerns**: Infrastructure code stays outside your agent's core logic, ensuring maintainability.

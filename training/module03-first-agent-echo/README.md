@@ -39,18 +39,18 @@ instruction: You are an echo agent. Your only job is to repeat the user's input 
 
 #### 2. Programmatic (Python)
 
-For more advanced scenarios, you can define your agent directly in a Python script (e.g., `agent.py`) using the `LlmAgent` class. This is the more powerful and flexible method.
+For more advanced scenarios, you can define your agent directly in a Python script (e.g., `agent.py`) using the **`Agent`** class. This is the modern standard in ADK 2.0.
 
 **Advantages:**
 *   **Flexibility:** Allows for dynamic configuration and logic.
-*   **Advanced Features:** Required for implementing features like tools and callbacks, which you will learn about in later modules.
+*   **Advanced Features:** Required for implementing features like tools, workflows, and plugins.
 *   **Integration:** Easily integrates with other Python code and systems.
 
 The same agent defined in Python would look like this:
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
-root_agent = LlmAgent(
+root_agent = Agent(
     name="echo_agent",
     model="gemini-3.5-flash",
     description="An agent that repeats the user's input.",
@@ -59,8 +59,17 @@ root_agent = LlmAgent(
 ```
 **Important:** When defining an agent in Python, the ADK requires that the main agent variable be named exactly `root_agent`.
 
-### Scaffolding Your Project with `adk create`
+### The ADK 2.0 Runtime: App and Runner
 
+In ADK 2.0, defining the agent is only the first step. To actually run it, the framework uses two key concepts:
+
+1.  **App:** A container that wraps your `root_agent`. It defines the boundaries of your AI application, including its name and any global plugins (like for observability).
+2.  **Runner:** The engine that executes the `App`. It handles the session state, manages the connection to the LLM, and provides helper methods like `run_debug()`.
+
+When you use the CLI command `adk web`, the ADK automatically creates an **App** and an **InMemoryRunner** for you behind the scenes!
+
+### Scaffolding Your Project with `adk create`
+...
 The ADK command-line tool helps you quickly set up the necessary file structure for a new agent.
 
 Running `adk create <agent_name>` initiates a wizard that lets you choose your preferred method (Config-based or Programmatic). It then creates a directory containing:

@@ -1,23 +1,23 @@
 ---
 sidebar_position: 4
-title: "Module 4: Core Agent Concepts: `LlmAgent` Deep Dive"
+title: "Module 4: Core Agent Concepts: Agent Deep Dive"
 ---
 
-# Module 4: Core Agent Concepts: `LlmAgent` Deep Dive
+# Module 4: Core Agent Concepts: Agent Deep Dive
 
 ## Theory
 
 ### The "Brain" of the Operation
 
-At the heart of most agents you build with the ADK is the `LlmAgent`. This is the component that acts as the "thinking" part of your application. It uses the power of a Large Language Model (LLM) like Gemini to understand user requests, reason about them, and decide on a course of action.
+At the heart of most applications you build with the ADK is the **`Agent`**. This is the component that acts as the "thinking" part of your application. It uses the power of a Large Language Model (LLM) like Gemini to understand user requests, reason about them, and decide on a course of action.
 
-Unlike a traditional program that follows a fixed, deterministic path, an `LlmAgent` is non-deterministic. It interprets the context of a conversation and its own instructions to dynamically figure out what to do next. This flexibility is what makes agents so powerful.
+In ADK 2.0, the `Agent` class (formerly `LlmAgent`) is the primary node type for LLM-powered reasoning. Unlike a traditional program that follows a fixed, deterministic path, an `Agent` is non-deterministic. It interprets the context of a conversation and its own instructions to dynamically figure out what to do next. This flexibility is what makes agents so powerful.
 
-Building an effective `LlmAgent` requires a clear understanding of its core configuration parameters. In this module, we'll take a deep dive into the most important one: the `instruction`.
+Building an effective `Agent` requires a clear understanding of its core configuration parameters. In this module, we'll take a deep dive into the most important one: the `instruction`.
 
 ### Defining the Agent's Identity
 
-As you saw in the previous module, every `LlmAgent` has a few basic identity parameters, which can be set in `agent.py` or, for simpler agents, in a `root_agent.yaml` file:
+Every `Agent` has a few basic identity parameters:
 
 *   **`name` (Required):** A unique identifier for the agent (e.g., `echo_agent`).
 *   **`description` (Optional):** A short summary of the agent's purpose.
@@ -51,9 +51,9 @@ Crafting good instructions is a skill often called "prompt engineering." Here ar
 
     **Python Example (`agent.py`):**
     ```python
-    from google.adk.agents import LlmAgent
+    from google.adk import Agent
 
-    root_agent = LlmAgent(
+    root_agent = Agent(
         name="support_classifier",
         model="gemini-3.5-flash",
         instruction="""
@@ -95,35 +95,35 @@ Crafting good instructions is a skill often called "prompt engineering." Here ar
 
 In the lab for this module, you will practice this skill by building a structured version of this Support Classifier agent.
 
-### Advanced Configuration: Structured Output & State (v1.0)
+### Advanced Configuration: Structured Output & State
 
-In many production scenarios, you don't just want a text response; you need **structured data**. The ADK v1.0 provides two powerful parameters for this:
+In many production scenarios, you don't just want a text response; you need **structured data**. ADK 2.0 provides two powerful parameters for this:
 
 #### 1. Enforcing JSON with `output_schema`
 You can pass a Pydantic model to the `output_schema` parameter. This forces the LLM to respond *only* with a JSON object that matches that schema.
 
 ```python
 from pydantic import BaseModel
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
 class SentimentOutput(BaseModel):
     sentiment: str
     confidence: float
 
-analyzer_agent = LlmAgent(
+analyzer_agent = Agent(
     name="sentiment_analyzer",
     model="gemini-3.5-flash",
     instruction="Analyze the sentiment of the user's message.",
     output_schema=SentimentOutput # Force JSON output
 )
 ```
-**CRITICAL LIMITATION:** When `output_schema` is set, the agent **cannot use tools** or delegate to other agents. Use it for data extraction, classification, or formatting tasks.
+**CRITICAL LIMITATION:** When `output_schema` is set, the agent **cannot use tools** or perform **Agent Transfers** (delegation). Use it for data extraction, classification, or formatting tasks where reasoning is the final step.
 
 #### 2. Passing Data with `output_key`
 The `output_key` parameter (a string) tells the ADK to take the final text of the agent's response and save it automatically into the session state dictionary (`ctx.session.state`).
 
 ```python
-agent = LlmAgent(
+agent = Agent(
     # ...
     output_key="analysis_result" # Saves output to state['analysis_result']
 )
@@ -131,8 +131,7 @@ agent = LlmAgent(
 This is essential for building multi-agent systems where one agent's output is needed as another agent's input.
 
 ### Key Takeaways
-- The `LlmAgent` is the "brain" of an ADK application, using an LLM to reason and decide on actions.
-- The `instruction` parameter is the most powerful tool for controlling an agent's behavior, defining its persona, goals, constraints, and process.
-- **`output_schema`** (v1.0): Allows enforcing a strict JSON structure for the agent's response using Pydantic. **Note:** Enabling this disables tool use and agent transfers.
-- **`output_key`** (v1.0): Automatically saves the agent's final response into the session state (`ctx.session.state`) under the specified key, facilitating data passing between agents.
-- Effective prompt engineering involves being specific, using simple language, providing examples (few-shot prompting), and iterating on your instructions.
+- The **`Agent`** class is the "brain" of an ADK 2.0 application.
+- The `instruction` parameter is the most powerful tool for controlling behavior.
+- **`output_schema`**: Enforces strict JSON output via Pydantic (disables tools/transfers).
+- **`output_key`**: Automatically saves the agent's response into the session state for cross-node data passing.

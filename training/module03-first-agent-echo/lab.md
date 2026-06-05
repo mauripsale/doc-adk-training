@@ -32,11 +32,11 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
 Modify your `agent.py` file to look like the following, filling in the `TODO` sections.
 
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
 # TODO: Define the root_agent for your application.
 # You will need to provide a name, a model, and the instruction for the agent.
-root_agent = LlmAgent(
+root_agent = Agent(
     name=...,  # TODO: Give your agent a name (e.g., "echo_agent")
     model=..., # TODO: Specify the model to use (e.g., "gemini-3.5-flash")
     instruction=...,  # TODO: Provide the instruction for the echo agent.
@@ -62,7 +62,7 @@ instruction: ... # Provide the instruction for the echo agent.
 ### Self-Reflection Questions
 - What are the advantages of defining an agent in a Python script versus a YAML file?
 - Why is it important to keep API keys and other secrets in a `.env` file instead of directly in your agent's code?
-- Explore the "Events" tab in the Dev UI after running your agent. What information does it provide, and how could this be useful for debugging a more complex agent?
+- Explore the **"Trace"** tab in the Dev UI after running your agent. What information does it provide, and how could this be useful for debugging a more complex agent?
 
 <hr/>
 

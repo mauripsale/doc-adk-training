@@ -36,7 +36,7 @@ Modify `agent.py` to use the advanced configuration patterns.
 ```python
 import os
 from functools import cached_property
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.models import Gemini
 from google.adk.models.lite_llm import LiteLlm
 from google.genai import Client, types
@@ -56,7 +56,7 @@ else:
     # Use your ResilientGemini
     model_to_use = ...
 
-root_agent = LlmAgent(
+root_agent = Agent(
     name="support_analyzer_agent",
     model=model_to_use,
     instruction="Analyze customer support issues."

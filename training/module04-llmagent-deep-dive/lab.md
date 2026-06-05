@@ -26,18 +26,18 @@ Your task is to build a **"Support Analyzer"** agent. Instead of returning plain
 7.  **Inspect State:** After a few interactions, check the "Session State" in the Dev UI to confirm that `"last_ticket_analysis"` is being populated correctly.
 
 ### Python Approach (Primary)
-Modify `agent.py` to include the Pydantic model and updated `LlmAgent` parameters.
+Modify `agent.py` to include the Pydantic model and updated `Agent` parameters.
 
 ```python
 from pydantic import BaseModel
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
 # TODO: Define your Pydantic schema
 class SupportAnalysis(BaseModel):
     # TODO: Add fields (category, sentiment, summary)
     pass
 
-root_agent = LlmAgent(
+root_agent = Agent(
     name="support_analyzer_agent",
     model="gemini-3.5-flash",
     instruction="...", # TODO: Update instructions for categorization, sentiment, and summary

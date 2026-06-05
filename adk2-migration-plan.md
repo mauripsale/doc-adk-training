@@ -34,6 +34,7 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 *   [x] **Modulo 38 (Best Practices):** Allineato a ADK 2.0 Resilience.
 *   [x] **Modulo 13_5 (Firestore):** Migrazione a `FirestoreSessionService` v2.
 *   [x] **Modulo 25 (Observability):** Integrazione nativa con **OpenTelemetry** e **Cloud Trace**. Focus su `node_info` per il debug dei grafi.
+*   [x] **Modulo 25.5 (Nuovo): RAI & Safety Plugins:** Implementazione del pattern **Fail-Closed** per la sicurezza enterprise.
 
 ---
 
@@ -53,7 +54,9 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 | **21** | ✅ OK | `simulation_module21_client/`| A2A v2 Distributed |
 | **21.5**| ✅ OK | `simulation_21_5/` | Dynamic Workflows |
 | **21.6**| ✅ OK | `simulation_21_6/` | Deterministic Edges |
-| **21.7**| ✅ OK | `simulation_module21_7/` | **Nuovo!** Collaborative |
+| **21.7**| ✅ OK | `simulation_module21_7/` | Collaborative Hand-offs |
+| **25** | ✅ OK | `simulation_module25/` | Observability & OTel |
+| **25.5**| ✅ OK | `simulation_module25_5/` | **Nuovo!** Safety RAI |
 | **38** | ✅ OK | (Theory & Patterns) | Production Readiness |
 
 ---

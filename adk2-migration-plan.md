@@ -36,6 +36,10 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 *   [x] **Modulo 25 (Observability):** Integrazione nativa con **OpenTelemetry** e **Cloud Trace**. Focus su `node_info` per il debug dei grafi.
 *   [x] **Modulo 25.5 (Nuovo): RAI & Safety Plugins:** Implementazione del pattern **Fail-Closed** per la sicurezza enterprise.
 
+### 🔹 Fase 5: Estensioni & Ecosistema
+*   [x] **Modulo 27 (Intro to MCP):** Integrazione del **Model Context Protocol** come set di strumenti per i Nodi Agente.
+*   [x] **Modulo 28 (Building MCP Tools):** Sviluppo di server MCP personalizzati per esporre capacità di business ai grafi ADK.
+
 ---
 
 ## 🛠️ Stato dei Lavori: **100% COMPLETATO**
@@ -56,7 +60,9 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 | **21.6**| ✅ OK | `simulation_21_6/` | Deterministic Edges |
 | **21.7**| ✅ OK | `simulation_module21_7/` | Collaborative Hand-offs |
 | **25** | ✅ OK | `simulation_module25/` | Observability & OTel |
-| **25.5**| ✅ OK | `simulation_module25_5/` | **Nuovo!** Safety RAI |
+| **25.5**| ✅ OK | `simulation_module25_5/` | Safety RAI |
+| **27** | ✅ OK | `simulation_module27/` | **Nuovo!** MCP Consumer |
+| **28** | ✅ OK | `simulation_module28/` | **Nuovo!** MCP Provider |
 | **38** | ✅ OK | (Theory & Patterns) | Production Readiness |
 
 ---

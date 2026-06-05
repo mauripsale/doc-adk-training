@@ -61,46 +61,47 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     ```python
     import os
     # TODO: 1. Import the necessary classes:
-    # LlmAgent from google.adk.agents
-    # MCPToolset from google.adk.tools.mcp_tool.mcp_toolset
-    # StdioConnectionParams from google.adk.tools.mcp_tool.mcp_session_manager
-    # StdioServerParameters from mcp
+    from google.adk import Agent
+    from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
+    from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
+    from mcp import StdioServerParameters
 
     # -- Configuration --
     # TODO: 2. Define the TARGET_FOLDER_PATH.
-    # It's good practice to define paths dynamically if possible,
-    # or ensure the user understands the need for an ABSOLUTE path.
-    # For this example, construct a path relative to this file,
-    # assuming 'test_files' is in the same directory as agent.py.
     TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files/")
 
     # -- Agent Definition --
     # TODO: 3. Define the root_agent.
-    # Instantiate an LlmAgent with the following properties:
+    # Instantiate an Agent with the following properties:
     # - model: 'gemini-3.5-flash'
     # - name: 'filesystem_agent'
     # - instruction: 'You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.'
     # - tools: A list containing one item: the MCPToolset.
-    root_agent = None # Replace this
-
-    # Inside the LlmAgent's `tools` list, you will configure the MCPToolset.
-    # Follow this structure:
-    #
-    # MCPToolset(
-    #     connection_params=StdioConnectionParams(
-    #         server_params=StdioServerParameters(
-    #             # TODO: 4. Set the `command` to 'npx'.
-    #             command=...,
-    #             # TODO: 5. Set the `args` to a list containing:
-    #             # "-y"
-    #             # "@modelcontextprotocol/server-filesystem"
-    #             # The absolute path to the TARGET_FOLDER_PATH variable you defined above.
-    #             args=[...],
-    #         ),
-    #     ),
-    #     # TODO: 6. Optionally, filter specific tools. For this lab, let\'s allow 'list_directory' and 'read_file'.
-    #     tool_filter=['list_directory', 'read_file']
-    # )
+    
+    root_agent = Agent(
+        model='gemini-3.5-flash',
+        name='filesystem_agent',
+        instruction='You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.',
+        tools=[
+            MCPToolset(
+                connection_params=StdioConnectionParams(
+                    server_params=StdioServerParameters(
+                        # TODO: 4. Set the `command` to 'npx'.
+                        command='npx',
+                        # TODO: 5. Set the `args` to a list containing:
+                        # "-y", "@modelcontextprotocol/server-filesystem", absolute path to TARGET_FOLDER_PATH
+                        args=[
+                            "-y", 
+                            "@modelcontextprotocol/server-filesystem", 
+                            os.path.abspath(TARGET_FOLDER_PATH)
+                        ],
+                    ),
+                ),
+                # TODO: 6. Optionally, filter specific tools: 'list_directory' and 'read_file'.
+                tool_filter=['list_directory', 'read_file']
+            )
+        ]
+    )
     ```
 
 4.  **Set up your `.env` file** with your API key or Vertex AI project.

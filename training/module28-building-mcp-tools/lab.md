@@ -96,18 +96,18 @@ if __name__ == "__main__":
 
 ### Step 3: Create the ADK Client Agent
 
-Create an `agent.py` file and add the provided code to connect to your server.
+Create an `agent.py` file and add the provided code to connect to your server using the ADK 2.0 `Agent` class.
 
 ```python
 # In agent.py
 import os
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams
 from mcp import StdioServerParameters
 
 PATH_TO_SERVER = os.path.abspath("./cart_server.py")
 
-root_agent = LlmAgent(
+root_agent = Agent(
     model='gemini-3.5-flash',
     name='shopping_agent',
     instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',

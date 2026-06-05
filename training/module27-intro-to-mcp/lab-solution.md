@@ -13,7 +13,7 @@ This file contains the complete code for the `agent.py` script in the Stateful F
 
 ```python
 import os # Required for path operations
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
@@ -21,12 +21,10 @@ from mcp import StdioServerParameters
 # -- Configuration --
 # It's good practice to define paths dynamically if possible,
 # or ensure the user understands the need for an ABSOLUTE path.
-# For this example, we'll construct a path relative to this file,
-# assuming 'test_files' is in the same directory as agent.py.
 TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files/")
 
 # -- Agent Definition --
-root_agent = LlmAgent(
+root_agent = Agent(
     model='gemini-3.5-flash',
     name='filesystem_agent',
     instruction='You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.',
@@ -41,9 +39,8 @@ root_agent = LlmAgent(
                     args=[
                         "-y",  # Auto-confirm 'npx' installation
                         "@modelcontextprotocol/server-filesystem", # The server package
-                        # IMPORTANT: This MUST be an ABSOLUTE path to a folder the
-                        # npx process can access.
-                        os.path.abspath(TARGET_FOLDER_PATH), # The directory it should manage
+                        # IMPORTANT: This MUST be an ABSOLUTE path.
+                        os.path.abspath(TARGET_FOLDER_PATH),
                     ],
                 ),
             ),

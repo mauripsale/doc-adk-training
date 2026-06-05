@@ -47,11 +47,10 @@ The `mcp` Python library provides a `Server` class and decorators to simplify th
 
 In the lab, you will build a simple MCP server that exposes a stateful "shopping cart" tool, learning the fundamentals of implementing these handlers.
 
-### Key Takeaways
-- By building an MCP server, you become a **provider** of tools to any MCP-compliant client, not just your own agents.
-- An MCP server must implement two core handlers: `list_tools` to advertise its capabilities, and `call_tool` to execute them.
-- The `mcp` Python library simplifies server creation with a `Server` class and the `@app.list_tools()` and `@app.call_tool()` decorators.
-- The `call_tool` handler receives a `session_id`, which is the key to managing state for different clients across multiple requests.
-- **Benefits of Decoupling:** Building an MCP server decouples your tool's logic from the agent, which provides significant long-term benefits. It allows for independent scalability (you can scale the agent and the tool server separately based on their specific loads), modular maintenance (you can update and redeploy the tool logic without touching the agent), and reusability (the MCP server can be consumed by any MCP-compliant client, not just your ADK agent, and can even be written in a different programming language).
-- **The Role of `session_id`:** The `session_id` is crucial in a multi-user environment because it provides user isolation and enables stateful conversations. It acts as a unique key to distinguish one user's context (e.g., their shopping cart) from another's, and it links a sequence of requests from a single user into a coherent, evolving transaction.
-- **State Management in Production:** Using a global in-memory dictionary for state (like `SESSION_CARTS` in the lab) is not suitable for production. If you run multiple instances of your server for scalability or redundancy, each instance will have its own separate in-memory dictionary, leading to state inconsistency. The correct production solution is to use an external, centralized data store (e.g., a Redis cache, a SQL/NoSQL database) that all server instances can access, ensuring a single source of truth for the state.
+### Why build an MCP Server?
+
+Building an MCP server decouples your tool's logic from the agent, which provides significant benefits:
+1.  **Independent Scalability:** You can scale the agent and the tool server separately.
+2.  **Modular Maintenance:** Update tool logic without redeploying the agent.
+3.  **Reusability:** Your MCP server can be consumed by *any* MCP-compliant client.
+4.  **Workflow Integration:** In ADK 2.0, you can equip any `Agent` node with your custom MCP server, allowing for complex, distributed graph execution.

@@ -534,23 +534,67 @@ The solution is excellent. It demonstrates the modern App pattern and correctly 
 Consider adding a small section on how to use 'Cloud Monitoring' dashboards to visualize the metrics exported by the native OTel hooks.
 
 ---
-# 🎓 Student Evaluation Report: Module 25.5 (RAI & Safety Plugins)
+# 🎓 Student Evaluation Report: Module 27 (Intro to MCP)
 
 ## 📊 Summary Scores (1-5)
 * **Clarity of Theory (README.md):** 5
 * **Clarity of Instructions (lab.md):** 5
 * **Code Completeness:** 5
 * **Solution Quality (lab-solution.md):** 5
-* **Overall Difficulty:** 2
+* **Overall Difficulty:** 3
 
 ## 🧑‍💻 The Student Experience
-Building a safety guardrail was surprisingly simple thanks to the Plugin system. The 'Fail-Closed' concept is explained effectively, and seeing the agent's response get overwritten in real-time is a very powerful 'aha' moment. It makes the student feel like they have real control over the AI's behavior.
+The introduction of the Model Context Protocol (MCP) as a way to handle stateful interactions is a significant addition to the curriculum. The "Filesystem" example is concrete and easy to understand. Using `MCPToolset` with `npx` demonstrates the power of the community ecosystem, as students can leverage existing servers without writing custom integration code.
 
 ## 🚧 Friction Points & Bugs
-None. The regex implementation for PII detection is a perfect example of a deterministic safety layer. The lab instructions are clear and the simulation was successful.
+The lab relies on `npx` and network access to download the MCP server package. In restricted environments, this could be a blocker. However, the documentation correctly notes this prerequisite. The simulation verified that the configuration logic in `agent.py` is sound and follows ADK 2.0 patterns.
 
 ## 🏁 Solution Review
-The solution is excellent. It demonstrates the modern App pattern and correctly uses the Event object to modify the output before it reaches the user.
+The solution correctly implements the `Agent` and `MCPToolset` configuration. The use of `os.path.abspath` for the `TARGET_FOLDER_PATH` is a critical technical detail that is correctly emphasized. The `__init__.py` file is properly included to ensure the agent is discoverable by the ADK CLI.
 
 ## 💡 Suggestions for Improvement
-Consider adding a 'Bonus Task' to show how to use a secondary 'Safety LLM' (like a smaller, faster model) inside the plugin to check for toxic tone, moving beyond simple regex.
+Consider adding a small troubleshooting section in the `README.md` for common `npx` issues or permission errors when the MCP server tries to access the filesystem.
+
+---
+# 🎓 Student Evaluation Report: Module 27 (Intro to MCP)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Connecting an agent to the filesystem via MCP feels like giving it 'hands'. The concept of stateful tools is a crucial step up from simple stateless functions. The use of MCPToolset in ADK 2.0 is clean and the dynamic discovery of tools is a significant 'wow' factor.
+
+## 🚧 Friction Points & Bugs
+The requirement for absolute paths in StdioConnectionParams can be a tripping point for students. The lab correctly addresses this with os.path.abspath(), but it's worth highlighting.
+
+## 🏁 Solution Review
+The solution is technically solid. It correctly demonstrates how to sandbox the filesystem server to a specific target folder, which is an essential security practice.
+
+## 💡 Suggestions for Improvement
+Consider adding a 'Search' MCP server example to show how agents can also consume specialized web search capabilities through the same protocol.
+
+---
+# 🎓 Student Evaluation Report: Module 28 (Building MCP Tools)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 4
+
+## 🧑‍💻 The Student Experience
+Building your own server is the ultimate empowerment. It transforms the student from a 'user' of AI to an 'architect' of AI capabilities. Implementing the shopping cart logic on the server side provides a clear understanding of where state should live in distributed systems.
+
+## 🚧 Friction Points & Bugs
+The Python decorators for MCP (@app.list_tools, @app.call_tool) are intuitive but require the 'mcp' library, which students must install separately. This is correctly noted in the instructions.
+
+## 🏁 Solution Review
+The solution provides a perfect implementation of a stateful MCP server. The bi-directional flow between the Python server and the ADK agent is clearly demonstrated.
+
+## 💡 Suggestions for Improvement
+Add a 'Scale-up' note about moving from in-memory SESSION_CARTS to a real database like Redis or Firestore for production scenarios.

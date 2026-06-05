@@ -33,12 +33,12 @@ MCP works on a client-server model:
 
 ```text
 +-----------------+      +----------------------+      +--------------------+
-|   ADK Agent     |----->|    MCPToolset        |----->|     MCP Server     |
-| (MCP Client)    |      | (ADK Wrapper/Client) |      | (e.g., Filesystem) |
+|   Agent Node    |----->|    MCPToolset        |----->|     MCP Server     |
+|  (MCP Client)   |      | (ADK Wrapper/Client) |      | (e.g., Filesystem) |
 +-----------------+      +----------------------+      +--------------------+
 ```
 
-The `MCPToolset` is the bridge. It connects to an MCP server, discovers the tools it offers, and makes them available to your agent. When your agent decides to use one of these tools, the `MCPToolset` proxies the call to the server, which executes the logic and maintains the state.
+The `MCPToolset` is the bridge. It connects to an MCP server, discovers the tools it offers, and makes them available to your agent node. When your agent decides to use one of these tools, the `MCPToolset` proxies the call to the server, which executes the logic and maintains the state.
 
 ### MCP Connection Types
 
@@ -54,8 +54,5 @@ In the lab, you will use the `Stdio` connection to run a local filesystem server
 - Standard function tools are **stateless**, which limits their ability to handle ongoing, multi-turn interactions.
 - The **Model Context Protocol (MCP)** is an open standard that enables agents to connect to **stateful** external tools.
 - The ADK acts as an MCP client, using the `MCPToolset` to connect to and consume tools from an MCP server.
-- This architecture allows you to leverage a growing ecosystem of pre-built, community-maintained MCP tools for common tasks like filesystem and database access.
-- The `StdioConnectionParams` are used to connect to an MCP server running as a local subprocess, which is ideal for development.
-- **Security and Sandboxing:** Launching an MCP server as a subprocess (e.g., via `StdioConnectionParams`) has security implications, as it grants the external code operational freedom on the host system. This is why **sandboxing** is critical. By restricting the server's access to a specific, sandboxed directory (the `TARGET_FOLDER_PATH`), you ensure that even if the server were compromised, it could not access or modify files outside of its designated area. This is a fundamental security practice for running external processes in a production environment.
-- **Stateful vs. Stateless Tools:** Unlike the stateless calculator tools from previous modules (where each call is an independent transaction), MCP tools are often stateful. The MCP server maintains the state of the external system (e.g., the filesystem). This means that an action taken in one turn (like `write_file`) persists and affects the outcome of subsequent actions in later turns (like `read_file`), enabling more complex, multi-turn interactions.
-- **Advantage of Dynamic Discovery:** The MCP's "plug-and-play" nature, where tools are dynamically discovered from the server, offers significant advantages over manual tool definition. It reduces maintenance, as changes to the server's tools are automatically reflected in the agent without requiring code changes. It also promotes a clean separation of concerns, where the tool's logic is completely decoupled from the agent's reasoning logic, and enhances reusability, as the same agent can connect to different MCP servers with minimal modification.
+- **Workflow Integration:** In ADK 2.0, an `Agent` node equipped with an `MCPToolset` becomes a powerful interface to external systems within your graph.
+- **Security and Sandboxing:** Launching an MCP server as a subprocess (e.g., via `StdioConnectionParams`) grants the external code operational freedom. Always **sandbox** the server to a specific directory to minimize risk.

@@ -35,7 +35,7 @@ This is the mode you've used so far. Let's explore its features more deeply.
     *   Open the UI in your browser (`http://127.0.0.1:8080`).
     *   Select `support_analyzer` from the dropdown menu if it's not already selected.
     *   Have a short conversation with your analyzer agent.
-    *   **Trace View:** On the right side of the screen, click on the "Trace" tab. You will see a waterfall diagram. Click on the `LlmAgent` step to expand it. Here you can see the full prompt sent to the Gemini model, including your detailed instruction and the user's message. This view is critical for debugging why an agent behaves a certain way.
+    *   **Trace View:** On the right side of the screen, click on the "Trace" tab. You will see a waterfall diagram. Click on the **Agent** node to expand it. Here you can see the full prompt sent to the Gemini model, including your detailed instruction and the user's message. This view is critical for debugging why an agent behaves a certain way.
     *   **State View:** Click the "State" tab. This view shows the agent's short-term memory for the current conversation. You should see the `last_ticket_analysis` key populated with JSON.
 
 ## Part 2: Headless Interaction with `adk run`

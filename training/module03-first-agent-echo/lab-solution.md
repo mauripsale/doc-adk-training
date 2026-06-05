@@ -120,12 +120,13 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
 ### Understanding What's Happening
 
 When you send a message:
-1.  **ADK** packages your message with the agent's instructions.
-2.  It sends the package to the **Gemini LLM**.
-3.  **Gemini** generates a response based on the instructions.
-4.  **ADK** returns the response to you.
+1.  **Runner** receives your input and retrieves (or creates) your **Session**.
+2.  **App** provides the **Agent** node to the runner.
+3.  **ADK** packages your message with the agent's instructions and session history.
+4.  **Gemini LLM** generates a response.
+5.  **Runner** saves the response to the session state and returns it to you.
 
-**Use the Events tab** in the Dev UI to see this flow in detail!
+**Use the Trace tab** in the Dev UI to see this flow in detail!
 
 ### Key Takeaways
 

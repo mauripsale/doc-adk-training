@@ -16,7 +16,7 @@ Here is the complete code implementing the resilient subclass and the multi-mode
 ```python
 import os
 from functools import cached_property
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.models import Gemini
 from google.adk.models.lite_llm import LiteLlm
 from google.genai import Client, types
@@ -50,7 +50,7 @@ else:
     # Use the professional, native Gemini subclass for production
     model_to_use = ResilientGemini(model="gemini-3.5-flash")
 
-root_agent = LlmAgent(
+root_agent = Agent(
     name="support_analyzer_agent",
     model=model_to_use,
     instruction="""

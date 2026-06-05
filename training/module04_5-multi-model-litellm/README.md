@@ -14,7 +14,7 @@ In this module, we will explore the three levels of model configuration in the A
 ### Level 1: Simple Strings (Prototype)
 The simplest way. Ideal for learning and quick tests.
 ```python
-agent = LlmAgent(model="gemini-3.5-flash", ...)
+agent = Agent(model="gemini-3.5-flash", ...)
 ```
 
 ### Level 2: The `Gemini` Class (Professional)
@@ -23,6 +23,7 @@ By importing `Gemini` from `google.adk.models`, you gain access to the model's u
 In production, LLM APIs can occasionally time out or return rate-limit errors (429). The `Gemini` class allows you to define a retry policy so the agent doesn't just crash when a request fails.
 
 ```python
+from google.adk import Agent
 from google.adk.models import Gemini
 from google.genai import types
 
@@ -32,7 +33,7 @@ resilient_model = Gemini(
     retry_options=types.HttpRetryOptions(initial_delay=1, attempts=3)
 )
 
-agent = LlmAgent(model=resilient_model, ...)
+agent = Agent(model=resilient_model, ...)
 ```
 
 ### Level 3: Custom Subclasses (Enterprise Expert)
@@ -42,6 +43,7 @@ This allows you to lock in production settings (like forcing the `global` locati
 
 ```python
 from functools import cached_property
+from google.adk import Agent
 from google.adk.models import Gemini
 from google.genai import Client, types
 import os
@@ -64,7 +66,7 @@ class ProductionGemini(Gemini):
         )
 
 # Use your expert class anywhere in your app
-agent = LlmAgent(model=ProductionGemini(model="gemini-3.5-flash"), ...)
+agent = Agent(model=ProductionGemini(model="gemini-3.5-flash"), ...)
 ```
 
 ---

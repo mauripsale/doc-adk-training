@@ -13,7 +13,7 @@ In this lab, we built a Customer Support Analyzer. We used a Pydantic schema to 
 
 ```python
 from pydantic import BaseModel
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 
 # Define the structured output schema
 class SupportAnalysis(BaseModel):
@@ -21,8 +21,8 @@ class SupportAnalysis(BaseModel):
     sentiment: str
     summary: str
 
-# Define the root agent with v1.0 structured features
-root_agent = LlmAgent(
+# Define the root agent with ADK 2.0 structured features
+root_agent = Agent(
     name="support_analyzer_agent",
     model="gemini-3.5-flash",
     description="An agent that categorizes customer support tickets and extracts sentiment.",
@@ -54,4 +54,4 @@ root_agent = LlmAgent(
     *   **Answer:** The agent can no longer use tools. The ADK enforces this because structured output mode optimizes the model's generation process specifically for following a schema. Mixing tool-calling (which involves a separate "reasoning" loop) with strict JSON generation is complex and error-prone. If you need both, you should use a multi-agent system: one agent to use tools and another to format the final result into JSON.
 
 3.  **Look at the Dev UI's "Session State". How could another agent in a future multi-agent system use the data stored in the `"last_ticket_analysis"` key?**
-    *   **Answer:** In a multi-agent workflow (like a `SequentialAgent`), the next agent in the chain can access `ctx.session.state["last_ticket_analysis"]`. For example, if the category is "billing", the workflow could route the user to a Billing Agent. If the sentiment is "negative," it could route them to a Human Escalation Agent, all without having to re-parse the original message.
+    *   **Answer:** In a multi-agent workflow (like a `Workflow` with sequential edges), the next node in the chain can access `ctx.session.state["last_ticket_analysis"]`. For example, if the category is "billing", the workflow could route the user to a Billing Agent. If the sentiment is "negative," it could route them to a Human Escalation Agent, all without having to re-parse the original message.

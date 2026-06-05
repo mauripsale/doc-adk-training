@@ -52,7 +52,15 @@ This mode is essential for moving your agent from a local development tool to a 
 
 In the lab for this module, you will get hands-on experience with all three of these commands, giving you a complete toolkit for running and interacting with your agents.
 
+### The ADK 2.0 CLI Engine
+
+While these commands feel like magic, they are powered by the **App** and **Runner** architecture you learned about in earlier modules. 
+
+*   `adk web` and `adk run` instantiate an **InMemoryRunner** for fast, local development.
+*   `adk api_server` provides a production-style environment where sessions and state are managed by the framework (and can be backed by Firestore, as you will see in Module 13.5).
+
 ### Key Takeaways
 - `adk web`: The primary tool for interactive development and debugging, featuring a chat UI and a detailed Trace View.
 - `adk run`: A headless, command-line interface for quick tests and automated scripting.
-- `adk api_server`: Runs the agent as a standalone HTTP server, exposing a RESTful API for integration with other applications and deployment to production environments.
+- `adk api_server`: Runs the agent as a standalone HTTP server, exposing a RESTful API for integration and deployment.
+- All CLI commands leverage the core **App** and **Runner** engine of ADK 2.0.

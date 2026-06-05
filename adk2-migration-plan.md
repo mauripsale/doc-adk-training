@@ -14,6 +14,9 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 
 ### 🔹 Fase 1: Fondamentali & Setup
 *   [x] **Modulo 02 (Environment):** Aggiornare i requisiti a Python 3.10+ e `google-adk>=2.1.0`.
+*   [x] **Modulo 03 (First Agent):** Passaggio alla classe `Agent` e introduzione semplificata a App/Runner.
+*   [x] **Modulo 04 (Agent Deep Dive):** Focus su `Agent` parameters, `output_schema` (Pydantic) e `output_key`.
+*   [x] **Modulo 05 (Execution Modes):** Spiegazione dei comandi CLI (`web`, `run`, `api_server`) e del runtime sottostante.
 *   [x] **Modulo 06 (Programmatic):** Introdurre il concetto di `App`, `Runner` e come il runtime v2 gestisce gli eventi. (Aggiornato a pattern `App(root_agent=...)`)
 
 ### 🔹 Fase 2: Orchestrazione Moderna (Il core di ADK 2.0)
@@ -47,6 +50,9 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 | Modulo | Stato | Artefatto Simulazione | Note |
 | :--- | :--- | :--- | :--- |
 | **02** | ✅ OK | `simulation_module02/` | Richiede v2.1.0+ |
+| **03** | ✅ OK | `simulation_module03/` | Modern Agent Class |
+| **04** | ✅ OK | `simulation_module04/` | Structured Output v2 |
+| **05** | ✅ OK | - | CLI Tooling |
 | **06** | ✅ OK | `simulation_module06/` | Pattern App/Runner v2 |
 | **13.5**| ✅ OK | `simulation_module13_5/`| Firestore v2 |
 | **15** | ✅ OK | (Design Lab) | Narrativa Graph/Node |

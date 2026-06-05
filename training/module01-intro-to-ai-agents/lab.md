@@ -15,18 +15,18 @@ The official ADK documentation is the most important resource you will use. It's
 
 1.  **Open the Documentation:** In your web browser, go to the main page of this documentation site.
 2.  **Explore the "Get Started" Section:** On the left sidebar, find the "Get started" section. Click through the pages like `About`, `Installation`, and `Quickstart`. Skim through these pages to get a high-level overview of what the ADK is and how to set it up.
-3.  **Browse the "Agents" Section:** Look at the "Agents" section in the sidebar. Notice the different types of agents available (`LlmAgent`, `Workflow Agents`, etc.). Click on `LlmAgent` to see the configuration options for the most common agent type.
-4.  **Look at the "Tools" Section:** Find the "Tools" section. See the different categories of tools, such as `Built-in tools` and `Function tools`. This will give you an idea of the capabilities you can give to your agents.
+3.  **Browse the "Agents" Section:** Look at the "Agents" section in the sidebar. Notice the modern `Agent` class which replaces the legacy `LlmAgent`.
+4.  **Explore the "Workflows" Section:** This is the heart of ADK 2.0. Look at how you can build graphs using `Workflow` and `Edges`.
 
-**Key Takeaway:** The documentation is your best friend. Knowing how to navigate it will save you a lot of time in the future.
+**Key Takeaway:** The documentation is your best friend. Ensure you are looking at the **ADK 2.0+** sections to follow the modern best practices.
 
 ## Step 2: Discover the Official Code Repositories
 
 The ADK is an open-source project with repositories on GitHub. These repositories contain the source code, issue trackers, and, most importantly, a wealth of examples.
 
-1.  **Find the ADK Python Repository:** Search on Google or GitHub for "Google ADK Python". The official repository should be one of the top results.
-2.  **Explore the `examples` directory:** Once you are on the GitHub page, find and click on the `examples` directory. This directory contains practical, runnable examples of different ADK features.
-3.  **Find a Simple Example:** Navigate into `contributing/samples/hello_world`. This is a great starting point.
+1.  **Find the ADK Python Repository:** Search on Google or GitHub for "Google ADK Python".
+2.  **Verify the Version:** Check the latest releases. You should see references to **ADK 2.0 GA** or higher.
+3.  **Explore the `examples` directory:** Look for samples that use the `Workflow` class. Navigating into `contributing/samples/hello_world` is still a great starting point, but notice how it now uses the `App` and `Runner` pattern.
 4.  **Examine the Code:** Click on the Python files (`agent.py` and `main.py`). Read through the code and the comments. Try to connect what you see in the code with the concepts you skimmed in the documentation (e.g., creating an `LlmAgent`).
 
 ***Scavenger Hunt!***

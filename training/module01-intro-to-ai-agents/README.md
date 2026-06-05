@@ -38,19 +38,20 @@ The **Google Agent Development Kit (ADK)** is a comprehensive framework designed
 
 The ADK is built on a philosophy of **modularity, flexibility, and scalability**. It provides a set of core primitives that you can compose like building blocks to create everything from simple, single-purpose agents to complex, multi-agent systems.
 
-#### Core Concepts of the ADK
+#### Core Concepts of ADK 2.0: The Graph Architecture
 
-*   **Agent:** The fundamental worker unit. An agent can be powered by an LLM for reasoning (`LlmAgent`) or be a deterministic controller for a workflow (`SequentialAgent`, `ParallelAgent`, `LoopAgent`).
-*   **Tool:** An interface that gives an agent a specific capability, such as searching the web, accessing a database, or calling a custom function.
-*   **Session & State:** Manages the short-term memory and context of a single conversation, ensuring the agent can handle multi-turn dialogues effectively.
-*   **Memory:** Enables an agent to recall information about a user across multiple conversations, providing the long-term context needed for personalized interactions.
-*   **Runner:** The engine that orchestrates the entire execution flow, managing the interaction between the user, the agent, and its tools. This simplifies development by abstracting away the complexities of the agent's execution lifecycle.
-*   **Evaluation:** A built-in framework for systematically testing and measuring your agent's performance to ensure quality and reliability before deployment.
-*   **Deployment:** Tools to easily package and deploy your agent to scalable environments like Google Cloud Run and GKE, bridging the gap from development to production.
+ADK 2.0 represents a major evolution in how we build AI systems. It moves away from monolithic agents and rigid hierarchies toward a flexible **Graph-based Architecture**.
 
-In this course, you will learn how to master these concepts to build powerful and intelligent AI agents.
+*   **Node:** The fundamental building block. A node is a discrete unit of work. It can be an **Agent** (powered by an LLM), a **Function Tool** (pure code), or even another nested **Workflow**.
+*   **Edge:** Defines the flow of control and data between nodes. Edges can be linear (sequential), branched (conditional), or even cyclic (loops).
+*   **Workflow:** The container and orchestrator. A Workflow defines the structure of your graph and manages the transitions between nodes using the **Workflow Runtime**.
+*   **App & Runner:** The infrastructure layer. An **App** wraps your root agent or workflow, and a **Runner** (like the `InMemoryRunner`) executes it, handling session state and telemetry.
+*   **Tool:** Capability interfaces that can be assigned to Agent nodes (e.g., Search, Database access).
+*   **Session & State:** Manages the context and memory of an interaction, ensuring continuity across the graph.
+
+In this course, you will learn to think in **Graphs and Nodi**, mastering ADK 2.0 to build scalable, production-grade AI applications.
 
 ### Key Takeaways
-- AI Agents are autonomous systems that can perceive, reason, plan, and act using tools.
-- The Google Agent Development Kit (ADK) is a framework for building, managing, and deploying sophisticated AI agents.
-- Core ADK concepts include Agents, Tools, Sessions, Memory, Runners, Evaluation, and Deployment.
+- AI Agents are autonomous systems that perceive, reason, and act using tools.
+- **ADK 2.0** uses a **Graph Architecture** where Agents and Tools are **Nodes** connected by **Edges**.
+- The **Workflow Runtime** is the engine that orchestrates complex multi-agent interactions seamlessly.

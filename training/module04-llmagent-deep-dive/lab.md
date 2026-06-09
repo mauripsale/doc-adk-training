@@ -11,7 +11,7 @@ Your task is to build a **"Support Analyzer"** agent. Instead of returning plain
 ## Lab Tasks
 1.  Open your terminal, ensure you are in your `adk-training` directory, and run the following command to scaffold a new agent:
     ```shell
-    adk create support_analyzer
+    uv run adk create support_analyzer
     ```
 2.  Navigate into the newly created `support_analyzer` directory.
 3.  **Define a Pydantic Schema:** In `agent.py`, create a class named `SupportAnalysis` that defines three fields:
@@ -22,7 +22,7 @@ Your task is to build a **"Support Analyzer"** agent. Instead of returning plain
     *   Set the `output_schema` to your `SupportAnalysis` class.
     *   Set the `output_key` to `"last_ticket_analysis"`.
 5.  **Refine Instructions:** Update the agent's `instruction` to ensure it understands its job is to extract these three specific pieces of information from the user's input.
-6.  **Run and Verify:** Run the agent using `adk web support_analyzer` (from the parent directory). In the Dev UI, test it with a phrase like *"My screen is completely broken and I'm very angry about it!"* and verify the response is a valid JSON object.
+6.  **Run and Verify:** Run the agent using `uv run adk web support_analyzer` (from the parent directory). In the Dev UI, test it with a phrase like *"My screen is completely broken and I'm very angry about it!"* and verify the response is a valid JSON object.
 7.  **Inspect State:** After a few interactions, check the "Session State" in the Dev UI to confirm that `"last_ticket_analysis"` is being populated correctly.
 
 ### Python Approach (Primary)

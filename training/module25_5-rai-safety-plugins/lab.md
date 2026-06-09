@@ -15,7 +15,7 @@ This demonstrates the **Fail-Closed** pattern used in enterprise AI applications
 
 1.  **Create a new project:**
     ```shell
-    adk create safety_guardrail
+    uv run adk create safety_guardrail
     ```
 
 ### Step 2: Implement the Safety Plugin
@@ -72,7 +72,7 @@ app = App(
 
 1.  **Launch the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Trigger the Leak:**
     - Ask: "Give me some test data."

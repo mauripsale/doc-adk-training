@@ -41,7 +41,7 @@ When you navigate to the `http://<EXTERNAL-IP>` address in your browser, you sho
 
 *   **`CrashLoopBackOff`:**
     *   **Problem:** The container is starting and then immediately crashing. This is an error within the container itself.
-    *   **Solution:** Use `kubectl logs deployment/echo_agent-deployment` to view the logs from the crashing pod. The logs will show the error message from the `adk web` command (e.g., a missing environment variable, a syntax error in an agent file, etc.).
+    *   **Solution:** Use `kubectl logs deployment/echo_agent-deployment` to view the logs from the crashing pod. The logs will show the error message from the `uv run adk web` command (e.g., a missing environment variable, a syntax error in an agent file, etc.).
 
 *   **Service IP remains `<pending>`:**
     *   **Problem:** GKE is having trouble creating the external load balancer. This can happen due to project quota issues or incorrect network configurations.
@@ -58,8 +58,8 @@ When you navigate to the `http://<EXTERNAL-IP>` address in your browser, you sho
         *   **`Service`:** The `Service` object is responsible for managing *access* to your application. It creates a stable network endpoint (like a public IP address) and a load balancer, routing external and internal traffic to the ephemeral Pods managed by the Deployment. Pods are transient and their IPs can change, so the Service provides a consistent way to reach the application.
         *   **Why both?** You need both because the Deployment ensures your agent is running reliably, while the Service ensures that clients can consistently *find and connect* to your running agent instances, abstracting away the dynamic nature of individual Pods.
 
-3.  **The `Dockerfile` uses `CMD ["adk", "api_server", ...]`. Why is it important to use `api_server` here instead of `web` for a production deployment?**
-    *   **Answer:** For a production deployment to GKE (or any backend service), it is critical to use `adk api_server` instead of `adk web`. The `api_server` command exposes a pure, headless REST API for programmatic consumption by other applications. In contrast, `adk web` includes the ADK Developer UI, which:
+3.  **The `Dockerfile` uses `CMD ["uv", "run", "adk", "api_server", ...]`. Why is it important to use `api_server` here instead of `web` for a production deployment?**
+    *   **Answer:** For a production deployment to GKE (or any backend service), it is critical to use `uv run adk api_server` instead of `uv run adk web`. The `api_server` command exposes a pure, headless REST API for programmatic consumption by other applications. In contrast, `uv run adk web` includes the ADK Developer UI, which:
         *   **Security Risk:** Exposes sensitive internal information (e.g., agent's full instruction, tool definitions, detailed execution traces) that should not be publicly accessible in production.
         *   **Resource Overhead:** Adds unnecessary size to the container image and consumes additional memory and CPU resources, increasing operational costs for a service that will not be interacted with via a UI.
-        Using `api_server` results in a leaner, more secure, and more efficient production deployment tailored for backend-to-backend communication.
+        Using `uv run adk api_server` results in a leaner, more secure, and more efficient production deployment tailored for backend-to-backend communication.

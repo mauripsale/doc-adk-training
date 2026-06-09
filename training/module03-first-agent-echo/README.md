@@ -66,13 +66,13 @@ In ADK 2.0, defining the agent is only the first step. To actually run it, the f
 1.  **App:** A container that wraps your `root_agent`. It defines the boundaries of your AI application, including its name and any global plugins (like for observability).
 2.  **Runner:** The engine that executes the `App`. It handles the session state, manages the connection to the LLM, and provides helper methods like `run_debug()`.
 
-When you use the CLI command `adk web`, the ADK automatically creates an **App** and an **InMemoryRunner** for you behind the scenes!
+When you use the CLI command `uv run adk web`, the ADK automatically creates an **App** and an **InMemoryRunner** for you behind the scenes!
 
-### Scaffolding Your Project with `adk create`
+### Scaffolding Your Project with `uv run adk create`
 ...
 The ADK command-line tool helps you quickly set up the necessary file structure for a new agent.
 
-Running `adk create <agent_name>` initiates a wizard that lets you choose your preferred method (Config-based or Programmatic). It then creates a directory containing:
+Running `uv run adk create <agent_name>` initiates a wizard that lets you choose your preferred method (Config-based or Programmatic). It then creates a directory containing:
 
 *   **`root_agent.yaml`** (for config-based) or **`agent.py`** (for programmatic).
 *   **`.env`:** A file for storing environment variables, such as your API keys. This keeps your secrets separate from your agent's code and configuration.
@@ -83,4 +83,4 @@ In the upcoming lab, you will use these concepts to create, configure, and run y
 - An ADK agent is defined by its `name`, `model`, `instruction`, and `description`.
 - The `instruction` is the most critical part, defining the agent's persona, goals, and rules.
 - Agents can be defined simply with YAML (`root_agent.yaml`) or programmatically with Python (`agent.py`).
-- The `adk create` command scaffolds the necessary project structure for a new agent.
+- The `uv run adk create` command scaffolds the necessary project structure for a new agent.

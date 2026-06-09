@@ -20,7 +20,7 @@ We will use the `uv` workflow to initialize our research project.
     ```bash
     uv init research_assistant --python 3.10
     cd research_assistant
-    uv add google-adk python-dotenv
+    uv add google.adk python-dotenv
     ```
 
 2.  **Configure Authentication:** Ensure your `.env` file has your project ID and location set for Vertex AI.

@@ -22,49 +22,48 @@ This will teach you the canonical way to execute an agent as part of a larger Py
     In the same directory as your `agent.py`, create a new Python file named `main.py`. This is where you will write the code to run your agent.
 
 ### Python Skeleton (`main.py`)
-Complete the `main.py` script by following the conceptual comments below. Refer to the "Theory" section if you forget the class names or method signatures.
+Complete the `main.py` script by following the comments.
 
 ```python
 import asyncio
 import logging
 from dotenv import load_dotenv
 
-# Optional: Suppress noisy ADK/httpx logs for cleaner terminal output
-logging.getLogger("google.adk").setLevel(logging.WARNING)
-logging.getLogger("httpx").setLevel(logging.WARNING)
+# --- Step 1: ADK Imports ---
+# TODO: Import App from google.adk.apps
+# TODO: Import InMemoryRunner from google.adk.runners
+# TODO: Import root_agent from agent.py
+from ... import ...
 
-# TODO: Step 1 - Bring in your "Intelligence" (the Agent) 
-# and your "Infrastructure" components (App and InMemoryRunner).
-# Remember: Agent is in agent.py, Apps/Runners are in google.adk.
+# Optional: Suppress noisy ADK/httpx logs
+logging.getLogger("google.adk").setLevel(logging.WARNING)
 
 load_dotenv()
 
-# TODO: Step 2 - Build the "Office Building" (The App instance).
-# Create an App container named "support_app" and move your Agent inside it.
+# --- Step 2: Infrastructure Setup ---
+# TODO: 1. Create the App instance named "support_app".
 app = ...
 
-# TODO: Step 3 - Start the "Management System" (The Runner instance).
-# Instantiate the single Runner that will manage all your user sessions.
-# For local dev, the InMemory version is the easiest way to start.
+# TODO: 2. Create the Runner instance using the app.
 runner = ...
 
 async def main():
     print("--- User A (Alice) ---")
-    # TODO: Step 4 - Process a message for Alice (Billing issue: "I was overcharged $50").
-    # Use the convenient debug method to execute the message.
-    # IMPORTANT: You must identify this session as "Alice".
+    # --- Step 3: Run for Alice ---
+    # TODO: Use the runner's debug method to send Alice's billing issue: 
+    # "I was overcharged $50". Don't forget the user_id!
     events_a = ...
     
-    # TODO: Step 5 - Inspect the output.
-    # The debug method returns a list of Events. 
-    # Loop through them to find the one that marks the "final response" 
-    # and print the content text to the console.
-    # Hint: use `event.is_final_response()` and `event.content.parts[0].text`
+    # --- Step 4: Process Events ---
+    # TODO: Loop through events_a and find the final response.
+    # Hint: use event.is_final_response()
+    for event in events_a:
+        ...
 
     print("\n--- User B (Bob) ---")
-    # TODO: Step 6 - Process a message for Bob (Technical issue: "My wifi is slow").
-    # Use the SAME runner instance, but a DIFFERENT user_id to ensure 
-    # their conversations don't leak into each other.
+    # --- Step 5: Run for Bob ---
+    # TODO: Use the SAME runner instance to send Bob's technical issue:
+    # "My wifi is slow". Use a different user_id.
     ...
 
 if __name__ == "__main__":
@@ -73,13 +72,11 @@ if __name__ == "__main__":
 
 ### Step 3: Run the Script
 
-Once you have completed the script, you can execute it directly from your terminal.
+Once you have completed the script, you can execute it using `uv run`.
 
-1.  **Ensure your virtual environment is active.**
-
-2.  **Run the script from your `support_analyzer` directory:**
+1.  **Run the script from your `support_analyzer` directory:**
     ```shell
-    python main.py
+    uv run python main.py
     ```
 
 ### Step 4: Observe the Output

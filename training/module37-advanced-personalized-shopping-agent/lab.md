@@ -27,7 +27,7 @@ This agent will be the interface to the e-commerce website.
 1.  **Create the `web_agent` project** (programmatic).
     ```shell
     cd capstone_shopping_system
-    adk create web_agent
+    uv run adk create web_agent
     cd web_agent
     ```
 
@@ -127,7 +127,7 @@ This agent will be responsible for remembering user preferences.
 1.  **Create the `personalization_agent` project** (programmatic).
     ```shell
     cd capstone_shopping_system
-    adk create personalization_agent
+    uv run adk create personalization_agent
     cd personalization_agent
     ```
 
@@ -205,7 +205,7 @@ This is the main, user-facing agent that will coordinate the others.
 1.  **Create the `orchestrator_agent` project** (programmatic).
     ```shell
     cd capstone_shopping_system
-    adk create orchestrator_agent
+    uv run adk create orchestrator_agent
     cd orchestrator_agent
     ```
 
@@ -303,7 +303,7 @@ Plan how you would deploy this distributed system.
 To test your full system, you will need to run all three agents in separate terminals:
 *   **Terminal 1 (`web_agent`):** `uvicorn agent:a2a_app --host localhost --port 8001`
 *   **Terminal 2 (`personalization_agent`):** `uvicorn agent:a2a_app --host localhost --port 8002`
-*   **Terminal 3 (`orchestrator_agent`):** `adk web orchestrator_agent`
+*   **Terminal 3 (`orchestrator_agent`):** `uv run adk web orchestrator_agent`
 
 Interact with the Orchestrator in the Dev UI and use the Trace view to observe the A2A communication and delegation.
 
@@ -312,7 +312,7 @@ Interact with the Orchestrator in the Dev UI and use the Trace view to observe t
 This is a complex lab with multiple deployments. It is crucial to delete the resources you created after completing the lab.
 
 #### For Local Development:
-1.  **Stop all running `uvicorn` and `adk web` processes** (Ctrl+C in each terminal).
+1.  **Stop all running `uvicorn` and `uv run adk web` processes** (Ctrl+C in each terminal).
 2.  **Delete the `capstone_shopping_system` directory:**
     ```shell
     cd ..

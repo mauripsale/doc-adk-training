@@ -27,7 +27,7 @@ In this lab, you will upgrade your **"Support Analyzer"** agent to a production-
     *   Otherwise, use your new `ResilientGemini` class.
 
 3.  **Verify the Configuration:**
-    *   Run the agent using `adk run support_analyzer`.
+    *   Run the agent using `uv run adk run support_analyzer`.
     *   Verify it works as expected. (Note: You won't "see" the retries unless a network error occurs, but your code is now protected!).
 
 ### Python Approach (Primary)

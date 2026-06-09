@@ -17,7 +17,7 @@ To integrate ADK's streaming capabilities into your own website or application, 
 
 A custom streaming application consists of two main components that communicate in real-time:
 
-1.  **The ADK Server:** This is your ADK agent, but instead of being run with `adk web`, it's run as a headless API server using `adk api_server`. This command exposes the agent's functionality over a network protocol. For streaming, it specifically opens a **WebSocket** endpoint, typically at `/live`.
+1.  **The ADK Server:** This is your ADK agent, but instead of being run with `uv run adk web`, it's run as a headless API server using `uv run adk api_server`. This command exposes the agent's functionality over a network protocol. For streaming, it specifically opens a **WebSocket** endpoint, typically at `/live`.
 
 2.  **The Custom Client:** This is the user-facing part of the application (e.g., a web page). It's responsible for:
     *   Capturing audio from the user's microphone.
@@ -58,7 +58,7 @@ In the lab for this module, you will be provided with a complete HTML and JavaSc
 
 ### Key Takeaways
 - To build a custom voice-enabled UI, you need a **custom streaming client** (front-end) and an **ADK server** (back-end).
-- The ADK server is run with `adk api_server`, which exposes a `/live` **WebSocket** endpoint for real-time, bidirectional communication.
+- The ADK server is run with `uv run adk api_server`, which exposes a `/live` **WebSocket** endpoint for real-time, bidirectional communication.
 - The client uses the browser's Web Audio API to capture microphone input and the WebSocket API to send and receive audio and text data.
 - The data flow is a continuous, full-duplex stream: the client sends audio chunks to the server, and the server sends back text and audio responses as they are generated.
 - **Impact of Audio Chunk Interval:** The `MediaRecorder`'s interval for sending audio data (e.g., 100ms) is critical for perceived latency. Increasing this value to 1000ms (1 second) would dramatically degrade the user experience. The user would have to wait a full second before any of their speech is sent to the server for processing, leading to unnatural pauses and a sluggish, non-real-time conversational flow.

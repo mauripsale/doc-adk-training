@@ -18,7 +18,7 @@ In this lab, you will build a **Collaborative Support Duo** consisting of a **Sa
 
 1.  **Create a new project:**
     ```shell
-    adk create collaborative_duo
+    uv run adk create collaborative_duo
     ```
 
 ### Step 2: Define the Collaborative Agents
@@ -72,7 +72,7 @@ root_agent = sales_agent
 
 1.  **Launch the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Verify the Dynamic Handoff:**
     - Ask: "How much does the Pro model cost?" -> Sales should answer.

@@ -17,7 +17,7 @@ We will use the same streaming agent configuration from Module 22.
     ```shell
     mkdir custom_streaming_app
     cd custom_streaming_app
-    adk create --type=config streaming_agent
+    uv run adk create --type=config streaming_agent
     ```
 
 2.  **Configure the agent:**
@@ -152,10 +152,10 @@ We will use the same streaming agent configuration from Module 22.
 
 1.  **Terminal 1 (ADK Server):**
     *   Navigate to the `custom_streaming_app` directory.
-    *   Run `adk api_server streaming_agent`.
+    *   Run `uv run adk api_server streaming_agent`.
     ```shell
     cd /path/to/custom_streaming_app
-    adk api_server streaming_agent
+    uv run adk api_server streaming_agent
     ```
 
 2.  **Terminal 2 (Client Web Server):**
@@ -178,7 +178,7 @@ If you get stuck, you can find the complete, working `index.html` code in the `l
 
 ### Lab Summary
 You have successfully built a custom client for a streaming ADK agent. You have learned:
-*   How to run an ADK agent as a backend service using `adk api_server`.
+*   How to run an ADK agent as a backend service using `uv run adk api_server`.
 *   The basic structure of an HTML/JavaScript client for streaming.
 *   How to use the `WebSocket` and Web Audio APIs to create a real-time voice application.
 

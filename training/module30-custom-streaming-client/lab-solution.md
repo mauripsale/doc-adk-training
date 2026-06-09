@@ -129,7 +129,7 @@ This file contains the complete, working code for the `index.html` custom client
 
 *   **"WebSocket connection to 'ws://localhost:8000/...' failed":**
     *   **Cause:** The ADK `api_server` is not running or is running on a different port.
-    *   **Solution:** Make sure you have a terminal window running `adk api_server` in your `streaming_agent` directory.
+    *   **Solution:** Make sure you have a terminal window running `uv run adk api_server` in your `streaming_agent` directory.
 
 *   **"NotAllowedError: Permission denied" in browser console:**
     *   **Cause:** You denied the browser's request to access your microphone.
@@ -137,7 +137,7 @@ This file contains the complete, working code for the `index.html` custom client
 
 *   **Connection opens but agent doesn't respond:**
     *   **Cause:** The agent server may have encountered an error. This is often because the `.env` file is not configured for Vertex AI.
-    *   **Solution:** Check the terminal window running `adk api_server` for any error messages. Ensure your `streaming_agent/.env` file is correctly configured with your Vertex AI project details.
+    *   **Solution:** Check the terminal window running `uv run adk api_server` for any error messages. Ensure your `streaming_agent/.env` file is correctly configured with your Vertex AI project details.
 
 ### Self-Reflection Answers
 

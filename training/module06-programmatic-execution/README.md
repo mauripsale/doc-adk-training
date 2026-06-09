@@ -7,7 +7,7 @@ title: "Module 6: Programmatic Execution: Apps and Runners"
 
 ## Theory
 
-Until now, you've used the ADK CLI (`adk web`, `adk run`) to interact with your agents. While great for testing, real-world applications (like a Discord bot or a web backend) need to trigger agents programmatically from within Python code.
+Until now, you've used the ADK CLI (`uv run adk web`, `uv run adk run`) to interact with your agents. While great for testing, real-world applications (like a Discord bot or a web backend) need to trigger agents programmatically from within Python code.
 
 To do this, you need to understand the relationship between three core objects: the **Agent**, the **App**, and the **Runner**.
 
@@ -30,25 +30,32 @@ The `Runner` is the management system that actually makes things happen. It rece
 *   **Role:** Orchestration and session management.
 *   **The Singleton Pattern:** In most applications, you create **one Runner instance** for your entire application. This single Runner is designed to handle multiple users and multiple sessions simultaneously.
 
-### How the Runner Handles Multiple Users
+### Understanding Runners and Sessions
 
-A common point of confusion is: *"Do I need a new Runner for every user?"* **No.**
+A common question is: *"Where are the conversations stored?"*
 
-When you tell the Runner to execute a message, you must provide two unique identifiers:
-1.  **`user_id`**: Identifies who is talking.
-2.  **`session_id`**: Identifies the specific conversation thread.
+The Runner doesn't store data itself. It uses a **Session Service** to find or create conversation threads.
+
+*   **`InMemoryRunner`**: Automatically uses an `InMemorySessionService`. It's perfect for local development because it's fast and requires no setup, but **all data is lost** when your Python script stops.
+*   **`Runner` (Base Class)**: In production, you use the base `Runner` class and inject a persistent service, like `FirestoreSessionService` (which you will learn about in Module 13.5). This allows your agent to remember users across restarts and across different server instances.
+
+### How the Runner Isolates Users
+
+When you call a Runner method, you must provide two unique identifiers:
+1.  **`user_id`**: Identifies who is talking (e.g., "alice_123").
+2.  **`session_id`**: Identifies the specific conversation thread (e.g., "billing_dispute_001").
 
 ```python
-# The Runner uses these IDs to fetch the correct memory/state automatically
+# The Runner uses these IDs to find the correct history in its Session Service
 async for event in runner.run_async(
     user_id="alice_123", 
-    session_id="chat_session_001", 
+    session_id="chat_001", 
     new_message=message
 ):
     # Process events...
 ```
 
-The Runner uses these IDs to look up the correct conversation history from its `SessionService`. This ensures that Alice's conversation never leaks into Bob's conversation, even though they are both being processed by the same Runner.
+The Runner uses these IDs to look up the correct conversation history. This ensures that Alice's conversation never leaks into Bob's, even though they are both being processed by the same Runner instance.
 
 ### Minimal Programmatic Setup
 

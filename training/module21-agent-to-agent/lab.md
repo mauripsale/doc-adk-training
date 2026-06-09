@@ -15,8 +15,8 @@ In this lab, you will build a distributed multi-agent system. You will create a 
 
 1.  **Create two separate agent projects** that will run independently.
     ```shell
-    adk create a2a_orchestrator
-    adk create research_specialist
+    uv run adk create a2a_orchestrator
+    uv run adk create research_specialist
     ```
     When prompted, choose the **Programmatic (Python script)** option for both.
 
@@ -109,7 +109,7 @@ This requires two separate terminals.
 
 2.  **Terminal 2 (Orchestrator Client):**
     *   Navigate to the parent `adk-training` directory.
-    *   Run `adk web a2a_orchestrator`.
+    *   Run `uv run adk web a2a_orchestrator`.
 
 3.  **Interact with the System:**
     *   Open the Dev UI for the orchestrator (`http://localhost:8080`).

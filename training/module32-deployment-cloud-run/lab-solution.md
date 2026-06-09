@@ -11,7 +11,7 @@ This lab is a procedural tutorial. The primary "solution" is a successfully depl
 
 ### Expected Output
 
-After running the `adk deploy cloud_run` command and waiting for the build and deployment process to complete, you should see output in your terminal that looks similar to this:
+After running the `uv run adk deploy cloud_run` command and waiting for the build and deployment process to complete, you should see output in your terminal that looks similar to this:
 
 ```
 ...
@@ -43,7 +43,7 @@ The most important part is the **Service URL**.
     *   **Solution:** Ensure your Google Cloud user account has the `Owner` or `Editor` role in the project.
 
 *   **`PERMISSION_DENIED` on `cloudbuild.googleapis.com` or `artifactregistry.googleapis.com`:**
-    *   **Problem:** The Cloud Build service account, which builds the container, doesn't have permission to push to Artifact Registry or deploy to Cloud Run. The `adk deploy` command attempts to set these permissions automatically, but may fail if your user account lacks sufficient privileges.
+    *   **Problem:** The Cloud Build service account, which builds the container, doesn't have permission to push to Artifact Registry or deploy to Cloud Run. The `uv run adk deploy` command attempts to set these permissions automatically, but may fail if your user account lacks sufficient privileges.
     *   **Solution:** Manually grant the `Cloud Build Service Account` the `Artifact Registry Writer` and `Cloud Run Admin` roles in the IAM section of the Google Cloud Console.
 
 *   **Deployment fails with a generic error:**
@@ -51,13 +51,13 @@ The most important part is the **Service URL**.
 
 ### Self-Reflection Answers
 
-1.  **The `adk deploy cloud_run` command automates many steps. What are these steps, and what would you have to do manually if this command didn't exist?**
-    *   **Answer:** The `adk deploy cloud_run` command automates the entire process of taking your agent from local code to a deployed Cloud Run service. Manually, this would involve:
+1.  **The `uv run adk deploy cloud_run` command automates many steps. What are these steps, and what would you have to do manually if this command didn't exist?**
+    *   **Answer:** The `uv run adk deploy cloud_run` command automates the entire process of taking your agent from local code to a deployed Cloud Run service. Manually, this would involve:
         1.  **Containerization:** Writing a `Dockerfile` to package your agent code and its dependencies into a Docker image.
         2.  **Image Build:** Running `docker build` (or `gcloud builds submit`) to create the container image.
         3.  **Image Push:** Pushing the container image to a container registry (like Google Artifact Registry or Docker Hub) using `docker push` or `gcloud artifacts docker push`.
         4.  **Service Creation/Update:** Creating or updating a Cloud Run service, specifying the container image, environment variables, region, and IAM permissions, typically using `gcloud run deploy`.
-        The `adk deploy` command abstracts away all these complex, multi-step cloud infrastructure commands.
+        The `uv run adk deploy` command abstracts away all these complex, multi-step cloud infrastructure commands.
 
 2.  **We deployed with the `--with_ui` flag. In a real production scenario where your agent is being called by another application (not a human in a browser), why would you omit this flag?**
     *   **Answer:** In a headless production scenario, the `--with_ui` flag should be omitted for two main reasons:

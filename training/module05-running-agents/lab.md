@@ -9,17 +9,17 @@ title: "Challenge Lab"
 Your task is to run and interact with your **"Support Analyzer"** agent using the three primary execution modes provided by the ADK CLI. **Always run these commands from your main `adk-training` directory.**
 
 ## Lab Tasks
-1.  **`adk web`:**
-    *   Run the command `adk web`.
+1.  **`uv run adk web`:**
+    *   Run the command `uv run adk web`.
     *   **Note:** When running from the parent directory, you don't need to specify the agent name; the Dev UI will allow you to select any agent in the subdirectories.
     *   Interact with your `support_analyzer` in the Dev UI and inspect the "Trace" view to see the full prompt sent to the LLM.
-2.  **`adk run`:**
+2.  **`uv run adk run`:**
     *   Stop the web server (`Ctrl+C`).
-    *   Run the command `adk run support_analyzer`.
+    *   Run the command `uv run adk run support_analyzer`.
     *   Interact with the agent directly in your terminal.
-3.  **`adk api_server`:**
+3.  **`uv run adk api_server`:**
     *   Stop the command-line runner.
-    *   Run the command `adk api_server`.
+    *   Run the command `uv run adk api_server`.
     *   Open a **separate terminal window** to act as the client.
     *   **Step A (The Failure):** Try to send a message *without* creating a session first. Copy and run this command:
         ```bash
@@ -51,9 +51,9 @@ Your task is to run and interact with your **"Support Analyzer"** agent using th
     *   Verify that you receive a stream of JSON responses containing the structured analysis (category, sentiment, summary).
 
 ### Self-Reflection Questions
-- In what scenarios would the detailed "Trace View" in `adk web` be more useful than the simple chat interface of `adk run`?
-- The `curl` command in the `adk api_server` section is a simple example of a programmatic client. What kind of real-world applications could you build that would interact with your agent's API in this way?
-- Why is it necessary to run the `adk api_server` and the `curl` command in two separate terminal windows? What does this separation represent in a real-world application architecture?
+- In what scenarios would the detailed "Trace View" in `uv run adk web` be more useful than the simple chat interface of `uv run adk run`?
+- The `curl` command in the `uv run adk api_server` section is a simple example of a programmatic client. What kind of real-world applications could you build that would interact with your agent's API in this way?
+- Why is it necessary to run the `uv run adk api_server` and the `curl` command in two separate terminal windows? What does this separation represent in a real-world application architecture?
 
 <hr/>
 

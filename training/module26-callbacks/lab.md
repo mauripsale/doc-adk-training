@@ -15,7 +15,7 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 
 1.  **Create the agent project:**
     ```shell
-    adk create content_moderator
+    uv run adk create content_moderator
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 

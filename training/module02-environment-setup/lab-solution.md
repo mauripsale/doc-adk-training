@@ -66,15 +66,26 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 
 ## Step 5: Run Verification
 
-Create `verify_setup.py` and run it using `uv run`. `uv run` ensures the script is executed using the exact Python version (3.10) and dependencies stored in your virtual environment.
+Create `verify_setup.py` (using the modern `Agent` and `App` patterns) and run it using `uv run`. `uv run` ensures the script is executed using the exact Python version (3.10) and dependencies stored in your virtual environment.
 
 ```bash
 uv run python verify_setup.py
 ```
 
 **Expected Output:**
-`✅ Google ADK is installed correctly.`
-`✅ Authentication successful: Connected to the LLM service via ADK agent.`
+`🔍 Testing ADK 2.0 Environment...`
+`🚀 Connecting to LLM...`
+`✅ Agent Response: ADK 2.0 is Ready!`
+`🎉 SETUP COMPLETE! You are running ADK 2.0.`
+
+### 💡 Troubleshooting: Model Not Found (404)
+
+If you see a `404 NOT_FOUND` error for `gemini-3.5-flash`, it is likely a region availability issue.
+
+**The Fix:**
+1.  Open your `.env` file.
+2.  Update `GOOGLE_CLOUD_LOCATION` to a region where the model is available (e.g., `us-east4`, `us-west1`, or `europe-west9`).
+3.  Run the verification script again.
 
 ---
 

@@ -18,15 +18,16 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
 | "12345" | "12345" | "You entered the numbers 1 through 5." |
 
 ## Lab Tasks
-1.  Use the `adk create` command to scaffold a new agent named `echo_agent`. By default, this will create a Python-based project structure:
+1.  Use the `uv run adk create` command to scaffold a new agent named `echo_agent`. By default, this will create a Python-based project structure:
     ```shell
-    adk create echo_agent
+    uv run adk create echo_agent
     ```
 2.  Follow the **Python Approach** below to define the agent's behavior.
 3.  **Instruction Strategy:** Craft an instruction that forces the agent to only echo and explicitly forbids it from answering questions or being helpful.
 4.  Configure the `.env` file with your Google API key or Google Cloud project details.
-5.  Run the agent using the `adk web` command (remember to run this from the parent directory of your agent).
+5.  Run the agent using the `uv run adk web` command (remember to run this from the parent directory of your agent).
 6.  Interact with the agent in the Dev UI to verify it passes the "Expected Behavior" tests.
+
 
 ### Python Approach (Primary)
 Modify your `agent.py` file to look like the following, filling in the `TODO` sections.

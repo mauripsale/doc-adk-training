@@ -28,16 +28,16 @@ You will build a new agent that can answer questions about current events and to
 
 2.  **Create the agent project (Python approach):**
 
-    Use the `adk create` command to create a new Python agent named `researcher_agent`.
+    Use the `uv run adk create` command to create a new Python agent named `researcher_agent`.
 
     ```shell
-    adk create --type=python researcher_agent
+    uv run adk create --type=python researcher_agent
     ```
 
     **Alternative (YAML approach):**
 
     ```shell
-    adk create --type=config researcher_agent
+    uv run adk create --type=config researcher_agent
     ```
 
 ### Step 2: Configure the Agent to Use Google Search
@@ -113,10 +113,10 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
 
 2.  **Start the web server:**
 
-    From the `adk-training` directory, run `adk web`.
+    From the `adk-training` directory, run `uv run adk web`.
 
     ```shell
-    adk web
+    uv run adk web
     ```
 
 3.  **Interact with the Researcher Agent:**

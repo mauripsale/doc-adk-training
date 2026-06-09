@@ -14,7 +14,7 @@ This file contains the recommended solutions and reasoning for the scenario-base
 #### **Scenario 1: The Startup MVP**
 
 *   **Recommendation:** ✅ **Cloud Run**
-*   **Justification:** This scenario is the primary use case for Cloud Run. The key drivers are **speed** and **low cost**. The `adk deploy cloud_run` command allows the team to deploy in minutes without any DevOps expertise. The serverless, pay-per-use model is perfect for a startup managing its burn rate, and the platform's automatic security (HTTPS, DDoS, IAM) is more than sufficient for an MVP.
+*   **Justification:** This scenario is the primary use case for Cloud Run. The key drivers are **speed** and **low cost**. The `uv run adk deploy cloud_run` command allows the team to deploy in minutes without any DevOps expertise. The serverless, pay-per-use model is perfect for a startup managing its burn rate, and the platform's automatic security (HTTPS, DDoS, IAM) is more than sufficient for an MVP.
 
 ---
 

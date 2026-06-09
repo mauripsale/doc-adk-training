@@ -73,7 +73,7 @@ When given a research topic, follow this workflow:
     ```bash
     uv init research_assistant --python 3.10
     cd research_assistant
-    uv add google-adk python-dotenv
+    uv add google.adk python-dotenv
     ```
 2.  Configure `.env` for Vertex AI.
 3.  Run the agent:

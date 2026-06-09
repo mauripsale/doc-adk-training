@@ -36,7 +36,7 @@ This method uses the Agent Starter Pack (ASP) to add deployment artifacts to you
 2.  **Navigate to the Parent Directory:** In your terminal, navigate to the parent directory that contains your agent folder (e.g., `your-project-directory/`).
 3.  **Enhance the Project:** Run the ASP `enhance` command to add the required deployment files to your project.
     ```shell
-    uvx agent-starter-pack enhance --adk -d agent_engine
+    uvx agent-starter-pack enhance --uv run adk -d agent_engine
     ```
 4.  **Follow the Prompts:** The tool will ask you several questions. You can accept the defaults, but ensure you select a **supported region** for Agent Engine (e.g., `us-central1`).
 

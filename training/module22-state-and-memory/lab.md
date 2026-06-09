@@ -25,7 +25,7 @@ You will build a tutor that:
 
 1.  **Create the agent project:**
     ```shell
-    adk create personal_tutor
+    uv run adk create personal_tutor
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
@@ -199,12 +199,12 @@ root_agent = None
 1.  **Set up your API key** in the `.env` file.
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web personal_tutor
+    uv run adk web personal_tutor
     ```
 3.  **Interact with the agent:**
     *   Go to the **State** tab in the Dev UI. Set the global app state by entering `{"app:course_version": "2.1"}` and clicking "Set State".
     *   Go back to the **Chat** tab and test your agent. Ask it to set your preferences, start a lesson, and check your progress.
-    *   **Note on Persistence:** The default `InMemorySessionService` used in development will lose `user:` and `app:` state if the `adk web` server is restarted. For true persistence, a database-backed `SessionService` would be required.
+    *   **Note on Persistence:** The default `InMemorySessionService` used in development will lose `user:` and `app:` state if the `uv run adk web` server is restarted. For true persistence, a database-backed `SessionService` would be required.
     *   Start a new session (refresh the page) and verify that your preferences were remembered but the current lesson topic was forgotten.
 
 ### Bonus Challenge: Dynamic Instructions

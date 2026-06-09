@@ -13,7 +13,7 @@ In this lab, you will build a comprehensive observability system for an agent us
 
 1.  **Create the agent project:**
     ```shell
-    adk create observability_agent
+    uv run adk create observability_agent
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
@@ -76,7 +76,7 @@ from google.adk.telemetry.setup import maybe_set_otel_providers
 
 1.  **Launch the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Test the Alerting Plugin:**
     Send prompts and verify the console output.

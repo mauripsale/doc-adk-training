@@ -127,7 +127,7 @@ Your goal is to help users manage their budget, project savings, and execute inv
 3.  **Test Confirmation (HITL):**
     Try: > "I want to invest $5000 now."
     
-    In the terminal (or Dev UI `adk web`), you will see a prompt asking for permission. Only if you say **"yes"** will the tool actually execute.
+    In the terminal (or Dev UI `uv run adk web`), you will see a prompt asking for permission. Only if you say **"yes"** will the tool actually execute.
 
 ### Lab Summary
 

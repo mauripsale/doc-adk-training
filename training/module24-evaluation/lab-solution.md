@@ -70,8 +70,8 @@ This file contains the expected output for the `eval_results/calculator_tests.ev
 2.  **The `response_match_score` is not a simple "equals" check. Why is this fuzzy matching necessary for evaluating LLM-generated text?**
     *   **Answer:** LLMs are non-deterministic. For the same input, they can produce semantically identical but syntactically different responses (e.g., "The weather is sunny" vs. "It's a sunny day"). A simple exact-match `equals` check would fail these valid variations. Fuzzy matching (like ROUGE scores) measures the overlap of n-grams or semantic similarity, allowing tests to pass if the key information and meaning are conveyed, even if the exact wording differs from the reference. This makes evaluation more robust and less prone to false negatives.
 
-3.  **How could you integrate the `adk eval` command into a CI/CD pipeline (like GitHub Actions) to automatically test your agent every time you push new code?**
-    *   **Answer:** You would add a step to your CI/CD workflow (e.g., a `.github/workflows/main.yml` file for GitHub Actions). After checking out your code and installing dependencies, you would run the `adk eval` command. For example:
+3.  **How could you integrate the `uv run adk eval` command into a CI/CD pipeline (like GitHub Actions) to automatically test your agent every time you push new code?**
+    *   **Answer:** You would add a step to your CI/CD workflow (e.g., a `.github/workflows/main.yml` file for GitHub Actions). After checking out your code and installing dependencies, you would run the `uv run adk eval` command. For example:
 
         ```yaml
         jobs:
@@ -89,9 +89,9 @@ This file contains the expected output for the `eval_results/calculator_tests.ev
                   pip install adk-python
                   # Install any agent-specific dependencies
               - name: Run agent evaluations
-                run: adk eval . eval_results/calculator_tests.evalset.json
+                run: uv run adk eval . eval_results/calculator_tests.evalset.json
         ```
-        If `adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed. This provides an automated safety net for agent development.
+        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed. This provides an automated safety net for agent development.
 
 4.  **What is the difference between "Golden Path" testing and "User Simulation"?**
     *   **Answer:** "Golden Path" testing (Regression Testing) uses *static*, recorded conversations to ensure the agent performs exactly as it did in the past for known inputs. It verifies correctness and prevents breaking changes. "User Simulation" (Stress/Dynamic Testing) uses a generative model to act as a *dynamic* user. It creates varied, unpredictable conversations based on a scenario, helping to find edge cases, safety issues, or robustness failures that static tests might miss.

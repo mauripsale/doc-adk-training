@@ -13,7 +13,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 1.  **Create and navigate to the agent project:**
     ```shell
-    adk create ui_agent
+    uv run adk create ui_agent
     cd ui_agent
     ```
     Choose the **Programmatic (Python script)** option.
@@ -125,7 +125,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 ### Step 3: Run the Full-Stack Application
 
-1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `adk api_server ui_agent`.
+1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `uv run adk api_server ui_agent`.
     *   **Note on CORS:** The ADK API server automatically handles Cross-Origin Resource Sharing (CORS), allowing your web page on port 8081 to make requests to your agent on port 8080.
 2.  **Terminal 2 (Client Server):** In the same directory, run `python3 -m http.server 8081`.
 
@@ -139,7 +139,7 @@ If you get stuck, you can find the complete, working code in the `lab-solution.m
 
 ### Lab Summary
 You have successfully built a full-stack agent application with a custom front-end. You have learned:
-*   How to run an ADK agent as a backend service using `adk api_server`.
+*   How to run an ADK agent as a backend service using `uv run adk api_server`.
 *   How to connect a custom JavaScript client to the ADK's native `/run_sse` streaming endpoint.
 *   The basic principles of handling streaming responses in a web UI.
 

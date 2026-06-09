@@ -40,7 +40,7 @@ We will use the `adk` command-line tool to create the file structure for our new
 2.  **Create the agent project:**
     Run the following command to create a new agent named `echo_agent`. This defaults to the Python-based approach.
     ```shell
-    adk create echo_agent
+    uv run adk create echo_agent
     ```
     This command creates a new directory named `echo_agent/` with an `agent.py` file and a `.env` file inside.
 
@@ -85,7 +85,7 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
 
 1.  **Create the agent with the `--type=config` flag:**
     ```shell
-    adk create --type=config echo_agent
+    uv run adk create --type=config echo_agent
     ```
     This creates a `root_agent.yaml` file instead of `agent.py`.
 
@@ -108,7 +108,7 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
 1.  **Start the ADK web server:**
     From the parent `adk-training` directory, run:
     ```shell
-    adk web
+    uv run adk web
     ```
     You should see output indicating a server has started on `http://127.0.0.1:8080`.
 
@@ -130,16 +130,16 @@ When you send a message:
 
 ### Key Takeaways
 
-✅ **`adk create`** is the starting point for all agents.
+✅ **`uv run adk create`** is the starting point for all agents.
 ✅ Agent behavior is defined by its **`instruction`**.
 ✅ **`.env`** keeps your API keys safe and out of code.
 ✅ You can define agents in **Python** (flexible) or **YAML** (simple).
-✅ **`adk web`** is your primary tool for testing and debugging.
+✅ **`uv run adk web`** is your primary tool for testing and debugging.
 
 ### Common Issues & Solutions
 
 *   **Problem**: "Agent not found" or errors on startup.
-    *   **Solution**: Make sure you are running `adk web` from the *parent directory* of `echo_agent`.
+    *   **Solution**: Make sure you are running `uv run adk web` from the *parent directory* of `echo_agent`.
 *   **Problem**: "Authentication error".
     *   **Solution**: Double-check that your `.env` file is correctly configured with your API key or GCP project.
 *   **Problem**: If using `agent.py`, "root_agent not found".

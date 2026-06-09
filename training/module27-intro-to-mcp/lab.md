@@ -22,7 +22,7 @@ In this lab, you will learn how to connect your ADK agent to an external, statef
 
 2.  **Create the agent project:**
     ```shell
-    adk create mcp_agent
+    uv run adk create mcp_agent
     cd mcp_agent
     ```
 
@@ -50,7 +50,7 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     In the `mcp_agent` directory, create a file named `agent.py`.
 
 2.  **Create the `__init__.py` file:**
-    This empty file is crucial. It tells Python to treat the `mcp_agent` directory as a package, allowing `adk web` to discover and load your `agent.py`.
+    This empty file is crucial. It tells Python to treat the `mcp_agent` directory as a package, allowing `uv run adk web` to discover and load your `agent.py`.
     ```shell
     touch __init__.py
     ```
@@ -110,7 +110,7 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
 
 1.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web
+    uv run adk web
     ```
     When the server starts, you will see output in the console as `npx` downloads and runs the `@modelcontextprotocol/server-filesystem` package.
 

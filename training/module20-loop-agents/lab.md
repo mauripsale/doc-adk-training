@@ -21,7 +21,7 @@ In this lab, you will build a self-improving agent system that uses a **Dynamic 
 
 1.  **Create the project:**
     ```shell
-    adk create essay_refiner
+    uv run adk create essay_refiner
     ```
 
 ### Step 2: Define the Nodes and Orchestrator
@@ -71,7 +71,7 @@ Looking for the solution? Here's a hint (Base64 decode me):
 
 1.  **Start the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Observe the Trace:**
     Notice how each call to `ctx.run_node()` appears in the trace. You can see the story evolving iteration by iteration.

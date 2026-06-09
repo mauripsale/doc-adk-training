@@ -40,7 +40,7 @@ Summarize the information you find in a clear and concise way.""",
 
 ### Running the Agent
 
-Because this agent is defined in a Python file, you must delete the placeholder `root_agent.yaml` file from the project directory before running `adk web`.
+Because this agent is defined in a Python file, you must delete the placeholder `root_agent.yaml` file from the project directory before running `uv run adk web`.
 
 ### Self-Reflection Answers
 

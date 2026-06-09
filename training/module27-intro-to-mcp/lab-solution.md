@@ -7,7 +7,7 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete code for the `agent.py` script in the Stateful File System Tool lab, aligned with the standard `adk web` workflow.
+This file contains the complete code for the `agent.py` script in the Stateful File System Tool lab, aligned with the standard `uv run adk web` workflow.
 
 ### `mcp_agent/agent.py`
 

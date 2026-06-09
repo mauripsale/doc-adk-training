@@ -26,7 +26,7 @@ In this lab, you will take the multi-agent customer support system you built in 
 
 ### Step 1: Prepare Your Project for Deployment
 
-The `adk deploy cloud_run` command is a powerful tool that automates most of the deployment process. Let's prepare our project and then use the command.
+The `uv run adk deploy cloud_run` command is a powerful tool that automates most of the deployment process. Let's prepare our project and then use the command.
 
 1.  **Navigate to your training directory:**
 
@@ -43,7 +43,7 @@ The `adk deploy cloud_run` command is a powerful tool that automates most of the
     cd customer_support_cloud
 
     # Create the agent subdirectory
-    adk create --type=config support_agent
+    uv run adk create --type=config support_agent
     cd support_agent
     ```
 
@@ -106,14 +106,14 @@ Now for the main event. We will use a single command to package, containerize, a
     Execute the following command, replacing `YOUR_PROJECT_ID` with your Google Cloud Project ID.
 
     ```shell
-    adk deploy cloud_run \
+    uv run adk deploy cloud_run \
       --project=YOUR_PROJECT_ID \
       --region=us-central1 \
       --with_ui \
       support_agent/
     ```
     **Command Breakdown:**
-    *   `adk deploy cloud_run`: The main command.
+    *   `uv run adk deploy cloud_run`: The main command.
     *   `--project=YOUR_PROJECT_ID`: Specifies which Google Cloud project to deploy to.
     *   `--region=us-central1`: Specifies the geographical region for the deployment.
     *   `--with_ui`: This crucial flag tells the command to include the ADK Developer UI in the deployment, so we can interact with it in a browser.
@@ -144,14 +144,14 @@ Congratulations! You have successfully deployed a multi-agent system to a scalab
 
 You have learned to:
 *   Prepare a multi-agent project for deployment.
-*   Use the `adk deploy cloud_run` command to automate the containerization and deployment process.
+*   Use the `uv run adk deploy cloud_run` command to automate the containerization and deployment process.
 *   Include the Dev UI in a deployment using the `--with_ui` flag.
 *   Access and test your agent running live on a public URL.
 
 In the next module, you will learn about an alternative deployment target, Google Kubernetes Engine (GKE), for when you need more control over your agent's infrastructure.
 
 ### Self-Reflection Questions
-- The `adk deploy cloud_run` command automates many steps. What are these steps, and what would you have to do manually if this command didn't exist?
+- The `uv run adk deploy cloud_run` command automates many steps. What are these steps, and what would you have to do manually if this command didn't exist?
 - We deployed with the `--with_ui` flag. In a real production scenario where your agent is being called by another application (not a human in a browser), why would you omit this flag?
 - Cloud Run can scale down to zero instances. What are the cost and performance implications of this feature for an agent that receives infrequent traffic?
 

@@ -13,9 +13,9 @@ Creating an agent configuration is the first step, but to test and use your agen
 
 Understanding these different execution modes is key to efficiently developing, debugging, and eventually deploying your agents.
 
-### 1. Interactive Development: `adk web`
+### 1. Interactive Development: `uv run adk web`
 
-The `adk web` command is your primary tool during development. It starts a local web server that hosts the **ADK Developer UI**.
+The `uv run adk web` command is your primary tool during development. It starts a local web server that hosts the **ADK Developer UI**.
 
 **Key Features:**
 
@@ -26,21 +26,21 @@ The `adk web` command is your primary tool during development. It starts a local
 
 The Dev UI is the best way to get immediate feedback and deep insight into your agent's reasoning process.
 
-### 2. Headless Interaction: `adk run`
+### 2. Headless Interaction: `uv run adk run`
 
-The `adk run` command allows you to interact with your agent directly from your terminal, without a graphical user interface.
+The `uv run adk run` command allows you to interact with your agent directly from your terminal, without a graphical user interface.
 
 **Key Features:**
 
 *   **Command-Line Chat:** It drops you into a simple, text-based chat session with your agent.
 *   **Quick Testing:** It's a fast way to test a specific input or a simple conversation without the overhead of launching a web browser.
-*   **Scripting and Automation:** Because it runs in the terminal, `adk run` can be used in automated testing scripts. You can pipe input to it and check the output to verify the agent's behavior.
+*   **Scripting and Automation:** Because it runs in the terminal, `uv run adk run` can be used in automated testing scripts. You can pipe input to it and check the output to verify the agent's behavior.
 
 This mode is ideal for quick checks and for integrating agent tests into a continuous integration (CI) pipeline.
 
-### 3. Deployment and Integration: `adk api_server`
+### 3. Deployment and Integration: `uv run adk api_server`
 
-The `adk api_server` command runs your agent as a standalone HTTP server, exposing its functionality through a RESTful API.
+The `uv run adk api_server` command runs your agent as a standalone HTTP server, exposing its functionality through a RESTful API.
 
 **Key Features:**
 
@@ -56,11 +56,11 @@ In the lab for this module, you will get hands-on experience with all three of t
 
 While these commands feel like magic, they are powered by the **App** and **Runner** architecture you learned about in earlier modules. 
 
-*   `adk web` and `adk run` instantiate an **InMemoryRunner** for fast, local development.
-*   `adk api_server` provides a production-style environment where sessions and state are managed by the framework (and can be backed by Firestore, as you will see in Module 13.5).
+*   `uv run adk web` and `uv run adk run` instantiate an **InMemoryRunner** for fast, local development.
+*   `uv run adk api_server` provides a production-style environment where sessions and state are managed by the framework (and can be backed by Firestore, as you will see in Module 13.5).
 
 ### Key Takeaways
-- `adk web`: The primary tool for interactive development and debugging, featuring a chat UI and a detailed Trace View.
-- `adk run`: A headless, command-line interface for quick tests and automated scripting.
-- `adk api_server`: Runs the agent as a standalone HTTP server, exposing a RESTful API for integration and deployment.
+- `uv run adk web`: The primary tool for interactive development and debugging, featuring a chat UI and a detailed Trace View.
+- `uv run adk run`: A headless, command-line interface for quick tests and automated scripting.
+- `uv run adk api_server`: Runs the agent as a standalone HTTP server, exposing a RESTful API for integration and deployment.
 - All CLI commands leverage the core **App** and **Runner** engine of ADK 2.0.

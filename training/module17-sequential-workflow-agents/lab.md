@@ -21,7 +21,7 @@ In this lab, you will build a multi-step content creation pipeline using an ADK 
 
 1.  **Create a new project:**
     ```shell
-    adk create blog_pipeline
+    uv run adk create blog_pipeline
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
@@ -97,7 +97,7 @@ root_agent = None
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web blog_pipeline
+    uv run adk web blog_pipeline
     ```
 3.  **Interact with the pipeline:**
     *   Send a topic to write about, like: "the history of the internet".

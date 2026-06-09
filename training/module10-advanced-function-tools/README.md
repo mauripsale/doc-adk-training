@@ -1,78 +1,53 @@
 ---
 sidebar_position: 10
-title: "Module 10: Advanced Function Tools"
+title: "Module 10: Stateful Tools & ToolContext"
 ---
 
-# Module 10: Advanced Function Tools
+# Module 10: Stateful Tools & ToolContext
 
 ## Theory
 
-### Beyond the Basics
+### Beyond Stateless Functions
 
-In the previous module, you learned the fundamentals of creating custom function tools by building a basic Calculator. Now, we will explore advanced techniques to make your tools more robust, context-aware, and secure. We will cover **ToolContext**, **Human-in-the-Loop (HITL)**, and **Parallel Tool Execution**.
+In the previous module, you built stateless tools: they take an input and return an immediate result. However, many real-world agents need **memory**. They need tools that can "remember" a user's preference or use data gathered in a previous turn.
 
-### 1. Context-Aware Tools (`ToolContext`)
+In ADK 2.0, you achieve this using the **`ToolContext`**.
 
-In a real application, your tools shouldn't exist in a vacuum. A tool often needs to know *who* it is acting for or what data was previously saved in the session. 
+### 1. The `ToolContext` Object
 
-By adding a parameter typed as `ToolContext` to your function, the ADK will automatically populate it at runtime. The LLM does **not** see this parameter in the tool schema.
+By adding a parameter typed as `ToolContext` to your function, the ADK automatically injects the current execution context. The LLM does **not** see this parameter in the tool schema.
 
 ```python
 from google.adk.tools import ToolContext
-from pydantic import BaseModel
 
-class GrowthReport(BaseModel):
-    status: str
-    total: float
-    message: str | None = None
-
-def calculate_wealth_growth(years: int, tool_context: ToolContext) -> GrowthReport:
-    """Calculates projected savings based on the user's saved monthly budget."""
-    # ADK 2.0: Access session state via tool_context.session.state
-    monthly_budget = tool_context.session.state.get("monthly_budget", 0)
-    
-    if monthly_budget <= 0:
-        return GrowthReport(status="error", total=0, message="Set budget first.")
-        
-    total = monthly_budget * 12 * years
-    return GrowthReport(status="success", total=total)
+def remember_info(data: str, tool_context: ToolContext):
+    # This parameter is invisible to the model!
+    ...
 ```
 
-**Rule:** Never mention `tool_context` in your function's docstring. The LLM doesn't need to know about it.
+### 2. State Management (`tool_context.session.state`)
 
-### 2. Human-in-the-Loop (`require_confirmation`)
+This is the most powerful feature of the context. It gives your tool direct read/write access to the current conversation's state.
 
-When an agent performs "destructive" or "financial" actions (like actually transferring money or executing a stock trade), you want a human to review the action before it happens.
+*   **Writing to State:** Save information to be used later.
+    ```python
+    tool_context.session.state["user_name"] = "Alice"
+    ```
+*   **Reading from State:** Make decisions based on historical data.
+    ```python
+    name = tool_context.session.state.get("user_name", "Stranger")
+    ```
 
-In Module 9, you passed raw functions to the `tools` list. To enable advanced features like confirmation, you must wrap your function in the ADK's `FunctionTool` class.
+### The "Memory" Pattern
 
-Setting `require_confirmation=True` pauses the agent's execution and asks the user for explicit permission in the Dev UI (or via code) before running the Python function.
+The most common use case for stateful tools is a **Store and Recall** pair:
+1.  **Store Tool:** Takes user input and saves it to a specific key in `tool_context.session.state`.
+2.  **Recall Tool:** Reads that key from the state and returns it to the agent.
 
-```python
-from google.adk.tools import FunctionTool
-
-# Wrap the sensitive function
-transfer_tool = FunctionTool(
-    execute_transfer, 
-    require_confirmation=True
-)
-
-# Usage in Agent:
-# tools=[transfer_tool]
-```
-
-### 3. Automatic Parallel Tool Execution
-
-One of the most powerful features of the ADK is its ability to execute multiple tools simultaneously. If a user asks a complex question like: *"How much will I have in 5 years if I save $500/mo, and what is the current interest rate for a mortgage?"*, the LLM is smart enough to request both tool calls in a single turn.
-
-The ADK receives this list and executes them **in parallel** using `asyncio.gather()`. This significantly improves performance, as the response time is limited only by the slowest tool, not the sum of all tools.
-
-### Best Practices for Complex Tools
-
-*   **Input Validation:** Your tool is the last line of defense. Always validate arguments (e.g., ensure `years` is a positive number).
-*   **Structured Errors:** Always return a dictionary with a `status` key. If something goes wrong, use `{"status": "error", "message": "..."}` so the LLM can explain the failure to the user.
+This allows the agent to maintain a "structured memory" that is more reliable than just relying on the raw chat history.
 
 ### Key Takeaways
-- Use **`ToolContext`** to securely access session state without confusing the LLM.
-- Use the **`FunctionTool`** wrapper with `require_confirmation=True` for sensitive actions.
-- The ADK automatically handles **Parallel Execution** when multiple tools are requested.
+- Use **`ToolContext`** to securely access the ADK runtime.
+- **`tool_context.session.state`** allows tools to persist data across turns.
+- Stateful tools enable agents to have a structured, programmable memory.
+- **Rule:** Never describe `tool_context` in your docstring; it's for the framework, not the LLM.

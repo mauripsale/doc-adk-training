@@ -3,134 +3,85 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 10: Building a "Wealth Planner" Agent Challenge
+# Lab 10: Building a "Memory" Agent with Stateful Tools
 
 ## Goal
 
-In this lab, you will evolve your basic Calculator into a **Wealth Planner**. You will learn how to make tools context-aware (reading from session state) and how to implement **Human-in-the-Loop** confirmation for sensitive actions.
+In this lab, you will build an agent that can remember a user's name across multiple turns. You will learn how to use the **`ToolContext`** to read from and write to the session state.
 
 ### Step 1: Prepare the Project
 
-We will continue using the `uv` workflow.
-
-1.  **Initialize the project:**
-    ```bash
-    uv init wealth_planner --python 3.10
-    cd wealth_planner
-    uv add "google-adk>=2.1.0" python-dotenv
-    ```
-
-2.  **Create the tools module:**
-    ```bash
-    mkdir tools
-    touch tools/__init__.py
-    touch tools/finance.py
-    ```
-
-3.  **Setup Authentication:** Ensure your `.env` file is ready.
-
-### Step 2: Implement Advanced Tools
-**Exercise:** Open `tools/finance.py` and implement the three functions below.
-
-```python
-# In tools/finance.py
-from google.adk.tools import ToolContext
-
-def set_budget(amount: float, tool_context: ToolContext) -> str:
-    """
-    Saves the user's monthly budget to their session profile.
-
-    Use this tool when the user tells you how much they can save or spend per month.
-    """
-    # TODO: Save the 'amount' to the session state under the key "monthly_budget"
-    # Hint: Use tool_context.session.state
-    pass
-
-def get_savings_projection(years: int, tool_context: ToolContext) -> dict:
-    """
-    Calculates projected savings over a period of years.
-    
-    Use this tool when the user asks how much they will have saved in the future.
-    """
-    # TODO: Access session state via tool_context.session.state to get "monthly_budget"
-    # TODO: If budget is 0 or missing, return an error dictionary.
-    # TODO: Calculate: total = budget * 12 * years
-    # TODO: Return a success dictionary with the result.
-    pass
-
-def execute_investment_plan(amount: float) -> dict:
-    """
-    Simulates executing a long-term investment plan.
-    
-    Use this tool ONLY when the user explicitly asks to "execute", "start", 
-    or "invest" a specific amount of money.
-    
-    Args:
-        amount: The total amount of money to invest.
-    """
-    # This tool is "sensitive" and will require confirmation.
-    return {
-        "status": "success", 
-        "message": f"Investment of ${amount} has been successfully initiated!"
-    }
+```bash
+uv run adk create memory_agent
+cd memory_agent
 ```
 
-### Step 3: Configure the Agent with HITL
+### Step 2: Implement Stateful Tools
 
-**Exercise:** Create `agent.py`. You will need to wrap the sensitive tool in a `FunctionTool` to enable the `require_confirmation` feature.
+**Exercise:** Create `tools/memory.py` and implement these two functions.
+
+```python
+# In tools/memory.py
+from google.adk.tools import ToolContext
+
+def store_name(name: str, tool_context: ToolContext) -> str:
+    """
+    Saves the user's name to the session memory.
+    Use this tool when the user tells you their name.
+    """
+    # TODO: Save 'name' to tool_context.session.state under key "user_name"
+    pass
+
+def recall_name(tool_context: ToolContext) -> str:
+    """
+    Retrieves the user's name from the session memory.
+    Use this tool if the user asks who they are or what their name is.
+    """
+    # TODO: Get "user_name" from tool_context.session.state.
+    # Return the name, or "Stranger" if not found.
+    pass
+```
+
+### Step 3: Configure the Agent
+
+**Exercise:** Configure `agent.py` to use these tools.
 
 ```python
 # In agent.py
 from google.adk import Agent
-from google.adk.tools import FunctionTool
-from tools.finance import set_budget, get_savings_projection, execute_investment_plan
+from tools.memory import store_name, recall_name
 
-# TODO: Create a FunctionTool for the investment plan with confirmation enabled.
-# Hint: Use require_confirmation=True
-investment_tool = ...
-
-# TODO: Define the root Agent node and register all three tools.
 root_agent = Agent(
-    name="wealth_planner",
+    name="memory_agent",
     model="gemini-3.5-flash",
     instruction="""
-# TODO: Write instructions for a professional Wealth Planner.
-# Ensure it knows to use 'set_budget' first if the budget is unknown.
-""",
-    tools=[...]
+    You are a friendly assistant. 
+    Use 'store_name' if the user introduces themselves.
+    Use 'recall_name' if they ask for their name.
+    """,
+    tools=[store_name, recall_name]
 )
 ```
 
-### Step 4: Test and Observe Parallel Execution
+### Step 4: Test the Memory
 
-1.  **Run the agent:**
-    ```bash
-    uv run adk run agent.py
-    ```
-
-2.  **Advanced CLI Testing (Parallelism):**
-    Try asking two independent things at once:
-    > "Project my savings for 5 years and also calculate 452 * 12." 
-    *(Assuming you added the multiply tool from Mod 09)*. 
-    
-    Observe in the logs how both tools are triggered.
-
-3.  **Test Confirmation (HITL):**
-    Try: > "I want to invest $5000 now."
-    
-    In the terminal (or Dev UI `uv run adk web`), you will see a prompt asking for permission. Only if you say **"yes"** will the tool actually execute.
+1.  **Run:** `uv run adk run agent.py`
+2.  **Test:**
+    - "Hi, I'm Mario." -> Should call `store_name`.
+    - "What is my name?" -> Should call `recall_name` and respond "Mario".
+3.  **Inspect:** Open the Dev UI (`uv run adk web`) and check the **State** tab to see the JSON data.
 
 ### Lab Summary
 
-You have successfully built an enterprise-ready financial agent! You have learned:
-*   How to use **`ToolContext`** to bridge the gap between your tools and the session state.
-*   How to implement **Human-in-the-Loop** confirmation for sensitive actions using `FunctionTool`.
-*   How the ADK handles **Parallel Execution** for complex user queries.
+You have successfully built an agent with programmable memory! You have learned:
+*   How to use **`ToolContext`** to access the ADK's session management.
+*   How to read and write to **`tool_context.session.state`**.
+*   How to create a **Store and Recall** pattern to maintain context across multiple turns.
 
 ### Self-Reflection Questions
-- Why is it more secure to read the `user_id` or `budget` from `ToolContext` rather than asking the LLM to provide it as a tool argument?
-- What happens if the user denies the confirmation for the investment tool? How does the LLM react?
-- How does parallel execution help with "latency-sensitive" tools (like calling a slow external API)?
+- Why is it more reliable to store data in the session state rather than just relying on the LLM's chat history?
+- What would happen if you used the same key (e.g., "user_name") for two different users? (Hint: The ADK isolates sessions automatically).
+- How could you extend this agent to remember other things, like a user's birthday or their favorite color?
 
 <hr/>
 

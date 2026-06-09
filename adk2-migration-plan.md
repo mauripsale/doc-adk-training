@@ -22,8 +22,9 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 ### 🔹 Fase 2: Orchestrazione Moderna (Il core di ADK 2.0)
 *   [x] **Modulo 08 (Intro Tools):** Superpoteri degli agenti e introduzione al Function Calling.
 *   [x] **Modulo 09 (Custom Tools):** Creazione di strumenti Python personalizzati con auto-schema.
-*   [x] **Modulo 10 (Advanced Tools):** Uso di `ToolContext` per accedere allo stato della sessione e HITL.
+*   [x] **Modulo 10 (Stateful Tools):** Uso di `ToolContext` per gestire la memoria (Session State).
 *   [x] **Modulo 11 (OpenAPI Tools):** Integrazione automatica di API REST tramite specifiche OpenAPI.
+*   [x] **Modulo 13 (Advanced Actions):** Controllo del runtime via `ToolContext.actions` e Human-in-the-Loop (HITL).
 *   [x] **Modulo 21.5 (Refactoring Totale): "Dynamic Workflows with @node"**
 *   [x] **Modulo 21.6: "Graph-based Workflows (Deterministic Edges)"**
 *   [x] **Modulo 21.7: "Collaborative Workflows (Native Hand-offs)"**
@@ -58,6 +59,11 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 | **04** | ✅ OK | `simulation_module04/` | Structured Output v2 |
 | **05** | ✅ OK | - | CLI Tooling |
 | **06** | ✅ OK | `simulation_module06/` | Pattern App/Runner v2 |
+| **08** | ✅ OK | - | Intro Function Calling |
+| **09** | ✅ OK | `simulation_module09/` | Modern Agent Class |
+| **10** | ✅ OK | `simulation_module10/` | Stateful Tools (Memory) |
+| **11** | ✅ OK | `simulation_module11/` | OpenAPI v2 |
+| **13** | ✅ OK | `simulation_module13/` | Actions & HITL |
 | **13.5**| ✅ OK | `simulation_module13_5/`| Firestore v2 |
 | **15** | ✅ OK | (Design Lab) | Narrativa Graph/Node |
 | **16** | ✅ OK | `simulation_module16/` | Agent Transfer v2 |

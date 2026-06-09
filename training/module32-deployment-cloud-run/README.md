@@ -9,7 +9,7 @@ title: "Module 32: Deployment to Cloud Run"
 
 ### From Localhost to the World
 
-So far, you have been running your agents on your local machine using commands like `adk web`. This is perfect for development and testing. However, to make your agent accessible to users or to integrate it with other applications, you need to **deploy** it to a publicly accessible, scalable, and reliable environment.
+So far, you have been running your agents on your local machine using commands like `uv run adk web`. This is perfect for development and testing. However, to make your agent accessible to users or to integrate it with other applications, you need to **deploy** it to a publicly accessible, scalable, and reliable environment.
 
 This is the final step in the agent development lifecycle: moving from a local prototype to a production-ready service.
 
@@ -30,9 +30,9 @@ Google Cloud Run is a **fully managed, serverless platform** designed to run con
 
 Cloud Run is an ideal platform for deploying ADK agents because it's simple to use, scales automatically, and you only pay for the computing resources you actually use.
 
-### The Deployment Process with `adk deploy cloud_run`
+### The Deployment Process with `uv run adk deploy cloud_run`
 
-While you can manually build a container, push it to a registry, and configure a Cloud Run service, the ADK provides a powerful command-line tool that automates this entire process for you: `adk deploy cloud_run`.
+While you can manually build a container, push it to a registry, and configure a Cloud Run service, the ADK provides a powerful command-line tool that automates this entire process for you: `uv run adk deploy cloud_run`.
 
 When you run this command, it performs a series of steps behind the scenes:
 
@@ -45,13 +45,13 @@ When you run this command, it performs a series of steps behind the scenes:
 
 The result is a publicly accessible HTTPS endpoint for your agent, all from a single command. This streamlined process allows you to focus on building your agent's logic, not on the complexities of cloud infrastructure.
 
-In the lab for this module, you will use the `adk deploy cloud_run` command to deploy the multi-agent customer support system you built in Module 15.
+In the lab for this module, you will use the `uv run adk deploy cloud_run` command to deploy the multi-agent customer support system you built in Module 15.
 
 ### Key Takeaways
 - **Deployment** is the process of packaging an agent into a **container** and running it on a production server.
 - **Google Cloud Run** is a fully managed, serverless platform that is ideal for deploying ADK agents due to its simplicity, automatic scaling (including to zero), and pay-per-use cost model.
-- The `adk deploy cloud_run` command automates the entire deployment workflow, including containerization, pushing to a registry, and configuring the Cloud Run service.
+- The `uv run adk deploy cloud_run` command automates the entire deployment workflow, including containerization, pushing to a registry, and configuring the Cloud Run service.
 - This streamlined command allows you to deploy a production-ready, publicly accessible agent with a single command.
 - **Scale-to-Zero Implications:** Cloud Run's ability to scale to zero instances is highly cost-effective for agents with infrequent traffic, as you are not billed for idle time. However, this comes with a performance trade-off: the first request to a scaled-down service will experience a "cold start," resulting in higher latency as a new container instance is provisioned. Subsequent requests will be fast until the instance scales down again.
 - **Omitting `--with_ui` in Production:** In a headless production scenario where the agent is consumed by another application via its API, the `--with_ui` flag should be omitted. This is for two main reasons: **security** (the Dev UI exposes internal agent details like the full instruction and tool trajectory that should not be public) and **efficiency** (the UI adds unnecessary overhead to the container size and resource consumption).
-- **Automation of `adk deploy`:** The `adk deploy cloud_run` command automates a multi-step process that would otherwise be manual and complex: packaging the code, building a container image (like `docker build`), pushing the image to a registry (like Artifact Registry), and creating/updating the Cloud Run service with the correct permissions and configuration. Without this command, each of these steps would need to be performed manually using `gcloud` or `docker` commands.
+- **Automation of `uv run adk deploy`:** The `uv run adk deploy cloud_run` command automates a multi-step process that would otherwise be manual and complex: packaging the code, building a container image (like `docker build`), pushing the image to a registry (like Artifact Registry), and creating/updating the Cloud Run service with the correct permissions and configuration. Without this command, each of these steps would need to be performed manually using `gcloud` or `docker` commands.

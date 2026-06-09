@@ -65,60 +65,49 @@ Create a file named `verify_setup.py` and add the following content:
 # verify_setup.py
 import asyncio
 import os
-import logging
 from dotenv import load_dotenv
-from google.adk.agents import LlmAgent
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
-
-# Suppress noisy ADK logs
-logging.getLogger("google.adk").setLevel(logging.WARNING)
+from google.adk import Agent
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
 
 async def main():
-    # Load environment variables from the .env file
     load_dotenv()
+    
+    print("🔍 Testing ADK 2.0 Environment...")
 
     try:
-        print("✅ Google ADK is installed correctly.")
-        print("Attempting to connect to the LLM service via an ADK agent...")
-
-        # Define a simple ADK agent
-        agent = LlmAgent(
+        # 1. Define a simple Node (Agent)
+        agent = Agent(
             name="verify_agent",
             model="gemini-3.5-flash",
-            instruction="You are a helpful assistant. Respond with a short confirmation."
+            instruction="Respond with: 'ADK 2.0 is Ready!'"
         )
 
-        # Use the ADK Runner to execute the agent
-        runner = Runner(
-            app_name="agents", # This must match the ADK's inferred app name
-            agent=agent,
-            session_service=InMemorySessionService()
-        )
-        session = await runner.session_service.create_session(
-            app_name="agents", user_id="test_user"
-        )
-        message = types.Content(parts=[types.Part(text="hello")])
+        # 2. Create the App
+        app = App(name="verify_app", root_agent=agent)
 
-        # Stream the response from the agent
-        final_response_text = "Agent did not produce a final response."
-        async for event in runner.run_async(user_id="test_user", session_id=session.id, new_message=message):
+        # 3. Initialize the Runner
+        runner = InMemoryRunner(app=app)
+
+        # 4. Execute using the new run_debug helper
+        print("🚀 Connecting to LLM...")
+        events = await runner.run_debug("Hello!", user_id="test_user")
+        
+        # Verify the response
+        ready = False
+        for event in events:
             if event.is_final_response():
-                if event.content and event.content.parts:
-                    final_response_text = event.content.parts[0].text
-                elif event.actions and event.actions.escalate:
-                    final_response_text = f"Agent escalated: {event.error_message or 'No specific message.'}"
-                break
-
-        if final_response_text != "Agent did not produce a final response.":
-            print("✅ Authentication successful: Connected to the LLM service via ADK agent.")
-            print(f"ADK agent response: {final_response_text}")
+                print(f"✅ Agent Response: {event.content.parts[0].text}")
+                ready = True
+        
+        if ready:
+            print("\n🎉 SETUP COMPLETE! You are running ADK 2.0.")
         else:
-            print("❌ Authentication failed: Could not connect to the LLM service via ADK agent.")
+            print("\n❌ Failed to get a final response from the agent.")
 
-    except ImportError:
-        print("❌ Installation error: The 'google-adk' package could not be found.")
+    except ImportError as e:
+        print(f"❌ Version Error: {e}")
+        print("Ensure you installed google-adk>=2.1.0")
     except Exception as e:
         print(f"❌ An unexpected error occurred: {e}")
 
@@ -133,6 +122,15 @@ Execute the script using `uv run`. This command ensures that your script runs wi
 ```bash
 uv run python verify_setup.py
 ```
+
+### 💡 Troubleshooting: Model Not Found (404)
+
+If you see an error like `Publisher Model ... gemini-3.5-flash was not found`, it usually means the specific model is not yet available in your chosen Google Cloud region (e.g., `us-central1`).
+
+**The Fix:**
+1.  Open your `.env` file.
+2.  Change `GOOGLE_CLOUD_LOCATION` to a different supported region, such as `us-east4`, `us-west1`, or `europe-west9`.
+3.  Run the verification script again.
 
 > **Note:** You might see a `UserWarning` regarding an `[EXPERIMENTAL]` feature (like `PLUGGABLE_AUTH`). You can safely ignore this; it is just the ADK informing you of its internal development state and does not affect your lab.
 

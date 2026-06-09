@@ -17,7 +17,7 @@ We will use `uv` to create a modern Python environment for our agent.
     ```bash
     uv init calculator_agent --python 3.10
     cd calculator_agent
-    uv add google-adk python-dotenv
+    uv add google.adk python-dotenv
     ```
 
 2.  **Setup Authentication:**

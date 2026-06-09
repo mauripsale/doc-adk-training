@@ -16,7 +16,7 @@ Before diving into building agents, it's crucial to set up a proper development 
 The ADK uses modern Python features like advanced type hints and improved asynchronous handling. 
 
 *   **Python Requirement:** Strictly **3.10 or higher**.
-*   **ADK Requirement:** This course is built for **google-adk >= 2.1.0**, which introduces the **Workflow Graph Runtime**. Older versions (1.x) are not compatible with the advanced orchestration patterns taught in this course.
+*   **ADK Requirement:** This course is built for **google.adk >= 2.1.0**, which introduces the **Workflow Graph Runtime**. Older versions (1.x) are not compatible with the advanced orchestration patterns taught in this course.
 
 ### Enter `uv`: The Modern Standard
 
@@ -53,6 +53,6 @@ gcloud config set project YOUR_PROJECT_ID
 The ADK automatically detects these credentials.
 
 ### Key Takeaways
-- **Python 3.10+** and **google-adk >= 2.1.0** are strictly required.
+- **Python 3.10+** and **google.adk >= 2.1.0** are strictly required.
 - **`uv`** is the recommended tool for managing Python projects and environments.
 - Use a **`.env`** file to manage your API key or project settings securely.

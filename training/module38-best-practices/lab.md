@@ -13,7 +13,7 @@ In this lab, you will build a **Best Practices Agent** that demonstrates several
 
 1.  **Create a new project:**
     ```shell
-    adk create best_practices_v2
+    uv run adk create best_practices_v2
     ```
     Choose the **Programmatic (Python script)** option.
 
@@ -101,7 +101,7 @@ root_agent = Workflow(
 
 1.  **Start the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Interact and Observe:**
     *   **Test Caching:** Run the 'caching' step twice. Notice the 2-second delay the first time, and the instant response the second time.

@@ -22,7 +22,7 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
 3.  **Start the web server:**
 
     ```shell
-    adk web calculator_agent
+    uv run adk web calculator_agent
     ```
 
 ### Step 2: Record the "Golden Path" Conversation
@@ -81,10 +81,10 @@ Now that we have a saved test case, we can run it to validate the agent's behavi
 Let's see what a failure looks like.
 
 1.  **Temporarily break the agent:**
-    *   Stop the `adk web` server (`Ctrl+C`).
+    *   Stop the `uv run adk web` server (`Ctrl+C`).
     *   Open `tools/calculator.py`.
     *   In the `add` function, change the calculation to `result = a + b + 1`.
-    *   Start the server again: `adk web`.
+    *   Start the server again: `uv run adk web`.
 
 2.  **Re-run the evaluation:**
     *   Go back to the "Eval" tab.
@@ -169,14 +169,14 @@ The structure looks like this:
 
 While the Dev UI is great for creating and running evaluations interactively, you can also run them from the command line. This is essential for integrating your agent tests into an automated CI/CD pipeline.
 
-1.  **Stop the `adk web` server.**
-2.  **Run the `adk eval` command:**
+1.  **Stop the `uv run adk web` server.**
+2.  **Run the `uv run adk eval` command:**
     From your `calculator_agent` directory, run the following command:
 
     ```shell
-    adk eval . eval_results/calculator_tests.evalset.json
+    uv run adk eval . eval_results/calculator_tests.evalset.json
     ```
-    *   **`adk eval`**: The main command.
+    *   **`uv run adk eval`**: The main command.
     *   **`.`**: The path to the agent to be tested (the current directory, `calculator_agent`).
     *   **`eval_results/calculator_tests.evalset.json`**: The path to the evaluation file to run.
 
@@ -206,7 +206,7 @@ You have learned to:
 ### Self-Reflection Questions
 - Why is testing the `tool_trajectory` often more important for ensuring an agent's correctness than just testing its final text response?
 - The `response_match_score` is not a simple "equals" check. Why is this fuzzy matching necessary for evaluating LLM-generated text?
-- How could you integrate the `adk eval` command into a CI/CD pipeline (like GitHub Actions) to automatically test your agent every time you push new code?
+- How could you integrate the `uv run adk eval` command into a CI/CD pipeline (like GitHub Actions) to automatically test your agent every time you push new code?
 - What is the difference between "Golden Path" testing and "User Simulation"?
 
 <hr/>

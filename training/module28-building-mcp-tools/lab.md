@@ -127,7 +127,7 @@ Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-3.5-fla
 
 ### Step 4: Test the Full System
 
-1.  **Start the ADK web server:** `adk web shopping_agent`
+1.  **Start the ADK web server:** `uv run adk web shopping_agent`
 2.  **Check the console logs:** You should see logs from your `cart_server.py` as it starts up.
 3.  **Interact with the agent** in the Dev UI:
     *   "Please add 'milk' to my cart."

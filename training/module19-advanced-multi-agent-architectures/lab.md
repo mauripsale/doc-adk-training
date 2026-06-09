@@ -80,7 +80,7 @@ root_agent = Workflow(
 
 1.  **Start the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Analyze the Trace:**
     Expand the trace in the Dev UI. You will see "sub-traces" for each of the three research workflows. Notice how they run in parallel, and how the root workflow waits for all of them at the `research_joiner` before proceeding to the writer.

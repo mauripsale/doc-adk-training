@@ -13,7 +13,7 @@ In this lab, you will work with an agent that has been given misleading instruct
 
 1.  **Create a new agent project:**
     ```shell
-    adk create retry_agent
+    uv run adk create retry_agent
     ```
     Choose the **Programmatic (Python script)** option.
 

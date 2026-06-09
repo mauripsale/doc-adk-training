@@ -15,7 +15,7 @@ This demonstrates how to create predictable AI pipelines in ADK 2.0 without writ
 
 1.  **Create a new project:**
     ```shell
-    adk create market_analyst
+    uv run adk create market_analyst
     ```
 2.  **Navigate into the directory:**
     ```shell
@@ -97,7 +97,7 @@ root_agent = Workflow(
 
 1.  **Launch the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Test the routing:**
     - "What is happening with the Dollar?" -> Should run `usd_analyst`.

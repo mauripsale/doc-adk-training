@@ -13,7 +13,7 @@ In this lab, you will create a simple ADK Skill on your file system and configur
 
 1.  **Create a new agent project:**
     ```shell
-    adk create skills_agent
+    uv run adk create skills_agent
     ```
     Choose the **Programmatic (Python script)** option.
 
@@ -95,7 +95,7 @@ root_agent = Agent(
 1.  **Set up your `.env` file.**
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web skills_agent
+    uv run adk web skills_agent
     ```
 3.  **Interact with the system:**
     *   Say "Hello there, my name is Alex."

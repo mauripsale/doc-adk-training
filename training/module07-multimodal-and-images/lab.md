@@ -20,7 +20,7 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
 
 1.  **Create the agent project:**
     ```shell
-    adk create visual_catalog
+    uv run adk create visual_catalog
     ```
 2.  **Navigate into the new directory:**
     ```shell

@@ -21,7 +21,7 @@ In this lab, you will take a simple agent that currently uses in-memory storage 
     ```
 3.  **Install dependencies:**
     ```shell
-    uv pip install google-adk google-cloud-firestore
+    uv pip install google.adk google-cloud-firestore
     ```
 
 ### Step 2: Review the Starter Code

@@ -55,7 +55,7 @@ You can create these evaluation cases manually in a JSON file, but the easiest w
 
 Once you have a set of evaluation cases, you can run them automatically:
 *   From the Dev UI, to get a quick visual report.
-*   From the command line (`adk eval`), for automated checks.
+*   From the command line (`uv run adk eval`), for automated checks.
 *   Programmatically (using `pytest`), to integrate agent evaluation into your CI/CD pipeline.
 
 By building a suite of evaluation cases, you create a safety net. Every time you change your agent's instructions or tools, you can re-run your evaluations to ensure you haven't caused a regression in its behavior. This brings the reliability of traditional software testing to the non-deterministic world of AI agents.
@@ -126,4 +126,4 @@ This allows you to "stress test" your agent against hundreds of diverse, generat
 - **Metrics Categories:** Evaluation covers **Trajectory** (did it follow the right steps?), **Response Quality** (is the answer correct/good?), and **Safety/Groundedness** (is it harmless and factual?).
 - **User Simulation:** Use dynamic user simulation to test your agent against varied, LLM-generated personas and scenarios, going beyond static examples.
 - **Importance of Trajectory Testing:** Testing the `tool_trajectory` is often more critical than just the final response because it validates the agent's underlying reasoning process.
-- **CI/CD Integration:** The `adk eval` command can be integrated as a standard test step in CI/CD pipelines to prevent regressions.
+- **CI/CD Integration:** The `uv run adk eval` command can be integrated as a standard test step in CI/CD pipelines to prevent regressions.

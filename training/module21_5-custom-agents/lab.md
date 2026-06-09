@@ -15,7 +15,7 @@ This exercise demonstrates the power of ADK 2.0: using standard Python logic to 
 
 1.  **Create a new project:**
     ```shell
-    adk create support_router_v2
+    uv run adk create support_router_v2
     ```
     Choose the **Programmatic (Python script)** option.
 
@@ -109,7 +109,7 @@ root_agent = Workflow(
 
 1.  **Start the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 2.  **Test the routing:**
     *   **Input:** "My internet is down, help!" -> Should route to `ai_support_bot`.

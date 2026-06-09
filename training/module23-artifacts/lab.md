@@ -20,7 +20,7 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
 
 1.  **Create the agent project:**
     ```shell
-    adk create doc_processor
+    uv run adk create doc_processor
     ```
     When prompted, choose the **Programmatic (Python script)** option.
 
@@ -118,9 +118,9 @@ root_agent = Agent(
 1.  **Set up your `.env` file** with your API key or Vertex AI project.
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
-    adk web doc_processor
+    uv run adk web doc_processor
     ```
-    *   **Note on Persistence:** For this lab, the default `InMemoryArtifactService` is used, meaning artifacts will be lost if the `adk web` server is restarted. For persistent storage, a `GcsArtifactService` would be configured in the `Runner`.
+    *   **Note on Persistence:** For this lab, the default `InMemoryArtifactService` is used, meaning artifacts will be lost if the `uv run adk web` server is restarted. For persistent storage, a `GcsArtifactService` would be configured in the `Runner`.
 3.  **Interact with the agent:**
     *   Select "document_processor" and send a prompt like: "Process the document named 'Annual_Report_2025'."
 4.  **Analyze the Trace and Artifacts:**

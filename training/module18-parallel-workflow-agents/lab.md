@@ -23,7 +23,7 @@ START ──┼──── Node 2 (hotels) ─────┼──→ JoinNode
 
 1.  **Create a new project:**
     ```shell
-    adk create travel_planner
+    uv run adk create travel_planner
     ```
 
 2.  **Navigate into the directory:**
@@ -93,7 +93,7 @@ root_agent = Workflow(
 1.  **Set up your `.env` file.**
 2.  **Start the Dev UI:**
     ```shell
-    adk web .
+    uv run adk web .
     ```
 3.  **Interact with the planner:**
     *   "Plan a 7-day vacation to Honolulu".

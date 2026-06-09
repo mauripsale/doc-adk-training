@@ -17,7 +17,7 @@ We will continue using the `uv` workflow.
     ```bash
     uv init wealth_planner --python 3.10
     cd wealth_planner
-    uv add google-adk python-dotenv
+    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Create the tools module:**
@@ -30,29 +30,37 @@ We will continue using the `uv` workflow.
 3.  **Setup Authentication:** Ensure your `.env` file is ready.
 
 ### Step 2: Implement Advanced Tools
-
-**Exercise:** Open `tools/finance.py` and implement the two functions below.
+**Exercise:** Open `tools/finance.py` and implement the three functions below.
 
 ```python
 # In tools/finance.py
 from google.adk.tools import ToolContext
 
+def set_budget(amount: float, tool_context: ToolContext) -> str:
+    """
+    Saves the user's monthly budget to their session profile.
+
+    Use this tool when the user tells you how much they can save or spend per month.
+    """
+    # ADK 2.0: Save to session state
+    tool_context.session.state["monthly_budget"] = amount
+    return f"Success: Your budget is now set to ${amount:.2f}/mo."
+
 def get_savings_projection(years: int, tool_context: ToolContext) -> dict:
+...
     """
     Calculates projected savings over a period of years.
     
     Use this tool when the user asks how much they will have saved in the future.
-    
-    Args:
-        years: The number of years to project.
     """
-    # TODO: Read the 'monthly_budget' from the tool_context.state.
-    # If it's not set, return an error asking the user to set it first.
-    budget = ... 
+    # ADK 2.0: Access session state via tool_context.session.state
+    budget = tool_context.session.state.get("monthly_budget", 0)
     
-    # TODO: Calculate: total = budget * 12 * years
-    # Return a success dictionary with the result.
-    pass
+    if budget <= 0:
+        return {"status": "error", "message": "No budget found. Please use set_budget first."}
+    
+    total = budget * 12 * years
+    return {"status": "success", "result": total}
 
 def execute_investment_plan(amount: float) -> dict:
     """
@@ -77,33 +85,27 @@ def execute_investment_plan(amount: float) -> dict:
 
 ```python
 # In agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools import FunctionTool
-from tools.finance import get_savings_projection, execute_investment_plan
+from tools.finance import set_budget, get_savings_projection, execute_investment_plan
 
 # TODO: Create a FunctionTool for the investment plan with confirmation enabled.
-# Hint: Pass the function as the first argument, and use require_confirmation=True.
 investment_tool = FunctionTool(
-    ...,
-    require_confirmation=...
+    execute_investment_plan,
+    require_confirmation=True
 )
 
-root_agent = LlmAgent(
+root_agent = Agent(
     name="wealth_planner",
     model="gemini-3.5-flash",
     instruction="""
 You are a professional Wealth Planner.
-Your goal is to help users project their savings and execute investment plans.
-
-Rules:
-1. To project savings, you MUST use `get_savings_projection`.
-2. If the tool says the budget is missing, ask the user: "What is your monthly budget?"
-3. To invest money, use the `execute_investment_plan` tool.
-4. If a user tells you their budget (e.g., "My budget is $500"), simply acknowledge it. 
+Your goal is to help users manage their budget, project savings, and execute investment plans.
 """,
     tools=[
-        get_savings_projection, # Direct passing is fine for simple tools
-        investment_tool          # Use the wrapped tool for HITL
+        set_budget,
+        get_savings_projection,
+        investment_tool
     ]
 )
 ```

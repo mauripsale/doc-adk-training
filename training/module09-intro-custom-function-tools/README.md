@@ -63,30 +63,47 @@ def get_weather(city: str, is_forecast: bool):
     ...
 ```
 
-#### 4. **Structured Return Value**
-A tool function in the ADK **must return a dictionary**. This allows you to provide a structured result that the LLM can easily understand. It is a best practice to include a `status` key to indicate the outcome.
+#### 4. Structured Return Value
+In ADK 2.0, a tool function can return a **dictionary** or, ideally, a **Pydantic model**. The LLM will receive this structured data and use its contents to formulate the final response.
 
 ```python
-def get_weather(city: str, is_forecast: bool) -> dict:
-    """... docstring ..."""
-    # ... logic to fetch weather ...
-    if success:
-        return {"status": "success", "report": "It is sunny."}
-    else:
-        return {"status": "error", "message": "Could not find weather for that city."}
+from pydantic import BaseModel
+
+class WeatherReport(BaseModel):
+    status: str
+    temperature: float
+    conditions: str
+
+def get_weather(city: str) -> WeatherReport:
+    """Fetches the current weather."""
+    # ... logic ...
+    return WeatherReport(status="success", temperature=22.0, conditions="Sunny")
 ```
-The LLM will receive this dictionary and use its contents to formulate the final response to the user.
 
-### Registering Tools with Your Agent
+### Advanced: The `ToolContext`
 
-In modern ADK versions, registering your custom functions as tools is incredibly simple. You just import your functions and pass them directly into the agent's `tools` list. The ADK automatically wraps them.
+Sometimes your tool needs to know more than just its arguments. It might need to read from the session state or perform an action like transferring control to another agent. In ADK 2.0, you can add a `tool_context: ToolContext` argument to your function to gain access to these framework features.
+
+```python
+from google.adk.tools import ToolContext
+
+def my_advanced_tool(query: str, tool_context: ToolContext):
+    # Access session state!
+    user_name = tool_context.session.state.get("user_name")
+    ...
+```
+
+
+### Registering Tools with Your Agent Node
+
+In ADK 2.0, registering your custom functions as tools is incredibly simple. You just import your functions and pass them directly into the **`Agent`** node's `tools` list. The ADK automatically wraps them.
 
 ```python
 # In agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from .tools.calculator import add, subtract # Import your functions
 
-root_agent = LlmAgent(
+root_agent = Agent(
     # ... other params
     tools=[
         add,       # The ADK automatically converts this Python function
@@ -98,11 +115,11 @@ root_agent = LlmAgent(
 In the lab for this module, you will put all these principles into practice by building a set of calculator functions and integrating them into a new "Calculator" agent.
 
 ### Key Takeaways
-- Custom Function Tools allow you to connect your agent to any capability you can program in Python.
-- The ADK automatically generates a tool schema from your function's signature (name, parameters, type hints) and its docstring.
-- A well-defined tool function must have a descriptive name, clear type hints for all parameters, and a detailed docstring explaining its purpose and usage.
-- All custom tool functions must return a dictionary.
-- Tools are easily registered by passing the function reference directly into the agent's `tools` list.
+- **Custom Function Tools** connect your agent node to any Python capability.
+- **Auto-Schema:** ADK 2.0 generates the tool schema from your function's signature and docstring.
+- **Type Safety:** Use type hints and Pydantic return models for robust tool execution.
+- **Context Awareness:** Use `ToolContext` for advanced interaction with the ADK runtime.
+- **Workflow Ready:** Tools are nodes in your graph, allowing for modular and testable designs.
 
 ## Limitations: Mixing Tool Types
 

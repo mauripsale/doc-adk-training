@@ -85,33 +85,28 @@ def divide(a: int, b: int) -> dict:
     # TODO: Handle the case where b is 0, returning an error dictionary.
     # Otherwise, calculate the division and return the result.
     pass
-```
 
-### Step 3: Configure the Agent in `agent.py`
+> **Pro Tip:** While we use simple dictionaries in this lab for simplicity, ADK 2.0 strongly recommends returning **Pydantic models** for better type safety and structured reasoning (as you will see in the Lab Solution).
 
-**Exercise:** Create `agent.py` and complete the configuration. You need to import your new functions and pass them directly to the agent's definition.
+### Step 3: Configure the Agent Node
+
+**Exercise:** Create `agent.py` and complete the configuration using the modern ADK 2.0 **`Agent`** class.
 
 ```python
 # In agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent
+from tools.calculator import add, subtract, multiply, divide
 
-# TODO: Import the four functions from your .tools.calculator module.
-# Hint: Since 'tools' is a package within the same directory as 'agent.py',
-# you should use an import like: `from tools.calculator import add, subtract, multiply, divide`
-
-root_agent = LlmAgent(
+root_agent = Agent(
     name="calculator_agent",
     model="gemini-3.5-flash",
-    description="An agent that can perform basic arithmetic calculations.",
-    instruction="""
+    description="An agent node that performs arithmetic.",
+    instruction=\"\"\"
 You are a helpful calculator assistant.
-When the user asks you to perform a calculation (add, subtract, multiply, or divide), you MUST use the appropriate tool.
-Clearly state the result of the calculation to the user.
-If the user asks a question that is not a calculation, politely state that you can only perform math.
-""",
+When the user asks you to perform a calculation, you MUST use the appropriate tool.
+\"\"\",
     # TODO: Add the four imported functions directly to this list.
-    # (The ADK will automatically wrap them into FunctionTools)
-    tools=[]
+    tools=[add, subtract, multiply, divide]
 )
 ```
 

@@ -15,23 +15,27 @@ In the previous module, you learned the fundamentals of creating custom function
 
 In a real application, your tools shouldn't exist in a vacuum. A tool often needs to know *who* it is acting for or what data was previously saved in the session. 
 
-Instead of forcing the LLM to pass every single piece of information as an argument (which increases token usage and risks errors), you can inject the current session's state directly into your function using `ToolContext`.
-
-By simply adding a parameter typed as `ToolContext` to your function, the ADK will automatically populate it at runtime. The LLM does **not** see this parameter in the tool schema.
+By adding a parameter typed as `ToolContext` to your function, the ADK will automatically populate it at runtime. The LLM does **not** see this parameter in the tool schema.
 
 ```python
 from google.adk.tools import ToolContext
+from pydantic import BaseModel
 
-def calculate_wealth_growth(years: int, tool_context: ToolContext) -> dict:
+class GrowthReport(BaseModel):
+    status: str
+    total: float
+    message: str | None = None
+
+def calculate_wealth_growth(years: int, tool_context: ToolContext) -> GrowthReport:
     """Calculates projected savings based on the user's saved monthly budget."""
-    # Securely access the user's monthly budget from the session state
-    monthly_budget = tool_context.state.get("monthly_budget", 0)
+    # ADK 2.0: Access session state via tool_context.session.state
+    monthly_budget = tool_context.session.state.get("monthly_budget", 0)
     
     if monthly_budget <= 0:
-        return {"status": "error", "message": "Please set your monthly budget first."}
+        return GrowthReport(status="error", total=0, message="Set budget first.")
         
     total = monthly_budget * 12 * years
-    return {"status": "success", "total": total}
+    return GrowthReport(status="success", total=total)
 ```
 
 **Rule:** Never mention `tool_context` in your function's docstring. The LLM doesn't need to know about it.

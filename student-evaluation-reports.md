@@ -598,3 +598,77 @@ The solution provides a perfect implementation of a stateful MCP server. The bi-
 
 ## 💡 Suggestions for Improvement
 Add a 'Scale-up' note about moving from in-memory SESSION_CARTS to a real database like Redis or Firestore for production scenarios.
+
+---
+# 🎓 Student Evaluation Report: Module 10 (Advanced Function Tools)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 4
+* **Solution Quality (lab-solution.md):** 3
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+The simulation was straightforward. I was able to initialize the project and implement the tools and agent configuration as described. The logic for accessing `tool_context.session.state` is clearly explained and worked immediately in my mock tests. The use of `FunctionTool(..., require_confirmation=True)` is an elegant way to teach HITL.
+
+## 🚧 Friction Points & Bugs
+1.  **Variable Inconsistency:** In `lab.md`, Step 2, the code uses `budget = tool_context.session.state.get("monthly_budget", 0)`, but the error message says `Please set your monthly budget first.` (with a space). While minor, consistency helps students.
+2.  **Attribute Access:** During verification, I found that `require_confirmation` is stored as `_require_confirmation` in the ADK 2.2.0 `FunctionTool` object. If a student tries to inspect this in a debugger or shell, they might get confused, though it doesn't affect the functional code.
+3.  **Missing "Set" Tool in Lab:** The `lab.md` asks students to use a `get_savings_projection` tool that depends on state, but doesn't provide the code for a tool that *sets* that state (like the `set_budget` tool found in the solution). Students would have to manually mock the state or would be stuck unable to test a "success" path in the CLI.
+
+## 🏁 Solution Review
+The solution (`lab-solution.md`) differs significantly from the challenge (`lab.md`):
+- It introduces `Pydantic` and `BaseModel` which were not mentioned in the lab steps.
+- It includes the `set_budget` tool which was missing from the lab.
+- **Critical Bug:** The "Self-Reflection Answers" in `lab-solution.md` are leftovers from Module 4.5/Module 38 (talking about Jitter and subclassing), and do not match the "Self-Reflection Questions" asked at the end of `lab.md`.
+
+## 💡 Suggestions for Improvement
+1.  **Update Lab Instructions:** Add a small step to implement a `set_budget` tool so the agent is actually usable.
+2.  **Fix Solution Reflection:** Update the answers in `lab-solution.md` to actually address the questions asked in `lab.md` (Security of ToolContext vs LLM args, etc.).
+3.  **Sync Tech Stack:** Decide if Module 10 should introduce Pydantic for tool outputs. If yes, add it to `lab.md`. If no, remove it from `lab-solution.md`.
+
+
+---
+# 🎓 Student Evaluation Report: Module 09 (Custom Function Tools)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+Creating custom tools in Python feels very powerful. The 'auto-schema' generation from docstrings and type hints is a huge time-saver and reduces the friction of connecting LLMs to code. Building a calculator is a classic but effective way to see function calling in action.
+
+## 🚧 Friction Points & Bugs
+A minor formatting issue in the lab instructions was identified and fixed. The transition from dictionaries to Pydantic models for tool outputs is introduced as a 'Pro Tip', which helps bridge the gap between simple prototyping and enterprise standards.
+
+## 🏁 Solution Review
+The solution is excellent. It demonstrates the use of the 'Agent' class and correctly implements arithmetic logic with structured Pydantic return models.
+
+## 💡 Suggestions for Improvement
+None. The module is a solid foundation for all subsequent tool-based interactions.
+
+---
+# 🎓 Student Evaluation Report: Module 11 (OpenAPI Tools)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+The ability to generate tools directly from an OpenAPI spec is a 'killer feature'. It makes the student realize they can connect their agents to almost any modern web service in minutes. The Frankfurter API example is a great choice as it requires no API keys, making the lab very accessible.
+
+## 🚧 Friction Points & Bugs
+The simulation verified that the OpenAPIToolset configuration is robust. No major issues found. The lab instructions correctly guide students through the critical 'operationId' and 'parameters' sections of the spec.
+
+## 🏁 Solution Review
+The solution correctly demonstrates how to convert a Python dictionary spec into a toolset. The agent configuration is idiomatic for ADK 2.0.
+
+## 💡 Suggestions for Improvement
+Consider adding a 'Part 2' where students download a real .json spec file from a public URL (like GitHub) and load it, to show how they would handle real-world existing specifications.

@@ -9,7 +9,7 @@ title: "Lab Solution"
 
 In this lab, we upgraded our Financial Assistant to be more secure and context-aware. We used `ToolContext` to access the session state and the `FunctionTool` wrapper to implement a human-in-the-loop confirmation step for budget changes.
 
-### `budget_expert/agent.py`
+### `wealth_planner/agent.py`
 
 ```python
 import os
@@ -34,7 +34,7 @@ def set_budget(amount: float, tool_context: ToolContext) -> str:
     tool_context.session.state["monthly_budget"] = amount
     return f"Success: Your budget is now set to ${amount:.2f}/mo."
 
-def calculate_savings(years: int, tool_context: ToolContext) -> SavingsResult:
+def get_savings_projection(years: int, tool_context: ToolContext) -> SavingsResult:
     """Calculates savings based on the stored budget."""
     budget = tool_context.session.state.get("monthly_budget", 0)
     
@@ -44,22 +44,27 @@ def calculate_savings(years: int, tool_context: ToolContext) -> SavingsResult:
     total = budget * 12 * years
     return SavingsResult(status="success", total=total)
 
+def execute_investment_plan(amount: float) -> dict:
+    """Simulates executing a long-term investment plan."""
+    return {"status": "success", "message": f"Investment of ${amount} initiated!"}
+
 # --- 3. Wrap with Advanced Features ---
-# We wrap set_budget because it modifies state (a "destructive" change)
-set_budget_tool = FunctionTool(set_budget, require_confirmation=True)
+# We wrap execute_investment_plan because it's a sensitive action
+investment_tool = FunctionTool(execute_investment_plan, require_confirmation=True)
 
 # --- 4. Define the Agent ---
 root_agent = Agent(
-    name="budget_expert",
+    name="wealth_planner",
     model="gemini-3.5-flash",
     instruction="""
-      You are a professional budget assistant. 
-      - Help users save their monthly budget using 'set_budget'.
-      - Help users project their wealth growth using 'calculate_savings'.
+      You are a professional Wealth Planner. 
+      - Help users manage their budget using 'set_budget'.
+      - Help users project their savings using 'get_savings_projection'.
+      - Execute plans using 'execute_investment_plan'.
       
       If you don't know their budget, ask them to set it first.
     """,
-    tools=[set_budget_tool, calculate_savings]
+    tools=[set_budget, get_savings_projection, investment_tool]
 )
 ```
 

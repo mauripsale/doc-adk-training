@@ -42,25 +42,21 @@ def set_budget(amount: float, tool_context: ToolContext) -> str:
 
     Use this tool when the user tells you how much they can save or spend per month.
     """
-    # ADK 2.0: Save to session state
-    tool_context.session.state["monthly_budget"] = amount
-    return f"Success: Your budget is now set to ${amount:.2f}/mo."
+    # TODO: Save the 'amount' to the session state under the key "monthly_budget"
+    # Hint: Use tool_context.session.state
+    pass
 
 def get_savings_projection(years: int, tool_context: ToolContext) -> dict:
-...
     """
     Calculates projected savings over a period of years.
     
     Use this tool when the user asks how much they will have saved in the future.
     """
-    # ADK 2.0: Access session state via tool_context.session.state
-    budget = tool_context.session.state.get("monthly_budget", 0)
-    
-    if budget <= 0:
-        return {"status": "error", "message": "No budget found. Please use set_budget first."}
-    
-    total = budget * 12 * years
-    return {"status": "success", "result": total}
+    # TODO: Access session state via tool_context.session.state to get "monthly_budget"
+    # TODO: If budget is 0 or missing, return an error dictionary.
+    # TODO: Calculate: total = budget * 12 * years
+    # TODO: Return a success dictionary with the result.
+    pass
 
 def execute_investment_plan(amount: float) -> dict:
     """
@@ -90,23 +86,18 @@ from google.adk.tools import FunctionTool
 from tools.finance import set_budget, get_savings_projection, execute_investment_plan
 
 # TODO: Create a FunctionTool for the investment plan with confirmation enabled.
-investment_tool = FunctionTool(
-    execute_investment_plan,
-    require_confirmation=True
-)
+# Hint: Use require_confirmation=True
+investment_tool = ...
 
+# TODO: Define the root Agent node and register all three tools.
 root_agent = Agent(
     name="wealth_planner",
     model="gemini-3.5-flash",
     instruction="""
-You are a professional Wealth Planner.
-Your goal is to help users manage their budget, project savings, and execute investment plans.
+# TODO: Write instructions for a professional Wealth Planner.
+# Ensure it knows to use 'set_budget' first if the budget is unknown.
 """,
-    tools=[
-        set_budget,
-        get_savings_projection,
-        investment_tool
-    ]
+    tools=[...]
 )
 ```
 

@@ -17,7 +17,7 @@ We will continue using the modern `uv` workflow.
     ```shell
     uv init market_analyst --python 3.10
     cd market_analyst
-    uv add google-adk python-dotenv
+    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Set up your API key** in the `.env` file for the Gemini model. (The Frankfurter Currency API we are using is completely free and requires no authentication).
@@ -29,7 +29,7 @@ We will continue using the modern `uv` workflow.
 ```python
 # In agent.py
 import json
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.openapi_tool import OpenAPIToolset
 
 # ============================================================================
@@ -52,34 +52,19 @@ FRANKFURTER_SPEC = {
                 # TODO: Complete this section for the "/latest" endpoint.
                 # - The operationId should be "get_latest_rates".
                 # - The summary should be "Get latest exchange rates".
-                # - It needs a "parameters" list with three query parameters:
-                #   1. "amount" (type: number)
-                #   2. "from" (type: string)
-                #   3. "to" (type: string)
-                # - It needs a "responses" section for a "200" status code.
-                #   Make sure the 200 response includes a 'content' mapping for 'application/json'
+                # - It needs a "parameters" list with query parameters: "amount", "from", "to".
             }
         }
     }
 }
 
 # ============================================================================
-# OPENAPI TOOLSET
+# AGENT NODE DEFINITION
 # ============================================================================
 
-# TODO: Create an OpenAPIToolset instance from the spec dictionary.
-# Hint: Use json.dumps(FRANKFURTER_SPEC) as the spec_str and "json" as the type.
-currency_toolset = ...
-
-# ============================================================================
-# AGENT DEFINITION
-# ============================================================================
-
-# TODO: Define the root_agent.
-# - Give it the name "market_analyst", model "gemini-3.5-flash".
-# - Write an instruction to be a helpful currency converter.
-# - Register the `currency_toolset` in its `tools` list.
-root_agent = LlmAgent(...)
+# TODO: 1. Create the OpenAPIToolset instance.
+# TODO: 2. Define the root Agent node and register the toolset.
+root_agent = Agent(...)
 ```
 
 ### Step 3: Run and Test Your Agent

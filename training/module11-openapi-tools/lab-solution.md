@@ -16,7 +16,7 @@ Here is the fully implemented `agent.py` file. Notice how the `/latest` path is 
 ```python
 # agent.py
 import json
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.openapi_tool import OpenAPIToolset
 
 # ============================================================================
@@ -83,9 +83,9 @@ currency_toolset = OpenAPIToolset(
 )
 
 # ============================================================================
-# AGENT DEFINITION
+# AGENT NODE DEFINITION
 # ============================================================================
-root_agent = LlmAgent(
+root_agent = Agent(
     name="market_analyst",
     model="gemini-3.5-flash",
     description="A specialist in global currency exchange rates.",
@@ -104,7 +104,7 @@ Always state the amount, the original currency, and the converted currency clear
     ```bash
     uv init market_analyst --python 3.10
     cd market_analyst
-    uv add google-adk python-dotenv
+    uv add "google-adk>=2.1.0" python-dotenv
     ```
 2.  Make sure your `.env` file contains your `GOOGLE_API_KEY`.
 3.  Run the interactive terminal:

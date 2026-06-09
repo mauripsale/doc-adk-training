@@ -15,7 +15,7 @@ This file contains the complete, step-by-step guide to creating the "Calculator"
     ```shell
     uv init calculator_agent --python 3.10
     cd calculator_agent
-    uv add google-adk python-dotenv
+    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Set up authentication:**
@@ -30,103 +30,63 @@ This file contains the complete, step-by-step guide to creating the "Calculator"
     ```
 
 2.  **Create the `calculator.py` file:**
-    Create `tools/calculator.py` and add the following code:
+    Create `tools/calculator.py` and add the following code. In ADK 2.0, returning a **Pydantic model** is the best practice for type-safe tool outputs.
 
     ```python
-    def add(a: int, b: int) -> dict:
+    from pydantic import BaseModel
+
+    class MathResult(BaseModel):
+        status: str
+        result: float = 0
+        message: str | None = None
+
+    def add(a: int, b: int) -> MathResult:
         """
         Adds two numbers together.
-
         Use this tool when the user asks to find the sum of two numbers.
-
-        Args:
-            a: The first number.
-            b: The second number.
-        
-        Returns:
-            A dictionary with the result of the addition.
         """
-        result = a + b
-        return {"status": "success", "result": result}
+        return MathResult(status="success", result=a + b)
 
-    def subtract(a: int, b: int) -> dict:
+    def subtract(a: int, b: int) -> MathResult:
         """
         Subtracts the second number from the first number.
-
-        Use this tool when the user asks to find the difference between two numbers.
-
-        Args:
-            a: The first number.
-            b: The second number to subtract.
-
-        Returns:
-            A dictionary with the result of the subtraction.
         """
-        result = a - b
-        return {"status": "success", "result": result}
+        return MathResult(status="success", result=a - b)
 
-    def multiply(a: int, b: int) -> dict:
+    def multiply(a: int, b: int) -> MathResult:
         """
         Multiplies two numbers together.
-
-        Use this tool when the user asks to find the product of two numbers.
-
-        Args:
-            a: The first number.
-            b: The second number.
-
-        Returns:
-            A dictionary with the result of the multiplication.
         """
-        result = a * b
-        return {"status": "success", "result": result}
+        return MathResult(status="success", result=a * b)
 
-    def divide(a: int, b: int) -> dict:
+    def divide(a: int, b: int) -> MathResult:
         """
         Divides the first number by the second number.
-
-        Use this tool when the user asks to divide one number by another.
-
-        Args:
-            a: The numerator.
-            b: The denominator.
-
-        Returns:
-            A dictionary with the result or an error if division by zero occurs.
         """
         if b == 0:
-            # Crucial: Returning a structured error instead of crashing the Python process
-            return {"status": "error", "message": "Cannot divide by zero."}
-        result = a / b
-        return {"status": "success", "result": result}
+            return MathResult(status="error", message="Cannot divide by zero.")
+        return MathResult(status="success", result=a / b)
     ```
 
-### Step 3: Configure the Agent to Use the Tools
+### Step 3: Configure the Agent Node
 
-Open `agent.py` and replace its contents with the following. Notice how we pass the raw Python functions directly into the `tools` list. The ADK automatically converts them into LLM-compatible tools based on their docstrings and type hints.
+Open `agent.py` and replace its contents with the following. We use the modern **`Agent`** class and pass the raw Python functions directly into the `tools` list.
 
 ```python
-from google.adk.agents import LlmAgent
-
-# Import the functions from your tools module
+from google.adk import Agent
 from tools.calculator import add, subtract, multiply, divide
 
-root_agent = LlmAgent(
+root_agent = Agent(
     name="calculator_agent",
     model="gemini-3.5-flash",
-    description="An agent that can perform basic arithmetic calculations.",
+    description="An agent node that can perform arithmetic calculations.",
     instruction="""
 You are a helpful calculator assistant.
-When the user asks you to perform a calculation (add, subtract, multiply, or divide), you MUST use the appropriate tool.
-Clearly state the result of the calculation to the user.
-If the user asks a question that is not a calculation, politely state that you can only perform math.
+When the user asks you to perform a calculation, you MUST use the appropriate tool.
+Clearly state the result to the user.
+If the user asks something else, politely decline.
 """,
-    tools=[
-        add,
-        subtract,
-        multiply,
-        divide,
-    ],
+    tools=[add, subtract, multiply, divide]
 )
 ```
 

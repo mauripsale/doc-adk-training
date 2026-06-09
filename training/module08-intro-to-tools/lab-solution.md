@@ -67,10 +67,10 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
     Open the `agent.py` file inside `researcher_agent` and replace its contents with the following:
 
     ```python
-    from google.adk.agents import LlmAgent
+    from google.adk import Agent
     from google.adk.tools import google_search
 
-    root_agent = LlmAgent(
+    root_agent = Agent(
         name="researcher_agent",
         model="gemini-3.5-flash",
         description="An agent that can research current events using Google Search.",

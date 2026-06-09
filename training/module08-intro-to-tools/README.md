@@ -17,7 +17,7 @@ This is where **Tools** come in. Tools are the single most important feature for
 
 In the context of the ADK, a Tool is a specific capability that you grant to an agent. It's a component that allows the agent to perform a concrete action beyond just generating text.
 
-Think of the `LlmAgent` as the "brain" and the tools as its "hands." The brain can reason and decide what to do, but it needs hands to execute the action.
+Think of the **`Agent`** node as the "brain" and the tools as its "hands." The brain can reason and decide what to do, but it needs hands to execute the action.
 
 **Examples of actions a tool can perform:**
 *   **Fetch real-time information:** Get the latest news, stock prices, or weather forecasts from an API.
@@ -50,4 +50,4 @@ In the following modules, you will get hands-on experience with these different 
 ### Key Takeaways
 - Tools give agents the ability to interact with the outside world, overcoming the limitations of the LLM's static knowledge.
 - The process of an agent deciding to use a tool is called Function Calling.
-- The ADK supports three main types of tools: Built-in Tools (like `google_search`), Custom Function Tools (your own Python code), and Third-Party Tools (from libraries like LangChain).
+- The ADK supports three main types of tools: Built-in Tools (like `google_search`), Custom Function Tools (your own Python code), and Third-Party Tools (from libraries like LangChain).ts three main types of tools: Built-in Tools (like `google_search`), Custom Function Tools (your own Python code), and Third-Party Tools (from libraries like LangChain).

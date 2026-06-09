@@ -20,9 +20,13 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 *   [x] **Modulo 06 (Programmatic):** Introdurre il concetto di `App`, `Runner` e come il runtime v2 gestisce gli eventi. (Aggiornato a pattern `App(root_agent=...)`)
 
 ### 🔹 Fase 2: Orchestrazione Moderna (Il core di ADK 2.0)
+*   [x] **Modulo 08 (Intro Tools):** Superpoteri degli agenti e introduzione al Function Calling.
+*   [x] **Modulo 09 (Custom Tools):** Creazione di strumenti Python personalizzati con auto-schema.
+*   [x] **Modulo 10 (Advanced Tools):** Uso di `ToolContext` per accedere allo stato della sessione e HITL.
+*   [x] **Modulo 11 (OpenAPI Tools):** Integrazione automatica di API REST tramite specifiche OpenAPI.
 *   [x] **Modulo 21.5 (Refactoring Totale): "Dynamic Workflows with @node"**
 *   [x] **Modulo 21.6: "Graph-based Workflows (Deterministic Edges)"**
-*   [x] **Modulo 21.7 (Nuovo): "Collaborative Workflows (Native Hand-offs)"** - Peer-to-peer delegation senza coordinatore centrale.
+*   [x] **Modulo 21.7: "Collaborative Workflows (Native Hand-offs)"**
 
 ### 🔹 Fase 3: Multi-Agent Systems (MAS)
 *   [x] **Modulo 15 (Intro to MAS):** Refactoring della narrativa Graph/Node.

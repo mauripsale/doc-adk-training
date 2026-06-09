@@ -1,96 +1,43 @@
 ---
 sidebar_position: 11
-title: "Module 11: OpenAPI Tools"
+title: "Module 11: Enterprise Integration with OpenAPI Tools"
 ---
 
-# Module 11: OpenAPI Tools
+# Module 11: Enterprise Integration with OpenAPI Tools
 
 ## Theory
 
-### Connecting Your Agent to Enterprise Systems
+### Connecting to the Enterprise Ecosystem
 
-In the previous modules, you wrote custom Python functions (`FunctionTool`) to give your agent new capabilities. While powerful, writing a custom Python wrapper for every single endpoint of a large corporate API (like a CRM, an ERP, or a banking backend) is tedious and hard to maintain.
+Modern enterprises run on RESTful APIs. Whether it's a CRM, an ERP, or a custom internal service, these systems often expose their functionality through **OpenAPI** specifications. To build truly useful AI agents, you must know how to connect them to these existing enterprise services.
 
-To connect your agent to the vast world of existing REST APIs, the ADK provides a much more efficient method: **OpenAPI Tools**.
+### From Specification to Node
 
-### What is OpenAPI?
+In ADK 2.0, an OpenAPI tool is often used as a specialized **Node** in your graph or as a tool attached to an **Agent**.
 
-**OpenAPI** (formerly known as Swagger) is a standard specification for describing REST APIs. It's a machine-readable format, usually written in JSON or YAML, that defines an API's endpoints, operations (GET, POST), parameters, authentication methods, and response structures.
+#### 1. Generating the Client
+You typically use a tool like `openapi-python-client` to generate a robust, type-safe Python client from your `.json` or `.yaml` specification.
 
-In most modern enterprises, backend teams automatically generate these `openapi.json` files for their services.
-
-### How `OpenAPIToolset` Works
-
-The ADK's `OpenAPIToolset` class ingests an OpenAPI specification and **automatically generates** a complete set of tools that your agent can use.
-
-```
-OpenAPI Spec (JSON/YAML) -> ADK Auto-Generation -> Tools Available to Agent
-```
-
-This process has massive benefits:
-*   **No Manual Tool Writing:** You don't need to write a Python function for every single API endpoint.
-*   **Always in Sync:** If the backend team updates the API and publishes a new spec, your agent instantly gets the updated tools.
-*   **Automatic Handling:** The toolset automatically handles HTTP request construction, parameter validation, URL building, and response parsing.
-
-### The Process in Detail
-
-1.  **Provide the Spec:** You provide the `OpenAPIToolset` with the OpenAPI specification (as a JSON string, a file path, or a URL).
-2.  **Tool Generation:** The ADK parses the `paths` and `operations` in the spec. For each operation, it creates a tool function in memory. 
-    *   The **tool's name** is derived directly from the `operationId` in the spec (converted to `snake_case`).
-    *   The **parameters** are derived from the API's query/path/body parameters.
-3.  **Agent Integration:** You add the entire toolset to your agent's `tools` list.
-4.  **Autonomous Use:** The LLM receives the schemas for all the auto-generated tools and can now decide to call them just like any standard function tool.
-
-### Example: Currency Exchange API
-
-Imagine you want to extend your "Wealth Planner" (from Module 10) to handle multiple currencies. Instead of writing custom HTTP requests, you find a public currency API (like Frankfurter) and its OpenAPI spec.
+#### 2. Wrapping in a Function Tool
+Once you have the client, you write a small wrapper function that initializes the client and makes the API call. This wrapper follows the standard ADK 2.0 tool pattern (Pydantic models and `ToolContext`).
 
 ```python
-import json
-from google.adk.agents import LlmAgent
-from google.adk.tools.openapi_tool import OpenAPIToolset
+from google.adk import Agent
+from my_api_client import Client, AuthenticatedClient
+from my_api_client.api.default import get_data
 
-# 1. The OpenAPI Specification (Usually loaded from a .json file)
-API_SPEC = {
-    "openapi": "3.0.0",
-    "info": {"title": "Currency API", "version": "1.0.0"},
-    "servers": [{"url": "https://api.frankfurter.app"}],
-    "paths": {
-        "/latest": {
-            "get": {
-                "operationId": "get_latest_rates", # -> Becomes the tool name!
-                "summary": "Get latest exchange rates",
-                "parameters": [
-                    {"name": "amount", "in": "query", "schema": {"type": "number"}},
-                    {"name": "from", "in": "query", "schema": {"type": "string"}},
-                    {"name": "to", "in": "query", "schema": {"type": "string"}}
-                ],
-                "responses": {"200": {"description": "Success"}}
-            }
-        }
-    }
-}
+def fetch_external_data(query: str) -> dict:
+    """Fetches data from the production API."""
+    client = AuthenticatedClient(base_url="https://api.example.com", token="...")
+    response = get_data.sync(client=client, q=query)
+    return response.to_dict()
 
-# 2. Create the Toolset
-# We convert the dict to a JSON string for the ADK
-currency_tools = OpenAPIToolset(
-    spec_str=json.dumps(API_SPEC), 
-    spec_str_type="json"
-)
-
-# 3. Add to Agent
-agent = LlmAgent(
-    name="global_market_analyst",
-    model="gemini-3.5-flash",
-    instruction="You are a market analyst. Use your tools to convert currencies.",
-    tools=[currency_tools] # Automatically registers `get_latest_rates`
-)
+# Register with Agent
+agent = Agent(name="api_expert", tools=[fetch_external_data], ...)
 ```
 
-With just those few lines, the LLM now knows how to call `https://api.frankfurter.app/latest?amount=X&from=Y&to=Z` perfectly.
-
 ### Key Takeaways
-- OpenAPI (Swagger) is a standard specification for describing REST APIs.
-- The ADK's `OpenAPIToolset` automatically generates a full set of agent tools from an OpenAPI specification string or file.
-- This eliminates the need to write manual Python HTTP clients for each API endpoint.
-- The `operationId` in the OpenAPI spec determines the exact name of the tool generated for the LLM.
+- **OpenAPI** is the industry standard for describing REST APIs.
+- Use **Code Generation** to create type-safe Python clients from specs.
+- Wrap the generated client in an ADK **Function Tool** for easy integration.
+- This pattern allows your agent node to securely and reliably communicate with any enterprise service.

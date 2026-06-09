@@ -3,121 +3,102 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 13: Creating a "Memory" Agent with Tool Context Challenge
+# Lab 13: Building a Secure Agent with HITL and Actions
 
 ## Goal
 
-In this lab, you will build an agent that can remember and recall a piece of information using a custom tool. You will learn how to use the `ToolContext` object to read from and write to the session's state, giving your tool "memory."
+In this lab, you will build a **Secure Finance Agent**. You will learn how to implement **Human-in-the-Loop (HITL)** for sensitive transactions and how to use **`tool_context.actions`** to dynamically escalate a conversation to a supervisor node.
 
-### Step 1: Create the Memory Agent Project
+### Step 1: Prepare the Project
 
-1.  **Create the agent project:**
-    ```shell
-    uv run adk create memory_agent
-    cd memory_agent
-    ```
-
-2.  **Create the tools module:**
-    ```shell
-    mkdir tools
-    touch tools/__init__.py
-    touch tools/memory.py
-    ```
-
-### Step 2: Write the State-Aware Tool Functions
-
-**Exercise:** Open `tools/memory.py`. A skeleton with two functions is provided. Your task is to implement the logic for each function using the `tool_context` to manage the agent's memory.
-
-```python
-# In tools/memory.py (Starter Code)
-
-from google.adk.tools import ToolContext
-
-def remember_name(name: str, tool_context: ToolContext) -> dict:
-    """
-    Remembers the user's name by saving it to the session state.
-    Use this tool when the user tells you their name.
-    Args:
-        name: The user's name to remember.
-    """
-    # Note: Do not describe the 'tool_context' parameter in the docstring.
-    # The LLM does not need to know about it.
-    
-    # TODO: Use the tool_context to save the user's `name` to the
-    # session state under the key 'user_name'.
-    
-    return {"status": "success", "message": f"I will remember that your name is {name}."}
-
-def recall_name(tool_context: ToolContext) -> dict:
-    """
-    Recalls the user's name from the session state.
-    Use this tool when the user asks you what their name is.
-    """
-    # TODO: Use the tool_context to get the 'user_name' from the state.
-    # If the name exists, return it in a success dictionary:
-    # {"status": "success", "name": user_name}
-    # If it doesn't exist, return a "not_found" status:
-    # {"status": "not_found", "message": "I don't believe you've told me your name yet."}
-    pass
+```bash
+uv run adk create secure_finance
+cd secure_finance
 ```
 
-### Step 3: Configure the Agent in `agent.py`
+### Step 2: Implement the Secure Tools
 
-**Exercise:** Open `agent.py` and configure the agent to use your new tools.
+**Exercise:** Create `tools/finance.py`. You will implement a tool that handles investments.
+
+```python
+# In tools/finance.py
+from google.adk.tools import ToolContext
+
+def execute_investment(amount: float, tool_context: ToolContext) -> str:
+    """
+    Executes a long-term investment.
+    Use this tool only when the user explicitly asks to 'invest' or 'buy'.
+    """
+    # 1. Check for escalation: Any amount > 10,000 needs a human supervisor
+    if amount > 10000:
+        # TODO: Set tool_context.actions.transfer_to_agent to "supervisor"
+        # Hint: This will dynamically route the user to a different node.
+        pass
+        return f"Amount ${amount} requires supervisor approval. Escalating..."
+
+    # 2. Regular investment logic
+    return f"Success! ${amount} has been invested in your portfolio."
+```
+
+### Step 3: Configure the Agent with HITL
+
+**Exercise:** Open `agent.py`. You need to wrap your tool in a `FunctionTool` to enable the confirmation pop-up.
 
 ```python
 # In agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent, Workflow
 from google.adk.tools import FunctionTool
+from tools.finance import execute_investment
 
-# TODO: Import the `remember_name` and `recall_name` functions from your tools.memory module.
-
-# TODO: Create a FunctionTool for each of your imported functions.
-
-root_agent = LlmAgent(
-    name="memory_agent",
+# --- 1. Define the Supervisor Node ---
+supervisor = Agent(
+    name="supervisor",
     model="gemini-3.5-flash",
-    description="An agent that can remember and recall the user's name.",
-    instruction="""
-# TODO: Write an instruction that tells the agent:
-# - To use the `remember_name` tool when the user provides their name.
-# - To use the `recall_name` tool when the user asks what their name is.
-""",
-    # TODO: Add the two FunctionTool objects you created to this list.
-    tools=[]
+    instruction="You are a senior supervisor. Review the large investment request and provide a final verdict."
+)
+
+# --- 2. Wrap the Tool for Safety ---
+# TODO: Create a FunctionTool named 'secure_investment_tool'
+# Enable require_confirmation=True
+secure_investment_tool = ...
+
+# --- 3. Define the Main Agent ---
+finance_agent = Agent(
+    name="finance_agent",
+    model="gemini-3.5-flash",
+    instruction="Help users with their investments. Use 'execute_investment' for trades.",
+    tools=[secure_investment_tool],
+    sub_agents=[supervisor] # Required for discovery during transfer
+)
+
+# --- 4. Build the Workflow Graph ---
+root_agent = Workflow(
+    name="SecureSystem",
+    edges=[("START", finance_agent)]
 )
 ```
 
-### Step 4: Test the Memory Agent
+### Step 4: Test the Secure Workflow
 
-1.  **Set up your `.env` file.**
-2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
-    ```shell
-    uv run adk web
-    ```
-3.  **Interact with the agent:**
-    *   **Turn 1:** "Hi, my name is Alex."
-    *   **Turn 2:** "What is my name?"
-4.  **Examine the Trace and State:**
-    *   After the first turn, check the **State** tab to see if `user_name` was saved correctly.
-    *   Check the **Trace** view for both turns to see the `remember_name` and `recall_name` tools being called.
-
-### Having Trouble?
-
-If you get stuck, you can find the complete, working code in the `lab-solution.md` file.
+1.  **Start the Dev UI:** `uv run adk web .`
+2.  **Test HITL:** 
+    - Ask: "Invest $500 for me."
+    - **Observe:** A confirmation box should appear. The code only runs if you click "Approve."
+3.  **Test Dynamic Transfer:**
+    - Ask: "Invest $50,000 for me."
+    - **Observe:** The tool should trigger an escalation. In the Trace, you will see the `active_agent` change from `finance_agent` to `supervisor`.
 
 ### Lab Summary
 
-You have now created a tool with "memory"! You have learned to:
-*   Access the `ToolContext` by adding it to a tool function's signature.
-*   Write data to the session `state` using `tool_context.state['key'] = value`.
-*   Read data from the session `state` using `tool_context.state.get('key')`.
-*   Build an agent that can carry information across multiple turns of a conversation.
+You have built a production-ready secure agent! You learned:
+*   How to **pause execution** for human approval using `require_confirmation`.
+*   How to **reroute the conversation** dynamically using `tool_context.actions.transfer_to_agent`.
+*   How to combine manual safety (HITL) with automated business rules (Escalation).
 
 ### Self-Reflection Questions
-- Why is it important that the `tool_context` parameter is *not* included in the function's docstring?
-- The `recall_name` function uses `tool_context.state.get('user_name')` instead of `tool_context.state['user_name']`. What is the difference, and why is `.get()` a safer choice here?
-- How could you extend this agent to forget a user's name? What would the new tool function look like?
+- Why is it important to use `require_confirmation` for sensitive actions rather than just relying on the LLM's instructions?
+- In the dynamic transfer example, why did we need to add the `supervisor` agent to the `sub_agents` list of the `finance_agent`?
+- How does `tool_context.actions` allow you to implement business rules that the LLM cannot override?
 
 <hr/>
 

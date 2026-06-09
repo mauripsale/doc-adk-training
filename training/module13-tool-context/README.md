@@ -1,22 +1,15 @@
 ---
 sidebar_position: 13
-title: "Module 13: Advanced Tool Concepts: Tool Context"
+title: "Module 13: Advanced Interactions: Actions & HITL"
 ---
 
-# Module 13: Advanced Tool Concepts: Tool Context
+# Module 13: Advanced Interactions: Actions & HITL
 
 ## Theory
 
-### Giving Tools "Situational Awareness"
+By now, you know how to build stateful tools using the `ToolContext`. But `ToolContext` is much more than just a window into the session state; it is your gateway to controlling the **ADK Runtime** itself.
 
-So far, your custom tools have been simple, stateless functions: they take inputs, perform a calculation, and return a result. However, in more advanced scenarios, a tool might need more information than just its input arguments. It might need to:
-
-*   Read or write data to the conversation's memory.
-*   Know which user is making the request.
-*   Access files that have been uploaded.
-*   Influence the agent's workflow, for example, by telling it to transfer to another agent.
-
-This is where the **`ToolContext`** comes in. The `ToolContext` is a special object that the ADK can automatically provide to your tool function, giving it "situational awareness" and a powerful set of capabilities to interact with the agent's runtime environment.
+In this module, we will explore how to implement **Human-in-the-Loop (HITL)** safety and how tools can dynamically influence the agent's next steps.
 
 ### Accessing the Tool Context
 
@@ -34,53 +27,65 @@ When the agent calls your tool, the ADK framework will see this special paramete
 
 **Important:** You should **not** mention the `tool_context` parameter in your function's docstring. The LLM doesn't know or care about the context object; it's a mechanism for your code to interact with the ADK framework *after* the LLM has decided to call your tool.
 
-### Key Capabilities of `ToolContext`
+### 1. Human-in-the-Loop (`require_confirmation`)
 
-The `ToolContext` object provides access to several key pieces of information and control levers:
+For sensitive or destructive actions (like financial transfers, deleting files, or sending emails), you shouldn't trust the LLM to act alone. ADK 2.0 provides a native mechanism to pause execution and wait for a human "OK."
 
-#### 1. **State Management (`tool_context.state`)**
+To enable this, you must wrap your Python function in a **`FunctionTool`** object.
 
-This is the most common use case. The `tool_context.state` attribute gives your tool direct read and write access to the current conversation's `Session.state`. This allows your tool to:
-
-*   **Read from state:** Make decisions based on information saved by previous tools or agents.
-    ```python
-    user_preference = tool_context.state.get('user:theme', 'light')
-    ```
-*   **Write to state:** Save information that can be used by the agent or other tools later in the conversation.
-    ```python
-    tool_context.state['last_order_id'] = 'XYZ-123'
-    ```
-> **Note on State Scope:** The `tool_context.state` directly accesses the state specific to the *current session*. While not explicitly covered in this module, the ADK also supports broader state scopes, such as `user:*` (for user-specific, cross-session state) and `app:*` (for global application-level state). Understanding this distinction is key for designing more persistent and scalable agent memory.
-
-This turns your stateless functions into stateful tools that can participate in building up a shared understanding of the conversation.
-
-#### 2. **Flow Control (`tool_context.actions`)**
-
-The `tool_context.actions` attribute allows your tool to influence what the agent does *after* the tool finishes.
-
-*   **`transfer_to_agent`:** Your tool can dynamically decide to hand off the conversation to a different, more specialized agent.
-    ```python
-    if "urgent" in user_query:
-        tool_context.actions.transfer_to_agent = 'human_support_agent'
-    ```
-*   **`skip_summarization`:** If your tool's output is already a perfect, user-ready message, you can set this to `True` to prevent the LLM from rephrasing it.
-
-#### 3. **Accessing Files (`tool_context.load_artifact`)**
-
-If a user has uploaded files (known as "artifacts" in the ADK), your tool can access them via the `ToolContext`.
 ```python
-# Load a file the user uploaded named 'report.txt'
-uploaded_file = tool_context.load_artifact('report.txt')
-if uploaded_file:
-    text_content = uploaded_file.text
-    # ... process the text ...
+from google.adk.tools import FunctionTool
+
+# Wrap the tool and enable confirmation
+secure_tool = FunctionTool(
+    my_sensitive_function, 
+    require_confirmation=True # 🛡️ The safety trigger
+)
+```
+
+When the agent calls this tool, the ADK will:
+1.  Pause the interaction.
+2.  Send a `RequestInput` event to the user (via the Dev UI or API).
+3.  Execute the Python code **only if** the user clicks "Approve."
+
+### 2. Influencing the Workflow (`tool_context.actions`)
+
+Sometimes a tool needs to tell the framework: *"Wait, don't just return my result to the agent; do something else first!"* You do this via the `actions` attribute.
+
+#### Dynamic Agent Transfers
+A tool can decide to hand over the entire conversation to another specialist node in the graph.
+
+```python
+def check_emergency(level: int, tool_context: ToolContext):
+    if level > 9:
+        # 🏃 Dynamic hand-off
+        tool_context.actions.transfer_to_agent = "emergency_specialist"
+        return "Escalating to emergency support."
+    return "All clear."
+```
+
+#### Skipping Summarization
+If your tool returns a perfect, ready-to-use message for the user, you can prevent the LLM from rewriting it.
+```python
+tool_context.actions.skip_summarization = True
+```
+
+### 3. Accessing Artifacts (`load_artifact`)
+
+Tools can also interact with files uploaded by the user (like images, logs, or reports).
+
+```python
+def analyze_logs(file_name: str, tool_context: ToolContext):
+    log_file = tool_context.load_artifact(file_name)
+    if log_file:
+        content = log_file.text
+        # ... logic ...
 ```
 
 By leveraging the `ToolContext`, you can elevate your custom functions from simple calculators to powerful, context-aware components that are deeply integrated into the agent's lifecycle. In the following lab, you will use the `tool_context.state` to create a tool that can remember information across turns.
 
 ### Key Takeaways
-- The `ToolContext` object gives your custom tools "situational awareness" by providing access to the agent's runtime environment.
-- To use it, add a `tool_context: ToolContext` parameter to your tool function's signature.
-- `tool_context.state` allows your tool to read from and write to the current session's state, enabling stateful operations.
-- `tool_context.actions` allows your tool to influence the agent's workflow, such as by transferring to another agent.
-- `tool_context.load_artifact` allows your tool to access user-uploaded files.
+- **HITL** is a mandatory pattern for high-stakes enterprise agents.
+- Use **`FunctionTool`** to add metadata and safety controls to your Python functions.
+- **`tool_context.actions`** allows tools to steer the Workflow Runtime (Transfers, Skipping).
+- Tools are "Framework Aware" components, not just isolated functions.

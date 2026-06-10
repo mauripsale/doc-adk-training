@@ -1,9 +1,9 @@
 ---
 sidebar_position: 21
-title: "Module 21: Agent-to-Agent Communication"
+title: "Module 21: Distributed Graphs - A2A and External Nodes"
 ---
 
-# Module 21: Agent-to-Agent Communication
+# Module 21: Distributed Graphs - A2A and External Nodes
 
 ## Theory
 

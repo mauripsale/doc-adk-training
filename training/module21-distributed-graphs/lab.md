@@ -109,8 +109,8 @@ You have successfully built a distributed multi-agent system. You have learned t
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMjEtYWdlbnQtdG8tYWdlbnQvbGFiLXNvbHV0aW9u`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMjEtZGlzdHJpYnV0ZWQtZ3JhcGhzL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module21-agent-to-agent/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+    The direct link is: <a href="/doc-adk-training/module21-distributed-graphs/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
 </div>

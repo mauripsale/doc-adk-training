@@ -26,7 +26,7 @@ First, let's define what each agent in our system will do.
 #### Agent 1: The `router_agent`
 
 *   **Purpose:** This will be our main, parent agent. Its only job is to understand the user's request and delegate the task to the correct specialist agent. It should not perform any greetings itself.
-*   **Type:** `LlmAgent`. It needs the reasoning capability of an LLM to understand the user's intent.
+*   **Type:** **`Agent`**. It needs the reasoning capability of an LLM to understand the user's intent.
 *   **Initial Instruction Idea:**
     ```
     You are a language router. Your job is to understand which language the user wants to be greeted in and delegate to the appropriate specialist.
@@ -37,7 +37,7 @@ First, let's define what each agent in our system will do.
 #### Agent 2: The `spanish_greeter_agent`
 
 *   **Purpose:** This is our specialist sub-agent. Its only job is to provide a friendly greeting in Spanish.
-*   **Type:** `LlmAgent`.
+*   **Type:** **`Agent`**.
 *   **Description (for the router):** This is a critical piece of information. The `router_agent`'s LLM will read this description to understand what the `spanish_greeter_agent` is capable of. A good description would be:
     ```
     "An expert at providing friendly greetings in Spanish."

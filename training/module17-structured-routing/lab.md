@@ -108,8 +108,8 @@ You have successfully built a deterministic workflow!
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMjFfNi1ncmFwaC13b3JrZmxvd3MvbGFiLXNvbHV0aW9u`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMTctc3RydWN0dXJlZC1yb3V0aW5nL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module21_6-graph-workflows/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+    The direct link is: <a href="/doc-adk-training/module17-structured-routing/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
 </div>

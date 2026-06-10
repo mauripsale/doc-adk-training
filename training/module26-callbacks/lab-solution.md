@@ -73,7 +73,28 @@ def before_model_callback(
             )
     return None
 
-# --- Callback 4: Tool Validation ---
+# --- Callback 4: Output Filtering ---
+def after_model_callback(
+    callback_context: CallbackContext,
+    llm_response: LlmResponse
+) -> Optional[LlmResponse]:
+    """Removes sensitive email addresses from the LLM response."""
+    if not llm_response.content:
+        return None
+        
+    original_text = llm_response.content.parts[0].text
+    # Simple email regex
+    redacted_text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', original_text)
+    
+    if redacted_text != original_text:
+        print("🛡️ [FILTER] Redacted PII from model response.")
+        # Return a modified copy of the response
+        return llm_response.model_copy(update={
+            "content": types.Content(parts=[types.Part(text=redacted_text)], role="model")
+        })
+    return None
+
+# --- Callback 5: Tool Validation ---
 def before_tool_callback(
     tool: BaseTool,
     args: Dict[str, Any],
@@ -104,6 +125,7 @@ root_agent = Agent(
     before_agent_callback=before_agent_callback,
     after_agent_callback=after_agent_callback,
     before_model_callback=before_model_callback,
+    after_model_callback=after_model_callback,
     before_tool_callback=before_tool_callback
 )
 ```

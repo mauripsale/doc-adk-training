@@ -26,65 +26,31 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 
 ### Step 2: Implement the Callbacks
 
-**Exercise:** Open `agent.py`. Your task is to implement the logic for the four core callbacks. Use the `# TODO` comments as your guide.
+**Exercise:** Open `agent.py`. Your task is to implement the logic for the five core callbacks. Use the `# TODO` comments as your guide.
 
 ```python
-# In agent.py (Starter Code)
-from google.adk import Agent
-from google.adk.agents.callback_context import CallbackContext
-from google.adk.runners import InMemoryRunner
-from google.adk.tools import ToolContext
-from google.adk.tools.base_tool import BaseTool
-from google.adk.models.llm_request import LlmRequest
-from google.adk.models.llm_response import LlmResponse
-from google.genai import types
-from typing import Dict, Any, Optional
-import re
-import logging
-
-load_dotenv()
+# ... [previous imports] ...
 
 # ============================================================================ 
 # CALLBACK FUNCTIONS
 # ============================================================================ 
 
-def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
-    """
-    TODO: Implement Caching (Check).
-    1. Check if 'cached_response' exists in callback_context.state.
-    2. If it does, return a `types.Content` object with the text, skipping the LLM!
-    """
-    pass
+# ... [before_agent, after_agent, before_model stay the same] ...
 
-def after_agent_callback(callback_context: CallbackContext) -> None:
-    """
-    TODO: Implement Caching (Save).
-    1. Access the session history: callback_context.session.events
-    2. Find the last model response.
-    3. Save its text to callback_context.state['cached_response'].
-    """
-    pass
-
-def before_model_callback(
+def after_model_callback(
     callback_context: CallbackContext,
-    llm_request: LlmRequest
+    llm_response: LlmResponse
 ) -> Optional[LlmResponse]:
     """
-    TODO: Input Guardrail.
-    If the user text contains 'blocked_word', return an LlmResponse with a warning.
+    TODO: Output Filtering.
+    Use re.sub to redact email addresses from the LLM response text.
+    If redacted, return a new LlmResponse; otherwise return None.
     """
     pass
 
 def before_tool_callback(
-    tool: BaseTool,
-    args: Dict[str, Any],
-    tool_context: ToolContext
-) -> Optional[Dict[str, Any]]:
-    """
-    TODO: Argument Validation.
-    If tool.name == 'generate_text' and word_count > 5000, return an error dict.
-    """
-    pass
+    # ...
+```
 
 # ============================================================================ 
 # AGENT DEFINITION

@@ -30,7 +30,7 @@ In the modern ADK, using web grounding is incredibly simple. You can mix built-i
 Unlike earlier versions of the framework that required complex wrappers, you can now simply import the built-in tools and list them alongside your custom functions:
 
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools import google_search
 
 def my_custom_tool(item_id: str) -> dict:
@@ -38,7 +38,7 @@ def my_custom_tool(item_id: str) -> dict:
     return {"status": "success", "stock": 42}
 
 # You can mix built-in and custom tools freely!
-agent = LlmAgent(
+agent = Agent(
     name="grounded_agent",
     model="gemini-3.5-flash",
     instruction="Search the web and check our warehouse.",

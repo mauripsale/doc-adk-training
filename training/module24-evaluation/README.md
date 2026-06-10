@@ -11,7 +11,7 @@ title: "Module 24: Evaluating Agent Performance"
 
 In traditional software development, we rely on unit tests and integration tests to ensure our code is correct. These tests check for specific, predictable outcomes. For example, `assert add(2, 2) == 4`. This works because the `add` function is **deterministic**—it will always produce the same output for the same input.
 
-However, `LlmAgent`s are **non-deterministic**. Due to the probabilistic nature of Large Language Models, asking the same question twice might yield slightly different, yet equally correct, answers.
+However, `Agent`s are **non-deterministic**. Due to the probabilistic nature of Large Language Models, asking the same question twice might yield slightly different, yet equally correct, answers.
 
 *   **User:** "What's the weather in Paris?"
 *   **Acceptable Answer 1:** "The weather in Paris is currently sunny and 22°C."
@@ -121,7 +121,7 @@ For this, the ADK provides **User Simulation**.
 This allows you to "stress test" your agent against hundreds of diverse, generated conversations to find edge cases you might have missed manually. Note that for dynamic scenarios, you typically use reference-free metrics like `safety_v1` and `hallucinations_v1` since there is no single "expected" response.
 
 ### Key Takeaways
-- `LlmAgent`s are non-deterministic, so traditional pass/fail tests are insufficient.
+- `Agent`s are non-deterministic, so traditional pass/fail tests are insufficient.
 - The ADK evaluation framework measures quality by comparing an agent's behavior against a recorded "golden path" or **Evaluation Case**.
 - **Metrics Categories:** Evaluation covers **Trajectory** (did it follow the right steps?), **Response Quality** (is the answer correct/good?), and **Safety/Groundedness** (is it harmless and factual?).
 - **User Simulation:** Use dynamic user simulation to test your agent against varied, LLM-generated personas and scenarios, going beyond static examples.

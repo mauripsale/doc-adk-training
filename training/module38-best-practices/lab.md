@@ -119,5 +119,11 @@ You have successfully built an agent system that leverages the native resilience
 - What happens if you catch the exception inside `flaky_api_node` with a `try/except` block and return an error string? Does the framework still retry?
 - In a production environment (like Cloud Run), why is `lru_cache` only a partial solution for performance?
 
-<hr/>
-🕵️ HIDDEN SOLUTION: L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzgtYmVzdC1wcmFjdGljZXMvbGFiLXNvbHV0aW9u
+### 🕵️ Hidden Solution 🕵️
+
+Looking for the solution? Here's a hint (Base64 decode me):
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzgtYmVzdC1wcmFjdGljZXMvbGFiLXNvbHV0aW9u`
+
+<div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
+    The direct link is: <a href="/doc-adk-training/module38-best-practices/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+</div>

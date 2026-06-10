@@ -32,13 +32,13 @@ When you send a list of these parts to a vision-capable model like `gemini-3.5-f
 To send an image to an agent programmatically, you package it into a list and run it via an `App`:
 
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 
 # 1. Define the agent
-agent = LlmAgent(
+agent = Agent(
     name="vision_expert",
     model="gemini-3.5-flash",
     instruction="Describe the provided image in detail."

@@ -35,7 +35,7 @@ This part covers the absolute basics of AI agents and the ADK, getting your envi
 *   📖 **[Module 1: Introduction to AI Agents & Google ADK](./training/module01-intro-to-ai-agents/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   📖 **[Module 2: Setting Up Your Development Environment](./training/module02-environment-setup/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
 *   📖 **[Module 3: Your First Agent: The "Echo" Agent](./training/module03-first-agent-echo/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
-*   📖 **[Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-llmagent-deep-dive/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
+*   📖 **[Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-agent-deep-dive/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
 *   📖 **[Module 5: Running and Interacting with Agents](./training/module05-running-agents/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
 *   📖 **[Module 6: Running an Agent Programmatically](./training/module06-programmatic-execution/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   📖 **[Module 7: Multimodal and Images 📸](./training/module07-multimodal-and-images/)** (🧑‍💻 40 min / 👨‍🏫 60 min)

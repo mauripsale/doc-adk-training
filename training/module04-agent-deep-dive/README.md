@@ -11,7 +11,7 @@ title: "Module 4: Core Agent Concepts: Agent Deep Dive"
 
 At the heart of most applications you build with the ADK is the **`Agent`**. This is the component that acts as the "thinking" part of your application. It uses the power of a Large Language Model (LLM) like Gemini to understand user requests, reason about them, and decide on a course of action.
 
-In ADK 2.0, the `Agent` class (formerly `LlmAgent`) is the primary node type for LLM-powered reasoning. Unlike a traditional program that follows a fixed, deterministic path, an `Agent` is non-deterministic. It interprets the context of a conversation and its own instructions to dynamically figure out what to do next. This flexibility is what makes agents so powerful.
+In ADK 2.0, the `Agent` class (formerly `Agent`) is the primary node type for LLM-powered reasoning. Unlike a traditional program that follows a fixed, deterministic path, an `Agent` is non-deterministic. It interprets the context of a conversation and its own instructions to dynamically figure out what to do next. This flexibility is what makes agents so powerful.
 
 Building an effective `Agent` requires a clear understanding of its core configuration parameters. In this module, we'll take a deep dive into the most important one: the `instruction`.
 

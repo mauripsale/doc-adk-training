@@ -1,72 +1,51 @@
 ---
 sidebar_position: 13.5
-title: "Module 13.5: Enterprise Persistence with Firestore (ADK 2.0)"
+title: "Module 13.5: Extending ADK - Custom Persistence with Firestore"
 ---
 
-# Module 13.5: Enterprise Persistence with Firestore
+# Module 13.5: Extending ADK - Custom Persistence with Firestore
 
 ## Theory
 
-### The Need for Persistent Memory
+### The Power of Extensibility
 
-Up until now, our agents have been running using the `InMemorySessionService` (implicitly provided by `InMemoryRunner`). This is fantastic for development because it requires zero setup.
+One of the key strengths of ADK 2.0 is its **pluggable architecture**. While the core library provides built-in services for common tasks (like `InMemorySessionService` or `DatabaseSessionService` for SQL), enterprise requirements often demand integration with specific technologies.
 
-However, `InMemorySessionService` stores the entire conversation history and the **Session State** directly in the RAM of the Python process. This introduces a critical limitation: **if your server restarts, crashes, or scales down, all memory is completely lost.**
+Instead of being locked into a fixed set of database providers, you can **extend the ADK** by implementing your own services.
 
-In production, users expect an agent to remember past interactions and preferences even if they return days later.
+### The `BaseSessionService` Interface
 
-### Introduction to `FirestoreSessionService`
+In the ADK, all session persistence is governed by a single abstract class: **`BaseSessionService`**. 
 
-To achieve durable persistence, the ADK provides the **`FirestoreSessionService`**. This service replaces the in-memory store with [Google Cloud Firestore](https://cloud.google.com/firestore), a highly scalable, serverless NoSQL document database.
+Any class that inherits from `BaseSessionService` and implements its core methods can be used by the `Runner`. This allows you to store agent conversations and state in **any database**—from Redis and MongoDB to Google Cloud Firestore.
 
-By using `FirestoreSessionService`, the ADK automatically:
-1.  Saves every event (user messages, agent responses, tool calls) to Firestore.
-2.  Persists the key-value pairs stored in the `SessionState`.
-3.  Loads the history back into the agent's context when a user returns, allowing the **Workflow Runtime** to resume exactly where it left off.
+### Why Implement a Custom Session Service?
 
-### Implementation Pattern
+1.  **Organizational Standards:** Your company may already use Firestore as its primary serverless database.
+2.  **Specific Features:** You might want to leverage Firestore's real-time listeners or its native integration with Firebase.
+3.  **Cost & Scaling:** Firestore offers a specialized pricing model and automatic scaling that might be better suited for your agent's traffic patterns than a traditional SQL database.
 
-Switching from in-memory to Firestore requires almost zero changes to your actual agent logic. You only change the `Runner` configuration.
+### How it works: Dependency Injection
 
-Instead of `InMemoryRunner`, you use the base `Runner` class and explicitly pass an instance of `FirestoreSessionService`.
+The ADK uses **Dependency Injection** at the `Runner` level. When you instantiate a `Runner`, you don't have to use the default `InMemoryRunner`. Instead, you can provide your own custom session service instance.
 
-**Installation:**
-```bash
-uv add "google-adk[gcp]>=2.1.0"
-```
-
-**Code Pattern:**
 ```python
-from google.adk.apps import App
-from google.adk.sessions import FirestoreSessionService
-from google.adk import Runner
+# Custom implementation (which we will build in this lab)
+custom_service = FirestoreSessionService(project_id="my-project")
 
-# 1. Wrap your agent/workflow in an App
-app = App(name="persistence_demo", root_agent=my_agent)
-
-# 2. Initialize the Firestore Session Service
-firestore_service = FirestoreSessionService(
-    project_id="your-gcp-project-id"
-)
-
-# 3. Create a Runner and inject the service
+# Inject it into the base Runner
 runner = Runner(
-    app=app,
-    session_service=firestore_service
+    app=my_app,
+    session_service=custom_service
 )
 ```
 
-### Pre-requisites
-
-To use `FirestoreSessionService`, you need:
-1.  A Google Cloud Project with the Firestore API enabled.
-2.  A Firestore Database created in "Native mode".
-3.  The `google-cloud-firestore` Python package installed.
+From this point on, every call to `runner.run()` or `runner.run_async()` will automatically use your Firestore logic to save and load data, without you having to change a single line of agent instruction or tool code.
 
 ---
 
 ## Key Takeaways
 
-*   **Durable by Design:** `FirestoreSessionService` ensures state survives process restarts and horizontal scaling.
-*   **Decoupled Architecture:** Business logic (agents/nodes) remains identical whether using in-memory or cloud storage.
-*   **Workflow Integration:** ADK 2.0's Workflow engine uses the session service to store node-level checkpoints, making complex graphs fully resumable across failures.
+*   **ADK is extensible:** You can plug in custom implementations for sessions, artifacts, and more.
+*   **Decoupled Logic:** Your agent's "brain" (intelligence) is completely separated from its "memory" (storage technology).
+*   **Enterprise Ready:** Building custom providers is the standard way to integrate ADK into existing enterprise data ecosystems.

@@ -3,66 +3,103 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 13.5: Implementing Firestore Persistence Solution
+# Lab 13.5 Solution: Extending ADK with Firestore
 
-Below is the complete `agent.py` script upgraded to use `FirestoreSessionService`.
+## Goal
+
+This file contains the complete solution for both the `firestore_provider.py` and the `agent.py` script.
+
+### `firestore_provider.py`
+
+This is a functional implementation of the ADK 2.0 `BaseSessionService` using Firestore. Note how it implements the mandatory `append_event` and `update_session_state` methods.
 
 ```python
-# agent.py (Solution)
+from typing import Any, Optional
+import uuid
+import time
+from google.cloud import firestore
+from google.adk.sessions.base_session_service import BaseSessionService, GetSessionConfig
+from google.adk.sessions.session import Session
+from google.adk.events.event import Event
+
+class FirestoreSessionService(BaseSessionService):
+    def __init__(self, project_id: str):
+        self._client = firestore.AsyncClient(project=project_id)
+
+    async def create_session(self, *, app_name: str, user_id: str, state: Optional[dict] = None, session_id: Optional[str] = None) -> Session:
+        sid = session_id or str(uuid.uuid4())
+        # Reference: apps/{app}/users/{user}/sessions/{sid}
+        session_ref = self._client.collection("apps").document(app_name)\
+            .collection("users").document(user_id)\
+            .collection("sessions").document(sid)
+        
+        # Check if exists, else create
+        doc = await session_ref.get()
+        if not doc.exists:
+            await session_ref.set({
+                "created_at": time.time(),
+                "state": state or {}
+            })
+        
+        return Session(id=sid, app_name=app_name, user_id=user_id, state=doc.to_dict().get("state", {}) if doc.exists else (state or {}))
+
+    async def append_event(self, event: Event, session: Session) -> None:
+        # Save event to sub-collection
+        event_ref = self._client.collection("apps").document(session.app_name)\
+            .collection("users").document(session.user_id)\
+            .collection("sessions").document(session.id)\
+            .collection("events").document(event.invocation_id)
+        
+        await event_ref.set(event.model_dump())
+        print(f"🔥 [Firestore] Persisted event from {event.author}")
+
+    async def update_session_state(self, session: Session) -> None:
+        # Update the main session document's state
+        session_ref = self._client.collection("apps").document(session.app_name)\
+            .collection("users").document(session.user_id)\
+            .collection("sessions").document(session.id)
+            
+        await session_ref.update({"state": session.state})
+        print(f"🔥 [Firestore] Updated session state in cloud.")
+
+    # Other methods (get_session, list_sessions) would be implemented similarly
+    async def get_session(self, config: GetSessionConfig) -> Optional[Session]:
+        return await self.create_session(app_name=config.app_name, user_id=config.user_id, session_id=config.session_id)
+```
+
+### `agent.py`
+
+```python
 import asyncio
 import os
-from dotenv import load_dotenv
-
 from google.adk import Agent, Runner
 from google.adk.apps import App
-from google.adk.sessions import FirestoreSessionService
-from google.adk.tools import ToolContext
+from firestore_provider import FirestoreSessionService
+from dotenv import load_dotenv
 
 load_dotenv()
 
-def remember_name(name: str, tool_context: ToolContext) -> str:
-    """Saves the user's name to memory."""
-    tool_context.session.state["user_name"] = name
-    return f"I have successfully remembered that your name is {name}."
-
 agent = Agent(
     model="gemini-3.5-flash",
-    name="MemoryAgent",
-    instruction="You are a helpful assistant. Use the remember_name tool if the user tells you their name.",
-    tools=[remember_name]
+    name="PersistentAgent",
+    instruction="You are a helpful assistant that remembers the user's favorite color."
 )
 
 async def main():
-    user_id = "test_user_001"
-    
-    # 1. Get the Project ID from the environment
     project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
-    if not project_id:
-        raise ValueError("GOOGLE_CLOUD_PROJECT environment variable must be set.")
+    app = App(name="extensibility_demo", root_agent=agent)
     
-    # 2. Initialize the Firestore Session Service
-    print(f"Initializing Firestore in project: {project_id}")
-    firestore_service = FirestoreSessionService(project_id=project_id)
+    # --- SOLUTION: INJECTING THE CUSTOM PROVIDER ---
+    custom_fs = FirestoreSessionService(project_id=project_id)
     
-    # 3. Create the App
-    app = App(name="persistence_demo", root_agent=agent)
-
-    # 4. Use the base Runner with the firestore_service
-    # In ADK 2.0, we provide the 'app' instance.
     runner = Runner(
         app=app, 
-        session_service=firestore_service
+        session_service=custom_fs # <--- Injected here
     )
     
-    # 5. Interactive loop
-    print("Type 'quit' to exit.")
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() in ["exit", "quit"]:
-            break
-            
-        # run_debug automatically handles the session persistence
-        await runner.run_debug(user_input, user_id=user_id)
+    # On first run, tell it your color.
+    # On second run, comment the line below and ask: "What is my color?"
+    await runner.run_debug("My favorite color is emerald green.", user_id="student_123")
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -70,7 +107,11 @@ if __name__ == "__main__":
 
 ### Self-Reflection Answers
 
-1.  **Why is it important to use the same `user_id` and `app_name` when testing persistence across script restarts?**
-    *   **Answer:** The `FirestoreSessionService` uses a combination of the `app_name`, `user_id`, and `session_id` to uniquely locate the correct conversation document in the database. If you change the `user_id` or `app_name` when you restart the script, the ADK will create a brand new, empty session document instead of loading the old one, making it look like the persistence failed.
-2.  **If you open the Google Cloud Console and look at your Firestore database, what kind of structure (Collections/Documents) do you see the ADK has created?**
-    *   **Answer:** By default, you will see a root collection named `adk_sessions`. Inside this collection, there are documents where the document ID corresponds to the `session_id`. Inside these session documents, you will find the serialized `state` dictionary and sub-collections (like `events`) containing the individual messages of the conversation history.
+1.  **How does the use of an Abstract Base Class make the ADK more flexible?**
+    *   **Answer:** It creates a "Contract." The framework (Runner) doesn't care *how* you save the data, as long as you provide methods like `append_event`. This allows ADK to work with any database on the planet without changing the core engine.
+
+2.  **If you wanted to use Redis instead of Firestore?**
+    *   **Answer:** You would create a `RedisSessionService(BaseSessionService)` and replace the `AsyncClient` logic with `redis-py` logic. The `agent.py` would remain 100% identical.
+
+3.  **Why inject into the Runner?**
+    *   **Answer:** Separation of Concerns. The Agent should only focus on AI reasoning. The Runner handles the "dirty work" of I/O and infrastructure.

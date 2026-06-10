@@ -3,110 +3,121 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 13.5: Implementing Firestore Persistence (ADK 2.0)
+# Lab 13.5: Extending ADK with Custom Firestore Persistence
 
 ## Goal
 
-In this lab, you will take a simple agent that currently uses in-memory storage and upgrade it to use Google Cloud Firestore. You will verify that the agent remembers a user's name even after the Python script is completely stopped and restarted.
+In this lab, you will learn how to extend the ADK's core functionality by implementing a **Custom Session Service**. You will take a specialized `FirestoreSessionService` implementation and "plug it in" to an agent's runtime.
 
-### Step 1: Pre-requisites Setup
+By the end of this lab, you will have an agent that persists its memory to Google Cloud Firestore, surviving restarts of the Python process.
 
-*Ensure you have a Google Cloud Project with billing enabled.*
+### Step 1: Pre-requisites
 
-1.  **Enable Firestore:** Open the Google Cloud Console, navigate to **Firestore**, and click **Create Database**. Choose **Native mode**.
-2.  **Authenticate locally:**
-    ```shell
-    gcloud auth application-default login
-    gcloud config set project YOUR_PROJECT_ID
-    ```
-3.  **Install dependencies:**
-    ```shell
-    uv pip install google.adk google-cloud-firestore
+1.  **Enable Firestore:** In the GCP Console, ensure you have a Firestore database in **Native mode**.
+2.  **Auth:** `gcloud auth application-default login`
+3.  **Dependencies:**
+    ```bash
+    uv add google-cloud-firestore
     ```
 
-### Step 2: Review the Starter Code
+### Step 2: The Custom Provider
 
-Create a file named `agent.py` and paste the following starter code. Notice that it uses `InMemoryRunner`. 
+Create a file named `firestore_provider.py`. This contains the implementation that inherits from `BaseSessionService`. **Study the code** to see how it uses `firestore.AsyncClient` to map ADK concepts (Apps, Users, Sessions) to document paths.
 
 ```python
-# agent.py (Starter Code)
+# firestore_provider.py
+from typing import Any, Optional
+import uuid
+from google.cloud import firestore
+from google.adk.sessions.base_session_service import BaseSessionService, GetSessionConfig, ListSessionsResponse
+from google.adk.sessions.session import Session
+from google.adk.events.event import Event
+
+class FirestoreSessionService(BaseSessionService):
+    def __init__(self, project_id: str):
+        self._client = firestore.AsyncClient(project=project_id)
+
+    async def create_session(self, *, app_name: str, user_id: str, state: Optional[dict] = None, session_id: Optional[str] = None) -> Session:
+        sid = session_id or str(uuid.uuid4())
+        # Simplified for the lab: logic to save to apps/{app}/users/{user}/sessions/{sid}
+        # In a real app, you would perform an initial write here.
+        return Session(id=sid, app_name=app_name, user_id=user_id, state=state or {})
+
+    async def get_session(self, config: GetSessionConfig) -> Optional[Session]:
+        # Logic to retrieve session and its events from Firestore
+        pass # Implementation details hidden for brevity
+
+    async def append_event(self, event: Event, session: Session) -> None:
+        # Logic to write a new event to the Firestore sub-collection
+        print(f"🔥 [Firestore] Appending event: {event.author}")
+
+    async def update_session_state(self, session: Session) -> None:
+        # Logic to update the session document with current state
+        print(f"🔥 [Firestore] Syncing state for session: {session.id}")
+```
+
+### Step 3: Integrate the Provider
+
+**Exercise:** Open `agent.py`. Your task is to modify the `main()` function to use your new `FirestoreSessionService` instead of the default in-memory runner.
+
+```python
+# agent.py
 import asyncio
 import os
-from google.adk import Agent
+from google.adk import Agent, Runner
 from google.adk.apps import App
-from google.adk.runners import InMemoryRunner
-from google.adk.tools import ToolContext
+from firestore_provider import FirestoreSessionService # Import your custom class
 from dotenv import load_dotenv
 
 load_dotenv()
 
-def remember_name(name: str, tool_context: ToolContext) -> str:
-    """Saves the user's name to memory."""
-    tool_context.session.state["user_name"] = name
-    return f"I have successfully remembered that your name is {name}."
-
+# --- 1. Define a simple agent ---
 agent = Agent(
     model="gemini-3.5-flash",
-    name="MemoryAgent",
-    instruction="You are a helpful assistant. Use the remember_name tool if the user tells you their name.",
-    tools=[remember_name]
+    name="PersistentAgent",
+    instruction="You are a helpful assistant that remembers the user's favorite color."
 )
 
 async def main():
-    user_id = "test_user_001"
+    # TODO: 1. Setup metadata
+    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
+    app = App(name="extensibility_demo", root_agent=agent)
     
-    # --- STARTER CODE USES IN-MEMORY RUNNER ---
-    app = App(name="persistence_demo", root_agent=agent)
-    runner = InMemoryRunner(app=app)
+    # TODO: 2. Instantiate your custom service
+    # custom_fs = ...
     
-    # Basic interactive loop using run_debug
-    print("Type 'quit' to exit.")
-    while True:
-        user_input = input("You: ")
-        if user_input.lower() in ["exit", "quit"]: break
-            
-        # run_debug handles the session and prints to console automatically
-        await runner.run_debug(user_input, user_id=user_id)
+    # TODO: 3. Create a base Runner (NOT InMemoryRunner)
+    # Inject your custom_fs into the session_service parameter
+    # runner = Runner(app=app, session_service=...)
+    
+    # 4. Test it
+    print("Agent is now powered by Firestore persistence!")
+    await runner.run_debug("My favorite color is blue.", user_id="student_1")
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### Step 3: Test the Transient Nature of Memory
+### Step 4: Verify Persistence
 
-1.  Run the script: `python agent.py`
-2.  Tell the agent your name: `My name is Alice.`
-3.  Type `quit` to exit.
-4.  Run the script *again*: `python agent.py`
-5.  Ask immediately: `What is my name?` 
-    *   **Observation:** The agent has forgotten. The in-memory storage was wiped.
-
-### Step 4: Upgrade to FirestoreSessionService
-
-**Exercise:** Modify the `agent.py` script to use `FirestoreSessionService`.
-
-**Hints:**
-1.  Import `FirestoreSessionService` and the base `Runner`.
-    ```python
-    from google.adk.sessions import FirestoreSessionService
-    from google.adk import Runner
-    ```
-2.  Retrieve your Project ID: `project_id = os.getenv("GOOGLE_CLOUD_PROJECT")`.
-3.  Instantiate the service: `fs = FirestoreSessionService(project_id=project_id)`.
-4.  Replace `InMemoryRunner` with the base `Runner`, passing both `app` and `session_service`.
-    ```python
-    runner = Runner(app=app, session_service=fs)
-    ```
-
-### Step 5: Verify Persistence
-
-1.  Run your updated script.
-2.  Tell the agent a *new* name: `My name is Bob.`
-3.  Type `quit` to exit.
-4.  Run the script again.
-5.  Ask immediately: `What is my name?`
-6.  **Success Criteria:** The agent should reply "Bob", proving that state was successfully retrieved from Firestore!
+1.  Run the script once to set the favorite color.
+2.  Stop the script.
+3.  Modify the last line of `main()` to ask: `"What is my favorite color?"`.
+4.  Run it again. If the agent answers "Blue", your custom provider is working!
 
 ### Self-Reflection Questions
-1.  Why does ADK 2.0 store `node_info` in Firestore events? How does this help with resuming complex workflows?
-2.  What happens if two different runners try to append an event to the same session simultaneously? (Hint: Check the `FirestoreSessionService` lock mechanism).
+
+*   How does the use of an Abstract Base Class (`BaseSessionService`) make the ADK more flexible for large companies?
+*   If you wanted to use **Redis** instead of Firestore, what parts of the `firestore_provider.py` would you need to rewrite?
+*   Why is it better to inject the session service into the `Runner` rather than hardcoding it inside the `Agent`?
+
+<hr/>
+
+### 🕵️ Hidden Solution 🕵️
+
+Looking for the solution? Here's a hint (Base64 decode me):
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMTNfNS1maXJlc3RvcmUtcGVyc2lzdGVuY2UvbGFiLXNvbHV0aW9u`
+
+<div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
+    The direct link is: <a href="/doc-adk-training/module13.5-firestore-persistence/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+</div>

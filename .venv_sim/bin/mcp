@@ -1,6 +1,0 @@
-#!/Users/maurizio.ipsale/Code/adk-docs/.venv_sim/bin/python3
-import sys
-from mcp.cli import app
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(app())

@@ -26,34 +26,23 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 
 ### Step 2: Implement the Callbacks
 
-**Exercise:** Open `agent.py`. The full starter code is provided below. Your task is to implement the logic inside the `# TODO` comments for each callback function, and then register them with the agent.
+**Exercise:** Open `agent.py`. Your task is to implement the logic for the four core callbacks. Use the `# TODO` comments as your guide.
 
 ```python
 # In agent.py (Starter Code)
-
-from google.adk.agents import Agent, CallbackContext, InMemoryRunner
-from google.adk.tools.tool_context import ToolContext
+from google.adk import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.runners import InMemoryRunner
+from google.adk.tools import ToolContext
+from google.adk.tools.base_tool import BaseTool
+from google.adk.models.llm_request import LlmRequest
+from google.adk.models.llm_response import LlmResponse
 from google.genai import types
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 import re
 import logging
-import time
-from dataclasses import dataclass, field
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# ============================================================================ 
-# CONFIGURATION
-# ============================================================================ 
-
-BLOCKED_WORDS = ['profanity1', 'profanity2', 'hate-speech']
-
-PII_PATTERNS = {
-    'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-    'phone': r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'
-}
+load_dotenv()
 
 # ============================================================================ 
 # CALLBACK FUNCTIONS
@@ -61,86 +50,55 @@ PII_PATTERNS = {
 
 def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
     """
-    Called before agent starts processing a request.
-    TODO: Implement a caching mechanism.
+    TODO: Implement Caching (Check).
     1. Check if 'cached_response' exists in callback_context.state.
-    2. If it does, return a `types.Content` object containing that text, 
-       skipping the LLM execution entirely!
-    3. If it doesn't, return None to proceed normally.
+    2. If it does, return a `types.Content` object with the text, skipping the LLM!
     """
-    logger.info(f"[AGENT START] Session: {callback_context.invocation_id}")
-    pass # TODO: Implement caching check
+    pass
 
-def after_agent_callback(callback_context: CallbackContext, content: types.Content) -> Optional[types.Content]:
+def after_agent_callback(callback_context: CallbackContext) -> None:
     """
-    Called after agent completes processing.
-    TODO: Save the final content into the state so the `before_agent_callback` can cache it.
-    1. Extract the text from the `content` object.
-    2. Save it to `callback_context.state['cached_response']`.
-    3. Return None to allow the normal flow.
+    TODO: Implement Caching (Save).
+    1. Access the session history: callback_context.session.events
+    2. Find the last model response.
+    3. Save its text to callback_context.state['cached_response'].
     """
-    logger.info(f"[AGENT COMPLETE] Generated {len(content.parts)} parts")
-    pass # TODO: Implement caching save
+    pass
 
 def before_model_callback(
     callback_context: CallbackContext,
-    llm_request: types.GenerateContentRequest
-) -> Optional[types.GenerateContentResponse]:
+    llm_request: LlmRequest
+) -> Optional[LlmResponse]:
     """
-    Input Guardrail: Blocks requests containing inappropriate words.
-    TODO: Loop through BLOCKED_WORDS. If a blocked word is in the user text,
-    return a `types.GenerateContentResponse` with a safety message to block the LLM call.
+    TODO: Input Guardrail.
+    If the user text contains 'blocked_word', return an LlmResponse with a warning.
     """
-    user_text = "".join([p.text for c in llm_request.contents for p in c.parts if p.text])
-
-    for word in BLOCKED_WORDS:
-        if word.lower() in user_text.lower():
-            logger.warning(f"[LLM BLOCKED] Found blocked word: {word}")
-            # TODO: Return a GenerateContentResponse blocking the execution
-            return None # Replace this
-
-    return None
-
-def after_model_callback(
-    callback_context: CallbackContext,
-    llm_response: types.GenerateContentResponse
-) -> Optional[types.GenerateContentResponse]:
-    """
-    Output Filtering: Removes PII from LLM responses.
-    TODO: Use `re.sub` and PII_PATTERNS to redact sensitive info.
-    If the text changes, return a new `GenerateContentResponse`.
-    """
-    # Logic simplified for the exercise
-    return None
+    pass
 
 def before_tool_callback(
-    callback_context: CallbackContext,
-    tool_name: str,
-    args: Dict[str, Any]
+    tool: BaseTool,
+    args: Dict[str, Any],
+    tool_context: ToolContext
 ) -> Optional[Dict[str, Any]]:
     """
-    Argument Validation: Blocks tool calls with invalid arguments.
-    TODO: If `tool_name` is 'generate_text' and `word_count` > 5000,
-    return an error dict instead of None to block execution.
+    TODO: Argument Validation.
+    If tool.name == 'generate_text' and word_count > 5000, return an error dict.
     """
-    logger.info(f"[TOOL CALL] {tool_name} with args: {args}")
-    # TODO: Implement validation
-    return None
-
-# ============================================================================ 
-# TOOLS
-# ============================================================================ 
-
-def generate_text(topic: str, word_count: int, tool_context: ToolContext) -> Dict[str, Any]:
-    """Generates text on a topic with a specified word count."""
-    return {'status': 'success', 'message': f'Generated {word_count}-word article on "{topic}"'}
+    pass
 
 # ============================================================================ 
 # AGENT DEFINITION
 # ============================================================================ 
 
-# TODO: Define the `root_agent`. Register all tools and callback functions.
-root_agent = None
+# TODO: Define root_agent and register ALL callbacks
+root_agent = Agent(
+    name="secure_moderator",
+    model="gemini-3.5-flash",
+    # tools=[...],
+    # before_agent_callback=...,
+    # ...
+)
+```
 
 ```
 

@@ -1,9 +1,0 @@
-[project]
-name = "simulation-module21-7-v2"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.10"
-dependencies = [
-    "google-adk>=2.2.0",
-]

@@ -804,3 +804,28 @@ The solution is technically accurate and demonstrates the most modern way to bui
 
 ## 💡 Suggestions for Improvement
 None.
+
+---
+# 🎓 Student Evaluation Report: Module 13.5 - Custom Persistence with Firestore
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5/5
+* **Clarity of Instructions (lab.md):** 4/5
+* **Code Completeness:** 5/5
+* **Solution Quality (lab-solution.md):** 5/5
+* **Overall Difficulty:** 3/5
+
+## 🧑‍💻 The Student Experience
+The simulation was successful. I implemented the 'FirestoreSessionService' by inheriting from 'BaseSessionService'. The mapping of ADK sessions and events to Firestore's hierarchical document structure (apps -> users -> sessions -> events) is logical and easy to follow. Integration into the 'Runner' via dependency injection worked exactly as described.
+
+## 🚧 Friction Points & Bugs
+* **Runner vs InMemoryRunner**: In Step 3 of 'lab.md', the TODO comment says 'Create a base Runner (NOT InMemoryRunner)'. While correct for the lesson, a student might be confused if they previously only used 'InMemoryRunner'. Explicitly mentioning that 'Runner' is the base class for custom services would help.
+* **Mocking**: For students without active GCP credentials, a small section on how to mock the service for local testing would be a great addition, though not strictly required for the core lesson.
+
+## 🏁 Solution Review
+The solution is robust and provides a complete, production-ready implementation of 'append_event' and 'update_session_state'. It correctly uses 'AsyncClient' and handles session creation/retrieval gracefully.
+
+## 💡 Suggestions for Improvement
+1. Update 'lab.md' to explicitly mention that the 'Runner' class (imported from 'google.adk') is the one to use when injecting custom services.
+2. Ensure 'uv add google-cloud-firestore' is highlighted as a mandatory step in the 'lab.md' (it is currently, but easy to miss).
+

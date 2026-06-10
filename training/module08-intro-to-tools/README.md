@@ -40,7 +40,7 @@ The process of an agent using a tool is a fascinating dance between the LLM's re
 The ADK provides a rich and flexible ecosystem for tools, which can be categorized into three main types:
 
 1.  **Built-in Tools:** Ready-to-use tools provided by the ADK for common tasks. The most prominent example is `google_search`, which allows your agent to perform a Google search to answer questions about recent events or topics outside its training data.
-    > **Note on Costs:** Using tools like `google_search` often leverages Google Cloud services (e.g., Vertex AI Search), which may incur costs on your Google Cloud bill. Please be aware of the pricing for these services.
+    > **Note on Costs:** Using tools like `google_search` often leverages Google Cloud services (e.g., Agent Search), which may incur costs on your Google Cloud bill. Please be aware of the pricing for these services.
     > **Displaying Grounding Responses:** For information on how to effectively display the grounding responses from `google_search` in your application, refer to the [official documentation on Google Search Grounding](https://google.github.io/adk-docs/grounding/google_search_grounding/#how-to-display-grounding-responses-with-google-search).
 2.  **Custom Function Tools:** This is where you can define your own capabilities. You can take any Python function you write and turn it into a tool that your agent can use. This is the most common and powerful way to extend your agent.
 3.  **Third-Party Tools:** The ADK is designed to be extensible, allowing you to integrate tools from other popular agent frameworks like LangChain and CrewAI.

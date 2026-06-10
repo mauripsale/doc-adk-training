@@ -174,7 +174,7 @@ uv run pytest tests
 
 ## Deployment
 
-* The personalized shopping agent sample can be deployed to Vertex AI Agent Engine. In order to inherit all dependencies of your agent you can build the wheel file of the agent and run the deployment.
+* The personalized shopping agent sample can be deployed to Agent Platform Agent Engine. In order to inherit all dependencies of your agent you can build the wheel file of the agent and run the deployment.
 
 1.  **Build Personalized Shopping Agent WHL File**
 

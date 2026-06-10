@@ -32,7 +32,7 @@ Think of an agent as an autonomous worker that you can delegate complex tasks to
 
 Building robust, production-ready AI agents is a complex task. It involves much more than just prompting an LLM. You need to manage conversation history, handle tool integrations, orchestrate complex workflows, evaluate performance, and deploy the agent to a scalable infrastructure.
 
-The **Google Agent Development Kit (ADK)** is a comprehensive framework designed to solve these challenges. It provides developers with the tools and structure needed to build, manage, evaluate, and deploy sophisticated AI-powered agents seamlessly.
+The **Google Agent Development Kit (ADK)** is a comprehensive framework designed to solve these challenges. It provides developers with the tools and structure needed to build, manage, evaluate, and deploy sophisticated AI-powered agents seamlessly on the **Gemini Enterprise Agent Platform** (formerly known as Vertex AI).
 
 #### The ADK Philosophy
 
@@ -54,4 +54,4 @@ In this course, you will learn to think in **Graphs and Nodes**, mastering ADK 2
 ### Key Takeaways
 - AI Agents are autonomous systems that perceive, reason, and act using tools.
 - **ADK 2.0** uses a **Graph Architecture** where Agents and Tools are **Nodes** connected by **Edges**.
-- The **Workflow Runtime** is the engine that orchestrates complex multi-agent interactions seamlessly.
+- The **Workflow Runtime** is the engine that orchestrates complex multi-agent interactions on the **Gemini Enterprise Agent Platform**.

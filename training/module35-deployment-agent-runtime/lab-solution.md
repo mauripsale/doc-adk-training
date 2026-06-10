@@ -17,7 +17,7 @@ After running `make backend`, a successful run of the command is the primary ind
 
 **Expected Outcome:**
 *   The `make backend` command completes without errors in your terminal.
-*   A new agent with the name you configured appears in the **Vertex AI -> Agent Runtime** section of the Google Cloud Console.
+*   A new agent with the name you configured appears in the **Agent Platform -> Agent Runtime** section of the Google Cloud Console.
 *   You can copy the **Agent Runtime ID** from the console to use with a client application.
 
 ---

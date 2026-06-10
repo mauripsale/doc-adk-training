@@ -21,7 +21,7 @@ We will use `uv` to create a modern Python environment for our agent.
     ```
 
 2.  **Setup Authentication:**
-    Create a `.env` file in your `calculator_agent` directory and add your `GOOGLE_API_KEY` (or Vertex AI settings).
+    Create a `.env` file in your `calculator_agent` directory and add your `GOOGLE_API_KEY` (or Agent Platform settings).
 
 3.  **Create the tools module:**
     It's good practice to organize your tool code in a separate module. The empty `__init__.py` file tells Python to treat the `tools` directory as a package, which allows us to import functions from it.

@@ -64,7 +64,7 @@ Change your `GOOGLE_CLOUD_LOCATION` (or `LOCATION` in `.env`) to one of the foll
 *   `europe-west9`
 
 #### 2. 🛑 `PermissionDenied: 403`
-Your user or service account does not have the "Vertex AI User" role.
+Your user or service account does not have the "Agent Platform User" role.
 **The Fix:** Go to IAM in the Cloud Console and grant your account the `roles/aiplatform.user` role.
 
 #### 3. 🛑 `ModuleNotFoundError: No module named 'google'`

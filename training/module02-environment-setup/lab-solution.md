@@ -56,13 +56,13 @@ Create a file named `.env` in the `adk-training` folder.
 GOOGLE_API_KEY="AIzaSy..."
 ```
 
-**Option B: Vertex AI (Service Account/ADC)**
+**Option B: Agent Platform (Service Account/ADC)**
 ```text
 GOOGLE_GENAI_USE_VERTEXAI="1"
 GOOGLE_CLOUD_PROJECT="your-project-id"
 GOOGLE_CLOUD_LOCATION="us-central1"
 ```
-*Note: If using Vertex AI, ensure you have run `gcloud auth application-default login`.*
+*Note: If using Agent Platform, ensure you have run `gcloud auth application-default login`.*
 
 ## Step 5: Run Verification
 

@@ -98,7 +98,7 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     root_agent = ...
     ```
 
-4.  **Set up your `.env` file** with your API key or Vertex AI project.
+4.  **Set up your `.env` file** with your API key or Agent Platform project.
 
 ### Step 4: Test the Stateful Tool
 

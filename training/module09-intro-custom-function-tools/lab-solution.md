@@ -19,7 +19,7 @@ This file contains the complete, step-by-step guide to creating the "Calculator"
     ```
 
 2.  **Set up authentication:**
-    Create a `.env` file in your `calculator_agent` directory and add your `GOOGLE_API_KEY` (or Vertex AI configuration).
+    Create a `.env` file in your `calculator_agent` directory and add your `GOOGLE_API_KEY` (or Agent Platform configuration).
 
 ### Step 2: Write the Custom Tool Functions
 

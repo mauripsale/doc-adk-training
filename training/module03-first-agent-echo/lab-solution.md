@@ -56,7 +56,7 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
         ```
         GOOGLE_API_KEY=<your-google-gemini-api-key>
         ```
-    *   **For Google Cloud Vertex AI:**
+    *   **For Google Cloud Agent Platform:**
         ```
         GOOGLE_GENAI_USE_VERTEXAI=1
         GOOGLE_CLOUD_PROJECT=<your_gcp_project>

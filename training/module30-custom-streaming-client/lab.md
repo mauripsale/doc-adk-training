@@ -22,7 +22,7 @@ We will use the same streaming agent configuration from Module 22.
 
 2.  **Configure the agent:**
     *   Navigate into `streaming_agent`.
-    *   Configure the `.env` file for **Vertex AI**.
+    *   Configure the `.env` file for **Agent Platform**.
     *   Replace the contents of `root_agent.yaml` with:
         ```yaml
         name: streaming_conversational_agent

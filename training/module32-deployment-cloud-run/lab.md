@@ -82,7 +82,7 @@ The `uv run adk deploy cloud_run` command is a powerful tool that automates most
         ```
 
 4.  **Configure the `.env` file for Vertex AI:**
-    Cloud Run deployments work best with Vertex AI. Open the `.env` file and configure it for your project.
+    Cloud Run deployments work best with Agent Platform. Open the `.env` file and configure it for your project.
     ```
     GOOGLE_GENAI_USE_VERTEXAI=1
     GOOGLE_CLOUD_PROJECT=<your_gcp_project>

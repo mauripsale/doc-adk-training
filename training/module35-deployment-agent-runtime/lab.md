@@ -60,7 +60,7 @@ This method uses the Agent Starter Pack (ASP) to add deployment artifacts to you
     ```shell
     make backend
     ```
-3.  **Find Your Agent:** Once the build is complete, navigate to **Vertex AI -> Agent Runtime** in the Cloud Console to find your deployed agent and its ID.
+3.  **Find Your Agent:** Once the build is complete, navigate to **Agent Platform -> Agent Runtime** in the Cloud Console to find your deployed agent and its ID.
 
 ---
 sidebar_position: 2

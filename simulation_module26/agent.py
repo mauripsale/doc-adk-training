@@ -1,17 +1,3 @@
----
-sidebar_position: 3
-title: "Lab Solution"
----
-
-# Lab 26 Solution: Building a Content Moderation Assistant
-
-## Goal
-
-This file contains the complete code for the `agent.py` script in the Content Moderation Assistant lab.
-
-### `content_moderator/agent.py`
-
-```python
 import os
 import re
 import logging
@@ -23,9 +9,7 @@ from google.adk.tools.base_tool import BaseTool
 from google.adk.models.llm_request import LlmRequest
 from google.adk.models.llm_response import LlmResponse
 from google.genai import types
-from dotenv import load_dotenv
-
-load_dotenv()
+from google.adk.runners import InMemoryRunner
 
 # --- Configuration ---
 BLOCKED_WORDS = ['unsafe', 'offensive']
@@ -49,9 +33,11 @@ def after_agent_callback(callback_context: CallbackContext) -> None:
     events = callback_context.session.events
     for event in reversed(events):
         if event.author != "user" and event.content:
-            response_text = event.content.parts[0].text
-            callback_context.state['cached_response'] = response_text
-            print("💾 [CACHE SAVE] Result persisted to session state.")
+            # Check if it's already a cached response to avoid double prefixing in simulation
+            text = event.content.parts[0].text
+            if not text.startswith("[CACHED]:"):
+                callback_context.state['cached_response'] = text
+                print(f"💾 [CACHE SAVE] Result persisted to session state: {text}")
             break
 
 # --- Callback 3: Input Guardrail ---
@@ -84,6 +70,9 @@ def before_tool_callback(
         count = args.get('word_count', 0)
         if count > 5000:
             print(f"⚠️ [VALIDATION] Blocked tool call: word_count {count} is too high.")
+            # ADK expectation for blocking tool execution is usually returning an error result
+            # or a modified args dict. If we return a dict with 'status'='error', 
+            # the framework handles it as the tool's output.
             return {
                 'status': 'error', 
                 'message': 'Word count exceeds the maximum limit of 5000.'
@@ -106,15 +95,3 @@ root_agent = Agent(
     before_model_callback=before_model_callback,
     before_tool_callback=before_tool_callback
 )
-```
-
-### Self-Reflection Answers
-
-1.  **What is the key difference between a callback and a plugin in the ADK? When would you choose one over the other?**
-    *   **Answer:** The key difference lies in their scope and primary role. **Callbacks** are agent-specific, designed for control, modification, and implementing guardrails *within a single agent's logic*. They can block or alter an agent's execution. **Plugins** are global (registered at the `Runner` level), designed for observation and telemetry (metrics, logging, alerting) *across all agents in an application*. Choose a callback to modify or block an agent's specific operations; choose a plugin to monitor behavior across the entire system without altering its logic.
-
-2.  **Why does returning a `types.Content` object from `before_agent_callback` cause the agent to skip the LLM call entirely?**
-    *   **Answer:** Returning an object from a callback signals to the ADK framework to *override* the default behavior. Since `before_agent_callback` happens at the very beginning of the agent's lifecycle, returning a final `Content` object tells the framework "I already have the answer, you don't need to do any work." The ADK accepts this `Content` as the final result and skips tool execution and LLM invocation, saving time and tokens. This is the core mechanism behind caching.
-
-3.  **How does using callbacks for guardrails and validation make an agent more reliable and safer to deploy in a production environment?**
-    *   **Answer:** Callbacks significantly enhance reliability and safety by introducing deterministic, hard-coded checks for critical functionalities, reducing reliance on the LLM's non-deterministic reasoning. For instance, `before_model_callback` can proactively prevent harmful input from reaching the LLM, and `after_model_callback` can filter sensitive data (PII) from responses before they are exposed. Similarly, `before_tool_callback` validates tool arguments, preventing runtime errors and ensuring tools are used correctly. This layered approach creates a more stable, secure, and predictable agent behavior in production.

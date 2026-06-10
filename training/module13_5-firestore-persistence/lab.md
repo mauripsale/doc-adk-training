@@ -54,6 +54,13 @@ class FirestoreSessionService(BaseSessionService):
     async def update_session_state(self, session: Session) -> None:
         # Logic to update the session document with current state
         print(f"🔥 [Firestore] Syncing state for session: {session.id}")
+
+    # Mandatory stubs for BaseSessionService
+    async def list_sessions(self, app_name: str, user_id: str) -> ListSessionsResponse:
+        return ListSessionsResponse(sessions=[])
+
+    async def delete_session(self, app_name: str, user_id: str, session_id: str) -> None:
+        pass
 ```
 
 ### Step 3: Integrate the Provider

@@ -62,15 +62,9 @@ class FirestoreSessionService(BaseSessionService):
         await session_ref.update({"state": session.state})
         print(f"🔥 [Firestore] Updated session state in cloud.")
 
-    # Other methods (get_session, list_sessions, delete_session)
+    # Other methods (get_session, list_sessions) would be implemented similarly
     async def get_session(self, config: GetSessionConfig) -> Optional[Session]:
         return await self.create_session(app_name=config.app_name, user_id=config.user_id, session_id=config.session_id)
-
-    async def list_sessions(self, app_name: str, user_id: str) -> ListSessionsResponse:
-        return ListSessionsResponse(sessions=[])
-
-    async def delete_session(self, app_name: str, user_id: str, session_id: str) -> None:
-        pass
 ```
 
 ### `agent.py`

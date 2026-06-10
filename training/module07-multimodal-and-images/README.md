@@ -60,7 +60,7 @@ multimodal_prompt = [
 
 ### Image Generation
 
-Beyond understanding images, some models can also **generate** them. Services like **Vertex AI Imagen** provide text-to-image capabilities. You can create a custom tool that takes a text description, calls the image generation API, and returns the resulting image.
+Beyond understanding images, some models can also **generate** them. Services like **Agent Platform Imagen** provide text-to-image capabilities. You can create a custom tool that takes a text description, calls the image generation API, and returns the resulting image.
 
 This allows you to build agents that can:
 *   Create product mockups from a description.
@@ -73,4 +73,4 @@ In the lab, you will build a "Visual Product Catalog Analyzer" that uses a singl
 - Multimodal models like Gemini can process text and images together, enabling vision-enabled agents.
 - The `google.genai.types.Part` object is the building block for multimodal content, allowing you to combine text and image data in a single prompt.
 - Vision-capable agents can be used for a wide range of tasks, including image analysis, document understanding, and multimodal reasoning.
-- You can create custom tools to integrate with image generation services like Vertex AI Imagen.
+- You can create custom tools to integrate with image generation services like Agent Platform Imagen.

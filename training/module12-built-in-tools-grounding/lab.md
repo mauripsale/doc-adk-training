@@ -10,7 +10,7 @@ title: "Challenge Lab"
 In this lab, you will build a **Research Assistant** that can access up-to-date information from the internet and process it using custom Python logic. You will learn how to mix built-in tools like `google_search` directly with your own custom tools.
 
 ### Prerequisites
-*   **Vertex AI:** While `google_search` can work with AI Studio keys, the ADK standardizes on Vertex AI for grounding in enterprise scenarios. Ensure your `.env` is configured correctly (refer to Module 2).
+*   **Agent Platform:** While `google_search` can work with AI Studio keys, the ADK standardizes on Agent Platform for grounding in enterprise scenarios. Ensure your `.env` is configured correctly (refer to Module 2).
 
 ### Step 1: Create and Prepare the Project
 

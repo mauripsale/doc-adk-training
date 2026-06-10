@@ -115,7 +115,7 @@ root_agent = Agent(
 
 ### Step 3: Run and Test the Pipeline
 
-1.  **Set up your `.env` file** with your API key or Vertex AI project.
+1.  **Set up your `.env` file** with your API key or Agent Platform project.
 2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
     ```shell
     uv run adk web doc_processor

@@ -2,7 +2,7 @@
 
 ## 1. Reconnaissance Summary
 - **README.md Analysis:** Clearly states the requirements for Python 3.10+ and google-adk >= 2.1.0. Introduces `uv` as the modern standard for package management.
-- **lab.md Analysis:** Provides a clear 4-step challenge for students to set up their environment using `uv`, configure authentication (API Key or Vertex AI), and run a verification script.
+- **lab.md Analysis:** Provides a clear 4-step challenge for students to set up their environment using `uv`, configure authentication (API Key or Agent Platform), and run a verification script.
 
 ## 2. Simulation Results
 - **Directory Created:** `simulation_module02/adk-training`

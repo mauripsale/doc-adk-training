@@ -10,7 +10,7 @@ title: "Module 35: Deploying to Agent Runtime"
 
 ### From Local Development to Production-Grade Deployment
 
-Deploying an agent involves packaging its code and running it on a scalable, reliable, and managed platform. **Google Cloud's Agent Runtime** is a fully managed service in Vertex AI designed for this, handling server management, scaling, and security.
+Deploying an agent involves packaging its code and running it on a scalable, reliable, and managed platform. **Google Cloud's Agent Runtime** is a fully managed service in the Gemini Enterprise Agent Platform designed for this, handling server management, scaling, and security.
 
 ### Two Paths to Deployment
 
@@ -36,7 +36,7 @@ The Agent Starter Pack (ASP) streamlines the path to production into a few simpl
     *   **Upload & Execute:** It packages your agent code, uploads it to Agent Runtime, and starts the agent.
 
 ### Key Takeaways
-- **Google Cloud's Agent Runtime** is a fully managed service in Vertex AI for deploying, scaling, and securing ADK agents.
+- **Google Cloud's Agent Runtime** is a fully managed service in the Gemini Enterprise Agent Platform for deploying, scaling, and securing ADK agents.
 - The **Accelerated Deployment** method, using the **Agent Starter Pack (ASP)**, is the recommended best practice for new projects, providing a pre-configured CI/CD pipeline and Infrastructure as Code.
 - The **Standard Deployment** method involves writing a custom Python script with the Vertex AI SDK, which is useful for understanding the underlying mechanics.
 - The Accelerated workflow follows a simple process: **Enhance** (adds deployment files to your project) and **Deploy** (provisions infrastructure and uploads your code).

@@ -48,7 +48,7 @@ Create a file named `.env` in your `adk-training` directory. This file will secu
     GOOGLE_API_KEY="YOUR_API_KEY"
     ```
 
-**Option B: Use Vertex AI (Advanced)**
+**Option B: Use Agent Platform (Advanced)**
 1.  Authenticate with the gcloud CLI: `gcloud auth application-default login`
 2.  Add the following lines to your `.env` file, replacing the placeholder values with your Google Cloud project details:
     ```

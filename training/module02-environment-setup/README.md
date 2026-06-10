@@ -52,6 +52,25 @@ gcloud config set project YOUR_PROJECT_ID
 
 The ADK automatically detects these credentials.
 
+### Troubleshooting Common Errors
+
+#### 1. 🛑 `404: Model 'gemini-3.5-flash' not found`
+This error usually occurs when the model has not yet been deployed to your specific Google Cloud location.
+
+**The Fix:**
+Change your `GOOGLE_CLOUD_LOCATION` (or `LOCATION` in `.env`) to one of the following high-availability regions:
+*   `us-central1`
+*   `us-east4`
+*   `europe-west9`
+
+#### 2. 🛑 `PermissionDenied: 403`
+Your user or service account does not have the "Vertex AI User" role.
+**The Fix:** Go to IAM in the Cloud Console and grant your account the `roles/aiplatform.user` role.
+
+#### 3. 🛑 `ModuleNotFoundError: No module named 'google'`
+This happens if you are not running the command inside the virtual environment.
+**The Fix:** Always prefix your commands with `uv run` (e.g., `uv run adk web .`).
+
 ### Key Takeaways
 - **Python 3.10+** and **google.adk >= 2.1.0** are strictly required.
 - **`uv`** is the recommended tool for managing Python projects and environments.

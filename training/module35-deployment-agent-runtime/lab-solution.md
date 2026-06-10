@@ -28,11 +28,10 @@ This section contains the complete code for the `deploy.py` and `interact.py` sc
 
 #### `multi_tool_agent/agent.py`
 
-This file should be the `agent.py` from the Python Quickstart. It is included here for completeness.
+This file defines the agent using the modern ADK 2.0 `Agent` class.
 
 ```python
-from google.adk.agents import LlmAgent
-from google.adk.tools import FunctionTool
+from google.adk import Agent
 import random
 
 def roll_die(sides: int, count: int = 1) -> dict:
@@ -48,26 +47,25 @@ def check_prime(number: int) -> dict:
         is_prime = all(number % i != 0 for i in range(2, int(number**0.5) + 1))
     return {"is_prime": is_prime}
 
-root_agent = LlmAgent(
+root_agent = Agent(
     model="gemini-3.5-flash",
     name="multi_tool_agent",
     instruction="You roll dice and answer questions about prime numbers.",
-    tools=[
-        FunctionTool(fn=roll_die),
-        FunctionTool(fn=check_prime),
-    ],
+    tools=[roll_die, check_prime],
 )
 ```
 
 #### `deploy.py`
 
+This script uses the Vertex AI SDK to package and deploy the agent.
+
 ```python
 import vertexai
 from vertexai import agent_engines
+from google.adk.apps import App
 from multi_tool_agent.agent import root_agent
 
 # --- CONFIGURATION ---
-# Note: Replace these with your actual Google Cloud project details.
 PROJECT_ID = "your-gcp-project-id"
 LOCATION = "us-central1"
 STAGING_BUCKET = "gs://your-unique-bucket-name"
@@ -77,18 +75,20 @@ def main():
     # Initialize Vertex AI SDK
     vertexai.init(project=PROJECT_ID, location=LOCATION, staging_bucket=STAGING_BUCKET)
 
-    # Prepare the agent for deployment by wrapping it in an AdkApp
-    print("Wrapping agent in AdkApp...")
-    app = agent_engines.AdkApp(
-        agent=root_agent,
-        enable_tracing=True
+    # 1. Wrap your agent in an App (Required for ADK 2.0 deployment)
+    print("Wrapping agent in App...")
+    app = App(
+        name="multi_tool_app",
+        root_agent=root_agent
     )
 
-    # Deploy to Agent Runtime
+    # 2. Deploy to Agent Runtime
+    # The 'agent_engines.create' function accepts an App object.
     print(f"Deploying '{AGENT_DISPLAY_NAME}' to Agent Runtime...")
     remote_app = agent_engines.create(
         agent_engine=app,
         display_name=AGENT_DISPLAY_NAME,
+        # Ensure the remote environment uses the modern SDK
         requirements=["google-cloud-aiplatform[adk,agent_engines]>=1.111"],
     )
 

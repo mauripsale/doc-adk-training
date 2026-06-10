@@ -1,15 +1,16 @@
 ---
 sidebar_position: 35
-title: "Module 35: Deploying to Agent Engine"
+title: "Module 35: Deploying to Agent Runtime"
 ---
 
-# Module 35: Deploying to Agent Engine
+# Module 35: Deploying to Agent Runtime
+
 
 ## Theory
 
 ### From Local Development to Production-Grade Deployment
 
-Deploying an agent involves packaging its code and running it on a scalable, reliable, and managed platform. **Google Cloud's Agent Engine** is a fully managed service in Vertex AI designed for this, handling server management, scaling, and security.
+Deploying an agent involves packaging its code and running it on a scalable, reliable, and managed platform. **Google Cloud's Agent Runtime** is a fully managed service in Vertex AI designed for this, handling server management, scaling, and security.
 
 ### Two Paths to Deployment
 
@@ -31,13 +32,13 @@ The Agent Starter Pack (ASP) streamlines the path to production into a few simpl
 1.  **Enhance (`uvx agent-starter-pack enhance`):** This is a one-time command that analyzes your existing ADK agent and adds the necessary deployment files to it. This includes the `Makefile`, Terraform configurations for infrastructure, and Cloud Build YAML files for the CI/CD pipeline.
 
 2.  **Deploy (`make backend`):** This command is the main entry point for deployment. It performs two key stages:
-    *   **Provision:** It runs a Cloud Build pipeline that uses Terraform to create all the necessary cloud infrastructure for your agent (Artifact Registry, Agent Engine service, service accounts, etc.).
-    *   **Upload & Execute:** It packages your agent code, uploads it to Agent Engine, and starts the agent.
+    *   **Provision:** It runs a Cloud Build pipeline that uses Terraform to create all the necessary cloud infrastructure for your agent (Artifact Registry, Agent Runtime service, service accounts, etc.).
+    *   **Upload & Execute:** It packages your agent code, uploads it to Agent Runtime, and starts the agent.
 
 ### Key Takeaways
-- **Google Cloud's Agent Engine** is a fully managed service in Vertex AI for deploying, scaling, and securing ADK agents.
+- **Google Cloud's Agent Runtime** is a fully managed service in Vertex AI for deploying, scaling, and securing ADK agents.
 - The **Accelerated Deployment** method, using the **Agent Starter Pack (ASP)**, is the recommended best practice for new projects, providing a pre-configured CI/CD pipeline and Infrastructure as Code.
 - The **Standard Deployment** method involves writing a custom Python script with the Vertex AI SDK, which is useful for understanding the underlying mechanics.
 - The Accelerated workflow follows a simple process: **Enhance** (adds deployment files to your project) and **Deploy** (provisions infrastructure and uploads your code).
-- **Agent Engine and Complex Clients:** The architecture of Agent Engine (a managed, scalable backend) simplifies the development of complex clients (like web or mobile apps). It handles concurrency and horizontal scaling automatically, provides a stable API for clients written in any language to connect to, and cleanly separates the UI/session management logic on the client from the heavy lifting of agent orchestration and AI logic on the backend.
+- **Agent Runtime and Complex Clients:** The architecture of Agent Runtime (a managed, scalable backend) simplifies the development of complex clients (like web or mobile apps). It handles concurrency and horizontal scaling automatically, provides a stable API for clients written in any language to connect to, and cleanly separates the UI/session management logic on the client from the heavy lifting of agent orchestration and AI logic on the backend.
 - **Advantages of Accelerated Deployment:** The Accelerated Deployment method is superior for production as it automates the creation of infrastructure as code (IaC) with Terraform and establishes a simple, repeatable deployment process. This provides a reproducible, auditable, and consistent deployment, incorporating best practices from the start, whereas the Standard Deployment is manual and better suited for learning the underlying SDK mechanics.

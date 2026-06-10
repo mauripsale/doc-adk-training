@@ -3,10 +3,10 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 35: Deploying an Agent to Agent Engine Challenge
+# Lab 35: Deploying an Agent to Agent Runtime Challenge
 
 ## Goal
-In this lab, you will deploy an ADK agent to Google Cloud's Agent Engine using both the recommended Accelerated method and the manual Standard method.
+In this lab, you will deploy an ADK agent to Google Cloud's Agent Runtime using both the recommended Accelerated method and the manual Standard method.
 
 ### Prerequisites
 *   A Google Cloud Project with billing enabled.
@@ -38,7 +38,7 @@ This method uses the Agent Starter Pack (ASP) to add deployment artifacts to you
     ```shell
     uvx agent-starter-pack enhance --uv run adk -d agent_engine
     ```
-4.  **Follow the Prompts:** The tool will ask you several questions. You can accept the defaults, but ensure you select a **supported region** for Agent Engine (e.g., `us-central1`).
+4.  **Follow the Prompts:** The tool will ask you several questions. You can accept the defaults, but ensure you select a **supported region** for Agent Runtime (e.g., `us-central1`).
 
 ### Step 2: Connect to Your Google Cloud Project
 1.  **Login to Google Cloud:**
@@ -60,7 +60,7 @@ This method uses the Agent Starter Pack (ASP) to add deployment artifacts to you
     ```shell
     make backend
     ```
-3.  **Find Your Agent:** Once the build is complete, navigate to **Vertex AI -> Agent Engine** in the Cloud Console to find your deployed agent and its ID.
+3.  **Find Your Agent:** Once the build is complete, navigate to **Vertex AI -> Agent Runtime** in the Cloud Console to find your deployed agent and its ID.
 
 ---
 sidebar_position: 2
@@ -139,7 +139,7 @@ python deploy.py
     ```
 
 ### Cleanup (Important!)
-Follow the cleanup instructions in `lab-solution.md` to delete the Agent Engine instances and GCS buckets to avoid incurring costs.
+Follow the cleanup instructions in `lab-solution.md` to delete the Agent Runtime instances and GCS buckets to avoid incurring costs.
 
 <hr/>
 

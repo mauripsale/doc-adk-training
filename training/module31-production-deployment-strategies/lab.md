@@ -11,7 +11,7 @@ In this lab, you will apply the decision framework from the theory section to a 
 
 ### The Scenarios
 
-For each of the following scenarios, read the description and decide which deployment platform is the best fit: **Cloud Run**, **Agent Engine**, **GKE**, or **Custom Server on Cloud Run**.
+For each of the following scenarios, read the description and decide which deployment platform is the best fit: **Cloud Run**, **Agent Runtime**, **GKE**, or **Custom Server on Cloud Run**.
 
 Be prepared to justify your choice based on the key requirements of each scenario.
 
@@ -75,7 +75,7 @@ sidebar_position: 2
 You have now practiced applying a strategic framework to real-world deployment decisions. You have learned to:
 *   Analyze business and technical requirements to choose a deployment platform.
 *   Prioritize factors like speed, cost, compliance, and control.
-*   Understand the specific use cases for Cloud Run, Agent Engine, GKE, and custom server deployments.
+*   Understand the specific use cases for Cloud Run, Agent Runtime, GKE, and custom server deployments.
 
 Check the `lab-solution.md` to see the recommended answers for each scenario.
 

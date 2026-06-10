@@ -3,11 +3,11 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 35 Solution: Deploying an Agent to Agent Engine
+# Lab 35 Solution: Deploying an Agent to Agent Runtime
 
 ## Goal
 
-This lab is a procedural tutorial. The solution for both parts is a successfully deployed Agent Engine instance.
+This lab is a procedural tutorial. The solution for both parts is a successfully deployed Agent Runtime instance.
 
 ---
 
@@ -17,8 +17,8 @@ After running `make backend`, a successful run of the command is the primary ind
 
 **Expected Outcome:**
 *   The `make backend` command completes without errors in your terminal.
-*   A new agent with the name you configured appears in the **Vertex AI -> Agent Engine** section of the Google Cloud Console.
-*   You can copy the **Agent Engine ID** from the console to use with a client application.
+*   A new agent with the name you configured appears in the **Vertex AI -> Agent Runtime** section of the Google Cloud Console.
+*   You can copy the **Agent Runtime ID** from the console to use with a client application.
 
 ---
 
@@ -84,8 +84,8 @@ def main():
         enable_tracing=True
     )
 
-    # Deploy to Agent Engine
-    print(f"Deploying '{AGENT_DISPLAY_NAME}' to Agent Engine...")
+    # Deploy to Agent Runtime
+    print(f"Deploying '{AGENT_DISPLAY_NAME}' to Agent Runtime...")
     remote_app = agent_engines.create(
         agent_engine=app,
         display_name=AGENT_DISPLAY_NAME,
@@ -93,7 +93,7 @@ def main():
     )
 
     print(f"Deployment complete. Resource Name: {remote_app.resource_name}")
-    print(f"Agent Engine ID: {remote_app.resource_name.split('/')[-1]}")
+    print(f"Agent Runtime ID: {remote_app.resource_name.split('/')[-1]}")
 
 if __name__ == "__main__":
     main()
@@ -204,16 +204,16 @@ if __name__ == "__main__":
         *   **Best Practices:** It incorporates Google Cloud and ADK best practices for security (e.g., IAM roles, service accounts), reliability, and scalability from the start.
         *   **Reduced Manual Effort & Errors:** It minimizes manual configuration, reducing human error and accelerating time to market compared to the more involved Standard Deployment.
 
-2.  **Agent Engine is a managed backend. How does this simplify the development of complex clients (e.g., web or mobile applications) that interact with your agent?**
-    *   **Answer:** As a managed backend, Agent Engine significantly simplifies client development by abstracting away the complexities of server-side operations. This includes:
-        *   **Automatic Scaling & Concurrency:** Clients don't need to worry about the agent's backend scaling to handle thousands of concurrent users. Agent Engine handles this automatically.
+2.  **Agent Runtime is a managed backend. How does this simplify the development of complex clients (e.g., web or mobile applications) that interact with your agent?**
+    *   **Answer:** As a managed backend, Agent Runtime significantly simplifies client development by abstracting away the complexities of server-side operations. This includes:
+        *   **Automatic Scaling & Concurrency:** Clients don't need to worry about the agent's backend scaling to handle thousands of concurrent users. Agent Runtime handles this automatically.
         *   **Stable API:** It provides a stable and consistent API endpoint that clients (whether web, mobile, or other services) can easily connect to without needing to understand the underlying agent's implementation details.
-        *   **Separation of Concerns:** The client can focus solely on UI/UX, session management, and presenting information, while Agent Engine handles the heavy lifting of agent orchestration, LLM interaction, tool execution, and state management.
-        *   **Security:** Agent Engine handles much of the backend security, allowing clients to focus on secure authentication with the managed service rather than managing complex server-side security.
+        *   **Separation of Concerns:** The client can focus solely on UI/UX, session management, and presenting information, while Agent Runtime handles the heavy lifting of agent orchestration, LLM interaction, tool execution, and state management.
+        *   **Security:** Agent Runtime handles much of the backend security, allowing clients to focus on secure authentication with the managed service rather than managing complex server-side security.
 
 3.  **For what scenarios might the Standard Deployment method (using `deploy.py` and the Vertex AI SDK) still be advantageous, even if Accelerated Deployment is generally recommended?**
     *   **Answer:** While Accelerated Deployment is the best practice for new production projects, the Standard Deployment method still has advantages for specific scenarios:
-        *   **Learning & Understanding:** It provides a deeper understanding of the underlying Vertex AI SDK and Agent Engine APIs, which is invaluable for debugging or custom integrations.
+        *   **Learning & Understanding:** It provides a deeper understanding of the underlying Vertex AI SDK and Agent Runtime APIs, which is invaluable for debugging or custom integrations.
         *   **Customization:** For highly specialized deployment workflows that deviate significantly from the ASP templates (e.g., integrating with existing, complex CI/CD systems or custom infrastructure), a manual script offers greater flexibility.
-        *   **Modifying Existing Deployments:** If you need to programmatically update specific aspects of an already deployed Agent Engine instance that aren't covered by the ASP `Makefile` commands, a custom script is often necessary.
+        *   **Modifying Existing Deployments:** If you need to programmatically update specific aspects of an already deployed Agent Runtime instance that aren't covered by the ASP `Makefile` commands, a custom script is often necessary.
         *   **Simplified Projects:** For very simple, one-off deployments or internal tools that don't require a full IaC/CI/CD setup, a direct script might be quicker to set up initially.

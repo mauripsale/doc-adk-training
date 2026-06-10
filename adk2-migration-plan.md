@@ -36,9 +36,11 @@ Questo documento traccia la migrazione del corso "Google ADK: From Zero to Hero"
 *   [x] **Modulo 18 (Parallel Workflows):** Migrazione a `JoinNode`.
 *   [x] **Modulo 19 (Advanced Architectures):** Introduzione ai **Nested Workflows**.
 *   [x] **Modulo 20 (Iterative Refinement):** Migrazione a Dynamic Workflow Loops (@node).
-*   [x] **Modulo 21 (Agent to Agent):** Migrazione a A2A v2 (Distributed Graphs).
+*   [x] **Modulo 26 (Callbacks):** Migrazione a firme ADK 2.0 e ripristino `after_model_callback`. Standardizzazione su simplified accessors (`LlmResponse.content`).
 
 ### 🔹 Fase 4: Produzione & Best Practices
+...
+*   [x] **Global Audit (Object Patterns):** Scansione di tutti i moduli per assicurare l'uso di `.content` invece di `.candidates` e `.contents` in `LlmRequest`. Codificato standard qualitativo in `GEMINI.md`.
 *   [x] **Modulo 38 (Best Practices):** Allineato a ADK 2.0 Resilience.
 *   [x] **Modulo 13_5 (Firestore):** Migrazione a `FirestoreSessionService` v2.
 *   [x] **Modulo 25 (Observability):** Integrazione nativa con **OpenTelemetry** e **Cloud Trace**. Focus su `node_info` per il debug dei grafi.

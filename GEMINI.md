@@ -5,7 +5,11 @@
     - This is NOT just a documentation check.
     - You MUST execute the **Simulation Step**: create a temporary directory, follow instructions exactly, and verify the code executes in a real (or mocked) runtime.
     - **Validation is only complete when artifacts (simulation directories and detailed reports) are physically verified on the filesystem.**
-- **ADK 2.0 Patterns:** Always use the graph-based Workflow Runtime patterns (e.g., `@node`, `ctx.run_node()`, `App(root_agent=...)`). Legacy patterns (ADK 1.x) are strictly forbidden unless explicitly noted.
+- **ADK 2.0 Object Patterns (API Accuracy):** Always use the simplified, modern accessors for ADK 2.0 internal objects.
+    - **`LlmResponse`:** NEVER use `.candidates`. Use the direct **`.content`** attribute.
+    - **`LlmRequest`:** Access prompt history via the **`.contents`** list.
+    - **`Event`:** Use modern event types and properties (e.g., `is_final_response()`).
+    - Verify these patterns by inspecting the installed package source code (`.venv`) if documentation is ambiguous.
 - **Pedagogical Balance (Challenge vs. Solution):** Technical `lab.md` files MUST be designed as active learning challenges. 
     - NEVER provide full implementation code in a `lab.md`.
     - USE code skeletons with clear `TODO` comments.

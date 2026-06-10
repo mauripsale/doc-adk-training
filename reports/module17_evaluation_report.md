@@ -1,32 +1,23 @@
-# 🎓 Student Evaluation Report: Module 17 - Sequential Workflows - Building Agent Pipelines
+# 🎓 Student Evaluation Report: Module 17 (Structured Routing)
 
 ## 📊 Summary Scores (1-5)
 * **Clarity of Theory (README.md):** 5
-* **Clarity of Instructions (lab.md):** 5 (Refactored to ADK 2.0)
+* **Clarity of Instructions (lab.md):** 4.5
 * **Code Completeness:** 5
-* **Solution Quality (lab-solution.md):** 5
-* **Overall Difficulty:** 2 (Pipeline focus)
+* **Solution Quality (lab-solution.md):** 4
+* **Overall Difficulty:** 2
 
 ## 🧑‍💻 The Student Experience
-Module 17 provides a clear and structured path for students to move from single-agent interactions to multi-agent pipelines. The theory section correctly identifies that in ADK 2.0, "Sequential" is a structural pattern achieved via `Workflow` and linear `edges`, rather than a dedicated class. This is a crucial distinction for students coming from earlier versions or other frameworks.
-
-The "Blog Post Generator" lab is a classic but effective scenario that clearly demonstrates the value of deterministic execution.
+The lab was straightforward and focused on a core concept: deterministic routing. Using Pydantic for routing keys is a powerful pattern that makes the workflow "type-safe" from an LLM perspective. The transition from Step 2 to Step 3 in `lab.md` was very clear. I appreciated the specific examples in Step 4 ("What is happening with the Dollar?").
 
 ## 🚧 Friction Points & Bugs
-*   **Bugs Fixed:** The `lab.md` file initially contained outdated ADK 1.0 references (e.g., `SequentialAgent`, `sub_agents` list). I refactored the lab to use the ADK 2.0 `Workflow` pattern with linear `edges` to match the `README.md` and `lab-solution.md`.
-*   **Verification:** I verified that the `edges` list correctly represents the pipeline: `START -> researcher -> writer -> editor -> formatter`.
-*   **Data Flow:** The use of `output_key` is correctly emphasized as the mechanism for passing data between non-adjacent nodes in the pipeline (e.g., the `formatter` needing `draft_post` from the `writer`).
+- **Minor Typo in Solution:** The `gbp_analyst` in `lab-solution.md` has a duplicate `model` parameter. While it doesn't break the code, it's a bit messy and might confuse a student who is looking closely at the solution.
+- **Model Name confusion:** The comment `# Tip: Use name as a string or the variable` in `lab-solution.md` is placed next to the `model` parameter, but it likely refers to the `edges` dictionary where one can use agent objects or their names as strings. This placement is slightly misleading.
 
 ## 🏁 Solution Review
-The solution in `lab-solution.md` is robust and follows ADK 2.0 best practices:
-1.  **Linear Edges:** Correct implementation of the pipeline using the `edges` list.
-2.  **Structured Data:** Use of Pydantic models for structured hand-offs between nodes.
-3.  **State Management:** Proper use of `output_key` and `{key}` syntax for context retrieval.
-4.  **Consistency:** I updated the solution to use the `blog_creation_pipeline` variable for better alignment with the starter code instructions.
+The solution correctly implements the workflow. It validates the use of `Workflow(edges=...)` which is the prescribed ADK 2.0 pattern. My implementation matched the solution closely.
 
 ## 💡 Suggestions for Improvement
-The module now perfectly represents the ADK 2.0 "Sequential as a Graph" narrative. One potential addition for a future revision would be to explicitly show a "Hybrid" pipeline where one of the nodes is a custom `@node` function instead of an `Agent`, demonstrating that Workflows are not limited to just LLM-to-LLM transitions.
-
----
-**Reviewer:** `adk-student-evaluator`
-**Status:** ✅ Approved for ADK 2.0 Training (After Refactor)
+- **Fix the duplicate argument:** Clean up the `gbp_analyst` definition in `lab-solution.md`.
+- **Clarify the Tip:** Move the tip about using names as strings to the `edges` section where it is more relevant.
+- **Error Handling Exercise:** Add a small section or a self-reflection question about what happens if the classifier returns something not in the `Literal`. (Wait, it's already there in the reflection questions, which is good).

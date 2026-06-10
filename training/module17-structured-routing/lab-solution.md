@@ -46,13 +46,13 @@ eur_analyst = Agent(
 
 gbp_analyst = Agent(
     name="gbp_analyst",
-    model="gbp_analyst", # Tip: Use name as a string or the variable
     model="gemini-3.5-flash",
     instruction="Provide a brief, neutral outlook for the British Pound."
 )
 
 # 4. Build the Deterministic Workflow
 # The 'edges' list defines the explicit structure of the graph.
+# Tip: You can use the agent object directly or its name as a string (e.g., "usd_analyst").
 root_agent = Workflow(
     name="MarketSystem",
     edges=[

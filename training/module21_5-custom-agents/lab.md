@@ -47,17 +47,10 @@ from typing import AsyncGenerator, Literal
 
 # ===== Specialist Agent Nodes =====
 
-ai_support = Agent(
-    name="ai_support_bot",
-    model="gemini-3.5-flash",
-    instruction="You are a helpful customer support AI. Answer technical questions clearly."
-)
-
-human_escalation = Agent(
-    name="human_escalation_team",
-    model="gemini-3.5-flash",
-    instruction="You are a human rep. Frustrated customer. apologize and promise a call."
-)
+# TODO: Define ai_support and human_escalation agents.
+# Hint: One is for technical help, the other for frustrated customers.
+ai_support = ...
+human_escalation = ...
 
 # ===== 1. Define Sentiment Schema =====
 
@@ -65,13 +58,8 @@ human_escalation = Agent(
 class SentimentClassification(BaseModel):
     sentiment: Literal["angry", "neutral", "happy"]
 
-# Create the classifier agent node
-classifier = Agent(
-    name="classifier",
-    model="gemini-3.5-flash",
-    instruction="Classify the sentiment of the user's latest message.",
-    output_schema=SentimentClassification
-)
+# TODO: Create the classifier agent node using the schema above.
+classifier = ...
 
 # ===== 2. Build the Dynamic Workflow =====
 

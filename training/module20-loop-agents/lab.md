@@ -34,13 +34,17 @@ In this lab, you will build a self-improving agent system that uses a **Dynamic 
 from google.adk import Agent, node, Context, Workflow
 
 # 1. Define the Specialist Agents
-writer = Agent(
-    name="writer",
-    model="gemini-3.5-flash",
-    instruction="Write a 2-sentence story about: {topic}"
-)
 
-# ... [critic and refiner stay the same] ...
+# TODO: Define the initial writer agent.
+writer = ...
+
+# TODO: Define the critic agent. 
+# It must return 'APPROVED' if the work is good, or feedback otherwise.
+critic = ...
+
+# TODO: Define the refiner agent.
+# It must rewrite the story based on feedback.
+refiner = ...
 
 # 2. Define the Iterative Orchestrator
 @node

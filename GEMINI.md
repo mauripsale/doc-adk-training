@@ -6,6 +6,12 @@
     - You MUST execute the **Simulation Step**: create a temporary directory, follow instructions exactly, and verify the code executes in a real (or mocked) runtime.
     - **Validation is only complete when artifacts (simulation directories and detailed reports) are physically verified on the filesystem.**
 - **ADK 2.0 Patterns:** Always use the graph-based Workflow Runtime patterns (e.g., `@node`, `ctx.run_node()`, `App(root_agent=...)`). Legacy patterns (ADK 1.x) are strictly forbidden unless explicitly noted.
+- **Pedagogical Balance (Challenge vs. Solution):** Technical `lab.md` files MUST be designed as active learning challenges. 
+    - NEVER provide full implementation code in a `lab.md`.
+    - USE code skeletons with clear `TODO` comments.
+    - PROVIDE conceptual hints and references to the Theory section instead of raw code.
+    - ENSURE that the student must write the core ADK logic (e.g., node definitions, workflow edges, context access) themselves.
+    - Full, runnable code is ONLY permitted in `lab-solution.md`.
 - **Pedagogical Consistency (Solution Hints):** Every technical `lab.md` MUST include a "Hidden Solution" section at the end.
     - It must contain a Base64-encoded hint of the solution path.
     - It must contain a direct link to the solution hidden via CSS opacity (0.01) to prevent accidental spoilers while enabling quick access for instructors.

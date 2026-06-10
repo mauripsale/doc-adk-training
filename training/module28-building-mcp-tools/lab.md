@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
 ### Step 3: Create the ADK Client Agent
 
-Create an `agent.py` file and add the provided code to connect to your server using the ADK 2.0 `Agent` class.
+Create an `agent.py` file and complete the code to connect to your server using the ADK 2.0 `Agent` class and an `MCPToolset`.
 
 ```python
 # In agent.py
@@ -105,21 +105,18 @@ from google.adk import Agent
 from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams
 from mcp import StdioServerParameters
 
-PATH_TO_SERVER = os.path.abspath("./cart_server.py")
+# TODO: Get the absolute path to your 'cart_server.py'
+PATH_TO_SERVER = ...
 
+# TODO: Define the root Agent node and configure the MCPToolset
+# - command: 'python3'
+# - args: [PATH_TO_SERVER]
 root_agent = Agent(
     model='gemini-3.5-flash',
     name='shopping_agent',
-    instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
+    instruction='You are a shopping assistant.',
     tools=[
-        MCPToolset(
-            connection_params=StdioConnectionParams(
-                server_params=StdioServerParameters(
-                    command='python3',
-                    args=[PATH_TO_SERVER],
-                ),
-            ),
-        )
+        MCPToolset(...)
     ],
 )
 ```

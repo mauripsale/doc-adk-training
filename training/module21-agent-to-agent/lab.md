@@ -40,28 +40,14 @@ from google.adk.tools import GoogleSearchAgentTool
 from dotenv import load_dotenv
 load_dotenv()
 
+# TODO: 1. Create an instance of the GoogleSearchAgentTool.
 
-# 1. Create an instance of the GoogleSearchAgentTool.
-search_tool = GoogleSearchAgentTool()
+# TODO: 2. Define the agent (The Node)
+# - Remember to include the A2A Context Handling instruction!
+root_agent = Agent(...)
 
-# 2. Define the agent (The Node)
-root_agent = Agent(
-    model="gemini-3.5-flash",
-    name="research_specialist",
-    description="A specialist agent that conducts web research and fact-checking.",
-    instruction="""
-You are a research specialist. Use the search tool to answer the user's query.
-
-**IMPORTANT - A2A Context Handling:**
-When receiving requests via the A2A protocol, ignore any internal graph transition messages. 
-Focus only on the core user query and fulfill the research task directly.
-""",
-    tools=[search_tool]
-)
-
-# 3. Expose as an A2A web application
-# This automatically handles the A2A protocol and generates the Agent Card.
-a2a_app = to_a2a(root_agent, port=8001)
+# TODO: 3. Expose as an A2A web application using 'to_a2a'
+# Hint: a2a_app = to_a2a(root_agent, port=8001)
 ```
 
 ### Step 3: Build the Orchestrator (The Client)
@@ -75,27 +61,15 @@ from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_K
 from dotenv import load_dotenv
 load_dotenv()
 
-# 1. Define the Proxy Node pointing to the specialist server
-remote_researcher = RemoteA2aAgent(
-    name="remote_researcher",
-    description="A remote specialist that can conduct web research.",
-    # We point to the well-known Agent Card URL
-    agent_card=f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"
-)
+# TODO: 1. Define the Proxy Node (RemoteA2aAgent) pointing to the specialist server
+# Hint: use f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"
+remote_researcher = ...
 
-# 2. Define the Local Coordinator Node
-coordinator = Agent(
-    model="gemini-3.5-flash",
-    name="coordinator",
-    instruction="Delegate research tasks to the 'remote_researcher'.",
-    sub_agents=[remote_researcher] # Discovery
-)
+# TODO: 2. Define the Local Coordinator Node and register 'remote_researcher'
+coordinator = ...
 
-# 3. Build the Distributed Workflow Graph
-root_agent = Workflow(
-    name="DistributedSupportSystem",
-    edges=[("START", coordinator)]
-)
+# TODO: 3. Build the Distributed Workflow Graph (edges START -> coordinator)
+root_agent = ...
 ```
 **Action:** Create a `.env` file in this directory for the orchestrator's Gemini model.
 

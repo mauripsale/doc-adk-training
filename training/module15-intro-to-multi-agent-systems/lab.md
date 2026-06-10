@@ -88,38 +88,17 @@ adk-training/
 ```
 
 **`agent.py` (The Router and Workflow):**
-We know this file will need to define the `Workflow` and register the sub-nodes.
-```python
-from google.adk import Agent, Workflow
-from . import spanish_greeter_agent
-
-# The Router Node
-router = Agent(
-    name="router_agent",
-    model="gemini-3.5-flash",
-    instruction="You are a language router...",
-    sub_agents=[spanish_greeter_agent.agent] # Registration for discovery
-)
-
-# The System Graph
-root_agent = Workflow(
-    name="GreetingSystem",
-    edges=[("START", router)]
-)
-```
+This file will need to:
+1.  Import the `Agent` and `Workflow` classes.
+2.  Import the `agent` object from your `spanish_greeter_agent.py` module.
+3.  Define the `router` agent and register the specialist in its `sub_agents` list.
+4.  Define the `root_agent` as a `Workflow` that starts with the `router`.
 
 **`spanish_greeter_agent.py` (The Specialist):**
-This will be a standard agent definition file.
-```python
-from google.adk import Agent
-
-agent = Agent(
-    name="spanish_greeter_agent",
-    model="gemini-3.5-flash",
-    description="An expert at providing friendly greetings in Spanish.",
-    instruction="You are a friendly assistant who only speaks Spanish..."
-)
-```
+This file will need to:
+1.  Define a standard `Agent` object.
+2.  Include a clear `description` for the router.
+3.  Include `instruction` that tells the agent to only greet in Spanish.
 
 ### Lab Summary
 

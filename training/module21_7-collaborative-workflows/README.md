@@ -1,57 +1,53 @@
 ---
 sidebar_position: 21.7
-title: "Module 21.7: Collaborative Workflows - Native Agent Hand-offs"
+title: "Module 21.7: Collaborative Agent Teams - Using Modes"
 ---
 
-# Module 21.7: Collaborative Workflows - Native Agent Hand-offs
+# Module 21.7: Collaborative Agent Teams - Using Modes
 
 ## Theory
 
-In previous modules, you learned how to orchestrate agents using **Coordinators** (Module 16) or **Deterministic Edges** (Module 21.6). ADK 2.0 introduces a third, highly dynamic way for agents to work together: **Collaborative Workflows**.
+In standard orchestration, a coordinator calls a sub-agent and control stays with that specialist until a manual hand-off happens. ADK 2.0 introduces a more structured way to manage these relationships: **Collaboration Modes**.
 
-### What is a Collaborative Workflow?
+### What are Collaboration Modes?
 
-In a Collaborative Workflow, agents are not just "tools" called by an orchestrator. They are peers that can **pass the conversation to each other** directly using a native `hand_off` mechanism.
+When you add a sub-agent to an `Agent` or `Workflow`, you can specify its **`mode`**. This setting controls how the sub-agent behaves and, crucially, how it **returns control to the parent**.
 
-Unlike the Coordinator pattern where one agent *always* stays in control, Collaborative Workflows allow for a "Relay Race" style of interaction.
+There are three primary modes:
 
-### The `collaborators` Parameter
+1.  **`chat` (Default):** Full multi-turn interaction. The sub-agent keeps control until it explicitly performs another transfer or the session ends.
+2.  **`task`:** Used for specific sub-tasks. The sub-agent can interact with the user for clarifications but **automatically returns control** to the parent once its task is complete.
+3.  **`single_turn`:** No user interaction allowed. The sub-agent performs a single reasoning step and returns the result to the parent immediately. This is ideal for parallel background tasks.
 
-To enable this, you use the `collaborators` parameter in the `Agent` definition. This tells the ADK that these agents are allowed to hand off control to one another.
+### The Power of Automatic Return
+
+In ADK 1.x, you often had to prompt your sub-agents to "hand back control." In ADK 2.0, using `mode="task"`, this is handled by the framework.
 
 ```python
 from google.adk import Agent
 
-# Agent A knows about Agent B
-agent_a = Agent(
-    name="sales_expert",
-    collaborators=[agent_b],
-    instruction="Handle sales queries. Hand off to tech_expert for technical details."
+# 1. Define a specialist in 'task' mode
+researcher = Agent(
+    name="researcher",
+    mode="task", # 🔄 Automatic return to parent!
+    instruction="Research the topic and provide a 3-point summary."
 )
 
-# Agent B knows about Agent A
-agent_b = Agent(
-    name="tech_expert",
-    collaborators=[agent_a],
-    instruction="Handle technical queries. Hand off to sales_expert for pricing."
+# 2. Assign to a coordinator
+root_agent = Agent(
+    name="coordinator",
+    sub_agents=[researcher], # Framework auto-injects 'request_task_researcher' tool
+    instruction="Delegate research to the specialist, then write a conclusion."
 )
 ```
 
-### How it works: Native Hand-offs
+### Why use Collaboration Modes?
 
-When an agent is part of a collaborative group, the ADK automatically injects a `hand_off_to_<agent_name>` tool into its toolkit. 
-1.  **Detection:** The LLM realizes it cannot fulfill a request (e.g., a Sales agent gets a deep technical question).
-2.  **Invocation:** The agent calls the auto-generated `hand_off` tool.
-3.  **Transition:** The Workflow Runtime immediately pauses the current agent and activates the collaborator.
-
-### Why use Collaborative Workflows?
-
-1.  **Dynamic Peer-to-Peer:** Perfect for scenarios where there is no clear "boss" agent.
-2.  **Reduced Overhead:** You don't need a middle-man "Router" agent that consumes tokens just to decide where to go.
-3.  **Natural Conversation:** The transition is seamless for the user, as the context is preserved across hand-offs.
+*   **Predictability:** You know exactly when and how control will flow back to your main orchestrator.
+*   **Parallelism:** Agents in `single_turn` mode can be executed concurrently within a Workflow graph.
+*   **Cleaner Prompts:** You no longer need to pollute your specialist's instructions with "how to return control" rules.
 
 ### Key Takeaways
-- **Collaborative Workflows** enable peer-to-peer agent transitions.
-- The **`collaborators`** list defines the "circle of trust" for an agent.
-- **Native Hand-offs** are powered by auto-generated tools managed by the Workflow Runtime.
-- Use this pattern for **fluid, expert-led interactions** where agents need to bounce the user back and forth based on evolving needs.
+- **Collaboration Modes** (`chat`, `task`, `single_turn`) manage sub-agent lifecycle.
+- **`mode="task"`** is the standard for delegation where you want the specialist to finish and "come back" to the main flow.
+- The framework handles the low-level tool injection (`request_task_...`) automatically based on the `sub_agents` list.

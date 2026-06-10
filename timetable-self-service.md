@@ -22,16 +22,16 @@
 | 🛠️ [Module 14: Third-Party Tools](./training/module14-third-party-tools/) | Medium | 30 |
 | **Part 3: Multi-Agent Systems** | | **300** |
 | 🤖🤖 [Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/) | Low | 15 |
-| 🤖🤖 [Module 16: Coordinator Agent](./training/module16-coordinator-agent/) | Medium | 40 |
-| 🤖🤖 [Module 17: Sequential Workflow Agents](./training/module17-sequential-workflow-agents/) | Medium | 30 |
-| 🤖🤖 [Module 18: Parallel Workflow Agents](./training/module18-parallel-workflow-agents/) | High | 40 |
-| 🤖🤖 [Module 19: Advanced Multi-Agent Architectures](./training/module19-advanced-multi-agent-architectures/) | High | 45 |
-| 🤖🤖 [Module 20: Loop Agents](./training/module20-loop-agents/) | High | 40 |
-| 🤖🤖 [Module 21: Agent-to-Agent Communication](./training/module21-agent-to-agent/) | High | 50 |
-| 🤖🤖 [Module 21.5: Creating Custom Agents](./training/module21_5-custom-agents/) | High | 40 |
+| 🤖🤖 [Module 16: Static Orchestration](./training/module16-static-orchestration/) | Medium | 40 |
+| 🤖🤖 [Module 17: Structured Routing](./training/module17-structured-routing/) | Medium | 30 |
+| 🤖🤖 [Module 18: Dynamic Orchestration](./training/module18-dynamic-orchestration/) | High | 40 |
+| 🤖🤖 [Module 19: Collaborative Teams](./training/module19-collaborative-teams/) | High | 45 |
+| 🤖🤖 [Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/) | High | 40 |
+| 🤖🤖 [Module 21: Distributed Graphs](./training/module21-distributed-graphs/) | High | 50 |
 | **Part 4: Production Readiness** | | **200** |
-| 🏭 [Module 22: State and Memory](./training/module22-state-and-memory/) | High | 35 |
-| 🏭 [Module 23: Artifacts](./training/module23-artifacts/) | High | 40 |
+...
+| ☁️ [Module 35: Deployment to Agent Runtime](./training/module35-deployment-agent-runtime/) | High | 60 |
+
 | 🏭 [Module 24: Evaluation](./training/module24-evaluation/) | Medium | 50 |
 | 🏭 [Module 25: Observability](./training/module25-observability/) | High | 35 |
 | 🏭 [Module 26: Callbacks](./training/module26-callbacks/) | High | 40 |
@@ -45,7 +45,7 @@
 | ☁️ [Module 32: Deployment to Cloud Run](./training/module32-deployment-cloud-run/) | High | 35 |
 | ☁️ [Module 33: Deployment to GKE](./training/module33-deployment-gke/) | High | 60 |
 | ☁️ [Module 34: Deploying an MCP Server to Cloud Run](./training/module34-deploying-mcp-server-cloud-run/) | High | 70 |
-| ☁️ [Module 35: Deployment to Agent Engine](./training/module35-deployment-agent-engine/) | High | 60 |
+| ☁️ [Module 35: Deployment to Agent Runtime](./training/module35-deployment-agent-runtime/) | High | 60 |
 | ☁️ [Module 36: Gemini Enterprise](./training/module36-gemini-enterprise/) | Low | 15 |
 | **Part 7: Capstone Project & Best Practices** | | **190** |
 | 🏆 [Module 37: Advanced Personalized Shopping Agent](./training/module37-advanced-personalized-shopping-agent/) | High | 85 |

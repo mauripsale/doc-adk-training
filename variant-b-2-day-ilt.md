@@ -17,6 +17,6 @@ This 2-day training variant provides a comprehensive learning experience that co
 | [Module 10: Advanced Function Tools](/module10-advanced-function-tools/) | YES | Teaches crucial best practices and the important parallel execution feature. |
 | [Module 12: Built-in Tools and Grounding](/module12-built-in-tools-grounding/) | YES | Provides a key capability (web search) for building more knowledgeable agents. |
 | [Module 15: Introduction to Multi-Agent Systems](/module15-intro-to-multi-agent-systems/) | YES | Introduces the next level of agent design, a key differentiator of the ADK. |
-| [Module 16: Coordinator Agent](/module16-coordinator-agent/) | YES | A practical, hands-on lab for building a simple but powerful multi-agent system. |
+| [Module 16: Static Orchestration](/module16-static-orchestration/) | YES | A practical, hands-on lab for building a simple but powerful multi-agent system. |
 | [Module 22: State and Memory](/module22-state-and-memory/) | YES | Covers the essential topic of managing conversation history for better user experience. |
 | [Module 38: Best Practices](/module38-best-practices/) | YES | A crucial summary module to reinforce key learnings and guide future development. |

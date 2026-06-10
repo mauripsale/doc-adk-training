@@ -7,7 +7,7 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete code for the `agent.py` script in the Research Assistant lab, using modern ADK practices.
+This file contains the complete code for the `agent.py` script in the Research Assistant lab, using ADK 2.0 practices.
 
 ### `research_assistant/agent.py`
 
@@ -18,7 +18,7 @@ Searches web, extracts key information, and formats a report.
 """
 
 from datetime import datetime
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools import google_search
 
 # --- Custom Tools ---
@@ -44,12 +44,12 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 
 # --- Agent Definition ---
 
-root_agent = LlmAgent(
+root_agent = Agent(
     model='gemini-3.5-flash',
     name='research_assistant',
     description='Conducts web research and compiles findings',
     instruction="""
-You are an expert research assistant for Cymbal Direct.
+You are an expert research assistant.
 You have access to the web via `google_search` and custom text processing tools.
 
 When given a research topic, follow this workflow:
@@ -58,7 +58,7 @@ When given a research topic, follow this workflow:
 3. Use `format_research_notes` to compile these facts into a professional report.
 4. Present the final, formatted document to the user as your final answer.
 """,
-    # In modern ADK, you can mix built-in and custom tools directly!
+    # In ADK 2.0, you can mix built-in and custom tools directly!
     tools=[
         google_search,
         extract_key_facts,
@@ -73,7 +73,7 @@ When given a research topic, follow this workflow:
     ```bash
     uv init research_assistant --python 3.10
     cd research_assistant
-    uv add google.adk python-dotenv
+    uv add "google-adk>=2.1.0" python-dotenv
     ```
 2.  Configure `.env` for Vertex AI.
 3.  Run the agent:
@@ -86,10 +86,10 @@ When given a research topic, follow this workflow:
 ## Self-Reflection Answers
 
 1.  **Earlier versions of ADK required a `GoogleSearchAgentTool` wrapper. Why is it better to mix tools directly now?**
-    *   **Answer:** It greatly simplifies the architecture and makes the code more readable. You no longer need to manage "wrapper" agents or worry about different tool types. Treating `google_search` just like any other Python function makes the developer experience consistent and intuitive.
+    *   **Answer:** It simplifies the architecture. Treating `google_search` just like any other Python function makes the developer experience consistent and intuitive.
 
-2.  **Our `extract_key_facts` tool is very simple. How could you make it more robust? (Hint: Could another LLM be used for this task?)**
-    *   **Answer:** The current implementation just splits text by dots, which is fragile. A better approach would be to use an LLM (perhaps a smaller, faster model like Gemini Flash) to perform semantic extraction. You could define a sub-agent whose sole purpose is fact extraction and call it from your main agent.
+2.  **Our `extract_key_facts` tool is very simple. How could you make it more robust?**
+    *   **Answer:** A better approach would be to use a separate **Agent** node (perhaps a smaller model like Gemini Flash) to perform semantic extraction from the search results.
 
-3.  **The agent's instruction defines a specific, sequential workflow. What might happen if you didn't specify the order of the tool calls in the instruction?**
-    *   **Answer:** Without a specified order, the LLM might try to call tools out of sequence (e.g., trying to format notes before searching) or skip important steps. Explicitly defining the chain of thought (Search -> Extract -> Format) ensures the agent behaves like a reliable professional instead of a random chatbot.
+3.  **The agent's instruction defines a specific, sequential workflow. What might happen if you didn't specify the order?**
+    *   **Answer:** The LLM might try to call tools out of sequence or skip steps. Explicitly defining the process (Search -> Extract -> Format) ensures reliable behavior.

@@ -20,7 +20,7 @@ We will use the `uv` workflow to initialize our research project.
     ```bash
     uv init research_assistant --python 3.10
     cd research_assistant
-    uv add google.adk python-dotenv
+    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Configure Authentication:** Ensure your `.env` file has your project ID and location set for Vertex AI.
@@ -32,7 +32,7 @@ We will use the `uv` workflow to initialize our research project.
 ```python
 # In agent.py
 from datetime import datetime
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools import google_search
 
 # --- Custom Tools (Provided) ---
@@ -57,17 +57,12 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 
 # --- Agent Definition ---
 
-# TODO: Define the `root_agent`.
+# TODO: Define the `root_agent` Node
 # 1. Use 'gemini-3.5-flash'.
 # 2. Add 'google_search', 'extract_key_facts', and 'format_research_notes' to tools.
-# 3. Write instructions for a research workflow:
-#    - Use search to find current info.
-#    - Extract key facts from search results.
-#    - Format and present the final document.
+# 3. Write instructions for a research workflow.
 
-root_agent = LlmAgent(
-    ...
-)
+root_agent = Agent(...)
 ```
 
 ### Step 3: Run and Test the Research Assistant

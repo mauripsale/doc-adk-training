@@ -48,7 +48,7 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
 ```python
 import asyncio
 import os
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
@@ -69,7 +69,7 @@ def load_image_from_file(path: str) -> types.Part:
 class VisualCatalogApp:
     def __init__(self):
         # 1. Define the Intelligence
-        self.agent = LlmAgent(
+        self.agent = Agent(
             model='gemini-3.5-flash',
             name='catalog_writer',
             instruction="You are a professional product catalog writer. Analyze the image and write a compelling description."

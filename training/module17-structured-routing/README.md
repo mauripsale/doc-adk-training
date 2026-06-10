@@ -1,15 +1,15 @@
 ---
-sidebar_position: 21.6
-title: "Module 21.6: Graph-based Workflows - Deterministic Routing"
+sidebar_position: 17
+title: "Module 17: Structured Routing - Edges and Dictionaries"
 ---
 
-# Module 21.6: Graph-based Workflows - Deterministic Routing
+# Module 17: Structured Routing - Edges and Dictionaries
 
 ## Theory
 
-In Module 21.5, you learned about **Dynamic Workflows** using the `@node` decorator. These allow you to use standard Python code to decide which node to run next. 
+In Module 16, you learned how to define static paths. But what if you want your graph to branch based on a specific decision? 
 
-However, there are many scenarios where the flow of your application is **predictable and structured**. For these cases, ADK 2.0 provides the **`Workflow`** class, which allows you to define a graph using explicit **Edges**.
+While you can use **Dynamic Workflows** (Module 18) for total control, ADK 2.0 provides a more efficient middle ground: **Dictionary-based Routing**.
 
 ### Why use Deterministic Workflows?
 

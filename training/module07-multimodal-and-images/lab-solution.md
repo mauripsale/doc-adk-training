@@ -14,7 +14,7 @@ This file contains the complete code for the `main.py` script in the Visual Prod
 ```python
 import asyncio
 import os
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
@@ -36,7 +36,8 @@ def load_image_from_file(path: str) -> types.Part:
 class VisualCatalogApp:
     def __init__(self):
         # 1. Define the Agent (The Intelligence)
-        self.agent = LlmAgent(
+        # Using the modern ADK 2.0 Agent class
+        self.agent = Agent(
             model='gemini-3.5-flash',
             name='catalog_writer',
             instruction="""
@@ -47,7 +48,6 @@ class VisualCatalogApp:
             """.strip()
         )
         # 2. Build the App and Runner (The Infrastructure)
-        # InMemoryRunner is pre-configured with an InMemorySessionService.
         self.app = App(name="visual_catalog", root_agent=self.agent)
         self.runner = InMemoryRunner(app=self.app)
 
@@ -77,7 +77,6 @@ class VisualCatalogApp:
         )
 
         # Step 4: Run the agent using run_async
-        # We iterate through the asynchronous generator.
         print("📸 Sending image to Gemini...")
         async for event in self.runner.run_async(
             user_id=user_id,
@@ -113,10 +112,10 @@ if __name__ == '__main__':
 ### Self-Reflection Answers
 
 1.  **Why did we have to call `create_session` manually this time, whereas in Module 6's `run_debug` we didn't?**
-    *   **Answer:** `run_debug` is a high-level helper method designed for ease of use during development. It automatically handles session creation behind the scenes if the session doesn't exist. In contrast, `run_async` is the standard execution method used in production; it is more "un-opinionated" and requires the session infrastructure to be explicitly managed by the developer, giving you more control over how sessions are identified and stored.
+    *   **Answer:** `run_debug` is a high-level helper method that automatically handles session creation. `run_async` is the production standard; it requires explicit session management, giving developers more control.
 
-2.  **How does the `InMemoryRunner` simplify the setup of the `SessionService` compared to a base `Runner`?**
-    *   **Answer:** The base `Runner` class requires you to manually instantiate and pass in a `SessionService` (like `FirestoreSessionService` or `InMemorySessionService`) to its constructor. The `InMemoryRunner` comes pre-bundled with an `InMemorySessionService` already configured, so you don't have to import or manage the service separately—you can access it directly via `runner.session_service`.
+2.  **How does the `InMemoryRunner` simplify the setup compared to a base `Runner`?**
+    *   **Answer:** The `InMemoryRunner` comes pre-bundled with an `InMemorySessionService` configured, so you don't have to manage the service object manually.
 
-3.  **If you wanted to analyze a PDF document instead of an image, which `mime_type` would you use in the `types.Blob`?**
-    *   **Answer:** You would use `application/pdf`. Gemini models are multimodal and can process PDFs, images, video, and audio using the same `Part` and `Blob` structure.
+3.  **If you wanted to analyze a PDF document instead of an image, which `mime_type` would you use?**
+    *   **Answer:** You would use `application/pdf`. The `Part` and `Blob` structure remains the same for all media types.

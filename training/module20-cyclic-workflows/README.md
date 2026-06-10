@@ -1,9 +1,9 @@
 ---
 sidebar_position: 20
-title: "Module 20: Iterative Refinement with Loop Agents"
+title: "Module 20: Cyclic Workflows - Iteration and Self-Correction"
 ---
 
-# Module 20: Iterative Refinement with Loop Agents
+# Module 20: Cyclic Workflows - Iteration and Self-Correction
 
 ## Theory
 

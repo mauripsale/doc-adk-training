@@ -52,16 +52,15 @@ This part focuses on giving your agents "superpowers" by connecting them to tool
 *   🧰 **[Module 14: Third-Party Tools](./training/module14-third-party-tools/)** (🧑‍💻 30 min / 👨‍🏫 40 min)
 
 ### 🤖🤖 Part 3: Multi-Agent Systems (Modules 15-21)
-Learn how to go beyond single agents and build complex systems where multiple agents collaborate to solve complex problems, both locally and in a distributed fashion.
+Learn how to go beyond single agents and build complex systems where multiple agents collaborate to solve complex problems using ADK 2.0 Graph-based Workflows.
 
 *   🤝 **[Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/)** (🧑‍💻 15 min / 👨‍🏫 30 min)
-*   🤝 **[Module 16: Coordinator Agent](./training/module16-coordinator-agent/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
-*   🤝 **[Module 17: Sequential Workflow Agents](./training/module17-sequential-workflow-agents/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
-*   🤝 **[Module 18: Parallel Workflow Agents](./training/module18-parallel-workflow-agents/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
-*   🤝 **[Module 19: Advanced Multi-Agent Architectures](./training/module19-advanced-multi-agent-architectures/)** (🧑‍💻 45 min / 👨‍🏫 75 min)
-*   🤝 **[Module 20: Loop Agents](./training/module20-loop-agents/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
-*   🤝 **[Module 21: Agent-to-Agent Communication](./training/module21-agent-to-agent/)** (🧑‍💻 50 min / 👨‍🏫 70 min)
-*   🤝 **[Module 21.5: Custom Agents](./training/module21_5-custom-agents/)** (🧑‍💻 45 min / 👨‍🏫 70 min)
+*   🤝 **[Module 16: Static Orchestration](./training/module16-static-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
+*   🤝 **[Module 17: Structured Routing](./training/module17-structured-routing/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
+*   🤝 **[Module 18: Dynamic Orchestration](./training/module18-dynamic-orchestration/)** (🧑‍💻 45 min / 👨‍🏫 65 min)
+*   🤝 **[Module 19: Collaborative Teams](./training/module19-collaborative-teams/)** (🧑‍💻 45 min / 👨‍🏫 75 min)
+*   🤝 **[Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🤝 **[Module 21: Distributed Graphs](./training/module21-distributed-graphs/)** (🧑‍💻 50 min / 👨‍🏫 70 min)
 
 ### 🏭 Part 4: Production Readiness (Modules 22-26)
 This part covers the essential features for making your agents robust, observable, and reliable in a production environment.
@@ -87,7 +86,7 @@ Learn how to deploy your agents and their components to various scalable cloud e
 *   🚀 **[Module 32: Deployment to Cloud Run](./training/module32-deployment-cloud-run/)** (🧑‍💻 35 min / 👨‍🏫 50 min)
 *   🚀 **[Module 33: Deployment to GKE](./training/module33-deployment-gke/)** (🧑‍💻 60 min / 👨‍🏫 95 min)
 *   🚀 **[Module 34: Deploying an MCP Server to Cloud Run](./training/module34-deploying-mcp-server-cloud-run/)** (🧑‍💻 70 min / 👨‍🏫 105 min)
-*   🚀 **[Module 35: Deployment to Agent Engine](./training/module35-deployment-agent-engine/)** (🧑‍💻 60 min / 👨‍🏫 90 min)
+*   🚀 **[Module 35: Deployment to Agent Runtime](./training/module35-deployment-agent-runtime/)** (🧑‍💻 60 min / 👨‍🏫 90 min)
 *   🚀 **[Module 36: Gemini Enterprise](./training/module36-gemini-enterprise/)** (🧑‍💻 15 min / 👨‍🏫 25 min)
 
 ### 🏆 Part 7: Capstone Project & Best Practices (Modules 37-38)

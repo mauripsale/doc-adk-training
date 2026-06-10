@@ -14,10 +14,20 @@ Your task is to build and configure a new agent that can search the web to answe
 2.  **Enable the Vertex AI API** in your Google Cloud project.
 3.  **Configure the `.env` file** inside the `researcher_agent` directory to use Vertex AI, providing your project ID and a location.
 4.  **Modify the `agent.py` file** (Python approach):
-    *   Define an **`Agent`** named `root_agent`.
-    *   Set the `model` to `gemini-3.5-flash`.
-    *   Write a clear `instruction` that directs the agent to use a search tool for any questions about recent or up-to-date information.
-    *   Add the `google_search` tool to the `tools` list.
+
+    ```python
+    # In agent.py
+    from google.adk import Agent
+    from google.adk.tools import google_search
+
+    # TODO: Define the root_agent node
+    # - name: "researcher_agent"
+    # - model: "gemini-3.5-flash"
+    # - instruction: Tell it to use search for current events.
+    # - tools: Add the google_search tool.
+    root_agent = Agent(...)
+    ```
+
 5.  **Run the agent** from your main `adk-training` directory using the `uv run adk web` command (without specifying the agent name).
 6.  **Test the agent** by asking it a question about a recent event (e.g., "Who won the last major sports championship?").
 7.  **Verify** that the `google_search` tool was used by inspecting the **"Trace"** view in the Dev UI.

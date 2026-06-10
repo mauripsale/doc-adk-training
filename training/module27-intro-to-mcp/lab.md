@@ -78,30 +78,24 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     # - instruction: 'You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.'
     # - tools: A list containing one item: the MCPToolset.
     
-    root_agent = Agent(
-        model='gemini-3.5-flash',
-        name='filesystem_agent',
-        instruction='You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.',
-        tools=[
-            MCPToolset(
-                connection_params=StdioConnectionParams(
-                    server_params=StdioServerParameters(
-                        # TODO: 4. Set the `command` to 'npx'.
-                        command='npx',
-                        # TODO: 5. Set the `args` to a list containing:
-                        # "-y", "@modelcontextprotocol/server-filesystem", absolute path to TARGET_FOLDER_PATH
-                        args=[
-                            "-y", 
-                            "@modelcontextprotocol/server-filesystem", 
-                            os.path.abspath(TARGET_FOLDER_PATH)
-                        ],
-                    ),
-                ),
-                # TODO: 6. Optionally, filter specific tools: 'list_directory' and 'read_file'.
-                tool_filter=['list_directory', 'read_file']
-            )
-        ]
-    )
+    # Inside the Agent's `tools` list, you will configure the MCPToolset.
+    # Follow this structure:
+    #
+    # MCPToolset(
+    #     connection_params=StdioConnectionParams(
+    #         server_params=StdioServerParameters(
+    #             # TODO: 4. Set the `command` to 'npx'.
+    #             # TODO: 5. Set the `args` to a list containing:
+    #             # "-y", "@modelcontextprotocol/server-filesystem", absolute path to TARGET_FOLDER_PATH
+    #             command=...,
+    #             args=[...],
+    #         ),
+    #     ),
+    #     # TODO: 6. Optionally, filter specific tools: 'list_directory' and 'read_file'.
+    #     tool_filter=[...]
+    # )
+
+    root_agent = ...
     ```
 
 4.  **Set up your `.env` file** with your API key or Vertex AI project.

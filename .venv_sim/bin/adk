@@ -1,0 +1,6 @@
+#!/Users/maurizio.ipsale/Code/adk-docs/.venv_sim/bin/python3
+import sys
+from google.adk.cli import main
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(main())

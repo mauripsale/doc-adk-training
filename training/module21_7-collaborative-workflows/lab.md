@@ -3,96 +3,97 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.7: Peer-to-Peer Agent Hand-offs
+# Lab 21.7: Building a Collaborative Travel Team
 
 ## Goal
 
-In this lab, you will build a **Collaborative Support Duo** consisting of a **Sales Agent** and a **Tech Agent**. You will learn how to use the `collaborators` parameter to allow these agents to hand off the conversation to each other natively, without a central coordinator.
+In this lab, you will build a **Travel Planning Team** consisting of a **Coordinator**, a **Weather Specialist**, and a **Flight Booker**. You will learn how to use the `mode` parameter to create a system where sub-agents fulfill specific tasks and then automatically return control to the main planner.
 
 ### The Scenario
-- **User** starts by talking to the **Sales Agent**.
-- If the user asks a technical question, the Sales Agent **hands off** to the Tech Agent.
-- If the Tech Agent hears a question about pricing or buying, it **hands off** back to the Sales Agent.
+- **Coordinator** receives the user's travel request.
+- It delegates to the **Weather Specialist** (in `single_turn` mode) to get a quick forecast.
+- It then delegates to the **Flight Booker** (in `task` mode) to find and "book" a flight (allowing for some back-and-forth about preferences).
+- Finally, the Coordinator synthesizes the plan.
 
 ### Step 1: Create the Project
 
-1.  **Create a new project:**
-    ```shell
-    uv run adk create collaborative_duo
-    ```
+```shell
+uv run adk create travel_team
+cd travel_team
+```
 
-### Step 2: Define the Collaborative Agents
+### Step 2: Implement the Collaborative Nodes
 
-Open `agent.py`. You need to define two agents that refer to each other.
+Open `agent.py`. Your task is to define the team and configure their modes correctly.
 
-**Exercise:** Complete the `collaborators` list and instructions for both agents.
+**Exercise:** Complete the agent definitions by setting the appropriate `mode` for each specialist.
 
 ```python
 # In agent.py (Starter Code)
 from google.adk import Agent
 
-# Note: We define them with placeholder collaborator lists first 
-# to avoid 'name not defined' errors in Python.
-
-# 1. Define the Tech Agent
-tech_agent = Agent(
-    name="tech_agent",
+# 1. Define the Weather Specialist
+# Hint: Use 'single_turn' mode for a quick, non-interactive lookup.
+weather_agent = Agent(
+    name="weather_checker",
     model="gemini-3.5-flash",
-    description="Expert in hardware specs and troubleshooting.",
     instruction="""
-    You are a technical support expert. 
-    - If the user asks about prices, discounts, or how to buy, 
-      you MUST hand off to the sales_agent.
+    # TODO: Write instructions to provide a brief 3-day forecast 
+    # for the requested destination.
     """
 )
 
-# 2. Define the Sales Agent
-sales_agent = Agent(
-    name="sales_agent",
+# 2. Define the Flight Booker
+# Hint: Use 'task' mode to allow the agent to ask the user 
+# questions about their flight preferences before finishing.
+flight_agent = Agent(
+    name="flight_booker",
     model="gemini-3.5-flash",
-    description="Expert in pricing, bundles, and purchase orders.",
     instruction="""
-    You are a sales representative.
-    - If the user asks about hardware specs or technical issues, 
-      you MUST hand off to the tech_agent.
-    """,
-    # TODO: Add tech_agent to collaborators
-    collaborators=[] 
+    # TODO: Write instructions to help the user book a flight. 
+    # Ask about preferred airline or time if not provided.
+    """
 )
 
-# 3. Retroactively add collaborators to tech_agent
-# tech_agent.collaborators = [sales_agent]
-
-# 4. Define the Root Agent
-# In a collaborative setup, any agent can be the entry point.
-root_agent = sales_agent
+# 3. Define the Coordinator
+# Hint: Coordinator should NOT have a mode set (it's the root).
+root_agent = Agent(
+    name="travel_planner",
+    model="gemini-3.5-flash",
+    instruction="""
+    # TODO: Write instructions to coordinate the team.
+    # 1. Get weather from weather_checker.
+    # 2. Book flight via flight_booker.
+    # 3. Present the final cohesive plan.
+    """,
+    # TODO: Register your specialists here
+    sub_agents=[] 
+)
 ```
 
-### Step 3: Test the Hand-off
+### Step 3: Run and Test
 
 1.  **Launch the Dev UI:**
     ```shell
     uv run adk web .
     ```
-2.  **Verify the Dynamic Handoff:**
-    - Ask: "How much does the Pro model cost?" -> Sales should answer.
-    - Follow up: "Does it support 5G?" -> Sales should **hand off** to Tech.
-    - Follow up: "Great, I'll take two. What's the discount?" -> Tech should **hand off** back to Sales.
-
-3.  **Inspect the Trace:**
-    In the Dev UI, look at how the `active_agent` changes in the trace without any manual routing code.
+2.  **Verify the Flow:**
+    - Ask: "I want to go to Tokyo next week."
+    - **Observe:** The `travel_planner` should call the `weather_checker`. 
+    - **Observe:** Then it should call the `flight_booker`. The flight booker might ask you "Which airline do you prefer?" or "Do you want a morning flight?". 
+    - **Final Check:** After you answer, notice how control **automatically returns** to the `travel_planner` without any "hand-off" code.
 
 ### Lab Summary
 
-You have implemented a Collaborative Workflow!
-- You learned how to use the **`collaborators`** parameter.
-- You observed **Native Hand-offs** in action.
-- You realized that agents can act as peers, sharing responsibility for the user's session.
+You have built a Collaborative Agent Team!
+- You used **`mode="single_turn"`** for background utility tasks.
+- You used **`mode="task"`** for interactive sub-tasks with automatic return.
+- You observed how the ADK 2.0 framework manages the hand-off lifecycle so you can focus on agent logic.
 
 ### Self-Reflection Questions
-- What is the main difference between a Collaborative Workflow and a Coordinator Agent?
-- Why is it necessary to assign collaborators retroactively in Python when dealing with circular references?
-- Can you think of an enterprise scenario where peer-to-peer hand-offs are safer than a central router?
+- Why would you use `single_turn` instead of `task` for a database lookup node?
+- What happens to the conversation history when a sub-agent is in `task` mode? (Hint: Check the Trace tab).
+- How does the `mode` setting improve the reliability of complex, multi-step workflows compared to standard `chat` mode?
 
 <hr/>
 

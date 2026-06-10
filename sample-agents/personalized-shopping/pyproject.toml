@@ -6,9 +6,10 @@ authors = [{ name = "Yiwen Song", email = "yiwensong@google.com" }]
 license = "Apache-2.0"
 readme = "README.md"
 dependencies = [
-    "google-cloud-aiplatform[adk,agent-engines]>=1.93.0",
+    "google-cloud-aiplatform[adk,agent-engines]>=1.111.0",
     "google-genai>=1.9.0",
-    "google-adk>=1.0.0",
+    "google-adk[a2a]>=2.1.0",
+    "uvicorn>=0.34.0",
     "pydantic>=2.10.6",
     "python-dotenv>=1.0.1",
     "pyserini>=0.43.0",

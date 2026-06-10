@@ -12,7 +12,7 @@ This file contains the complete code for the `agent.py` file in the Fact-finder 
 ### `fact_finder_agent/agent.py`
 
 ```python
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.langchain_tool import LangchainTool
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -27,7 +27,7 @@ langchain_tool_instance = WikipediaQueryRun(api_wrapper=api_wrapper)
 wikipedia_tool = LangchainTool(tool=langchain_tool_instance)
 
 # 3. Define the ADK agent and include the wrapped tool in its tools list.
-root_agent = LlmAgent(
+root_agent = Agent(
     name="fact_finder_agent",
     model="gemini-3.5-flash",
     description="An agent that can look up information on Wikipedia.",

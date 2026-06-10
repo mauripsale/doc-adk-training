@@ -6,7 +6,7 @@
 | 📖 [Module 1: Introduction to AI Agents & Google ADK](./training/module01-intro-to-ai-agents/) | Low | 35 |
 | 📖 [Module 2: Setting Up Your Development Environment](./training/module02-environment-setup/) | Medium | 40 |
 | 📖 [Module 3: Your First Agent: The "Echo" Agent](./training/module03-first-agent-echo/) | Low | 35 |
-| 📖 [Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-llmagent-deep-dive/) | Low | 30 |
+| 📖 [Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-agent-deep-dive/) | Low | 30 |
 | 📖 [Module 4.5: Professional Model Configuration & Resiliency](./training/module04_5-multi-model-litellm/) | Medium | 30 |
 | 📖 [Module 5: Running and Interacting with Agents](./training/module05-running-agents/) | Medium | 30 |
 | 📖 [Module 6: Running an Agent Programmatically](./training/module06-programmatic-execution/) | Medium | 35 |

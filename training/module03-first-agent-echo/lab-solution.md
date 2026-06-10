@@ -67,11 +67,11 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
     Open `agent.py` and replace its contents with this:
 
     ```python
-    from google.adk.agents import LlmAgent
+    from google.adk import Agent
 
     # IMPORTANT: The ADK requires this main agent variable
     # to be named exactly `root_agent`.
-    root_agent = LlmAgent(
+    root_agent = Agent(
         name="echo_agent",
         model="gemini-3.5-flash",
         description="A parrot agent that only repeats user input.",

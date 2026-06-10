@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
 ```python
 # Filename: agent.py
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
 from mcp import StreamableHTTPConnectionParams
 
@@ -91,7 +91,7 @@ from mcp import StreamableHTTPConnectionParams
 # Replace this with the URL from your `gcloud run deploy` output
 MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL"
 
-root_agent = LlmAgent(
+root_agent = Agent(
     model='gemini-3.5-flash',
     name='cloud_shopping_agent',
     instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',

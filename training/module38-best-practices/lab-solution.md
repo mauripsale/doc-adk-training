@@ -85,7 +85,7 @@ root_agent = Workflow(
 1.  **Fail-Closed Security:** By using Pydantic schemas, we ensure that malformed or malicious data is blocked at the very first node. The workflow doesn't even attempt to call the LLM or external APIs if the input doesn't match the contract.
 2.  **Native Resilience:** ADK 2.0's `RetryConfig` allows us to separate business logic from error handling. Your nodes stay "clean" (no messy loops or `try/except` boilerplate), while the framework ensures reliability.
 3.  **Local Caching:** `lru_cache` is a simple, effective way to speed up repeated queries within the same process. For multi-instance production environments, you would replace this with a distributed cache like Redis.
-4.  **Deterministic Routing:** Using a `Workflow` graph instead of a general `LlmAgent` for this pipeline saves costs and reduces latency because we don't need an LLM to decide what the next step is.
+4.  **Deterministic Routing:** Using a `Workflow` graph instead of a general `Agent` for this pipeline saves costs and reduces latency because we don't need an LLM to decide what the next step is.
 
 ### Self-Reflection Answers
 

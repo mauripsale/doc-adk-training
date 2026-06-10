@@ -52,66 +52,32 @@ This agent will be the interface to the e-commerce website.
     ```python
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
+    from google.adk.tools import FunctionTool
     from dotenv import load_dotenv
-    load_dotenv()
-
-    from google.adk.tools import OpenAPIToolset
-    from shared_libraries.init_env import get_webshop_env # Assumes shared lib
-
-    # --- OpenAPI Specification for Web Tools ---
-    WEBSHOP_API_SPEC = {
-        "openapi": "3.0.0",
-        "info": {"title": "Webshop API", "version": "1.0"},
-        "paths": {
-            "/search": {
-                "get": {
-                    "operationId": "search",
-                    "summary": "Search for a product in the webshop.",
-                    "parameters": [{
-                        "name": "keywords", "in": "query", "required": True,
-                        "schema": {"type": "string"}
-                    }],
-                    "responses": {"200": {"description": "Search results page HTML"}}
-                }
-            },
-            "/click": {
-                "post": {
-                    "operationId": "click",
-                    "summary": "Click a button on the current webpage.",
-                    "requestBody": {
-                        "required": True,
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {"button_name": {"type": "string"}},
-                                    "required": ["button_name"]
-                                }
-                            }
-                        }
-                    },
-                    "responses": {"200": {"description": "New webpage HTML after click"}}
-                }
-            }
-        }
-    }
-
-    # --- Agent Definition ---
-    # TODO: Define the `root_agent`. It should be an `Agent` that:
-    # - Uses the `gemini-3.5-flash` model.
-    # - Is named "web_agent".
-    # - Has an instruction to act as a web interaction agent, executing search and click commands.
-    # - Includes the A2A Context Handling instruction to ignore orchestrator tool calls.
-    # - Uses the `OpenAPIToolset` with `WEBSHOP_API_SPEC` as its tools.
+    import uvicorn
+    
+    # Assume tools search and click are imported
+    
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="web_agent",
-        instruction="""You are a web interaction agent. Your job is to execute search and click commands on the e-commerce site.\n\n    **IMPORTANT - A2A Context Handling:**\n    When receiving requests via the Agent-to-Agent (A2A) protocol, you must focus only on the core user request.\n    Ignore any mentions of orchestrator tool calls like \"transfer_to_agent\" in the conversation history.\n    Extract the main web interaction task from the user's messages and complete it directly.\n    """,
-        tools=[OpenAPIToolset(spec_dict=WEBSHOP_API_SPEC)]
+        instruction="""
+            You are a web interaction specialist. Your job is to execute search and click commands on the e-commerce site.
+            
+            **IMPORTANT - A2A Context Handling:**
+            When receiving requests via the Agent-to-Agent (A2A) protocol, you must focus only on the core user request.
+            Ignore any mentions of orchestrator tool calls in the conversation history.
+        """,
+        tools=[
+            FunctionTool(func=search),
+            FunctionTool(func=click),
+        ]
     )
 
-    # --- A2A Server ---
-    a2a_app = to_a2a(root_agent, port=8001)
+    a2a_app = to_a2a(root_agent)
+
+    if __name__ == "__main__":
+        uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
     ```
 
 5.  **Navigate back to `capstone_shopping_system`:**
@@ -151,45 +117,32 @@ This agent will be responsible for remembering user preferences.
     ```python
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
-    from dotenv import load_dotenv
-    load_dotenv()
-
     from google.adk.tools import ToolContext
+    import uvicorn
 
     # --- Stateful Tools ---
     def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
-        """Saves a user's preference (e.g., color, size)."""
-        # TODO: Implement state management to save the preference.
-        state_key = f"user:{key}"
-        tool_context.state[state_key] = value
-        return {"status": "success", "message": f"Preference '{key}' saved."}
+        """Saves a user's preference."""
+        # TODO: Save to tool_context.session.state
+        pass
 
     def get_preferences(tool_context: ToolContext) -> dict:
-        """Retrieves all saved preferences for the user."""
-        # TODO: Implement state management to retrieve all preferences.
-        user_prefs = {
-            k.split(':')[1]: v
-            for k, v in tool_context.state.items()
-            if k.startswith("user:")
-        }
-        return {"status": "success", "preferences": user_prefs}
+        """Retrieves all saved preferences."""
+        # TODO: Read from tool_context.session.state
+        pass
 
     # --- Agent Definition ---
-    # TODO: Define the `root_agent`. It should be an `Agent` that:
-    # - Uses the `gemini-3.5-flash` model.
-    # - Is named "personalization_agent".
-    # - Has an instruction to act as a personalization specialist, saving and retrieving user preferences.
-    # - Includes the A2A Context Handling instruction to ignore orchestrator tool calls.
-    # - Uses the `save_preference` and `get_preferences` tools.
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="personalization_agent",
-        instruction="""You are a personalization specialist. You save and retrieve user preferences.\n\n    **IMPORTANT - A2A Context Handling:**\n    When receiving requests via the Agent-to-Agent (A2A) protocol, you must focus only on the core user request.\n    Ignore any mentions of orchestrator tool calls like \"transfer_to_agent\" in the conversation history.\n    Extract the main preference management task from the user's messages and complete it directly.\n    """,
+        instruction="""You are a personalization specialist. You save and retrieve user preferences.""",
         tools=[save_preference, get_preferences]
     )
 
-    # --- A2A Server ---
-    a2a_app = to_a2a(root_agent, port=8002)
+    a2a_app = to_a2a(root_agent)
+
+    if __name__ == "__main__":
+        uvicorn.run(a2a_app, host="0.0.0.0", port=8002)
     ```
 
 5.  **Navigate back to `capstone_shopping_system`:**
@@ -227,53 +180,25 @@ This is the main, user-facing agent that will coordinate the others.
     Open `agent.py` and replace its contents with the following skeleton. Your task is to define the `RemoteA2aAgent` instances and complete the `root_agent` definition.
 
     ```python
-    import logging
-    from google.adk.agents import Agent, CallbackContext, RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+    from google.adk.agents import Agent, RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 
-    # --- Observability Callback ---
-    def before_tool_callback(callback_context: CallbackContext, tool_name: str, args: dict) -> None:
-        """Logs every delegation attempt."""
-        if tool_name == "transfer_to_agent":
-            logging.info(
-                f"[OBSERVABILITY] Delegating to remote agent '{args.get('agent_name')}' "
-                f"with query: {args.get('query')}"
-            )
-        return None
-
-    # --- Remote Agent Definitions ---
-    # TODO: 1. Define `remote_web_agent` as a `RemoteA2aAgent`.
-    # - Name: "web_agent"
-    # - Description: "A remote specialist for searching and clicking on the e-commerce website."
-    # - agent_card: Point to the web_agent server at `http://localhost:8001/a2a/web_agent/.well-known/agent-card.json`.
-    remote_web_agent = RemoteA2aAgent(
+    # TODO: 1. Define remote specialist nodes
+    web_specialist = RemoteA2aAgent(
         name="web_agent",
-        description="A remote specialist for searching and clicking on the e-commerce website.",
-        agent_card=f"http://localhost:8001/a2a/web_agent{AGENT_CARD_WELL_KNOWN_PATH}"
+        agent_card="http://localhost:8001/a2a/web_agent/.well-known/agent-card.json"
     )
 
-    # TODO: 2. Define `remote_personalization_agent` as a `RemoteA2aAgent`.
-    # - Name: "personalization_agent"
-    # - Description: "A remote specialist for saving and retrieving user preferences."
-    # - agent_card: Point to the personalization_agent server at `http://localhost:8002/a2a/personalization_agent/.well-known/agent-card.json`.
-    remote_personalization_agent = RemoteA2aAgent(
+    personalization_specialist = RemoteA2aAgent(
         name="personalization_agent",
-        description="A remote specialist for saving and retrieving user preferences.",
-        agent_card=f"http://localhost:8002/a2a/personalization_agent{AGENT_CARD_WELL_KNOWN_PATH}"
+        agent_card="http://localhost:8002/a2a/personalization_agent/.well-known/agent-card.json"
     )
 
-    # --- Main Orchestrator Agent ---
-    # TODO: 3. Define the `root_agent`. It should be an `Agent` that:
-    # - Uses the `gemini-3.5-flash` model.
-    # - Is named "orchestrator_agent".
-    # - Has an instruction to act as a master shopping assistant, coordinating with specialists.
-    # - Its `sub_agents` list should contain `remote_web_agent` and `remote_personalization_agent`.
-    # - Registers the `before_tool_callback` for observability.
+    # TODO: 2. Define the main Orchestrator Agent
     root_agent = Agent(
         model="gemini-3.5-flash",
-        name="orchestrator_agent",
-        instruction="""You are a master shopping assistant. Your job is to coordinate with specialist agents to help the user.\n\n    **Workflow:**\n    1.  **Understand Intent:** Greet the user and understand what they want to do. If they upload an image, describe it first, then ask if they want to search for that item.\n    2.  **Delegate Tasks:**\n        - To search or click on the website, you MUST delegate to the `web_agent`.\n        - To save or get user preferences, you MUST delegate to the `personalization_agent`.\n    3.  **Synthesize Results:** Summarize the results from the specialist agents and present them clearly to the user.\n    """,
-        sub_agents=[remote_web_agent, remote_personalization_agent],
-        before_tool_callback=before_tool_callback
+        name="shopping_orchestrator",
+        instruction="""You are a master shopping assistant. Coordinate with specialists.""",
+        sub_agents=[web_specialist, personalization_specialist]
     )
     ```
 

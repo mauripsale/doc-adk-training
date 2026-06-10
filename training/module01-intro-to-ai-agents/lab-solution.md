@@ -16,7 +16,7 @@ The primary source for all information related to the Google Agent Development K
 *   [About the ADK](https://google.github.io/adk-docs/get-started/about)
 *   [Installation Guide](https://google.github.io/adk-docs/get-started/installation)
 *   [Quickstart Tutorial](https://google.github.io/adk-docs/get-started/quickstart)
-*   [LlmAgent](https://google.github.io/adk-docs/agents/llm-agent)
+*   [Agent](https://google.github.io/adk-docs/agents/llm-agent)
 *   [Built-in Tools](https://google.github.io/adk-docs/tools/built-in-tools)
 *   [Function Tools](https://google.github.io/adk-docs/tools/function-tools)
 

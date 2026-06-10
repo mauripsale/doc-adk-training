@@ -34,4 +34,4 @@ except Exception:
     webshop_env = None
     init_env = None
 
-from . import agent
+from . import orchestrator as agent

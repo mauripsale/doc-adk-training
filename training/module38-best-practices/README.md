@@ -17,7 +17,7 @@ In ADK 2.0, every component is a **Node** in a **Workflow Graph**. Choosing the 
 
 | Pattern | When to use it | Key Characteristics |
 | :--- | :--- | :--- |
-| **`LlmAgent`** | Natural language reasoning and dynamic tool calling. | Non-deterministic, flexible. Best for high-level decision making. |
+| **`Agent`** | Natural language reasoning and dynamic tool calling. | Non-deterministic, flexible. Best for high-level decision making. |
 | **`Workflow` (Static) ** | Fixed, predictable pipelines (Sequential/Parallel). | Deterministic. Reduced latency and cost by avoiding LLM routing where logic is known. |
 | **`@node` (Dynamic)** | Complex, code-based orchestration (Loops, If/Else). | Maximum control. Allows arbitrary Python logic between agent executions. |
 

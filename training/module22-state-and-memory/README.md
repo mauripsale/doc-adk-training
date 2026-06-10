@@ -34,7 +34,7 @@ The agent's **scratchpad**—a key-value dictionary for conversation-level data.
 You can directly inject session state values into your agent's instructions using `{key}` templating. This makes your prompts dynamic and context-aware.
 
 ```python
-agent = LlmAgent(
+agent = Agent(
     name="StoryGenerator",
     instruction="Write a story about a cat with the theme: {current_topic}."
 )

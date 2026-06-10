@@ -49,7 +49,7 @@ ADK 2.0 represents a major evolution in how we build AI systems. It moves away f
 *   **Tool:** Capability interfaces that can be assigned to Agent nodes (e.g., Search, Database access).
 *   **Session & State:** Manages the context and memory of an interaction, ensuring continuity across the graph.
 
-In this course, you will learn to think in **Graphs and Nodi**, mastering ADK 2.0 to build scalable, production-grade AI applications.
+In this course, you will learn to think in **Graphs and Nodes**, mastering ADK 2.0 to build scalable, production-grade AI applications.
 
 ### Key Takeaways
 - AI Agents are autonomous systems that perceive, reason, and act using tools.

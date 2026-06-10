@@ -33,7 +33,7 @@ Because we are importing Python objects, we need to define our agent in a Python
 ```python
 # In agent.py (Starter Code)
 
-from google.adk.agents import LlmAgent
+from google.adk import Agent
 from google.adk.tools.langchain_tool import LangchainTool
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
@@ -47,11 +47,11 @@ langchain_tool_instance = None
 # TODO: 2. Wrap the LangChain tool instance with the ADK's `LangchainTool` wrapper.
 wikipedia_tool = None
 
-# TODO: 3. Define the `root_agent` as an `LlmAgent`.
+# TODO: 3. Define the `root_agent` as an `Agent`.
 # - Give it a name, model (`gemini-3.5-flash`), and description.
 # - Write an instruction to use the Wikipedia tool for factual questions.
 # - Add your wrapped `wikipedia_tool` to its `tools` list.
-root_agent = LlmAgent(
+root_agent = Agent(
     name="fact_finder_agent",
     model="gemini-3.5-flash",
     description="An agent that can look up information on Wikipedia.",

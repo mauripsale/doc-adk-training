@@ -22,8 +22,9 @@ Any class that inherits from `BaseSessionService` and implements its core method
 ### Why Implement a Custom Session Service?
 
 1.  **Organizational Standards:** Your company may already use Firestore as its primary serverless database.
-2.  **Specific Features:** You might want to leverage Firestore's real-time listeners or its native integration with Firebase.
-3.  **Cost & Scaling:** Firestore offers a specialized pricing model and automatic scaling that might be better suited for your agent's traffic patterns than a traditional SQL database.
+2.  **Performance & Latency:** You might need **sub-second latency** for a high-traffic customer bot. In this case, you could implement a custom service using **Redis** to cache session state in-memory, ensuring near-instant response times that a standard persistent database might not provide.
+3.  **Specific Features:** You might want to leverage Firestore's real-time listeners or its native integration with Firebase.
+4.  **Cost & Scaling:** Firestore offers a specialized pricing model and automatic scaling that might be better suited for your agent's traffic patterns than a traditional SQL database.
 
 ### How it works: Dependency Injection
 

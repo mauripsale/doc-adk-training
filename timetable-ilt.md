@@ -28,6 +28,7 @@
 | 🤖🤖 [Module 19: Collaborative Teams](./training/module19-collaborative-teams/) | High | 75 |
 | 🤖🤖 [Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/) | High | 65 |
 | 🤖🤖 [Module 21: Distributed Graphs](./training/module21-distributed-graphs/) | High | 70 |
+| 🏁 [Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/) | Low | 30 |
 | **Day 4: Production Readiness** | | **315** |
 ...
 | ☁️ [Module 35: Deployment to Agent Runtime](./training/module35-deployment-agent-runtime/) | High | 90 |

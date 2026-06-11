@@ -136,7 +136,7 @@ This file contains the complete, working code for the `index.html` custom client
     *   **Solution:** Go into your browser's site settings for `localhost:8081` and change the Microphone permission to "Allow".
 
 *   **Connection opens but agent doesn't respond:**
-    *   **Cause:** The agent server may have encountered an error. This is often because the `.env` file is not configured for Vertex AI.
+    *   **Cause:** The agent server may have encountered an error. This is often because the `.env` file is not configured for Agent Platform.
     *   **Solution:** Check the terminal window running `uv run adk api_server` for any error messages. Ensure your `streaming_agent/.env` file is correctly configured with your Agent Platform project details.
 
 ### Self-Reflection Answers

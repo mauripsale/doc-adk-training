@@ -52,7 +52,7 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
 
 2.  **Set up your environment variables:**
 
-    Navigate into the `researcher_agent` directory and open the `.env` file. For the search tool to work, you **must** configure your agent to use Vertex AI.
+    Navigate into the `researcher_agent` directory and open the `.env` file. For the search tool to work, you **must** configure your agent to use Agent Platform.
 
     Update the `.env` file to look like this, filling in your project ID and desired location:
     ```

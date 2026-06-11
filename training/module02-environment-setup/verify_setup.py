@@ -1,7 +1,12 @@
 import asyncio
 import sys
 import importlib.metadata
-from google.adk.agents import LlmAgent
+from google.adk import Agent
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
+from dotenv import load_dotenv
+
+load_dotenv()
 
 async def main():
     try:
@@ -23,20 +28,23 @@ async def main():
             sys.exit(1)
         print("✅ Python 3.10+ requirement met.")
 
-        # 3. Basic Functionality Check
-        print("Attempting to connect to the LLM service...")
-        agent = LlmAgent(
+        # 3. Basic Functionality Check (Using App/Runner Pattern)
+        print("Attempting to connect to the Gemini Enterprise Agent Platform...")
+        agent = Agent(
             name="verify_agent", 
             model="gemini-3.5-flash", 
-            instruction="You are a helpful assistant. Reply with 'OK' if you can hear me."
+            instruction="You are a helpful assistant. Reply with 'ADK 2.0 is ready!' if you can hear me."
         )
+        app = App(name="verify", root_agent=agent)
+        runner = InMemoryRunner(app=app)
 
-        # Basic invoke still works for simple verification
-        response = await agent.invoke("Verify connection")
+        response_text = ""
+        async for event in runner.run_async(user_id="verify_user", message="Verify connection"):
+            if event.is_final_response():
+                response_text = event.content.parts[0].text
 
-        if response:
-            print("✅ Authentication successful: Connected to the LLM service.")
-            print(f"LLM verification response: {response}")
+        if response_text:
+            print(f"✅ Authentication successful: {response_text}")
         else:
             print("❌ Authentication failed: Could not connect to the LLM service.")
 

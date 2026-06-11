@@ -34,7 +34,7 @@ This keeps the main agent incredibly lightweight, loading heavy documentation on
 
 ### Using Skills in the ADK
 
-In the ADK v1.0, Skills are managed using the `SkillToolset`.
+In the modern ADK, Skills are managed using the `SkillToolset`.
 
 ```python
 import pathlib

@@ -34,7 +34,7 @@ Your task is to build and configure a new agent that can search the web to answe
 
 ## Self-Reflection Questions
 - Why is it important to explicitly instruct the agent *when* to use the `google_search` tool? What might happen if you just gave it the tool with no instructions?
-- The `google_search` tool requires a Vertex AI configuration. Why do you think this is a requirement, as opposed to using a simple Google AI Studio API key?
+- The `google_search` tool requires an Agent Platform configuration. Why do you think this is a requirement, as opposed to using a simple Google AI Studio API key?
 - How does giving an agent access to real-time information fundamentally change the kinds of problems it can solve compared to an agent that only relies on its internal knowledge?
 
 <hr/>

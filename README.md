@@ -61,6 +61,7 @@ Learn how to go beyond single agents and build complex systems where multiple ag
 *   🤝 **[Module 19: Collaborative Teams](./training/module19-collaborative-teams/)** (🧑‍💻 45 min / 👨‍🏫 75 min)
 *   🤝 **[Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🤝 **[Module 21: Distributed Graphs](./training/module21-distributed-graphs/)** (🧑‍💻 50 min / 👨‍🏫 70 min)
+*   🏁 **[Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/)** (🧑‍💻 20 min / 👨‍🏫 30 min)
 
 ### 🏭 Part 4: Production Readiness (Modules 22-26)
 This part covers the essential features for making your agents robust, observable, and reliable in a production environment.

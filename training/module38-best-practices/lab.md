@@ -114,6 +114,13 @@ You have successfully built an agent system that leverages the native resilience
 *   How to use **Framework Retries** by propagating exceptions instead of catching them.
 *   How to use `lru_cache` for local performance gains.
 
+### Step 4: Bonus Challenge - Prompt Optimization
+
+Refactor a previous lab's agent (e.g., the `researcher_agent` from Module 8) to optimize its token usage.
+1.  **Analyze:** Run the agent and check the token counts in the Dev UI or logs.
+2.  **Optimize:** Rewrite the instructions using the techniques learned in the Best Practices theory (e.g., more concise constraints, removing redundant examples).
+3.  **Validate:** Re-run the same prompt and compare the token usage. Did you manage to reduce cost without losing quality?
+
 ### Self-Reflection Questions
 - Why is it better to let the framework handle retries rather than writing manual loops in your tool functions?
 - What happens if you catch the exception inside `flaky_api_node` with a `try/except` block and return an error string? Does the framework still retry?

@@ -23,7 +23,7 @@ We will use the `uv` workflow to initialize our research project.
     uv add "google-adk>=2.1.0" python-dotenv
     ```
 
-2.  **Configure Authentication:** Ensure your `.env` file has your project ID and location set for Vertex AI.
+2.  **Configure Authentication:** Ensure your `.env` file has your project ID and location set for Agent Platform.
 
 ### Step 2: Define the Agent and Tools
 

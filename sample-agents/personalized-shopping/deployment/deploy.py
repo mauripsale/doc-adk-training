@@ -45,7 +45,7 @@ app = AdkApp(
 
 AGENT_WHL_FILE = "./personalized_shopping-0.1.0-py3-none-any.whl"
 
-print("Deploying agent to agent engine...")
+print("Deploying agent to agent runtime...")
 remote_app = agent_engines.create(
     app,
     requirements=[
@@ -55,7 +55,7 @@ remote_app = agent_engines.create(
         AGENT_WHL_FILE,
     ],
 )
-print("Deploying agent to agent engine finished.")
+print("Deploying agent to agent runtime finished.")
 print("-" * 50)
 
 print("Testing deployemnt:")

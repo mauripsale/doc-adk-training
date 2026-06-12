@@ -36,7 +36,7 @@ This solution provides the architectural blueprints and justifications for the s
 *   **Design:**
     1.  `START` -> `Writer`
     2.  `Writer` -> `Critic`
-    3.  `Critic` -> `Writer` (IF "Too Scary") <-- **The Cycle**
+    3.  `Critic` -> `Writer` (IF "Too Scary") -- **The Cycle**
     4.  `Critic` -> `END` (IF "Satisfied")
 
 *   **Justification:**

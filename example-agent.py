@@ -1,6 +1,6 @@
 """Improve Engagement agent — A2A client coordinating Data + Intervention agents.
 
-Deploys to Agent Engine via `adk deploy agent_engine`. The Improve Engagement agent is
+Deploys to Agent Runtime via `adk deploy agent_engine`. The Improve Engagement agent is
 NOT an A2A server — it is the user-facing agent that delegates data questions
 to the Data Agent and intervention creation to the Intervention Agent, both via
 their Cloud Run A2A endpoints.

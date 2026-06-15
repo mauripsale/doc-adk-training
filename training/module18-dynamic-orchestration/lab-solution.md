@@ -3,7 +3,7 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 21.5 Solution: Building a Smart Support Router with Dynamic Workflows
+# Lab 18 Solution: Building a Smart Support Router with Dynamic Workflows
 
 ## Goal
 

@@ -3,7 +3,7 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.6: Building a Market Analyst with Deterministic Edges
+# Lab 17: Building a Market Analyst with Deterministic Edges
 
 ## Goal
 

@@ -3,7 +3,7 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.5: Building a Smart Support Router with Dynamic Workflows
+# Lab 18: Building a Smart Support Router with Dynamic Workflows
 
 ## Goal
 

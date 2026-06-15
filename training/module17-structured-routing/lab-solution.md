@@ -3,7 +3,7 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 21.6 Solution: Market Analyst with Deterministic Edges
+# Lab 17 Solution: Market Analyst with Deterministic Edges
 
 ## Goal
 

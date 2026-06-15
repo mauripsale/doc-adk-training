@@ -3,7 +3,7 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 21.7 Solution: Building a Collaborative Travel Team
+# Lab 19 Solution: Building a Collaborative Travel Team
 
 ## Goal
 

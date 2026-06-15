@@ -56,7 +56,7 @@ root_agent = Agent(
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDQtbGxtYWdlbnQtZGVlcC1kaXZlL2xhYi1zb2x1dGlvbg==`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDQtYWdlbnQtZGVlcC1kaXZlL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
     The direct link is: <a href="/doc-adk-training/module04-agent-deep-dive/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>

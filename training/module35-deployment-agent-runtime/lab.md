@@ -146,7 +146,7 @@ Follow the cleanup instructions in `lab-solution.md` to delete the Agent Runtime
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzUtZGVwbG95bWVudC1hZ2VudC1lbmdpbmUvbGFiLXNvbHV0aW9u`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzUtZGVwbG95bWVudC1hZ2VudC1ydW50aW1lL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
     The direct link is: <a href="/doc-adk-training/module35-deployment-agent-engine/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>

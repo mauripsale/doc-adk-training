@@ -62,6 +62,43 @@ This file contains the expected output for the `eval_results/calculator_tests.ev
 }
 ```
 
+### Extra Challenge: `locustfile.py` Template
+
+This script simulates concurrent users sending prompts to your ADK Agent API server (`uv run adk API_SERVER_ARGS`) to test system latency and endpoint throughput under load.
+
+```python
+import json
+from locust import HttpUser, task, between
+
+class ADKAgentUser(HttpUser):
+    # Wait between 1 and 3 seconds between tasks per user
+    wait_time = between(1, 3)
+
+    @task
+    def ask_calculator_agent(self):
+        # Target the native ADK API Server runner execution endpoint
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "session_id": "locust-load-test-session",
+            "prompt": "What is 15 + 27?"
+        }
+        
+        # We hit the standard synchronous runner execution endpoint
+        with self.client.post("/run", json=payload, headers=headers, catch_response=True) as response:
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    # Check if final response text contains expected result
+                    if "42" in data.get("response", ""):
+                        response.success()
+                    else:
+                        response.failure(f"Incorrect agent response: {data}")
+                except json.JSONDecodeError:
+                    response.failure("Malformed JSON response from agent server")
+            else:
+                response.failure(f"HTTP error: {response.status_code}")
+```
+
 ### Self-Reflection Answers
 
 1.  **Why is testing the `tool_trajectory` often more important for ensuring an agent's correctness than just testing its final text response?**

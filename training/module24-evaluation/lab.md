@@ -190,7 +190,21 @@ While the Dev UI is great for creating and running evaluations interactively, yo
 
     Total: 1/1 passed (100%)
     ```
-    This provides a fast, automated way to confirm your agent is still behaving as expected after you make changes.
+### Extra Challenge: Performance Load Testing with Locust (Optional)
+
+In production, evaluations are not just about correctness, but also about **performance and latency**. To test if your asynchronous agent endpoints can scale under concurrent user traffic without blocking the Python event loop, you can use **Locust**.
+
+1. **Install Locust** (inside your virtual environment):
+   ```shell
+   uv pip install locust
+   ```
+2. **Create a `locustfile.py`:**
+   Create a basic file inside your directory to simulate users hitting the ADK `/run_sse` (Server-Sent Events) or `/run` endpoint. See the expected template structure in the `lab-solution.md` if you need guidance.
+3. **Execute the load test:**
+   ```shell
+   locust -f locustfile.py
+   ```
+   Open `http://localhost:8089` to start the test and observe your agent response latency and success rate under load.
 
 ### Lab Summary
 

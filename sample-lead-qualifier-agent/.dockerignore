@@ -1,0 +1,10 @@
+.venv
+tests/
+.git
+.gitignore
+*.db
+.pytest_cache/
+__pycache__/
+.adk/
+.cloudbuild/
+deployment/

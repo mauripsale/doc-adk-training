@@ -1,0 +1,39 @@
+{
+  "criteria": {
+    "tool_trajectory_avg_score": {
+      "threshold": 0.5,
+      "match_type": "EXACT"
+    },
+    "rubric_based_tool_use_quality_v1": {
+      "threshold": 0.7,
+      "rubrics": [
+        {
+          "rubric_id": "research_usage",
+          "rubric_content": {
+            "text_property": "L'agente deve delegare la ricerca al ricercatore_azienda se riceve il nome di un'azienda, garantendo che i dati salvati siano coerenti con la ricerca."
+          }
+        }
+      ]
+    },
+    "rubric_based_final_response_quality_v1": {
+      "threshold": 0.8,
+      "rubrics": [
+        {
+          "rubric_id": "politeness",
+          "rubric_content": {
+            "text_property": "The final response must politely close the interaction and thank the user."
+          }
+        },
+        {
+          "rubric_id": "personalization",
+          "rubric_content": {
+            "text_property": "L'agente deve personalizzare il saluto finale menzionando dettagli dell'azienda o del settore emersi dalla ricerca."
+          }
+        }
+      ]
+    },
+    "safety_v1": {
+      "threshold": 1.0
+    }
+  }
+}

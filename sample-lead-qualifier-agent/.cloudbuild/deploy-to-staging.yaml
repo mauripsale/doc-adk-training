@@ -1,0 +1,111 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+  substitutionOption: ALLOW_LOOSE
+
+substitutions:
+  _REPO_NAME: prod-adk-repo-staging
+  _REGION: us-central1
+  _SERVICE_NAME: prod-adk
+
+steps:
+  # 1) Install uv package manager and sync dependencies
+  - name: "python:3.12-slim"
+    id: install-dependencies
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        pip install uv==0.8.13 --user && uv sync --locked
+    env:
+      - 'PATH=/usr/local/bin:/usr/bin:~/.local/bin'
+
+  # 2) Run unit tests using pytest
+  - name: "python:3.12-slim"
+    id: unit-tests
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        uv run pytest tests/unit -v
+    env:
+      - 'PATH=/usr/local/bin:/usr/bin:~/.local/bin'
+
+  # 3) Run integration tests
+  - name: "python:3.12-slim"
+    id: integration-tests
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        export GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+        export GOOGLE_CLOUD_LOCATION=global
+        export FIRESTORE_DATABASE_ID=lead-qualifier-db-staging
+        uv run pytest tests/integration -v
+    env:
+      - 'PATH=/usr/local/bin:/usr/bin:~/.local/bin'
+
+  # 4) Run evaluation tests (ADK eval)
+  - name: "python:3.12-slim"
+    id: eval-tests
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        export GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+        export GOOGLE_CLOUD_LOCATION=global
+        export GOOGLE_GENAI_USE_VERTEXAI=True
+        # Limita la concorrenza a 1 per evitare errori 429 RESOURCE_EXHAUSTED
+        export ADK_EVAL_MAX_CONCURRENCY=1
+        uv sync --dev --extra eval
+        uv run adk eval ./app tests/eval/evalsets/lead_qualifier.evalset.json --config_file_path=tests/eval/eval_config.json
+
+    env:
+      - 'PATH=/usr/local/bin:/usr/bin:~/.local/bin'
+
+  # 5) Build Docker Image for STAGING
+  - name: "gcr.io/cloud-builders/docker"
+    id: build-image
+    args:
+      - "build"
+      - "-t"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME-staging:$COMMIT_SHA"
+      - "."
+
+  # 6) Push Docker Image to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    id: push-image
+    args:
+      - "push"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME-staging:$COMMIT_SHA"
+
+  # 7) Deploy to STAGING on Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: deploy-staging
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        gcloud beta run deploy $_SERVICE_NAME-staging \
+          --image $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME-staging:$COMMIT_SHA \
+          --region $_REGION \
+          --project $PROJECT_ID \
+          --no-allow-unauthenticated \
+          --service-account "$_SERVICE_NAME-app-staging@$PROJECT_ID.iam.gserviceaccount.com" \
+          --max-instances 10 \
+          --min-instances 0 \
+          --update-env-vars "FIRESTORE_DATABASE_ID=lead-qualifier-db-staging,LOGS_BUCKET_NAME=$PROJECT_ID-$_SERVICE_NAME-staging-logs,OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true,ALLOW_ORIGINS=*,GOOGLE_GENAI_USE_VERTEXAI=True,GOOGLE_CLOUD_LOCATION=global"

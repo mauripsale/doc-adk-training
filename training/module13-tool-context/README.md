@@ -82,7 +82,12 @@ def analyze_logs(file_name: str, tool_context: ToolContext):
         # ... logic ...
 ```
 
-By leveraging the `ToolContext`, you can elevate your custom functions from simple calculators to powerful, context-aware components that are deeply integrated into the agent's lifecycle. In the following lab, you will use the `tool_context.state` to create a tool that can remember information across turns.
+By leveraging the `ToolContext`, you can elevate your custom functions from simple calculators to powerful, context-aware components that are deeply integrated into the agent's lifecycle. 
+
+> [!NOTE]
+> **Pedagogical Note:** Although we will dive deep into multi-agent orchestration and workflows on **Day 3 (Module 15+)**, in the following lab we will use a simple, single-edge `Workflow` container. This is a technical requirement in ADK 2.0 to support the dynamic hand-off (escalation) from our main agent to a supervisor agent.
+>
+> In the following lab, you will use human confirmation and workflow actions to build a secure financial escalation system.
 
 ### Key Takeaways
 - **HITL** is a mandatory pattern for high-stakes enterprise agents.

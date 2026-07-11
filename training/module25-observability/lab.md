@@ -28,7 +28,8 @@ In this lab, you will build a comprehensive observability system for an agent us
 
 ```python
 # In agent.py (Starter Code)
-from google.adk import Agent, App, node, Context, Workflow
+from google.adk import Agent, node, Context, Workflow
+from google.adk.apps import App
 from google.adk.plugins import BasePlugin
 from google.adk.events import Event
 

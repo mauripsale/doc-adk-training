@@ -13,7 +13,8 @@ This file contains the complete code for the `agent.py` script in the Observabil
 
 ```python
 import os
-from google.adk import Agent, App
+from google.adk import Agent
+from google.adk.apps import App
 from google.adk.plugins import BasePlugin
 from google.adk.events import Event
 from google.adk.telemetry.google_cloud import get_gcp_exporters

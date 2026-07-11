@@ -13,7 +13,9 @@ This file contains the complete code for the `agent.py` script using a professio
 
 ```python
 import re
-from google.adk import Agent, App, Event
+from google.adk import Agent
+from google.adk.events import Event
+from google.adk.apps import App
 from google.adk.plugins import BasePlugin
 
 # --- 1. Define the Safety Plugin ---

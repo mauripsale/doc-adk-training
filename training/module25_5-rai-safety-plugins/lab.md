@@ -27,7 +27,9 @@ Open `agent.py`. You need to create a class that intercepts the agent's final re
 ```python
 # In agent.py (Starter Code)
 import re
-from google.adk import Agent, App, Context, Event
+from google.adk import Agent, Context
+from google.adk.events import Event
+from google.adk.apps import App
 from google.adk.plugins import BasePlugin
 
 class PIIGuardrailPlugin(BasePlugin):

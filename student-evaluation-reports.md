@@ -920,3 +920,29 @@ The solution in `lab-solution.md` is robust. The json structure of `calculator_t
 
 ## 💡 Suggestions for Improvement
 Already implemented by adding the optional Locust load testing challenge and solution code.
+
+---
+# 🎓 Student Evaluation Report: Module 37 (Distributed Personalized Shopping Agent)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 4
+
+## 🧑‍💻 The Student Experience
+The capstone lab was an incredible synthesis of all previous concepts! Setting up three separate agents communicating via the A2A (Agent-to-Agent) protocol felt like building a real-world enterprise service architecture. Having separate `web_agent`, `personalization_agent`, and `orchestrator_agent` is highly modular. The instructions in `lab.md` were crystal-clear, detailing step-by-step setup using `uv`. I was able to write the agent files and set up the mocks without looking at the solution, achieving full syntax compilation successfully on the first run.
+
+## 🚧 Friction Points & Bugs
+No severe friction points or bugs were encountered. The prerequisite tools are clearly listed. A small point of caution for other students: because this is a distributed multi-agent setup, it requires running three terminal sessions simultaneously (ports 8001, 8002, and the web ui). Clarifying port allocations and the exact `uvicorn` commands was crucial, and the `lab.md` did this flawlessly.
+
+## 🏁 Solution Review
+The solution provided in `lab-solution.md` is perfectly aligned with ADK 2.0 A2A design patterns:
+1. It uses `to_a2a(root_agent)` to expose agents as FastAPI/Uvicorn applications.
+2. It leverages `AGENT_CARD_WELL_KNOWN_PATH` to discover remote agent cards.
+3. It uses `RemoteA2aAgent` to easily register remote microservices.
+It matches my simulation perfectly and compiles without warnings.
+
+## 💡 Suggestions for Improvement
+The lab is already exceptional. One small suggestion: we could add a minor note in `lab.md` explaining how `to_a2a` automatically wraps the agent in a FastAPI app behind the scenes, so students understand why `uvicorn` is used to run it.

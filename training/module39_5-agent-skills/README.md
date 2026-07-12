@@ -81,5 +81,5 @@ my-skill/
 ### Key Takeaways
 - **Skills** are modular packages containing instructions, references, and scripts to teach an agent complex domain knowledge.
 - They prevent context bloat via **Progressive Disclosure**—loading detailed instructions only when the skill is activated.
-- In ADK v1.0, you load skills from a directory using `load_skill_from_dir()`.
+- In ADK 2.0, you load skills from a directory using `load_skill_from_dir()`.
 - You provide skills to an Agent by bundling them inside a `SkillToolset`, which handles the activation and execution logic.

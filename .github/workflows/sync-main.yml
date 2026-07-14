@@ -1,0 +1,44 @@
+name: Sync main with solution (student version)
+
+on:
+  push:
+    branches:
+      - solution
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Open PR to update main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Mirror solution onto main, stripping lab solutions
+        run: |
+          git rm -r --quiet --ignore-unmatch .
+          git checkout origin/solution -- .
+          find training -name 'lab-solution.md' -delete
+          git add -A
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: sync/solution-to-main
+          base: main
+          delete-branch: true
+          title: "chore: sync main with solution (student version)"
+          commit-message: "chore: sync main with solution (student version)"
+          body: |
+            Automated sync triggered by a push to `solution`.
+
+            All `training/**/lab-solution.md` files have been removed so `main`
+            stays the student-facing version without answer keys, per
+            `branch-management.md`. Please review the diff before merging.

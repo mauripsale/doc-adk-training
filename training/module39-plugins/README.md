@@ -3,25 +3,21 @@ sidebar_position: 39
 title: "Module 39: ADK Plugins"
 ---
 
-# Module 39: Enhancing Agents with ADK Plugins
+# Module 39: Advanced Recovery with Built-In Plugins
 
 ## Theory
 
-### What are Plugins?
+### Building on Custom Plugins
 
-As you build more complex agents, you'll find that certain functionality is needed across *all* your agents and tools. Features like logging, error handling, context filtering, and global policy enforcement are "cross-cutting concerns"—they don't belong in the core logic of a single agent, but rather in the infrastructure that runs them.
+Having previously built custom plugins for **Observability (Module 25)** and **Responsible AI Guardrails (Module 25.5)**, you are already familiar with how the ADK's plugin architecture cleanly separates cross-cutting infrastructure concerns from your core agent prompt logic. 
 
-In the ADK, **Plugins** are reusable modules that hook into the execution lifecycle (via global callbacks) to provide this functionality. 
+As a reminder, **Plugins** inherit from `BasePlugin` and register on the **App** (or Runner) to globally intercept and inspect events. They operate using three primary patterns:
 
-Unlike agent-specific callbacks (like `before_model_callback` on a single `Agent`), a Plugin is registered on the **App** (or Runner), and its logic applies globally to *every* step of the workflow, for *every* agent in the application.
+1.  **Observing (Return `None`):** Watches the data flow (e.g., your custom `AlertingPlugin` from Module 25).
+2.  **Intervening (Return an Object):** Blocks execution and overrides standard behavior (e.g., caching or PII blocking from Module 25.5).
+3.  **Amending (Modify in place):** Amends the conversation history or configuration before execution.
 
-### The Three Plugin Patterns
-
-Plugins in ADK v1.0 inherit from `BasePlugin` and operate using three primary patterns based on what their hook methods return:
-
-1.  **Observing (Return `None`):** The plugin watches the data flow without changing it. Useful for logging, analytics (like `BigQueryAgentAnalyticsPlugin`), or debugging.
-2.  **Intervening (Return an Object):** The plugin blocks the standard execution and forces the system to use a different result. Useful for global guardrails or caching.
-3.  **Amending (Modify in place):** The plugin modifies the request or response objects before they are passed along. Useful for injecting global system instructions (`GlobalInstructionPlugin`) or redacting PII universally.
+In this module, we will explore one of the most powerful **built-in framework plugins** that uses a combination of *Intervening* and *Amending* to handle a critical production issue: **tool hallucination**.
 
 ### The Problem: Fragile Tool Use
 
@@ -43,7 +39,7 @@ The **`ReflectAndRetryToolPlugin`** is a powerful built-in plugin designed to so
 4.  **Retry:** The LLM, seeing this error, "reflects" on its mistake and generates a *new* tool call with the corrected name or arguments.
 5.  **Loop:** This process repeats up to a configured `max_retries` limit.
 
-### Using Plugins in ADK v1.0
+### Using Plugins in ADK 2.0
 
 To use a plugin, you instantiate it and add it to your `App` configuration.
 
@@ -57,7 +53,7 @@ retry_plugin = ReflectAndRetryToolPlugin(
     max_retries=3  # Give agents 3 chances to fix their mistakes
 )
 
-# In ADK v1.0, plugins are registered on the App object
+# In ADK 2.0, plugins are registered globally on the App object
 app = App(
     name="my_robust_app",
     root_agent=my_agent,

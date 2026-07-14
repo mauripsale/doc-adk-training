@@ -190,7 +190,58 @@ While the Dev UI is great for creating and running evaluations interactively, yo
 
     Total: 1/1 passed (100%)
     ```
-    This provides a fast, automated way to confirm your agent is still behaving as expected after you make changes.
+### Extra Challenge: Performance Load Testing with Locust (Optional)
+
+In production, evaluations are not just about correctness, but also about **performance and latency**. To test if your asynchronous agent endpoints can scale under concurrent user traffic without blocking the Python event loop, you can use **Locust**.
+
+1. **Install Locust** (inside your virtual environment):
+   ```shell
+   uv pip install locust
+   ```
+2. **Create a `locustfile.py`:**
+   Create a file inside your directory and use this skeletal template. Your task is to fill in the **ADK-specific payload** and **validation logic** where marked with `TODO`:
+
+   ```python
+   import json
+   from locust import HttpUser, task, between
+
+   class ADKAgentUser(HttpUser):
+       # Wait between 1 and 3 seconds between tasks per user
+       wait_time = between(1, 3)
+
+       @task
+       def ask_calculator_agent(self):
+           headers = {"Content-Type": "application/json"}
+           
+           # TODO: Define the JSON payload matching ADK's native API contract
+           # It must include a session_id and a prompt (e.g. asking the calculator)
+           payload = {
+               # "session_id": "...",
+               # "prompt": "..."
+           }
+           
+           # TODO: Complete the POST request to the API server's execution endpoint (e.g., "/run")
+           with self.client.post("/run", json=payload, headers=headers, catch_response=True) as response:
+               if response.status_code == 200:
+                   try:
+                       data = response.json()
+                       # TODO: Check if the expected mathematical result is present in the response
+                       # if expected_value_present:
+                       #     response.success()
+                       # else:
+                       #     response.failure(...)
+                       pass
+                   except json.JSONDecodeError:
+                       response.failure("Malformed JSON response")
+               else:
+                   response.failure(f"HTTP error: {response.status_code}")
+   ```
+
+3. **Execute the load test:**
+   ```shell
+   locust -f locustfile.py
+   ```
+   Open `http://localhost:8089` to start the test and observe your agent response latency and success rate under load.
 
 ### Lab Summary
 

@@ -14,63 +14,29 @@ L'analisi della documentazione `llms-full.txt` (v1.0) ha evidenziato quattro are
 
 ---
 
-## 📋 Roadmap della Revisione
+## 📋 Stato di Avanzamento della Revisione (Audit completato)
 
-### Fase 0: Audit & Sanitize (Risoluzione Leak Soluzioni)
+### 🔹 Fase 0: Audit & Sanitize (Risoluzione Leak Soluzioni) — **100% COMPLETATO**
+- [x] **Modulo 38 (Best Practices):** Sostituito il codice in `lab.md` con scheletri puliti (`TODO` e `pass`). Rimosse le risposte dal file teorico `README.md` e verificate correttamente in fondo a `lab-solution.md`.
+- [x] **Modulo 03 (First Agent):** Aggiunto il paragrafo "Answers to Self-Reflection Questions" in fondo a `lab-solution.md`.
+- [x] **Modulo 28 (MCP Tools):** Verificato lo starter code in `lab.md` per assicurare che non ci siano leak di logica e che usi correttamente `# TODO`.
 
-Prima di introdurre nuovi concetti, è fondamentale "ripulire" i laboratori attuali dove le soluzioni sono trapelate nel codice di partenza e dove le domande di riflessione sono mal gestite.
-*   **Modulo 38 (Best Practices):**
-    *   *Problema:* Il file `lab.md` contiene già l'implementazione completa (es. `try/except`, `@retry`). Inoltre, le risposte alle *Self-Reflection Questions* sono state inserite per errore in fondo al file teorico `README.md` (sotto "Key Takeaways") anziché nel `lab-solution.md`.
-    *   *Azione:* Sostituire il codice nel `lab.md` con funzioni vuote (usando `pass` o commenti `TODO`). Spostare le risposte dal `README.md` al `lab-solution.md`.
-*   **Modulo 03 (First Agent):**
-    *   *Problema:* Le *Self-Reflection Questions* presenti nel `lab.md` non hanno una risposta nel `lab-solution.md`.
-    *   *Azione:* Aggiungere un paragrafo "Answers to Self-Reflection Questions" in fondo a `lab-solution.md`.
-*   **Modulo 28 (MCP Tools):**
-    *   *Problema:* Verificare e rimuovere eventuale logica risolutiva avanzata trapelata nello starter code di `lab.md`.
+### 🔹 Fase 1: Aggiornamento dei Fondamenti (Moduli 01 - 10) — **100% COMPLETATO**
+- [x] **Modulo 04 (LLM Agent Deep Dive):** Introdotti i parametri `output_schema` (con Pydantic) e `output_key` nel `README.md`, nel `lab.md` (Support Analyzer) e nel `lab-solution.md`. Spiegata la limitazione dell'uso dei tool con gli output strutturati.
+- [x] **Modulo 04.5 (Professional Model Configuration & Resiliency):** Nuovo modulo creato. Include la spiegazione di `Gemini` per retries resilienti e `LiteLlm` per fallback multi-modello. Laboratorio implementato e validato.
 
-### Fase 1: Aggiornamento dei Fondamenti (Moduli 01 - 10)
+### 🔹 Fase 2: Orchestrazione e Workflow (Moduli 15 - 20) — **100% COMPLETATO**
+- [x] **Moduli 17 & 18 (Sequential & Parallel):** Aggiornati i flussi per rimuovere il parsing manuale delle stringhe, passando dati strutturati tramite `ctx.session.state` popolato da `output_key`.
+- [x] **Modulo 20 (Loop/Cyclic Agents):** Introdotte logiche di interruzione e loop di self-correction basate sul Workflow Runtime di ADK 2.0.
 
-*   **Modulo 04 (LLM Agent Deep Dive):**
-    *   **Revisione:** Introdurre i parametri `output_schema` (con Pydantic) e `output_key`.
-    *   **Laboratorio:** Creare un esercizio dove l'agente deve restituire un oggetto JSON rigido (es. estrazione entità da un testo) e salvarlo automaticamente in sessione.
-    *   **Nota:** Spiegare che l'uso di `output_schema` disabilita i tool per quell'agente.
+### 🔹 Fase 3: Estensibilità e Advanced (Moduli 21 - 39) — **100% COMPLETATO**
+- [x] **NUOVO Modulo (Post-21): Creazione di Agenti Custom (`BaseAgent` & `_run_async_impl`):** *ESCLUSO* (Deciso di escludere questo modulo poiché in ADK 2.0 l'ereditarietà classica è considerata un pattern avanzato di nicchia, ampiamente sostituita da `@node` e `Workflow` che riducono drasticamente la complessità pedagogica).
+- [x] **Modulo 26 (Callbacks):** Introdotti i trigger di callback (come `before_agent_callback`) per logging, convalida e logica di bypass/caching.
+- [x] **Modulo 39 (Plugins):** Strutturata la teoria sui pattern *Observing, Intervening, Amending* e integrato l'uso del `ReflectAndRetryToolPlugin`.
+- [x] **Modulo 39.5 (Agent Skills):** Nuovo modulo creato per insegnare la "Progressive Disclosure" del contesto tramite `load_skill_from_dir` e `SkillToolset`.
 
-*   **NUOVO Modulo 04.5: Supporto Multi-Modello con LiteLLM**
-    *   **Contenuto:** Installazione di `litellm` e configurazione del wrapper `LiteLlm`.
-    *   **Laboratorio:** Switch a caldo di un agente tra Gemini e un modello locale (Ollama/Mistral) o esterno (Claude/GPT-4o) cambiando solo la riga `model=LiteLlm(...)`.
-    *   **Troubleshooting:** Gestione dei prompt di sistema per modelli locali per evitare loop infiniti di chiamate a funzioni.
-
-### Fase 2: Orchestrazione e Workflow (Moduli 15 - 20)
-
-*   **Modulo 17 & 18 (Sequential & Parallel):**
-    *   **Revisione:** Aggiornare i flussi per eliminare il parsing manuale delle stringhe.
-    *   **Focus:** Passaggio di dati strutturati tra agenti tramite `ctx.session.state` popolato da `output_key`.
-
-*   **Modulo 20 (Loop Agents):**
-    *   **Revisione:** Introdurre logiche di interruzione del loop basate su flag di stato o tool di escalation (`tool_context.actions.escalate = True`).
-
-### Fase 3: Estensibilità e Advanced (Moduli 21 - 39)
-
-*   **NUOVO Modulo (Post-21): Creazione di Agenti Custom**
-    *   **Contenuto:** Ereditarietà da `BaseAgent`, override del costruttore `__init__` e implementazione di `_run_async_impl`.
-    *   **Laboratorio:** Implementare un orchestratore con logica condizionale complessa (es: "Se l'analisi del sentiment è negativa, invia a un agente umano, altrimenti prosegui con l'agente di supporto automatico").
-
-*   **Modulo 26 (Callbacks):**
-    *   **Revisione:** Introdurre `before_agent_callback`.
-    *   **Laboratorio:** Implementare un meccanismo di caching: se il risultato è già nello stato, il callback usa `skip` per non invocare il modello LLM, risparmiando token e tempo.
-
-*   **Modulo 39 (Plugins):**
-    *   **Revisione:** Allineare la teoria alla doc v1.0, formalizzando l'ereditarietà da `BasePlugin` e i tre pattern operativi: *Observing, Intervening, Amending*.
-    *   **Focus:** Verificare che il `ReflectAndRetryToolPlugin` e l'aggancio al `Runner` usino le firme dei metodi aggiornate.
-
-*   **NUOVO Modulo 39.5: Integrazione Agent Skills**
-    *   **Contenuto:** Concetto di "Progressive Disclosure" del context. Architettura a tre livelli di una skill (`L1 Frontmatter`, `L2 Instructions` in `SKILL.md`, `L3 Resources` in `references/`, `assets/`, `scripts/`).
-    *   **Laboratorio:** Usare `google.adk.skills.load_skill_from_dir` e `google.adk.tools.skill_toolset.SkillToolset` per caricare la skill `adk-skill` che abbiamo appena creato, aggiungendola ai `tools` dell'agente. Mostrare come l'agente decide autonomamente quando leggere i file di riferimento associati alla skill.
-
-### Fase 4: Finalizzazione e Best Practices (Modulo 38)
-
-*   **Modulo 38 (Best Practices):**
-    *   **Integrazione:** Aggiungere la matrice decisionale ufficiale ADK per la scelta del tipo di agente (`LlmAgent` vs `WorkflowAgent` vs `CustomAgent`).
+### 🔹 Fase 4: Finalizzazione e Best Practices — **100% COMPLETATO**
+- [x] **Modulo 38 (Best Practices):** Integrata la matrice decisionale ufficiale ADK 2.0 per guidare gli studenti nella scelta tra `LlmAgent`, `WorkflowAgent` o `@node` (Custom Workflows).
 
 ---
 

@@ -1,0 +1,42 @@
+{
+  "eval_set_id": "search_and_modular",
+  "name": "Search and Modular Delegation Evalset",
+  "description": "Valida il nuovo workflow: identificazione azienda, ricerca tramite sub-agente e salvataggio arricchito.",
+  "eval_cases": [
+    {
+      "eval_id": "case_full_flow_ferrero",
+      "conversation": [
+        {
+          "invocation_id": "inv_1",
+          "user_content": { "parts": [{ "text": "Ciao, sono un responsabile di Ferrero Spa." }] },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "ricercatore_azienda",
+                "args": { "user_query": "Ferrero Spa" }
+              }
+            ]
+          }
+        },
+        {
+          "invocation_id": "inv_2",
+          "user_content": { "parts": [{ "text": "Al momento usiamo Adecco per circa 300 persone stagionali." }] },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "salva_qualificazione",
+                "args": {
+                  "nome_azienda": "Ferrero Spa",
+                  "descrizione_azienda": "Azienda multinazionale italiana specializzata in prodotti dolciari.",
+                  "tipo": "competitor",
+                  "volume": 300
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "session_input": { "app_name": "app", "user_id": "eval_user_1", "state": {} }
+    }
+  ]
+}

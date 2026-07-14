@@ -1,0 +1,47 @@
+telemetry:
+  namespace: "lead-qualifier-agent"
+
+app:
+  name: "app"
+
+fastapi:
+  enable_web_ui: false
+
+env:
+  GOOGLE_CLOUD_LOCATION: "global"
+  GOOGLE_GENAI_USE_VERTEXAI: "True"
+
+firestore:
+  database_id: "lead-qualifier-db-prod"
+  sessions_database_id: "adk-sessions-db-prod"
+
+agents:
+  root:
+    name: "qualificatore_commerciale"
+    model: "gemini-3.1-pro-preview"
+    temperature: 0.1
+    safety_settings:
+      HATE_SPEECH: BLOCK_LOW_AND_ABOVE
+      DANGEROUS_CONTENT: BLOCK_LOW_AND_ABOVE
+      SEXUALLY_EXPLICIT: BLOCK_LOW_AND_ABOVE
+      HARASSMENT: BLOCK_LOW_AND_ABOVE
+  researcher:
+    name: "ricercatore_azienda"
+    model: "gemini-3-flash-preview"
+    temperature: 0.0
+    max_output_tokens: 1000
+
+rai:
+  threshold: 0.8
+  categories:
+    - Toxic
+    - Insult
+    - Profanity
+    - Violent
+    - Sexual
+    - Hate Speech
+    - Harassment
+    - Death, Harm & Tragedy
+  messages:
+    fallback: "Spiacente, ma non posso fornire questa risposta in quanto potrebbe contenere contenuti non conformi ai principi di Responsible AI."
+    input_blocked: "Spiacente, ma il tuo messaggio è stato bloccato in quanto non conforme ai nostri principi di Responsible AI."

@@ -1,0 +1,79 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+  substitutionOption: ALLOW_LOOSE
+
+substitutions:
+  _REPO_NAME: prod-adk-repo-dev
+  _REGION: us-central1
+  _SERVICE_NAME: prod-adk
+
+steps:
+  # 1) Install dependencies using the official uv image
+  - name: "python:3.12-slim"
+    id: install-dependencies
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        pip install uv==0.8.13 --user && uv sync --locked
+    env:
+      - 'PATH=/usr/local/bin:/usr/bin:~/.local/bin'
+
+  # 2) Run unit tests using pytest
+  - name: "python:3.12-slim"
+    id: unit-tests
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        uv run pytest tests/unit -v
+    env:
+      - 'PATH=/usr/local/bin:/usr/bin:~/.local/bin'
+
+  # 3) Build the Docker image
+  - name: "gcr.io/cloud-builders/docker"
+    id: build-image
+    args:
+      - "build"
+      - "-t"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME-dev:$COMMIT_SHA"
+      - "."
+
+  # 4) Push the image to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    id: push-image
+    args:
+      - "push"
+      - "$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME-dev:$COMMIT_SHA"
+
+  # 5) Deploy to Cloud Run
+  - name: "gcr.io/cloud-builders/gcloud"
+    id: deploy-app
+    entrypoint: /bin/bash
+    args:
+      - "-c"
+      - |
+        gcloud beta run deploy $_SERVICE_NAME-dev \
+          --image $_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_SERVICE_NAME-dev:$COMMIT_SHA \
+          --region $_REGION \
+          --project $PROJECT_ID \
+          --no-allow-unauthenticated \
+          --service-account "$_SERVICE_NAME-app-dev@$PROJECT_ID.iam.gserviceaccount.com" \
+          --max-instances 10 \
+          --min-instances 0 \
+          --update-env-vars "FIRESTORE_DATABASE_ID=lead-qualifier-db-dev,FIRESTORE_SESSIONS_DATABASE_ID=adk-sessions-db-dev,LOGS_BUCKET_NAME=$PROJECT_ID-$_SERVICE_NAME-dev-logs,OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true,ALLOW_ORIGINS=*,GOOGLE_GENAI_USE_VERTEXAI=True,GOOGLE_CLOUD_LOCATION=global"

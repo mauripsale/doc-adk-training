@@ -18,7 +18,7 @@
 | 🛠️ [Module 11: OpenAPI Tools](./training/module11-openapi-tools/) | High | 35 |
 | 🛠️ [Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/) | Medium | 30 |
 | 🛠️ [Module 13: Tool Context](./training/module13-tool-context/) | High | 40 |
-| 🛠️ [Module 13.5: Enterprise Persistence with Firestore](./training/module13_5-firestore-persistence/) | High | 30 |
+| 🛠️ [Module 13.5: Extending ADK - Custom Persistence with Firestore](./training/module13_5-firestore-persistence/) | High | 30 |
 | 🛠️ [Module 14: Third-Party Tools](./training/module14-third-party-tools/) | Medium | 30 |
 | **Part 3: Multi-Agent Systems** | | **275** |
 | 🤖🤖 [Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/) | Low | 15 |
@@ -50,7 +50,7 @@
 | **Part 7: Capstone Project & Best Practices** | | **290** |
 | 🏆 [Module 37: Advanced Personalized Shopping Agent](./training/module37-advanced-personalized-shopping-agent/) | High | 85 |
 | 🏆 [Module 38: Best Practices](./training/module38-best-practices/) | High | 35 |
-| 🔌 [Module 39: Plugins](./training/module39-plugins/) | High | 35 |
+| 🔌 [Module 39: ADK Plugins](./training/module39-plugins/) | High | 35 |
 | 🎓 [Module 39.5: Agent Skills](./training/module39_5-agent-skills/) | High | 35 |
 | 🎯 [Module 40: Advanced Capstone - Aegis Incident Response & AgentOps](./training/module40-advanced-capstone-aegis-incident-response/) | High | 100 |
 | **TOTAL** | | **29 Hours** |

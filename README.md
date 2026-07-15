@@ -50,7 +50,7 @@ This part focuses on giving your agents "superpowers" by connecting them to tool
 *   🧰 **[Module 11: OpenAPI Tools](./training/module11-openapi-tools/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🧰 **[Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   🧰 **[Module 13: Tool Context](./training/module13-tool-context/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
-*   🧰 **[Module 13.5: Enterprise Persistence with Firestore](./training/module13_5-firestore-persistence/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
+*   🧰 **[Module 13.5: Extending ADK - Custom Persistence with Firestore](./training/module13_5-firestore-persistence/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   🧰 **[Module 14: Third-Party Tools](./training/module14-third-party-tools/)** (🧑‍💻 30 min / 👨‍🏫 40 min)
 
 ### 🤖🤖 Part 3: Multi-Agent Systems (Modules 15-21)

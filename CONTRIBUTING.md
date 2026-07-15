@@ -51,6 +51,25 @@ To update the `main` (student) branch with the latest changes from `solution`, d
 *   Pushes the updated `main` branch to GitHub.
 *   Returns you to the `solution` branch.
 
+## Versioning & Releases
+
+This course follows [Semantic Versioning](https://semver.org/) (`MAJOR.MINOR.PATCH`), applied to content rather than code:
+
+*   **MAJOR** (`v2.0.0`): a full curriculum overhaul (e.g. a framework version migration like ADK 1.0 → 2.0).
+*   **MINOR** (`v1.1.0`): one or more new modules added.
+*   **PATCH** (`v1.0.1`): fixes and corrections to existing content (typos, broken links, timetable/README updates).
+
+Releases are tagged on `solution` only — it is the source of truth, and `main` is kept in sync automatically (see above).
+
+**To cut a release:**
+```bash
+git checkout solution
+git pull origin solution
+git tag -a v1.1.0 -m "v1.1.0"
+git push origin v1.1.0
+```
+Pushing a `v*` tag automatically triggers the `Create GitHub Release` workflow, which publishes a GitHub Release with auto-generated notes summarizing the merged PRs and commits since the previous tag.
+
 ## Code of Conduct
 
 This project and everyone participating in it is governed by the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). By participating, you are expected to uphold this code. Please report unacceptable behavior.

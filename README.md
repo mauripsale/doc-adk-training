@@ -12,11 +12,11 @@ This course was created and is maintained by [**Maurizio Ipsale**](https://www.l
 
 ## 🚧 Project Status 🚧
 
-**Current Version:** `v0.2.0`
+**Current Version:** `v1.0.0`
 
-Please be aware that this training course is in its early stages of development. As a "version zero" project, the content is subject to significant changes, additions, and refactoring.
+This training course is complete and production-ready, covering the full ADK 2.0 curriculum across 40 modules — from your first agent to distributed, enterprise-grade multi-agent systems with full AgentOps observability.
 
-We are working hard to refine and expand the material, but you may encounter typos, errors, or incomplete sections. Your feedback and contributions are highly encouraged! If you find an issue or have a suggestion, please [open an issue on GitHub](https://github.com/mauripsale/doc-adk-training/issues).
+We continue to refine and expand the material as the ADK evolves. Your feedback and contributions are highly encouraged! If you find an issue or have a suggestion, please [open an issue on GitHub](https://github.com/mauripsale/doc-adk-training/issues).
 
 ## ⏱️ Time Estimation
 
@@ -36,6 +36,7 @@ This part covers the absolute basics of AI agents and the ADK, getting your envi
 *   📖 **[Module 2: Setting Up Your Development Environment](./training/module02-environment-setup/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
 *   📖 **[Module 3: Your First Agent: The "Echo" Agent](./training/module03-first-agent-echo/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   📖 **[Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-agent-deep-dive/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
+*   📖 **[Module 4.5: Professional Model Configuration & Resiliency](./training/module04_5-multi-model-litellm/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   📖 **[Module 5: Running and Interacting with Agents](./training/module05-running-agents/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
 *   📖 **[Module 6: Running an Agent Programmatically](./training/module06-programmatic-execution/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   📖 **[Module 7: Multimodal and Images 📸](./training/module07-multimodal-and-images/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
@@ -49,6 +50,7 @@ This part focuses on giving your agents "superpowers" by connecting them to tool
 *   🧰 **[Module 11: OpenAPI Tools](./training/module11-openapi-tools/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🧰 **[Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   🧰 **[Module 13: Tool Context](./training/module13-tool-context/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🧰 **[Module 13.5: Enterprise Persistence with Firestore](./training/module13_5-firestore-persistence/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   🧰 **[Module 14: Third-Party Tools](./training/module14-third-party-tools/)** (🧑‍💻 30 min / 👨‍🏫 40 min)
 
 ### 🤖🤖 Part 3: Multi-Agent Systems (Modules 15-21)
@@ -57,11 +59,11 @@ Learn how to go beyond single agents and build complex systems where multiple ag
 *   🤝 **[Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/)** (🧑‍💻 15 min / 👨‍🏫 30 min)
 *   🤝 **[Module 16: Static Orchestration](./training/module16-static-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
 *   🤝 **[Module 17: Structured Routing](./training/module17-structured-routing/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
-*   🤝 **[Module 18: Dynamic Orchestration](./training/module18-dynamic-orchestration/)** (🧑‍💻 45 min / 👨‍🏫 65 min)
+*   🤝 **[Module 18: Dynamic Orchestration](./training/module18-dynamic-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🤝 **[Module 19: Collaborative Teams](./training/module19-collaborative-teams/)** (🧑‍💻 45 min / 👨‍🏫 75 min)
 *   🤝 **[Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🤝 **[Module 21: Distributed Graphs](./training/module21-distributed-graphs/)** (🧑‍💻 50 min / 👨‍🏫 70 min)
-*   🏁 **[Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/)** (🧑‍💻 20 min / 👨‍🏫 30 min)
+*   🏁 **[Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/)** (🧑‍💻 15 min / 👨‍🏫 30 min)
 
 ### 🏭 Part 4: Production Readiness (Modules 22-26)
 This part covers the essential features for making your agents robust, observable, and reliable in a production environment.
@@ -90,11 +92,14 @@ Learn how to deploy your agents and their components to various scalable cloud e
 *   🚀 **[Module 35: Deployment to Agent Runtime](./training/module35-deployment-agent-runtime/)** (🧑‍💻 60 min / 👨‍🏫 90 min)
 *   🚀 **[Module 36: Gemini Enterprise](./training/module36-gemini-enterprise/)** (🧑‍💻 15 min / 👨‍🏫 25 min)
 
-### 🏆 Part 7: Capstone Project & Best Practices (Modules 37-38)
-Apply everything you've learned in a final capstone project and review the essential best practices for building production-ready agents.
+### 🏆 Part 7: Capstone Project & Best Practices (Modules 37-40)
+Apply everything you've learned in a final capstone project, review essential best practices for building production-ready agents, and explore advanced extensibility patterns like plugins and skills before tackling a full enterprise-grade capstone.
 
 *   ✨ **[Module 37: Advanced Personalized Shopping Agent](./training/module37-advanced-personalized-shopping-agent/)** (🧑‍💻 85 min / 👨‍🏫 120 min)
 *   ✨ **[Module 38: Best Practices](./training/module38-best-practices/)** (🧑‍💻 35 min / 👨‍🏫 50 min)
+*   🔌 **[Module 39: ADK Plugins](./training/module39-plugins/)** (🧑‍💻 35 min / 👨‍🏫 50 min)
+*   🎓 **[Module 39.5: Agent Skills](./training/module39_5-agent-skills/)** (🧑‍💻 35 min / 👨‍🏫 50 min)
+*   🎯 **[Module 40: Advanced Capstone - Aegis Incident Response & AgentOps](./training/module40-advanced-capstone-aegis-incident-response/)** (🧑‍💻 100 min / 👨‍🏫 140 min)
 
 ---
 ## Detailed Timetables

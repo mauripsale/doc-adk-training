@@ -96,19 +96,19 @@ if __name__ == "__main__":
 
 ### Step 3: Create the ADK Client Agent
 
-Create an `agent.py` file and complete the code to connect to your server using the ADK 2.0 `Agent` class and an `MCPToolset`.
+Create an `agent.py` file and complete the code to connect to your server using the ADK 2.0 `Agent` class and an `McpToolset`.
 
 ```python
 # In agent.py
 import os
 from google.adk import Agent
-from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams
+from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
 from mcp import StdioServerParameters
 
 # TODO: Get the absolute path to your 'cart_server.py'
 PATH_TO_SERVER = ...
 
-# TODO: Define the root Agent node and configure the MCPToolset
+# TODO: Define the root Agent node and configure the McpToolset
 # - command: 'python3'
 # - args: [PATH_TO_SERVER]
 root_agent = Agent(
@@ -116,7 +116,7 @@ root_agent = Agent(
     name='shopping_agent',
     instruction='You are a shopping assistant.',
     tools=[
-        MCPToolset(...)
+        McpToolset(...)
     ],
 )
 ```

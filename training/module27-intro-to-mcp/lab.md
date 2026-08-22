@@ -7,7 +7,7 @@ title: "Challenge Lab"
 
 ## Goal
 
-In this lab, you will learn how to connect your ADK agent to an external, stateful tool using the Model Context Protocol (MCP). You will use the `MCPToolset` to connect to a pre-built, open-source MCP server that provides file system operations. This will allow your agent to list files and read their contents from your local machine.
+In this lab, you will learn how to connect your ADK agent to an external, stateful tool using the Model Context Protocol (MCP). You will use the `McpToolset` to connect to a pre-built, open-source MCP server that provides file system operations. This will allow your agent to list files and read their contents from your local machine.
 
 ### Prerequisites
 
@@ -44,7 +44,7 @@ The MCP file system server needs a directory to operate on. Let's create one.
 
 ### Step 3: Configure the Agent to Use the MCP Toolset
 
-Because the `MCPToolset` requires Python code to configure the connection, we must define our agent in an `agent.py` file.
+Because the `McpToolset` requires Python code to configure the connection, we must define our agent in an `agent.py` file.
 
 1.  **Create the `agent.py` file:**
     In the `mcp_agent` directory, create a file named `agent.py`.
@@ -56,13 +56,13 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     ```
 
 3.  **Complete the `agent.py` script:**
-    **Exercise:** Open `agent.py` and complete the script by following the `# TODO` comments. Your goal is to define an agent and configure the `MCPToolset` to launch and connect to the file system server.
+    **Exercise:** Open `agent.py` and complete the script by following the `# TODO` comments. Your goal is to define an agent and configure the `McpToolset` to launch and connect to the file system server.
 
     ```python
     import os
     # TODO: 1. Import the necessary classes:
     from google.adk import Agent
-    from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
+    from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
     from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
     from mcp import StdioServerParameters
 
@@ -76,12 +76,12 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
     # - model: 'gemini-3.5-flash'
     # - name: 'filesystem_agent'
     # - instruction: 'You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.'
-    # - tools: A list containing one item: the MCPToolset.
+    # - tools: A list containing one item: the McpToolset.
     
-    # Inside the Agent's `tools` list, you will configure the MCPToolset.
+    # Inside the Agent's `tools` list, you will configure the McpToolset.
     # Follow this structure:
     #
-    # MCPToolset(
+    # McpToolset(
     #     connection_params=StdioConnectionParams(
     #         server_params=StdioServerParameters(
     #             # TODO: 4. Set the `command` to 'npx'.
@@ -119,7 +119,7 @@ Because the `MCPToolset` requires Python code to configure the connection, we mu
         *   **Expected Response:** The agent should respond with the content of the file: "Hello from the MCP world!"
 
 3.  **Examine the Trace View:**
-    *   In the trace for both turns, you will see `execute_tool` steps for `list_directory` and `read_file`. These tools were **dynamically discovered** by the `MCPToolset`.
+    *   In the trace for both turns, you will see `execute_tool` steps for `list_directory` and `read_file`. These tools were **dynamically discovered** by the `McpToolset`.
 
 ### Having Trouble?
 
@@ -131,12 +131,12 @@ You have successfully connected your ADK agent to a stateful, external tool usin
 
 You have learned to:
 *   Understand the client-server architecture of MCP.
-*   Use the `MCPToolset` to connect to an MCP server.
+*   Use the `McpToolset` to connect to an MCP server.
 *   Configure the `StdioConnectionParams` to automatically launch a local MCP server process directly within your agent definition.
 *   Build an agent that can use tools provided by an external service without having to define them locally.
 
 ### Self-Reflection Questions
-- The `MCPToolset` dynamically discovers the tools from the server. What are the advantages of this approach compared to manually defining each tool on the agent side?
+- The `McpToolset` dynamically discovers the tools from the server. What are the advantages of this approach compared to manually defining each tool on the agent side?
 - The file system server is "stateful" because it remembers the state of the `test_files` directory between tool calls. How does this differ from the stateless calculator tools you built in earlier modules?
 - The `StdioConnectionParams` launches the MCP server as a subprocess. What are the security implications of this, and why is it important that the server is sandboxed to a specific `TARGET_FOLDER_PATH`?
 

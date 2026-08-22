@@ -14,7 +14,7 @@ This file contains the complete code for the `agent.py` script in the Stateful F
 ```python
 import os # Required for path operations
 from google.adk import Agent
-from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
+from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 
@@ -30,7 +30,7 @@ root_agent = Agent(
     instruction='You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.',
     tools=[
         # This is the bridge to the external MCP server.
-        MCPToolset(
+        McpToolset(
             connection_params=StdioConnectionParams(
                 server_params=StdioServerParameters(
                     # The command to run the MCP server.
@@ -57,7 +57,7 @@ This file should be created and can be left empty. It is required for the ADK to
 
 ### Self-Reflection Answers
 
-1.  **The `MCPToolset` dynamically discovers the tools from the server. What are the advantages of this approach compared to manually defining each tool on the agent side?**
+1.  **The `McpToolset` dynamically discovers the tools from the server. What are the advantages of this approach compared to manually defining each tool on the agent side?**
     *   **Answer:** Dynamic discovery reduces boilerplate code and improves maintainability. You don't need to update your agent's code every time the MCP server adds, removes, or modifies a tool. It promotes a clean separation of concerns: the MCP server is responsible for defining its capabilities, and the agent client simply consumes them. This makes the system more flexible and scalable.
 
 2.  **The file system server is "stateful" because it remembers the state of the `test_files` directory between tool calls. How does this differ from the stateless calculator tools you built in earlier modules?**

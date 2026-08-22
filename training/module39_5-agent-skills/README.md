@@ -34,7 +34,7 @@ This keeps the main agent incredibly lightweight, loading heavy documentation on
 
 ### Using Skills in the ADK
 
-In the modern ADK, Skills are managed using the `SkillToolset`.
+In the modern ADK, Skills are managed using the `SkillToolset`. Note that as of ADK 2.0, the Skills feature is still marked **experimental** in the official documentation — the core API you'll use here (`load_skill_from_dir`, `SkillToolset`) is stable enough for this course, but expect it to keep evolving.
 
 ```python
 import pathlib
@@ -77,6 +77,12 @@ my-skill/
 ├── references/        <-- Optional: Documentation for the agent to read
 └── assets/            <-- Optional: Files used in the output (templates, etc.)
 ```
+
+### Going Further: The Skill Registry (Preview)
+
+Everything above loads skills from your local filesystem — fine for a handful of skills you wrote yourself. In an enterprise setting with hundreds or thousands of skills shared across teams, ADK offers a **Skill Registry** (currently a Preview feature) that lets an agent discover and load skills on demand from a remote catalog instead of bundling them all upfront.
+
+You connect it by passing a registry (e.g. `GCPSkillRegistry` from `google.adk.integrations.skill_registry`) to your `SkillToolset`. ADK then automatically injects two extra tools for the agent: `search_skills(query)` to find relevant skills semantically, and `load_skill(skill_name)` to pull one in only when needed — the same Progressive Disclosure idea, just applied to a catalog instead of a local folder. Locally loaded skills always take priority over registry ones with the same name. This is beyond the scope of this lab, but worth knowing about if you're designing a skill strategy for a larger organization.
 
 ### Key Takeaways
 - **Skills** are modular packages containing instructions, references, and scripts to teach an agent complex domain knowledge.

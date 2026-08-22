@@ -172,6 +172,20 @@ You have successfully deployed an agent to GKE. You learned to:
 *   Write Kubernetes `Deployment` and `Service` manifests.
 *   Use `envsubst` and `kubectl` to deploy your application.
 
+### Bonus: The Automated Way
+
+Now that you understand what happens under the hood, compare it to the ADK CLI shortcut that automates Steps 2-4 (containerization, push to Artifact Registry, manifest generation, and `kubectl apply`) in a single command:
+```shell
+adk deploy gke \
+    --project $GOOGLE_CLOUD_PROJECT \
+    --cluster_name adk-cluster \
+    --region $GOOGLE_CLOUD_LOCATION \
+    --service_type=LoadBalancer \
+    --with_ui \
+    echo_agent/
+```
+You won't run this in the lab (you already deployed manually above), but knowing it exists — and now understanding exactly what it does for you — is valuable once you move past learning and into daily production work.
+
 ### Cleanup (Important!)
 
 GKE clusters can incur significant costs if left running. It is crucial to delete the resources you created after completing the lab.

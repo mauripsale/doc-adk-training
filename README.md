@@ -12,11 +12,19 @@ This course was created and is maintained by [**Maurizio Ipsale**](https://www.l
 
 ## 🚧 Project Status 🚧
 
-**Current Version:** `v1.0.0`
+**Current Version:** `v1.0.1`
 
 This training course is complete and production-ready, covering the full ADK 2.0 curriculum across 40 modules — from your first agent to distributed, enterprise-grade multi-agent systems with full AgentOps observability.
 
 We continue to refine and expand the material as the ADK evolves. Your feedback and contributions are highly encouraged! If you find an issue or have a suggestion, please [open an issue on GitHub](https://github.com/mauripsale/doc-adk-training/issues).
+
+**What's new in `v1.0.1`:** a pass against the latest official ADK documentation, keeping the course current as the framework evolves —
+*   **Module 12:** a "Looking Ahead" note on the new (Preview) `ManagedAgent`.
+*   **Module 21:** fixed the A2A lab to opt into ADK's reliability-fixed executor (`use_legacy=False`), avoiding known streaming-mode message-duplication bugs.
+*   **Module 27:** a new bonus section connecting to a *remote* MCP server (`StreamableHTTPConnectionParams`) via the public GitHub MCP server, in addition to the existing local/Stdio example.
+*   **Module 28:** aligned MCP naming (`McpToolset`) with the current official SDK.
+*   **Module 33:** a bonus callout showing the automated `adk deploy gke` shortcut alongside the manual walkthrough.
+*   **Module 39.5:** noted the Skills feature's experimental status and added a "Going Further" section on the (Preview) Skill Registry.
 
 ## ⏱️ Time Estimation
 

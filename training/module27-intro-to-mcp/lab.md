@@ -135,6 +135,48 @@ You have learned to:
 *   Configure the `StdioConnectionParams` to automatically launch a local MCP server process directly within your agent definition.
 *   Build an agent that can use tools provided by an external service without having to define them locally.
 
+### Bonus: Connecting to a Remote MCP Server
+
+So far you connected to a *local* MCP server launched as a subprocess (`StdioConnectionParams`). Most real-world integrations instead connect to a server already running somewhere else over HTTP, using `StreamableHTTPConnectionParams` — same `McpToolset`, different transport.
+
+1.  **Get a free GitHub Personal Access Token:** create one at [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new) with read-only repository access.
+
+2.  **Set it as an environment variable** in your `.env` file:
+    ```text
+    GITHUB_TOKEN=YOUR_GITHUB_TOKEN
+    ```
+
+3.  **Create a second agent** (e.g. `github_agent/agent.py`):
+    ```python
+    import os
+    from google.adk import Agent
+    from google.adk.tools.mcp_tool import McpToolset
+    from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+
+    GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
+
+    root_agent = Agent(
+        model="gemini-3.5-flash",
+        name="github_agent",
+        instruction="Help users get information from GitHub repositories.",
+        tools=[
+            McpToolset(
+                connection_params=StreamableHTTPConnectionParams(
+                    url="https://api.githubcopilot.com/mcp/",
+                    headers={
+                        "Authorization": f"Bearer {GITHUB_TOKEN}",
+                        "X-MCP-Readonly": "true",
+                    },
+                ),
+            )
+        ],
+    )
+    ```
+
+4.  **Try it:** ask "What are the open issues on google/adk-python?" — no `npx`, no subprocess, no local sandboxing: the tool call goes straight over HTTPS to GitHub's servers.
+
+A few things change when the server is remote instead of local: there's no subprocess lifecycle to manage (the server runs independently of your agent), network failures (timeouts, rate limits, an expired token) become a real possibility that a local stdio server never has, and the security surface shifts from "the subprocess has filesystem access" to "don't hardcode the credential in your header" — which is why the token above comes from `.env`, not a literal string.
+
 ### Self-Reflection Questions
 - The `McpToolset` dynamically discovers the tools from the server. What are the advantages of this approach compared to manually defining each tool on the agent side?
 - The file system server is "stateful" because it remembers the state of the `test_files` directory between tool calls. How does this differ from the stateless calculator tools you built in earlier modules?

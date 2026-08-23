@@ -51,6 +51,10 @@ agent = Agent(
 
 The ADK handles the complexity of merging these different tool types for you. When the user asks a question, the LLM will decide whether to look at the public web using `google_search` or query your internal database using `my_custom_tool`.
 
+### Looking Ahead: Managed Agents (Preview)
+
+ADK 2.4.0 introduces `ManagedAgent`, a way to plug Google's own first-party, server-hosted agents (like the Antigravity agent) directly into your ADK flow — no sandbox to provision, no client-side tool declarations, just an `agent_id` and a `GEMINI_API_KEY`. It implements the same `BaseAgent` contract you've been using, so it drops into a workflow like any other agent. The trade-off: you get powerful built-in capabilities (web search, server-side code execution) but lose the fine-grained control you have with `LlmAgent`. It's still Preview, so treat it as a preview of where ADK is headed rather than a pattern to build on yet.
+
 ### `google_maps_grounding`: Location-Based Queries
 
 The `google_maps_grounding` tool enables agents to answer location-based queries, such as finding nearby places, getting directions, or understanding geographic context. This tool is currently only available when using the **Vertex AI API**.

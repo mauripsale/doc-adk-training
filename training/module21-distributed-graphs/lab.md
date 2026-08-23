@@ -63,6 +63,7 @@ load_dotenv()
 
 # TODO: 1. Define the Proxy Node (RemoteA2aAgent) pointing to the specialist server
 # Hint: use f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"
+# Hint: pass use_legacy=False to opt into the reliability-fixed A2A executor
 remote_researcher = ...
 
 # TODO: 2. Define the Local Coordinator Node and register 'remote_researcher'

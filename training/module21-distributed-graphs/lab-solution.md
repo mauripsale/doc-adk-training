@@ -53,7 +53,8 @@ load_dotenv()
 remote_researcher = RemoteA2aAgent(
     name="remote_researcher",
     description="A remote specialist that can conduct web research.",
-    agent_card=f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"
+    agent_card=f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}",
+    use_legacy=False,
 )
 
 # 2. Define the Coordinator Node

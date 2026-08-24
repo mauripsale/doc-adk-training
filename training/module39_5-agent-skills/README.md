@@ -66,6 +66,8 @@ agent = Agent(
 )
 ```
 
+**Production Alternative**: `UnsafeLocalCodeExecutor` is for learning only. For production, ADK offers sandboxed executors that isolate execution outside your own process — e.g. `GkeCodeExecutor` (runs code in a dedicated GKE pod) or `AgentEngineSandboxCodeExecutor` (a managed sandbox on Agent Runtime). Both require their respective infrastructure already provisioned, so they're mentioned here as a pointer rather than a lab exercise.
+
 ### The Structure of a Skill Directory
 
 When you use `load_skill_from_dir`, the ADK expects a specific directory layout:

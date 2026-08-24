@@ -190,6 +190,50 @@ While the Dev UI is great for creating and running evaluations interactively, yo
 
     Total: 1/1 passed (100%)
     ```
+### Bonus: Writing a Custom Metric (Optional)
+
+Built-in criteria like `tool_trajectory_avg_score` can't check business-specific logic — for example, whether the calculator's result is actually mathematically correct. For that, you write a custom metric: a Python function matching ADK's expected signature, wired into `EvalConfig.custom_metrics`.
+
+1.  **Create `custom_metrics.py`** in your `calculator_agent` directory:
+    ```python
+    from google.adk.evaluation.evaluator import EvaluationResult, PerInvocationResult
+    from google.adk.evaluation.eval_metrics import EvalStatus
+
+    def check_math_is_correct(eval_metric, actual_invocations, expected_invocations, conversation_scenario):
+        """Custom metric: verifies the calculator's tool result is arithmetically correct."""
+        results = [
+            PerInvocationResult(actual_invocation=inv, score=1.0, eval_status=EvalStatus.PASSED)
+            for inv in actual_invocations
+        ]
+        return EvaluationResult(
+            overall_score=1.0,
+            overall_eval_status=EvalStatus.PASSED,
+            per_invocation_results=results,
+        )
+    ```
+    *(This skeleton always passes — as a challenge, make it actually re-compute the expected result from the tool call arguments and compare it against the tool's response.)*
+
+2.  **Register it** in an `EvalConfig` (either in your `evalset.json`'s config section, or passed to `adk eval`) under `custom_metrics`, pointing `code_config.name` at `custom_metrics.check_math_is_correct`.
+
+3.  **Run `uv run adk eval`** again — your custom metric now runs alongside the built-in ones in the same report.
+
+### Bonus: Dynamic User Simulation (Optional)
+
+Static "Golden Path" cases are great for regression testing, but they can't test how your agent handles a real, unpredictable user. **User Simulation** lets an LLM play the user instead, following a `conversation_plan` and an optional persona (`NOVICE`, `EXPERT`, `EVALUATOR`).
+
+1.  **Add a `ConversationScenario`** to your eval set instead of a fixed conversation:
+    ```json
+    {
+      "starting_prompt": "What's 7 times 8?",
+      "conversation_plan": "Ask for one more calculation, then thank the agent.",
+      "user_persona": "NOVICE"
+    }
+    ```
+
+2.  **Run the evaluation** as usual. Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things.
+
+3.  Since there's no single "expected" response for a dynamically generated conversation, pair this with reference-free metrics like `safety_v1` and `hallucinations_v1` rather than `response_match_score`.
+
 ### Extra Challenge: Performance Load Testing with Locust (Optional)
 
 In production, evaluations are not just about correctness, but also about **performance and latency**. To test if your asynchronous agent endpoints can scale under concurrent user traffic without blocking the Python event loop, you can use **Locust**.

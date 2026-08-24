@@ -108,6 +108,8 @@ Because the `McpToolset` requires Python code to configure the connection, we mu
     ```
     When the server starts, you will see output in the console as `npx` downloads and runs the `@modelcontextprotocol/server-filesystem` package.
 
+    > **Note:** if your very first request fails with an MCP session timeout, this is likely `npx` downloading the server package for the first time. Simply retry — it will be fast on every subsequent run since the package stays cached locally.
+
 2.  **Interact with the agent:**
     *   Open the Dev UI in your browser.
     *   Select the `filesystem_agent` from the dropdown.

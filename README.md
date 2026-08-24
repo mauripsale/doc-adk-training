@@ -12,11 +12,16 @@ This course was created and is maintained by [**Maurizio Ipsale**](https://www.l
 
 ## 🚧 Project Status 🚧
 
-**Current Version:** `v1.0.1`
+**Current Version:** `v1.0.2`
 
 This training course is complete and production-ready, covering the full ADK 2.0 curriculum across 40 modules — from your first agent to distributed, enterprise-grade multi-agent systems with full AgentOps observability.
 
 We continue to refine and expand the material as the ADK evolves. Your feedback and contributions are highly encouraged! If you find an issue or have a suggestion, please [open an issue on GitHub](https://github.com/mauripsale/doc-adk-training/issues).
+
+**What's new in `v1.0.2`:** a second pass, this time against ADK 2.6.0 —
+*   **Module 12:** noted `ManagedAgent`'s new `instruction` parameter.
+*   **Module 24:** added hands-on "Custom Metric" and "Dynamic User Simulation" bonus sections, closing a gap where the theory mentioned both but the lab never demonstrated them.
+*   **Module 26:** introduced `ReflectAndRetryModelPlugin` and `ReflectAndRetryToolPlugin` as concrete, production-ready examples of the plugin pattern.
 
 **What's new in `v1.0.1`:** a pass against the latest official ADK documentation, keeping the course current as the framework evolves —
 *   **Module 12:** a "Looking Ahead" note on the new (Preview) `ManagedAgent`.

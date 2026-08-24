@@ -176,7 +176,7 @@ You have successfully deployed an agent to GKE. You learned to:
 
 Now that you understand what happens under the hood, compare it to the ADK CLI shortcut that automates Steps 2-4 (containerization, push to Artifact Registry, manifest generation, and `kubectl apply`) in a single command:
 ```shell
-adk deploy gke \
+uv run adk deploy gke \
     --project $GOOGLE_CLOUD_PROJECT \
     --cluster_name adk-cluster \
     --region $GOOGLE_CLOUD_LOCATION \

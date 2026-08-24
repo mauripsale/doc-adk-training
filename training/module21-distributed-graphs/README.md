@@ -26,7 +26,7 @@ from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 # 1. Define the Proxy Node pointing to a remote service
 remote_expert = RemoteA2aAgent(
     name="remote_expert",
-    agent_card="http://localhost:8001/a2a/research_specialist/.well-known/agent-card.json",
+    agent_card="http://localhost:8001/.well-known/agent-card.json",
     use_legacy=False,
 )
 

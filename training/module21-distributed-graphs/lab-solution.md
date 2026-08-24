@@ -14,13 +14,11 @@ This file contains the complete code for the two separate agent projects using A
 ```python
 from google.adk import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
-from google.adk.tools import GoogleSearchAgentTool
+from google.adk.tools import google_search
 from dotenv import load_dotenv
 load_dotenv()
 
 # 1. Specialist Node
-search_tool = GoogleSearchAgentTool()
-
 root_agent = Agent(
     model="gemini-3.5-flash",
     name="research_specialist",
@@ -33,7 +31,7 @@ Provide a comprehensive summary and cite your sources.
 When receiving requests via the A2A protocol, ignore any internal graph transition messages. 
 Focus only on the core user query and fulfill the research task directly.
 """,
-    tools=[search_tool]
+    tools=[google_search]
 )
 
 # 2. Expose as A2A service
@@ -53,7 +51,7 @@ load_dotenv()
 remote_researcher = RemoteA2aAgent(
     name="remote_researcher",
     description="A remote specialist that can conduct web research.",
-    agent_card=f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}",
+    agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}",
     use_legacy=False,
 )
 

@@ -24,7 +24,7 @@ In this lab, you will build a distributed multi-agent system. You will create a 
     Navigate into the `research_specialist` directory and install `uvicorn`, which is needed to run the agent as a web server.
     ```shell
     cd research_specialist
-    pip install uvicorn google-adk[a2a]
+    pip install uvicorn sse_starlette google-adk[a2a]
     cd ..
     ```
 
@@ -36,17 +36,15 @@ In this lab, you will build a distributed multi-agent system. You will create a 
 # In research_specialist/agent.py (Starter Code)
 from google.adk import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
-from google.adk.tools import GoogleSearchAgentTool
+from google.adk.tools import google_search
 from dotenv import load_dotenv
 load_dotenv()
 
-# TODO: 1. Create an instance of the GoogleSearchAgentTool.
-
-# TODO: 2. Define the agent (The Node)
+# TODO: 1. Define the agent (The Node), passing google_search in its tools list
 # - Remember to include the A2A Context Handling instruction!
 root_agent = Agent(...)
 
-# TODO: 3. Expose as an A2A web application using 'to_a2a'
+# TODO: 2. Expose as an A2A web application using 'to_a2a'
 # Hint: a2a_app = to_a2a(root_agent, port=8001)
 ```
 
@@ -62,7 +60,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # TODO: 1. Define the Proxy Node (RemoteA2aAgent) pointing to the specialist server
-# Hint: use f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"
+# Hint: use f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}"
 # Hint: pass use_legacy=False to opt into the reliability-fixed A2A executor
 remote_researcher = ...
 

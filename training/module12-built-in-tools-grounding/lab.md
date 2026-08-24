@@ -69,7 +69,7 @@ root_agent = Agent(...)
 
 1.  **Start the agent in interactive mode:** 
     ```bash
-    uv run adk run agent.py
+    uv run adk run .
     ```
 
 2.  **Interact with the agent:**

@@ -78,7 +78,7 @@ When given a research topic, follow this workflow:
 2.  Configure `.env` for Vertex AI.
 3.  Run the agent:
     ```bash
-    uv run adk run agent.py
+    uv run adk run .
     ```
 
 ---

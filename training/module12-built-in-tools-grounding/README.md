@@ -53,7 +53,7 @@ The ADK handles the complexity of merging these different tool types for you. Wh
 
 ### Looking Ahead: Managed Agents (Preview)
 
-ADK 2.4.0 introduces `ManagedAgent`, a way to plug Google's own first-party, server-hosted agents (like the Antigravity agent) directly into your ADK flow — no sandbox to provision, no client-side tool declarations, just an `agent_id` and a `GEMINI_API_KEY`. It implements the same `BaseAgent` contract you've been using, so it drops into a workflow like any other agent. The trade-off: you get powerful built-in capabilities (web search, server-side code execution) but lose the fine-grained control you have with `LlmAgent`. It's still Preview, so treat it as a preview of where ADK is headed rather than a pattern to build on yet.
+ADK 2.4.0 introduces `ManagedAgent`, a way to plug Google's own first-party, server-hosted agents (like the Antigravity agent) directly into your ADK flow — no sandbox to provision, no client-side tool declarations, just an `agent_id` and a `GEMINI_API_KEY`. It implements the same `BaseAgent` contract you've been using, so it drops into a workflow like any other agent. The trade-off: you get powerful built-in capabilities (web search, server-side code execution) but lose the fine-grained control you have with `LlmAgent`. It's still Preview, so treat it as a preview of where ADK is headed rather than a pattern to build on yet. As of v2.6.0, `ManagedAgent` also accepts an `instruction` parameter (forwarded as `system_instruction`), so you're not limited to the backend's default behavior.
 
 ### `google_maps_grounding`: Location-Based Queries
 

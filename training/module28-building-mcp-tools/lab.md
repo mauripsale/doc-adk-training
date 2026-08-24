@@ -105,12 +105,15 @@ Create an `agent.py` file and complete the code to connect to your server using 
 
 ```python
 # In agent.py
-import os
+import pathlib
 from google.adk import Agent
 from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
 from mcp import StdioServerParameters
 
-# TODO: Get the absolute path to your 'cart_server.py'
+# TODO: Get the absolute path to your 'cart_server.py'.
+# Base it on this file's own location (pathlib.Path(__file__).parent), not on
+# os.getcwd() — the process's working directory won't be this folder when
+# 'adk web'/'adk run' is launched from the parent directory in Step 4.
 PATH_TO_SERVER = ...
 
 # TODO: Define the root Agent node and configure the McpToolset
@@ -129,7 +132,11 @@ Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-3.5-fla
 
 ### Step 4: Test the Full System
 
-1.  **Start the ADK web server:** `uv run adk web shopping_agent`
+1.  **Navigate to the parent directory and start the ADK web server**, pointing it at the `custom_mcp_server` folder you created in Step 1:
+    ```shell
+    cd ..
+    uv run adk web custom_mcp_server
+    ```
 2.  **Check the console logs:** You should see logs from your `cart_server.py` as it starts up.
 3.  **Interact with the agent** in the Dev UI:
     *   "Please add 'milk' to my cart."

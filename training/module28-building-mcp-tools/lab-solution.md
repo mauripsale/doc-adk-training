@@ -105,14 +105,16 @@ if __name__ == "__main__":
 
 ```python
 # Filename: agent.py
-import os
+import pathlib
 from google.adk import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 
-# Get the absolute path to our server script.
-PATH_TO_SERVER = os.path.abspath("./cart_server.py")
+# Get the absolute path to our server script, based on this file's own
+# location rather than the process's working directory — 'adk web'/'adk run'
+# are launched from the parent directory, so a relative path would break.
+PATH_TO_SERVER = str(pathlib.Path(__file__).parent / "cart_server.py")
 
 root_agent = Agent(
     model='gemini-3.5-flash',

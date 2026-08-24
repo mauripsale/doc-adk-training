@@ -54,3 +54,7 @@ Building an MCP server decouples your tool's logic from the agent, which provide
 2.  **Modular Maintenance:** Update tool logic without redeploying the agent.
 3.  **Reusability:** Your MCP server can be consumed by *any* MCP-compliant client.
 4.  **Workflow Integration:** In ADK 2.0, you can equip any `Agent` node with your custom MCP server, allowing for complex, distributed graph execution.
+
+### Going Further: Exposing a Whole Agent as an MCP Tool (Experimental)
+
+This module built a hand-written MCP server exposing granular tools (`add_item_to_cart`, `view_cart`) — no agent involved on the server side. ADK also offers the opposite direction: `to_mcp_server(agent)` (from `google.adk.tools.mcp_tool`, requires the `[mcp]` extra) wraps an *entire* ADK agent — its model loop and all of its own tools — as a single MCP tool that any MCP host can call, hiding the whole conversation behind one request/response. It's the MCP counterpart of `to_a2a`, which you used in Module 21 to expose an agent over A2A instead. It's still marked `@experimental` in ADK's source, so treat it as a preview rather than a pattern to build on yet.

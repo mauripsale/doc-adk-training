@@ -17,7 +17,10 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
     cd /path/to/your/adk-training/calculator_agent
     ```
 
-2.  **Ensure your virtual environment is active** and your `.env` file is configured with your API key.
+2.  **Ensure your virtual environment is active** and your `.env` file is configured with your API key. Also make sure the evaluation extra is installed — `adk eval` (Step 8) will fail without it:
+    ```shell
+    uv add "google-adk[eval]"
+    ```
 
 3.  **Start the web server:**
 
@@ -213,26 +216,54 @@ Built-in criteria like `tool_trajectory_avg_score` can't check business-specific
     ```
     *(This skeleton always passes — as a challenge, make it actually re-compute the expected result from the tool call arguments and compare it against the tool's response.)*
 
-2.  **Register it** in an `EvalConfig` (either in your `evalset.json`'s config section, or passed to `adk eval`) under `custom_metrics`, pointing `code_config.name` at `custom_metrics.check_math_is_correct`.
+2.  **Create `eval_config.json`** in the same directory. Registering the function under `custom_metrics` is not enough on its own — it must *also* be listed in `criteria` (with a threshold) for ADK to actually run it:
+    ```json
+    {
+      "criteria": {
+        "check_math_is_correct": 0.5
+      },
+      "custom_metrics": [
+        {
+          "name": "check_math_is_correct",
+          "code_config": { "name": "custom_metrics.check_math_is_correct" }
+        }
+      ]
+    }
+    ```
 
-3.  **Run `uv run adk eval`** again — your custom metric now runs alongside the built-in ones in the same report.
+3.  **Run the evaluation, pointing at your config file:**
+    ```shell
+    uv run adk eval . eval_results/calculator_tests.evalset.json --config_file_path eval_config.json
+    ```
+    Your custom metric now runs alongside the built-in ones in the same report.
 
 ### Bonus: Dynamic User Simulation (Optional)
 
 Static "Golden Path" cases are great for regression testing, but they can't test how your agent handles a real, unpredictable user. **User Simulation** lets an LLM play the user instead, following a `conversation_plan` and an optional persona (`NOVICE`, `EXPERT`, `EVALUATOR`).
 
-1.  **Add a `ConversationScenario`** to your eval set instead of a fixed conversation:
+1.  **Create `scenarios.json`**, a `ConversationScenarios` file, instead of a fixed conversation:
     ```json
     {
-      "starting_prompt": "What's 7 times 8?",
-      "conversation_plan": "Ask for one more calculation, then thank the agent.",
-      "user_persona": "NOVICE"
+      "scenarios": [
+        {
+          "starting_prompt": "What's 7 times 8?",
+          "conversation_plan": "Ask for one more calculation, then thank the agent.",
+          "user_persona": "NOVICE"
+        }
+      ]
     }
     ```
 
-2.  **Run the evaluation** as usual. Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things.
+2.  **Add it to your eval set** using the dedicated CLI command, which drives the simulated conversation and records it as a new eval case:
+    ```shell
+    uv run adk eval_set add_eval_case calculator_agent calculator_tests \
+        --scenarios_file scenarios.json \
+        --session_input_file eval_results/calculator_tests.evalset.json
+    ```
 
-3.  Since there's no single "expected" response for a dynamically generated conversation, pair this with reference-free metrics like `safety_v1` and `hallucinations_v1` rather than `response_match_score`.
+3.  **Run the evaluation** as usual (Step 8). Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things.
+
+4.  Since there's no single "expected" response for a dynamically generated conversation, pair this with reference-free metrics like `safety_v1` and `hallucinations_v1` rather than `response_match_score`.
 
 ### Extra Challenge: Performance Load Testing with Locust (Optional)
 

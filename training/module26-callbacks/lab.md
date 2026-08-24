@@ -128,6 +128,14 @@ root_agent = Agent(
 )
 ```
 
+### Step 3: Run and Test
+
+Start the agent and try both paths: a normal prompt (should reach the model), and a prompt containing a blocked word like "unsafe" (should be refused by `before_model_callback` without ever calling the model). Then repeat the same prompt in the same session — `before_agent_callback` should return the cached response instantly.
+
+```shell
+uv run adk run content_moderator
+```
+
 ### Self-Reflection Questions
 - What is the key difference between a callback and a plugin in the ADK? When would you choose one over the other?
 - Why does returning a `types.Content` object from `before_agent_callback` cause the agent to skip the LLM call entirely?

@@ -78,6 +78,8 @@ my-skill/
 └── assets/            <-- Optional: Files used in the output (templates, etc.)
 ```
 
+The skill's frontmatter `name` must be lowercase kebab-case (letters, digits, hyphens — no underscores) and match its containing directory name exactly, or `load_skill_from_dir` will reject it.
+
 ### Going Further: The Skill Registry (Preview)
 
 Everything above loads skills from your local filesystem — fine for a handful of skills you wrote yourself. In an enterprise setting with hundreds or thousands of skills shared across teams, ADK offers a **Skill Registry** (currently a Preview feature) that lets an agent discover and load skills on demand from a remote catalog instead of bundling them all upfront.

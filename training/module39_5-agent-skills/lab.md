@@ -32,20 +32,20 @@ We need to create the physical structure for our skill.
     ```
 2.  Inside `skills`, create a directory for our specific skill:
     ```shell
-    mkdir skills/greeting_skill
+    mkdir skills/greeting-skill
     ```
-3.  Inside `skills/greeting_skill`, create the required `SKILL.md` file:
+3.  Inside `skills/greeting-skill`, create the required `SKILL.md` file:
     ```shell
-    touch skills/greeting_skill/SKILL.md
+    touch skills/greeting-skill/SKILL.md
     ```
 
 ### Step 3: Write the Skill Instructions
 
-Open `skills/greeting_skill/SKILL.md` in your editor and paste the following content. This defines the metadata (how the agent knows *when* to use it) and the body (the actual instructions).
+Open `skills/greeting-skill/SKILL.md` in your editor and paste the following content. This defines the metadata (how the agent knows *when* to use it) and the body (the actual instructions).
 
 ```markdown
 ---
-name: greeting_skill
+name: greeting-skill
 description: A friendly greeting skill that can say hello to a specific person. Use this skill whenever the user asks to be greeted or says hello.
 ---
 
@@ -70,7 +70,7 @@ from google.adk.tools.skill_toolset import SkillToolset
 from google.adk.code_executors.unsafe_local_code_executor import UnsafeLocalCodeExecutor
 
 # TODO: 1. Load the skill from the directory you created.
-# Hint: Use pathlib.Path(__file__).parent / "skills" / "greeting_skill"
+# Hint: Use pathlib.Path(__file__).parent / "skills" / "greeting-skill"
 greeting_skill = None
 
 # TODO: 2. Create the SkillToolset.
@@ -101,7 +101,7 @@ root_agent = Agent(
     *   Say "Hello there, my name is Alex."
     *   You should receive a highly enthusiastic response with emojis, proving the agent loaded and followed the `SKILL.md` instructions!
 4.  **Examine the Trace View:**
-    *   Look at the trace. You should see the agent making a "tool call" to activate the `greeting_skill`. This is progressive disclosure in action!
+    *   Look at the trace. You should see the agent making a "tool call" to activate the `greeting-skill` skill. This is progressive disclosure in action!
 
 ### Self-Reflection Questions
 - Look at your `SKILL.md` file. Which part of it is loaded into the agent's context *before* the user says hello? Which part is loaded *after*?

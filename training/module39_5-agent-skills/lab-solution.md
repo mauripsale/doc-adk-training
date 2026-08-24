@@ -21,7 +21,7 @@ from google.adk.code_executors.unsafe_local_code_executor import UnsafeLocalCode
 # 1. Load the skill from the directory you created.
 # We use pathlib to reliably point to the folder relative to this script.
 greeting_skill = load_skill_from_dir(
-    pathlib.Path(__file__).parent / "skills" / "greeting_skill"
+    pathlib.Path(__file__).parent / "skills" / "greeting-skill"
 )
 
 # 2. Create the SkillToolset.

@@ -108,41 +108,41 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     kind: Deployment
     metadata:
       name: echo_agent-deployment
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: echo_agent
-  template:
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: echo_agent
+      template:
+        metadata:
+          labels:
+            app: echo_agent
+        spec:
+          containers:
+          - name: echo_agent
+            image: ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/echo_agent:v1
+            ports:
+            - containerPort: 8080
+            env:
+              - name: GOOGLE_GENAI_USE_VERTEXAI
+                value: "1"
+              - name: GOOGLE_CLOUD_PROJECT
+                value: "${GOOGLE_CLOUD_PROJECT}"
+              - name: GOOGLE_CLOUD_LOCATION
+                value: "${GOOGLE_CLOUD_LOCATION}"
+    ---
+    apiVersion: v1
+    kind: Service
     metadata:
-      labels:
+      name: echo_agent-service
+    spec:
+      type: LoadBalancer
+      selector:
         app: echo_agent
-spec:
-  containers:
-  - name: echo_agent
-    image: ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/echo_agent:v1
-    ports:
-    - containerPort: 8080
-    env:
-      - name: GOOGLE_GENAI_USE_VERTEXAI
-        value: "1"
-      - name: GOOGLE_CLOUD_PROJECT
-        value: "${GOOGLE_CLOUD_PROJECT}"
-      - name: GOOGLE_CLOUD_LOCATION
-        value: "${GOOGLE_CLOUD_LOCATION}"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: echo_agent-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: echo_agent
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 8080
+      ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 8080
     ```
 
 4.  **Deploy the application:**

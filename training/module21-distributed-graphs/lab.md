@@ -18,7 +18,6 @@ In this lab, you will build a distributed multi-agent system. You will create a 
     uv run adk create a2a_orchestrator
     uv run adk create research_specialist
     ```
-    When prompted, choose the **Programmatic (Python script)** option for both.
 
 2.  **Install Server Dependencies:**
     Navigate into the `research_specialist` directory and install `uvicorn`, which is needed to run the agent as a web server.

@@ -179,4 +179,4 @@ Software components, such as the code in the `sample-agents` directory, are lice
 
 ## 🙏 Acknowledgements
 
-This training course was inspired by the structure and content of the original ADK Training Hub created by Raphael Mansuy. While all content has been originally rewritten and adapted, we gratefully acknowledge his foundational work.
+This training course was initially inspired by the ADK Training Hub created by Raphael Mansuy. The course has since evolved its own structure and challenge-lab-based pedagogy, with all content originally written and adapted — but we gratefully acknowledge his early influence.

@@ -173,12 +173,18 @@ The structure looks like this:
 While the Dev UI is great for creating and running evaluations interactively, you can also run them from the command line. This is essential for integrating your agent tests into an automated CI/CD pipeline.
 
 1.  **Stop the `uv run adk web` server.**
-2.  **Run the `uv run adk eval` command:**
+2.  **Create an `__init__.py`** in your `calculator_agent` root, if you don't already have one:
+    ```shell
+    echo "from . import agent" > __init__.py
+    ```
+    `adk eval` loads your agent through this file, unlike `adk run`/`adk web`, which discover `agent.py` directly and don't need it.
+3.  **Run the `uv run adk eval` command:**
     From your `calculator_agent` directory, run the following command:
 
     ```shell
-    uv run adk eval . eval_results/calculator_tests.evalset.json
+    PYTHONPATH=. uv run adk eval . eval_results/calculator_tests.evalset.json
     ```
+    *   **`PYTHONPATH=.`**: Required so that `agent.py`'s `from tools.calculator import ...` resolves — unlike `adk run`, `adk eval` doesn't add the current directory to Python's import path automatically.
     *   **`uv run adk eval`**: The main command.
     *   **`.`**: The path to the agent to be tested (the current directory, `calculator_agent`).
     *   **`eval_results/calculator_tests.evalset.json`**: The path to the evaluation file to run.
@@ -216,24 +222,23 @@ Built-in criteria like `tool_trajectory_avg_score` can't check business-specific
     ```
     *(This skeleton always passes — as a challenge, make it actually re-compute the expected result from the tool call arguments and compare it against the tool's response.)*
 
-2.  **Create `eval_config.json`** in the same directory. Registering the function under `custom_metrics` is not enough on its own — it must *also* be listed in `criteria` (with a threshold) for ADK to actually run it:
+2.  **Create `eval_config.json`** in the same directory. Registering the function under `custom_metrics` is not enough on its own — it must *also* be listed in `criteria` (with a threshold) for ADK to actually run it. Note that `custom_metrics` is a dict keyed by metric name, not a list:
     ```json
     {
       "criteria": {
         "check_math_is_correct": 0.5
       },
-      "custom_metrics": [
-        {
-          "name": "check_math_is_correct",
+      "custom_metrics": {
+        "check_math_is_correct": {
           "code_config": { "name": "custom_metrics.check_math_is_correct" }
         }
-      ]
+      }
     }
     ```
 
 3.  **Run the evaluation, pointing at your config file:**
     ```shell
-    uv run adk eval . eval_results/calculator_tests.evalset.json --config_file_path eval_config.json
+    PYTHONPATH=. uv run adk eval . eval_results/calculator_tests.evalset.json --config_file_path eval_config.json
     ```
     Your custom metric now runs alongside the built-in ones in the same report.
 
@@ -254,16 +259,26 @@ Static "Golden Path" cases are great for regression testing, but they can't test
     }
     ```
 
-2.  **Add it to your eval set** using the dedicated CLI command, which drives the simulated conversation and records it as a new eval case:
-    ```shell
-    uv run adk eval_set add_eval_case calculator_agent calculator_tests \
-        --scenarios_file scenarios.json \
-        --session_input_file eval_results/calculator_tests.evalset.json
+2.  **Create a `session_input.json`** describing which app/user this simulated conversation belongs to:
+    ```json
+    { "app_name": "calculator_agent", "user_id": "test_user" }
     ```
 
-3.  **Run the evaluation** as usual (Step 8). Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things.
+3.  **Create a new eval set and add the scenario to it.** Unlike the Dev UI (which stores eval sets under `eval_results/`), the `adk eval_set` CLI commands always store them directly in your agent's root directory — so this uses a separate eval set (`user_sim_tests`) rather than mixing locations with `calculator_tests`:
+    ```shell
+    uv run adk eval_set create . user_sim_tests
+    uv run adk eval_set add_eval_case . user_sim_tests \
+        --scenarios_file scenarios.json \
+        --session_input_file session_input.json
+    ```
 
-4.  Since there's no single "expected" response for a dynamically generated conversation, pair this with reference-free metrics like `safety_v1` and `hallucinations_v1` rather than `response_match_score`.
+4.  **Run the evaluation** against the new eval set:
+    ```shell
+    PYTHONPATH=. uv run adk eval . user_sim_tests.evalset.json
+    ```
+    Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things.
+
+5.  Since there's no single "expected" response for a dynamically generated conversation, pair this with reference-free metrics like `safety_v1` and `hallucinations_v1` rather than `response_match_score`.
 
 ### Extra Challenge: Performance Load Testing with Locust (Optional)
 

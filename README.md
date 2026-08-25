@@ -12,11 +12,28 @@ This course was created and is maintained by [**Maurizio Ipsale**](https://www.l
 
 ## 🚧 Project Status 🚧
 
-**Current Version:** `v1.0.2`
+**Current Version:** `v1.0.3`
 
 This training course is complete and production-ready, covering the full ADK 2.0 curriculum across 40 modules — from your first agent to distributed, enterprise-grade multi-agent systems with full AgentOps observability.
 
 We continue to refine and expand the material as the ADK evolves. Your feedback and contributions are highly encouraged! If you find an issue or have a suggestion, please [open an issue on GitHub](https://github.com/mauripsale/doc-adk-training/issues).
+
+**What's new in `v1.0.3`:** ADK 2.4-2.6 coverage completed, plus a full empirical re-validation pass (every change below was actually run, not just reasoned about) that surfaced several pre-existing bugs unrelated to prior updates —
+
+*Coverage:*
+*   **Module 18:** a "Going Further" section on using a `@node` directly as an `Agent` tool, paired with `RequestInput`/`ResumabilityConfig` for human-in-the-loop pause-and-resume.
+*   **Module 26:** noted `BasePlugin`'s notification-only `on_agent_error_callback`/`on_run_error_callback`, and added an explicit run/test step.
+*   **Module 28:** noted `to_mcp_server` as the agent-level counterpart to Module 27's tool-level MCP server.
+*   **Module 39.5:** pointed to `GkeCodeExecutor`/`AgentEngineSandboxCodeExecutor` as production-safe alternatives to `UnsafeLocalCodeExecutor`.
+
+*Bugs found and fixed via empirical re-validation (student simulations that actually run the code):*
+*   **Module 9 & 12:** fixed `adk run agent.py` (needs a directory, not a file) in both modules.
+*   **Module 21:** fixed a nonexistent tool (`GoogleSearchAgentTool` → `google_search`), a missing dependency, and a wrong agent-card URL that silently blocked the entire A2A lab.
+*   **Module 24:** fixed `adk eval`'s missing `__init__.py`/`PYTHONPATH` requirement and corrected both bonus sections' JSON formats and CLI commands.
+*   **Module 27:** fixed a missing `mcp` install (the extra is required, not optional).
+*   **Module 28:** fixed a CWD-dependent path and a directory-naming mismatch that broke the lab when run as documented.
+*   **Module 33:** fixed a broken YAML indentation that caused `kubectl` to silently discard the Deployment's `spec`.
+*   Removed a handful of stale `adk create` CLI prompts referenced across several modules.
 
 **What's new in `v1.0.2`:** a second pass, this time against ADK 2.6.0 —
 *   **Module 12:** noted `ManagedAgent`'s new `instruction` parameter.

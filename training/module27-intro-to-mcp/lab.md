@@ -26,6 +26,11 @@ In this lab, you will learn how to connect your ADK agent to an external, statef
     cd mcp_agent
     ```
 
+3.  **Install the MCP extra.** `mcp` is not part of ADK's base install — it only comes in via ADK's `[mcp]` extra, which pins a compatible version:
+    ```shell
+    uv add "google-adk[mcp]"
+    ```
+
 ### Step 2: Create a Test Directory and File
 
 The MCP file system server needs a directory to operate on. Let's create one.

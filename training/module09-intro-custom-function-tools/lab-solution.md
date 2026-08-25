@@ -95,7 +95,7 @@ If the user asks something else, politely decline.
 You can now start the agent using the modern ADK CLI command:
 
 ```bash
-uv run adk run agent.py
+uv run adk run .
 ```
 
 Interact with the agent in the terminal and ask it to perform calculations:

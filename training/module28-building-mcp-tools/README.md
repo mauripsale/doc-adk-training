@@ -31,18 +31,18 @@ Once the client's LLM decides to use a tool, it sends a `call_tool()` request co
 The server's `call_tool()` handler is responsible for:
 *   Receiving the request.
 *   Executing the corresponding logic for the requested tool.
-*   Managing any state associated with the `session_id`.
+*   Managing any state the tool needs (e.g. an in-memory cart, a database row).
 *   Returning a result to the client.
 
 ### Building an MCP Server in Python
 
 The `mcp` Python library provides a `Server` class and decorators to simplify this process.
 
-1.  **Install the library:** `pip install mcp`
+1.  **Install the library (via ADK's compatible extra):** `uv add "google-adk[mcp]"`
 2.  **Instantiate the Server:** `app = Server("my_mcp_server")`
 3.  **Implement Handlers with Decorators:** You write `async` functions and use decorators to register them as handlers.
     *   `@app.list_tools()`: This decorates the function that will handle the `list_tools` request. It should return a list of `mcp.types.Tool` objects.
-    *   `@app.call_tool()`: This decorates the function that will handle the `call_tool` request. It receives the tool name, arguments, and `session_id`.
+    *   `@app.call_tool()`: This decorates the function that will handle the `call_tool` request. It receives the tool name and arguments.
 4.  **Run the Server:** You use a runner function (e.g., `mcp.server.stdio.stdio_server`) to start the server and listen for connections.
 
 In the lab, you will build a simple MCP server that exposes a stateful "shopping cart" tool, learning the fundamentals of implementing these handlers.
@@ -54,3 +54,7 @@ Building an MCP server decouples your tool's logic from the agent, which provide
 2.  **Modular Maintenance:** Update tool logic without redeploying the agent.
 3.  **Reusability:** Your MCP server can be consumed by *any* MCP-compliant client.
 4.  **Workflow Integration:** In ADK 2.0, you can equip any `Agent` node with your custom MCP server, allowing for complex, distributed graph execution.
+
+### Going Further: Exposing a Whole Agent as an MCP Tool (Experimental)
+
+This module built a hand-written MCP server exposing granular tools (`add_item_to_cart`, `view_cart`) — no agent involved on the server side. ADK also offers the opposite direction: `to_mcp_server(agent)` (from `google.adk.tools.mcp_tool`, requires the `[mcp]` extra) wraps an *entire* ADK agent — its model loop and all of its own tools — as a single MCP tool that any MCP host can call, hiding the whole conversation behind one request/response. It's the MCP counterpart of `to_a2a`, which you used in Module 21 to expose an agent over A2A instead. It's still marked `@experimental` in ADK's source, so treat it as a preview rather than a pattern to build on yet.

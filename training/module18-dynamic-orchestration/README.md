@@ -54,6 +54,42 @@ root_agent = Workflow(
 3.  **Automatic Checkpointing:** The ADK automatically saves the progress of each node. If execution is interrupted, it resumes exactly where it left off.
 4.  **Observability:** The Workflow Runtime tracks every node execution, providing detailed traces in the Dev UI.
 
+### Going Further: Using a Node as a Tool
+
+You've built `@node`-based workflows that a parent graph orchestrates. ADK also lets a plain `Agent` call a `@node` directly as a tool — just list it in `tools=[...]`, no wrapper needed (ADK wraps it in an internal `NodeTool` automatically). Combined with `RequestInput`, a node-as-tool can even pause mid-call for human approval and resume on the next turn:
+
+```python
+from typing import Generator
+from google.adk import Agent, Context
+from google.adk.workflow import node
+from google.adk.events import RequestInput
+from google.adk.apps import App, ResumabilityConfig
+
+@node(rerun_on_resume=True)
+def apply_discount(ctx: Context, tier: str) -> Generator[str, None, str]:
+    """Applies a discount for the given customer tier. Args: tier: the customer's tier."""
+    resume_input = ctx.resume_inputs.get("confirm_vip")
+    if "VIP" in tier and not resume_input:
+        yield RequestInput(interrupt_id="confirm_vip", message=f"Apply VIP discount for '{tier}'?")
+        return "pending"
+    return "20% off applied" if resume_input else "5% off applied"
+
+root_agent = Agent(
+    model="gemini-3.5-flash",
+    name="pricing_agent",
+    instruction="Help customers with discounts using the apply_discount tool.",
+    tools=[apply_discount],
+)
+
+app = App(
+    name="pricing_app",
+    root_agent=root_agent,
+    resumability_config=ResumabilityConfig(is_resumable=True),
+)
+```
+
+`ResumabilityConfig` is still marked `@experimental`, so expect this API to keep evolving — treat it as a preview rather than a pattern to build on yet.
+
 ### Key Takeaways
 - **Dynamic Workflows** allow defining complex orchestration logic using standard Python code decorated with `@node`.
 - **`ctx.run_node()`** is the primary way to execute other agents or functions within a workflow.

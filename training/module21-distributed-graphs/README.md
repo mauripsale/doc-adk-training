@@ -26,7 +26,8 @@ from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 # 1. Define the Proxy Node pointing to a remote service
 remote_expert = RemoteA2aAgent(
     name="remote_expert",
-    agent_card="http://localhost:8001/a2a/research_specialist/.well-known/agent-card.json"
+    agent_card="http://localhost:8001/.well-known/agent-card.json",
+    use_legacy=False,
 )
 
 # 2. Use it in your local Workflow
@@ -50,6 +51,10 @@ You are a research specialist.
 When receiving requests via the A2A protocol, ignore any internal graph transition messages. 
 Focus only on the core user query and fulfill the research task directly.
 ```
+
+### Advanced: A2A Reliability
+
+ADK 2.0 also ships an improved `A2aAgentExecutor` implementation that fixes known streaming-mode issues in the legacy A2A path — message duplication, misclassified outputs, and data loss when the remote agent has nested sub-agents. It's opt-in on the client side via `use_legacy=False` (as shown above); the server detects the extension automatically, so no changes are needed on the remote node. If you ever notice duplicate messages in the Trace View while running a distributed graph, this is why — try re-running with `use_legacy=False`.
 
 ### Key Takeaways
 - **Distributed Intelligence**: Build modular systems where nodes are independent web services.

@@ -11,10 +11,11 @@ In this lab, you will build your own simple, standalone MCP server from scratch.
 
 ### Step 1: Install MCP and Create Project
 
-1.  **Install the `mcp` library:**
+1.  **Install the `mcp` library (via the ADK's compatible extra):**
     ```shell
-    pip install mcp
+    uv add "google-adk[mcp]"
     ```
+    Installing `mcp` as a separate, unconstrained package (e.g. `pip install mcp`) can resolve a newer `mcp` release than the one ADK expects. Installing it through ADK's `[mcp]` extra guarantees a compatible version.
 
 2.  **Create a new project directory:**
     ```shell
@@ -31,14 +32,14 @@ In this lab, you will build your own simple, standalone MCP server from scratch.
 import asyncio
 import json
 from mcp import types as mcp_types
-from mcp.server.lowlevel import Server
+from mcp.server.lowlevel import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 
 # --- Server State ---
 # In a real application, this would be a database. For this lab, a simple
-# in-memory dictionary is enough to demonstrate statefulness.
-SESSION_CARTS = {}
+# in-memory list is enough to demonstrate statefulness.
+CART = []
 
 # --- MCP Server Setup ---
 app = Server("shopping_cart_mcp_server")
@@ -59,21 +60,17 @@ async def list_mcp_tools() -> list[mcp_types.Tool]:
     return [add_item_tool, view_cart_tool]
 
 @app.call_tool()
-async def call_mcp_tool(name: str, arguments: dict, session_id: str) -> list[mcp_types.Content]:
+async def call_mcp_tool(name: str, arguments: dict) -> list[mcp_types.Content]:
     """Handles the execution of our tools."""
-    print(f"[Server]: Client called tool '{name}' for session '{session_id}'.")
-
-    if session_id not in SESSION_CARTS:
-        SESSION_CARTS[session_id] = []
+    print(f"[Server]: Client called tool '{name}'.")
 
     # TODO: 3. Implement the logic for the "add_item_to_cart" tool.
     # - Get the "item" from the `arguments`.
-    # - Append it to the correct session cart in `SESSION_CARTS`.
+    # - Append it to `CART`.
     # - Return a success message.
 
     # TODO: 4. Implement the logic for the "view_cart" tool.
-    # - Get the current cart for the `session_id`.
-    # - Return the cart contents.
+    # - Return the current contents of `CART`.
     
     # Remember to return your response as a JSON string inside a
     # `mcp_types.TextContent` object.
@@ -84,7 +81,15 @@ async def call_mcp_tool(name: str, arguments: dict, session_id: str) -> list[mcp
 async def run_mcp_stdio_server():
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
         print("[Server]: Waiting for a client to connect...")
-        await app.run(read_stream, write_stream, InitializationOptions(server_name=app.name, server_version="0.1.0"))
+        await app.run(
+            read_stream,
+            write_stream,
+            InitializationOptions(
+                server_name=app.name,
+                server_version="0.1.0",
+                capabilities=app.get_capabilities(NotificationOptions(), {}),
+            ),
+        )
 
 if __name__ == "__main__":
     print("[Server]: Starting Shopping Cart MCP Server...")
@@ -96,19 +101,22 @@ if __name__ == "__main__":
 
 ### Step 3: Create the ADK Client Agent
 
-Create an `agent.py` file and complete the code to connect to your server using the ADK 2.0 `Agent` class and an `MCPToolset`.
+Create an `agent.py` file and complete the code to connect to your server using the ADK 2.0 `Agent` class and an `McpToolset`.
 
 ```python
 # In agent.py
-import os
+import pathlib
 from google.adk import Agent
-from google.adk.tools.mcp_tool import MCPToolset, StdioConnectionParams
+from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams
 from mcp import StdioServerParameters
 
-# TODO: Get the absolute path to your 'cart_server.py'
+# TODO: Get the absolute path to your 'cart_server.py'.
+# Base it on this file's own location (pathlib.Path(__file__).parent), not on
+# os.getcwd() — the process's working directory won't be this folder when
+# 'adk web'/'adk run' is launched from the parent directory in Step 4.
 PATH_TO_SERVER = ...
 
-# TODO: Define the root Agent node and configure the MCPToolset
+# TODO: Define the root Agent node and configure the McpToolset
 # - command: 'python3'
 # - args: [PATH_TO_SERVER]
 root_agent = Agent(
@@ -116,7 +124,7 @@ root_agent = Agent(
     name='shopping_agent',
     instruction='You are a shopping assistant.',
     tools=[
-        MCPToolset(...)
+        McpToolset(...)
     ],
 )
 ```
@@ -124,7 +132,11 @@ Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-3.5-fla
 
 ### Step 4: Test the Full System
 
-1.  **Start the ADK web server:** `uv run adk web shopping_agent`
+1.  **Navigate to the parent directory and start the ADK web server**, pointing it at the `custom_mcp_server` folder you created in Step 1:
+    ```shell
+    cd ..
+    uv run adk web custom_mcp_server
+    ```
 2.  **Check the console logs:** You should see logs from your `cart_server.py` as it starts up.
 3.  **Interact with the agent** in the Dev UI:
     *   "Please add 'milk' to my cart."
@@ -139,12 +151,12 @@ If you get stuck, you can find the complete, working code in the `lab-solution.m
 You have successfully built and consumed your own stateful MCP tool. You have learned to:
 *   Implement the `@app.list_tools()` handler to define a server's tool schema.
 *   Implement the `@app.call_tool()` handler to provide tool logic.
-*   Manage state on the server side, tied to a `session_id`.
+*   Manage state on the server side across multiple tool calls.
 *   Connect an ADK agent to your custom-built MCP server.
 
 ### Self-Reflection Questions
-- In our `cart_server.py`, we used a global dictionary `SESSION_CARTS` to store the state. Why is this approach not suitable for a production environment with multiple server instances? What would be a better solution?
-- The `call_tool` handler receives a `session_id`. Why is this ID crucial for managing state in a multi-user environment?
+- In our `cart_server.py`, we used a global list `CART` to store the state. Why is this approach not suitable for a production environment with multiple server instances or multiple concurrent users? What would be a better solution?
+- The server declares `capabilities` in its `InitializationOptions`. What role does this capability negotiation play during the MCP handshake, and what might happen if a client expects a capability the server never declared?
 - By building an MCP server, you have decoupled your tool's logic from the agent. What are the long-term benefits of this separation for maintaining and scaling your application?
 
 <hr/>

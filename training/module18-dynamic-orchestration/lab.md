@@ -17,7 +17,6 @@ This exercise demonstrates the power of ADK 2.0: using standard Python logic to 
     ```shell
     uv run adk create support_router_v2
     ```
-    Choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell

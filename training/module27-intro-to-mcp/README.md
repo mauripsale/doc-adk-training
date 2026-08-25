@@ -33,12 +33,12 @@ MCP works on a client-server model:
 
 ```text
 +-----------------+      +----------------------+      +--------------------+
-|   Agent Node    |----->|    MCPToolset        |----->|     MCP Server     |
+|   Agent Node    |----->|    McpToolset        |----->|     MCP Server     |
 |  (MCP Client)   |      | (ADK Wrapper/Client) |      | (e.g., Filesystem) |
 +-----------------+      +----------------------+      +--------------------+
 ```
 
-The `MCPToolset` is the bridge. It connects to an MCP server, discovers the tools it offers, and makes them available to your agent node. When your agent decides to use one of these tools, the `MCPToolset` proxies the call to the server, which executes the logic and maintains the state.
+The `McpToolset` is the bridge. It connects to an MCP server, discovers the tools it offers, and makes them available to your agent node. When your agent decides to use one of these tools, the `McpToolset` proxies the call to the server, which executes the logic and maintains the state.
 
 ### MCP Connection Types
 
@@ -53,6 +53,6 @@ In the lab, you will use the `Stdio` connection to run a local filesystem server
 ### Key Takeaways
 - Standard function tools are **stateless**, which limits their ability to handle ongoing, multi-turn interactions.
 - The **Model Context Protocol (MCP)** is an open standard that enables agents to connect to **stateful** external tools.
-- The ADK acts as an MCP client, using the `MCPToolset` to connect to and consume tools from an MCP server.
-- **Workflow Integration:** In ADK 2.0, an `Agent` node equipped with an `MCPToolset` becomes a powerful interface to external systems within your graph.
+- The ADK acts as an MCP client, using the `McpToolset` to connect to and consume tools from an MCP server.
+- **Workflow Integration:** In ADK 2.0, an `Agent` node equipped with an `McpToolset` becomes a powerful interface to external systems within your graph.
 - **Security and Sandboxing:** Launching an MCP server as a subprocess (e.g., via `StdioConnectionParams`) grants the external code operational freedom. Always **sandbox** the server to a specific directory to minimize risk.

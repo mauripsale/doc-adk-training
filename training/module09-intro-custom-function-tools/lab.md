@@ -116,7 +116,7 @@ You can test your new agent directly using the ADK CLI's interactive mode.
 
 1.  **Run the agent in interactive mode:**
     ```bash
-    uv run adk run agent.py
+    uv run adk run .
     ```
 2.  **Interact with the agent** in the terminal:
     *   "What is 42 + 118?"

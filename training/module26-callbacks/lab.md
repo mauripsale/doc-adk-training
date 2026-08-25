@@ -17,7 +17,6 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
     ```shell
     uv run adk create content_moderator
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
 
 2.  **Navigate into the new directory:**
     ```shell
@@ -29,13 +28,58 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 **Exercise:** Open `agent.py`. Your task is to implement the logic for the five core callbacks. Use the `# TODO` comments as your guide.
 
 ```python
-# ... [previous imports] ...
+import os
+import re
+import logging
+from typing import Dict, Any, Optional
+from google.adk import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.tools import ToolContext
+from google.adk.tools.base_tool import BaseTool
+from google.adk.models.llm_request import LlmRequest
+from google.adk.models.llm_response import LlmResponse
+from google.genai import types
+from dotenv import load_dotenv
 
-# ============================================================================ 
+load_dotenv()
+
+# --- Configuration ---
+BLOCKED_WORDS = ['unsafe', 'offensive']
+
+# ============================================================================
 # CALLBACK FUNCTIONS
-# ============================================================================ 
+# ============================================================================
 
-# ... [before_agent, after_agent, before_model stay the same] ...
+def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
+    """
+    TODO: Caching (Check).
+    Read 'cached_response' from callback_context.state. If present, print a
+    cache-hit message and return a types.Content wrapping it (role="model")
+    to skip the LLM entirely. Otherwise return None.
+    """
+    pass
+
+def after_agent_callback(callback_context: CallbackContext) -> None:
+    """
+    TODO: Caching (Save).
+    Walk callback_context.session.events in reverse to find the last
+    non-user event with content, and save its text into
+    callback_context.state['cached_response'] for future reuse.
+    """
+    pass
+
+def before_model_callback(
+    callback_context: CallbackContext,
+    llm_request: LlmRequest
+) -> Optional[LlmResponse]:
+    """
+    TODO: Input Guardrail.
+    Concatenate the text of llm_request.contents and check it against
+    BLOCKED_WORDS. If a blocked word is found, print a warning and return an
+    LlmResponse with a refusal message instead of calling the model.
+    Otherwise return None.
+    """
+    pass
 
 def after_model_callback(
     callback_context: CallbackContext,
@@ -49,23 +93,47 @@ def after_model_callback(
     pass
 
 def before_tool_callback(
-    # ...
-```
+    tool: BaseTool,
+    args: Dict[str, Any],
+    tool_context: ToolContext
+) -> Optional[Dict[str, Any]]:
+    """
+    TODO: Tool Validation.
+    If tool.name == 'generate_text' and args['word_count'] exceeds 5000,
+    print a warning and return an error dict (e.g. {'status': 'error',
+    'message': '...'}) to block execution. Otherwise return None.
+    """
+    pass
 
-# ============================================================================ 
+# --- Tools ---
+def generate_text(topic: str, word_count: int) -> dict:
+    """Generates text on a topic."""
+    return {"status": "success", "text": f"A {word_count}-word essay on {topic}..."}
+
+# ============================================================================
 # AGENT DEFINITION
-# ============================================================================ 
+# ============================================================================
 
-# TODO: Define root_agent and register ALL callbacks
+# TODO: Define root_agent and register ALL five callbacks defined above.
 root_agent = Agent(
     name="secure_moderator",
     model="gemini-3.5-flash",
+    # instruction=...,
     # tools=[...],
     # before_agent_callback=...,
-    # ...
+    # after_agent_callback=...,
+    # before_model_callback=...,
+    # after_model_callback=...,
+    # before_tool_callback=...,
 )
 ```
 
+### Step 3: Run and Test
+
+Start the agent and try both paths: a normal prompt (should reach the model), and a prompt containing a blocked word like "unsafe" (should be refused by `before_model_callback` without ever calling the model). Then repeat the same prompt in the same session — `before_agent_callback` should return the cached response instantly.
+
+```shell
+uv run adk run content_moderator
 ```
 
 ### Self-Reflection Questions

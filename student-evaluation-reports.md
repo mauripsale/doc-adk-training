@@ -969,3 +969,235 @@ The solution in `lab-solution.md` is exemplary, using clean, production-grade AD
 ## 💡 Suggestions for Improvement
 To further enhance the AgentOps section, we could provide an optional Appendix showing how to construct a custom Google Cloud Monitoring dashboard JSON file to plot these agent latency and token metrics.
 
+
+---
+# 🎓 Student Evaluation Report: Module 12 - Built-in Tools and Grounding
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 3
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 4
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+The theory flowed well — `google_search` as a built-in tool, mixed with custom functions, is explained clearly with a working code sample. The two "Looking Ahead: Managed Agents (Preview)" additions (base concept + the new `instruction` param note) read as clear, appropriately-scoped asides. Writing the `research_assistant` agent from the TODO skeleton was straightforward.
+
+## 🚧 Friction Points & Bugs
+**Real bug, reproducible, pre-existing (not part of this session's edits):** Step 3 of `lab.md` instructs `uv run adk run agent.py`, but the installed ADK CLI's `adk run` command expects a **directory**, not a file path, and fails immediately (`Error: Invalid value for 'AGENT': Directory 'agent.py' is a file.`). The fix is `uv run adk run .`. Confirmed the same broken command is also in `lab-solution.md`'s "Testing the Solution" section.
+
+**Infra limitation (not a course bug):** live end-to-end execution failed with `API key not valid` — environment/credentials issue, not a module defect. ADK-side wiring (schema validation, tool registration) all passed.
+
+## 🏁 Solution Review
+Independently-written `agent.py` matched `lab-solution.md` almost exactly in structure. No divergence in approach.
+
+## 💡 Suggestions for Improvement
+1. Fix `uv run adk run agent.py` → `uv run adk run .` in both `lab.md` and `lab-solution.md`.
+2. Add a one-line note clarifying `adk run` takes the agent's directory, not the entry-point file.
+3. The two new "Looking Ahead" boxes on `ManagedAgent` are good as-is; no changes needed there.
+
+---
+# 🎓 Student Evaluation Report: Module 21 — Distributed Graphs (A2A)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 4
+* **Clarity of Instructions (lab.md):** 2
+* **Code Completeness:** 1
+* **Solution Quality (lab-solution.md):** 1
+* **Overall Difficulty:** 5 (not because the concept is hard, but because the provided code doesn't run as-is)
+
+## 🧑‍💻 The Student Experience
+Theory is clear and the `use_legacy=False` / "Advanced: A2A Reliability" addition reads well. Executing the lab exactly as written (ADK 2.7.1) failed at three separate points before the reliability fix could even be tested.
+
+## 🚧 Friction Points & Bugs
+1. **`GoogleSearchAgentTool` doesn't exist** in installed ADK — the real class is `google_search`. Present in both `lab.md` and `lab-solution.md`.
+2. **Missing transitive dependency**: `pip install uvicorn google-adk[a2a]` is not enough — starting the specialist server crashes with `ModuleNotFoundError: No module named 'sse_starlette'`.
+3. **Agent card URL is wrong (blocking)**: both files build the URL as `f"http://localhost:8001/a2a/research_specialist{AGENT_CARD_WELL_KNOWN_PATH}"`, but the specialist actually serves its card at the root: `http://localhost:8001/.well-known/agent-card.json`. The `/a2a/research_specialist/...` path 404s.
+4. Test environment API key rejected — blocked a live end-to-end run (infra limitation, not a course bug).
+
+## 🏁 Solution Review
+`lab-solution.md` has the same `GoogleSearchAgentTool` and agent-card-URL bugs as the starter — not currently a working reference.
+
+## A2A Reliability Check (use_legacy=False)
+✅ Confirmed the parameter is real and correctly used (`RemoteA2aAgent.__init__` signature has `use_legacy: bool = True` in ADK 2.7.1). ⚠️ Could not empirically confirm the "no duplicate messages" claim end-to-end because finding #3 blocks the orchestrator from reaching the specialist at all, and the API key issue blocked a live run after patching locally. `use_legacy=False` itself looks correct but is currently unreachable due to a higher-priority bug.
+
+## 💡 Suggestions for Improvement
+1. **Highest priority**: fix the agent-card URL to `f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}"` in `lab.md`'s hint and `lab-solution.md`.
+2. Replace `GoogleSearchAgentTool` with `google_search` in both files.
+3. Add `sse_starlette` to the Step 1 install command.
+
+---
+# 🎓 Student Evaluation Report: Module 24 — Evaluating Agent Performance
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 3 (both new Bonus snippets have real technical inaccuracies)
+* **Solution Quality (lab-solution.md):** N/A (not reached — blocked by environment/pre-existing bug, not module content)
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Theory and the golden-path/CLI flow (Steps 1-8) read clearly. Live execution blocked by an invalid API key in the test environment (infra limitation). Pivoted to static verification against installed `google-adk==2.7.1` source for import paths, field names, JSON schemas, and CLI flags.
+
+## 🚧 Friction Points & Bugs
+1. **Blocking, pre-existing gap (not part of this session's bonuses):** `uv run adk eval` fails with `Error: Eval module is not installed, please install via "pip install google-adk[eval]"` on a plain `uv add google-adk`. Never mentioned anywhere in the module. Blocks the core lab, not just the bonuses.
+2. **Bonus "Custom Metric" — incomplete instructions:** the metric name must also be added to `criteria` (e.g. `{"check_math_is_correct": 0.5}`), not just `custom_metrics` — otherwise `code_config` is never used and nothing happens, with no error.
+3. **Bonus "Custom Metric" — wrong config location:** there's no `config` section in `evalset.json`; `adk eval` only accepts an `EvalConfig` as a separate file via `--config_file_path`.
+4. **Bonus "User Simulation" — invalid JSON shape:** the bare scenario object needs a `{"scenarios": [...]}"` wrapper, and there's a dedicated CLI command not mentioned at all: `adk eval_set add_eval_case AGENT_PATH EVAL_SET_ID --scenarios_file <file> --session_input_file <file>`.
+
+## 🏁 Solution Review
+Not reached — friction was environmental (API key) plus the two bonus-text issues above.
+
+## 💡 Suggestions for Improvement
+- Add `uv add "google-adk[eval]"` near the top of Step 1 (fixes the entire module, most urgent item).
+- Fix the Custom Metric bonus: add the `criteria` entry example and a real `eval_config.json` + `--config_file_path` command.
+- Fix the User Simulation bonus: wrap the JSON as `{"scenarios": [...]}"` and show the real `adk eval_set add_eval_case ... --scenarios_file ... --session_input_file ...` command.
+
+## Bonus Sections Technical Accuracy
+| Check | Result |
+|---|---|
+| `EvaluationResult`/`PerInvocationResult` import | ✅ Correct |
+| `EvalStatus` import | ✅ Correct |
+| Field names on both classes | ✅ All match |
+| Custom metric registration via `custom_metrics` | ⚠️ Correct but incomplete (needs `criteria` entry too) |
+| `EvalConfig` location as described | ❌ Incorrect — only a separate `--config_file_path` file works |
+| `user_persona: "NOVICE"` | ✅ Valid |
+| Bare `ConversationScenario` JSON as shown | ❌ Needs `{"scenarios": [...]}"` wrapper + `adk eval_set add_eval_case` command |
+
+---
+# 🎓 Student Evaluation Report: Module 26 - Callbacks and Guardrails
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 4
+* **Clarity of Instructions (lab.md):** 2
+* **Code Completeness:** 2
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Theory is clear, including the new self-healing plugins section. The lab itself proved impossible to complete from `lab.md` alone: "Step 2: Implement the Callbacks" is truncated — only one complete TODO (`after_model_callback`), a second cut off mid-sentence (`before_tool_callback`), and references to code "that comes before" that was never shown. An orphaned closing code fence appears before the Self-Reflection Questions, suggesting accidental truncation, not a pedagogical choice. `adk create`'s "Programmatic (Python script)" prompt also no longer exists in the current CLI (google-adk 2.7.1).
+
+## 🚧 Friction Points & Bugs
+1. **[High severity] `lab.md` truncated**: missing starter-code/TODOs for `before_agent_callback`, `before_model_callback`, and the completion of `before_tool_callback`. A real student has no way to know what to implement.
+2. **[Low severity] Outdated CLI prompt**: `lab.md` references an `adk create` prompt that no longer exists.
+3. Had to activate the Stuck Protocol and read `lab-solution.md` to proceed — penalized accordingly.
+
+## 🏁 Solution Review
+`lab-solution.md` is complete, well-commented, and correct. **Empirical verification of this session's new content** (README "Built-in Example: Self-Healing Plugins"): `ReflectAndRetryModelPlugin`/`ReflectAndRetryToolPlugin` import successfully from `google.adk.plugins`; `App` imports correctly from `google.adk.apps.app`; constructor signatures confirmed via `inspect.signature` — `max_retries` is valid for both. Instantiated an `App` with both plugins registered end-to-end with no errors. Could not validate live callback behavior (cache hit, guardrail, redaction, tool block) due to an invalid API key in the test environment (infra issue, not course code).
+
+## 💡 Suggestions for Improvement
+1. **High priority**: restore the missing starter-code/TODOs for the three incomplete callbacks in `lab.md` (recover from git history if possible).
+2. Remove/update the outdated `adk create` prompt reference.
+3. The new `ReflectAndRetry*` plugin content in the README is technically correct and empirically verified — no changes needed there.
+
+---
+# 🎓 Student Evaluation Report: Module 27 — Introduction to MCP & Stateful Tools
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Followed the lab step by step; the code produced matched `lab-solution.md`'s structure exactly, no ambiguity in the TODOs.
+
+## 🚧 Friction Points & Bugs
+1. **[Real] Timeout on first run**: the very first `npx -y @modelcontextprotocol/server-filesystem ...` invocation must download the npm package, exceeding ADK's hardcoded 5s MCP session timeout (`ConnectionError: ... timed out after 5.0s`), even though the server then starts correctly right after. Retrying the same call (npx now cached) works on the first try.
+2. **[False alarm, resolved]** Adding `mcp` explicitly and unconstrained (`uv add google-adk mcp`) resolves an incompatible `mcp==2.0.0`. Without adding it explicitly — as a student following only `adk create` would — `google-adk` resolves a compatible `mcp` version on its own. Not a course bug, an artifact of the test methodology.
+
+## 🏁 Solution Review
+`lab-solution.md` matches exactly what following the TODOs produces — no discrepancy, no need to consult it to get unstuck.
+
+## 💡 Suggestions for Improvement
+Add a line in Step 4: "If your very first request fails with an MCP session timeout, this is likely `npx` downloading the server package for the first time — simply retry." Near-zero cost, removes a real, reproducible first-run friction point.
+
+## McpToolset Rename Verification
+✅ Correct. Both `from google.adk.tools.mcp_tool.mcp_toolset import McpToolset` (used in the lab) and the package-root style import work correctly. The `MCPToolset`→`McpToolset` rename introduced no regressions.
+
+## Remote MCP Bonus — Static Review Only
+Not executed (requires a real GitHub PAT). Static review: imports correct and consistent with what was verified for the main lab, syntax valid, `Authorization` header pattern correct and safe (token from `.env`, never hardcoded). No issues found without execution.
+
+---
+# 🎓 Student Evaluation Report: Module 28 — Building a Custom MCP Tool
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 3 (contains a now-inaccurate technical claim)
+* **Clarity of Instructions (lab.md):** 3
+* **Code Completeness:** 1 (starter and solution code are not runnable against current `mcp` versions)
+* **Solution Quality (lab-solution.md):** 2 (same breakage as the starter)
+* **Overall Difficulty:** 4 (not conceptually hard — blocked by environment/API drift)
+
+## 🧑‍💻 The Student Experience
+Following `lab.md` literally (`pip install mcp` then `uv add google-adk mcp`), `McpToolset` fails to import at all — the whole `google.adk.tools.mcp_tool` package fails to load silently. A real beginner would be stuck immediately with no clue from the surface traceback.
+
+## 🚧 Friction Points & Bugs
+1. **[Critical] Import broken by `mcp` version conflict**: `uv add google-adk mcp` installs `google-adk==2.7.1` plus the latest `mcp==2.0.0`, but `google-adk` only declares its `mcp` version constraint inside its optional `[mcp]` extra. Result: `mcp==2.0.0` breaks `mcp_session_manager.py` (`ImportError: cannot import name 'McpHttpClientFactory'`), cascading to break all MCP imports. **Fix verified**: `uv add "google-adk[mcp]"` resolves `mcp==1.29.0` and imports work perfectly. The `MCPToolset`→`McpToolset` rename made this session is correct and unrelated to this bug.
+2. **[Critical] `call_tool` handler has a wrong signature**: both `lab.md` and `lab-solution.md` define `async def call_mcp_tool(name, arguments, session_id)`, but the real `mcp` 1.29.0 API calls handlers with only `(tool_name, arguments)` — confirmed via source and by running the real server, which raises `TypeError: missing 1 required positional argument: 'session_id'`. `session_id` doesn't exist anywhere in `mcp.server.lowlevel`.
+3. **[Critical] `InitializationOptions` missing required `capabilities`**: both files omit it; `mcp` 1.29.0 requires it (`ValidationError: capabilities Field required`). Fix: `capabilities=app.get_capabilities(NotificationOptions(), {})`.
+
+After fixing all three locally, verified end-to-end with a real MCP client that `list_tools`/`call_tool` work correctly. Live agent↔model interaction not testable (invalid API key in test environment — infra issue).
+
+## 🏁 Solution Review
+`lab-solution.md` contains the exact same three critical bugs as the starter — reading it does not unblock a stuck student.
+
+## 💡 Suggestions for Improvement
+1. `lab.md` Step 1: replace `pip install mcp` with `uv add "google-adk[mcp]"`.
+2. Remove `session_id` from the `call_tool` signature in both files (or implement real per-user state some other way, since the current API doesn't provide it natively).
+3. `README.md`: correct the claim that the handler receives "the tool name, arguments, and session_id" — it's just name and arguments today.
+4. Add `capabilities=app.get_capabilities(NotificationOptions(), {})` to `InitializationOptions` in both files.
+
+## McpToolset Rename Verification
+✅ Confirmed correct, provided `mcp` is installed via the compatible extra (`google-adk[mcp]`, resolving `mcp==1.29.0`) rather than as an unconstrained separate package. The legacy `MCPToolset` alias also remains available in parallel.
+
+---
+# 🎓 Student Evaluation Report: Module 33 — Deployment to GKE
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** N/A — would require real GKE cluster execution
+* **Overall Difficulty:** N/A — would require real execution
+
+## 🧑‍💻 Note: Static Review Only
+This evaluation is a static code/text review, not an executed simulation — no GKE cluster, Artifact Registry, or other real cloud resource was created, no cost incurred.
+
+## 🚧 Friction Points & Bugs
+- Environment variables (`GOOGLE_CLOUD_PROJECT`/`GOOGLE_CLOUD_LOCATION`) are used consistently across all steps, including the new "Bonus: The Automated Way" `adk deploy gke` command.
+- `--cluster_name adk-cluster` and `--service_type=LoadBalancer` in the Bonus match the manually-created cluster name and manifest `type: LoadBalancer` exactly.
+- The `echo_agent/` path argument is correct given the `cp -r echo_agent/ gke_echo_agent/` structure.
+- **Minor cosmetic inconsistency (non-blocking)**: README.md calls it `uv run adk deploy gke`, while the new Bonus block in lab.md writes `adk deploy gke` without the prefix.
+
+## 🏁 Solution Review
+The Bonus is purely informational ("you won't run this in the lab"), so it correctly has no counterpart in `lab-solution.md`.
+
+## 💡 Suggestions for Improvement
+Align `uv run adk deploy gke` (README) and `adk deploy gke` (lab.md Bonus) to the same form for consistency.
+
+---
+# 🎓 Student Evaluation Report: Module 39.5 - Agent Skills
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 4
+* **Clarity of Instructions (lab.md):** 2
+* **Code Completeness:** 3
+* **Solution Quality (lab-solution.md):** 2
+* **Overall Difficulty:** 3 (artificially high due to the bug below)
+
+## 🧑‍💻 The Student Experience
+Setup (`uv init`, `uv add google-adk` → installs 2.7.1, `adk create skills_agent`) worked smoothly. Code written independently from the TODOs matched `lab-solution.md` exactly.
+
+## 🚧 Friction Points & Bugs
+**Blocking, 100% reproducible bug, not a course-writer typo but a real API constraint change**: copying `SKILL.md`'s frontmatter exactly as shown in Step 3 (`name: greeting_skill`) crashes at load with a Pydantic `ValidationError: name must be lowercase kebab-case ... no ... consecutive delimiters`. On ADK 2.7.1, skill names cannot contain underscores by default (a `SNAKE_CASE_SKILL_NAME` feature flag exists but isn't on by default). Fixing only the frontmatter to kebab-case then produces a second error: `Skill name 'greeting-skill' does not match directory name 'greeting_skill'`. The full fix requires renaming **both** the directory and the `name:` field consistently to kebab-case, plus updating the path in `agent.py`. With that fix, skill loading proceeds correctly. Final conversational test not completed due to an invalid API key in the test environment (infra issue, not a module defect).
+
+## 🏁 Solution Review
+`lab-solution.md` has the exact same bug — assumes the snake_case directory/name from Steps 2-3 without correcting or flagging it.
+
+## 💡 Suggestions for Improvement
+1. **Priority fix**: rename the skill directory to `skills/greeting-skill` and its frontmatter to `name: greeting-skill` in both `lab.md` and `lab-solution.md`; update the path hint in Step 4 accordingly.
+2. Add a line in "The Structure of a Skill Directory" stating the `name` must be lowercase kebab-case and match its containing directory exactly.
+
+## New README Sections Review
+Both sections added this session are clear and well-calibrated: the "experimental" note is short and honest without undermining confidence in the module; "Going Further: The Skill Registry (Preview)" is correctly scoped as "beyond the scope of this lab" with no executable code to get stuck on, and correctly names `GCPSkillRegistry`, `search_skills`, `load_skill`.

@@ -106,6 +106,8 @@ While you can store simple secrets in the session state, the ADK provides a more
 
 This system uses a more complex `AuthConfig` object and is designed for production scenarios requiring robust security. For many use cases, storing simple API keys in the `user:` or `app:` state is a sufficient and simpler alternative.
 
+> **Going Further:** this module's lab doesn't exercise Credential Management hands-on — setting up a real OAuth flow is more infrastructure than a single lab warrants. If you want to try it, wire up `save_credential`/`load_credential` around a real third-party OAuth provider and confirm a tool can use the stored token on a later call, in a later session.
+
 ### Key Takeaways
 - The ADK's **Artifacts** system provides persistent, versioned file storage for agents.
 - **Binary Support:** Unlike simple text memory, Artifacts handle images, PDFs, and audio using `types.Part.from_bytes()`.

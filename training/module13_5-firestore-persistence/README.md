@@ -5,6 +5,8 @@ title: "Module 13.5: Extending ADK - Custom Persistence with Firestore"
 
 # Module 13.5: Extending ADK - Custom Persistence with Firestore
 
+*This module sits in Part 2 (Tools & Capabilities) rather than in the Part 4 state/memory modules on purpose: writing a custom `BaseSessionService` is itself an act of extending the ADK's toolkit with your own infrastructure, not a production-operations concern like the topics in Part 4. Think of it as "building a new kind of tool," just one that stores state instead of taking action.*
+
 ## Theory
 
 ### The Power of Extensibility

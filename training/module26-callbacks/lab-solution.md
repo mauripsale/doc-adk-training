@@ -79,10 +79,14 @@ def after_model_callback(
     llm_response: LlmResponse
 ) -> Optional[LlmResponse]:
     """Removes sensitive email addresses from the LLM response."""
-    if not llm_response.content:
+    if not llm_response.content or not llm_response.content.parts:
         return None
-        
+
     original_text = llm_response.content.parts[0].text
+    if not original_text:
+        # The model's response may be a pure function call (e.g. deciding to
+        # invoke generate_text) with no text part to filter.
+        return None
     # Simple email regex
     redacted_text = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[EMAIL_REDACTED]', original_text)
     
@@ -111,6 +115,25 @@ def before_tool_callback(
             }
     return None
 
+# --- Callback 6: Tool Output Audit ---
+def after_tool_callback(
+    tool: BaseTool,
+    args: Dict[str, Any],
+    tool_context: ToolContext,
+    tool_response: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    """Audits tool output and redacts blocked words as a defense-in-depth layer."""
+    if tool.name == 'generate_text':
+        text = tool_response.get('text', '')
+        if any(word in text.lower() for word in BLOCKED_WORDS):
+            print("🛡️ [AUDIT] Redacted blocked word from tool output.")
+            redacted = text
+            for word in BLOCKED_WORDS:
+                redacted = redacted.replace(word, '***')
+            return {**tool_response, 'text': redacted}
+        print(f"📋 [AUDIT] Tool '{tool.name}' executed successfully.")
+    return None
+
 # --- Tools ---
 def generate_text(topic: str, word_count: int) -> dict:
     """Generates text on a topic."""
@@ -126,7 +149,8 @@ root_agent = Agent(
     after_agent_callback=after_agent_callback,
     before_model_callback=before_model_callback,
     after_model_callback=after_model_callback,
-    before_tool_callback=before_tool_callback
+    before_tool_callback=before_tool_callback,
+    after_tool_callback=after_tool_callback
 )
 ```
 

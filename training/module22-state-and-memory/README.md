@@ -58,6 +58,8 @@ The ADK supports **rewinding** a session to a previous point. This is useful for
 *   **What is restored:** Session-level state and artifacts.
 *   **What is NOT restored:** Global resources like `app:` or `user:` state, and external side effects (like API calls already made).
 
+> **Going Further:** this module's lab doesn't exercise Session Rewind hands-on — it's a niche enough feature that a dedicated exercise wasn't worth the extra lab time. If you want to try it, add a small script that calls `session_service.get_session()`, notes an `invocation_id` partway through a multi-turn conversation, makes a few more turns, then rewinds to that point and confirms the state matches.
+
 ### Memory Service
 
 The Memory Service provides **long-term, searchable memory** for your agent, like an archive of past conversations.

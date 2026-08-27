@@ -39,16 +39,16 @@ The personalized shopping agent is a **distributed multi-agent system** composed
 
     The prompt also includes specific instructions on how to handle the web environment's state, such as using the "`< Prev`" button to navigate back.
 
-4.  **Artifacts:**
-    To provide a better user experience, the agent saves the HTML content of the current page as an artifact after each action. This allows the user to see the web page that the agent is interacting with in the ADK's web UI.
+4.  **Artifacts (optional extension):**
+    This lab's solution doesn't save artifacts — but the `web_agent`'s `click`/`search` tools are a natural place to add `tool_context.save_artifact()` calls, saving the HTML content of the current page after each action. That would let a user see the web page the agent is interacting with in the ADK's web UI, using the same pattern from Module 23.
 
 By combining these components, we can create a powerful agent that can navigate a web environment, gather information, and interact with a user to complete a complex task.
 
 ### Key Takeaways
-- This advanced challenge project integrates many concepts from the course: distributed multi-agent systems (A2A), state management, OpenAPI tools, multimodal input, and artifacts.
+- This advanced challenge project integrates many concepts from the course: distributed multi-agent systems (A2A), state management, and OpenAPI tools.
 - The architecture separates concerns into a main **Orchestrator**, a stateful **Personalization Agent**, and a **Web Agent** that abstracts the web environment.
 - The agent's `instruction` is engineered to follow a state machine-like process, guiding it through the complex, multi-step task of navigating a website.
-- Artifacts are used to provide a better user experience by visualizing the agent's interaction with the web environment.
+- Artifacts aren't wired up in this lab's solution, but they're a natural optional extension for visualizing the agent's interaction with the web environment (see above).
 - **Abstraction via OpenAPI:** Abstracting the website behind an OpenAPI spec is a superior design because it simplifies the orchestrator's reasoning task. The LLM only needs to know about the `search(keywords: str)` function, not the complex and messy raw HTML of the website. This improves reliability and makes the system more maintainable, as changes to the website's front-end only require updating the Web Agent's internal logic, not the orchestrator or the OpenAPI contract.
 - **Observability via Callbacks:** Using a `before_tool_callback` for logging separates the concern of observability from the agent's business logic. The orchestrator's core instruction remains focused on delegation, while the callback transparently intercepts and logs the action. This makes the system more maintainable, as the monitoring logic can be updated independently of the agent's reasoning.
 - **Advantages of Distributed Architecture:** This distributed A2A architecture offers significant advantages over a monolithic agent. It allows for **independent scalability** (the Web Agent can be scaled separately if it's under heavy load), **modular maintenance** (changes to the website's logic only require updating the Web Agent), and **reusability** (the Personalization Agent could be reused by other agents in the organization).

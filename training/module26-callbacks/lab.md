@@ -25,7 +25,7 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 
 ### Step 2: Implement the Callbacks
 
-**Exercise:** Open `agent.py`. Your task is to implement the logic for the five core callbacks. Use the `# TODO` comments as your guide.
+**Exercise:** Open `agent.py`. Your task is to implement the logic for the six core callbacks. Use the `# TODO` comments as your guide.
 
 ```python
 import os
@@ -89,6 +89,9 @@ def after_model_callback(
     TODO: Output Filtering.
     Use re.sub to redact email addresses from the LLM response text.
     If redacted, return a new LlmResponse; otherwise return None.
+    Note: llm_response.content.parts[0].text can be None — the model's
+    response may be a pure function call (e.g. deciding to invoke
+    generate_text) with no text to filter. Guard against that first.
     """
     pass
 
@@ -105,6 +108,22 @@ def before_tool_callback(
     """
     pass
 
+def after_tool_callback(
+    tool: BaseTool,
+    args: Dict[str, Any],
+    tool_context: ToolContext,
+    tool_response: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    """
+    TODO: Output Audit.
+    If tool.name == 'generate_text', check tool_response['text'] against
+    BLOCKED_WORDS (defense-in-depth, in case the model injects one via
+    arguments). If found, print a warning and return a modified copy of
+    tool_response with the blocked words replaced by '***'. Otherwise,
+    print an audit log line (e.g. tool name + status) and return None.
+    """
+    pass
+
 # --- Tools ---
 def generate_text(topic: str, word_count: int) -> dict:
     """Generates text on a topic."""
@@ -114,7 +133,7 @@ def generate_text(topic: str, word_count: int) -> dict:
 # AGENT DEFINITION
 # ============================================================================
 
-# TODO: Define root_agent and register ALL five callbacks defined above.
+# TODO: Define root_agent and register ALL six callbacks defined above.
 root_agent = Agent(
     name="secure_moderator",
     model="gemini-3.5-flash",
@@ -125,6 +144,7 @@ root_agent = Agent(
     # before_model_callback=...,
     # after_model_callback=...,
     # before_tool_callback=...,
+    # after_tool_callback=...,
 )
 ```
 

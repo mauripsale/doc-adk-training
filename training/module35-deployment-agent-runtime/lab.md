@@ -14,7 +14,6 @@ In this lab, you will deploy an ADK agent to Google Cloud's Agent Runtime using 
 *   A GCS bucket for the Standard Deployment part (`gsutil mb -p YOUR_PROJECT_ID -l us-central1 gs://YOUR_UNIQUE_BUCKET_NAME`).
 *   **Python Environment:** A Python version between 3.9 and 3.13.
 *   **UV Tool:** For managing the Python environment. See [Install UV](https://github.com/astral-sh/uv#installation).
-*   **Make Tool:** A build automation tool, typically pre-installed on Unix-based systems.
 *   **Required APIs:** Ensure the following APIs are enabled in your project:
     *   Vertex AI API
     *   Cloud Build API
@@ -29,15 +28,16 @@ In this lab, you will deploy an ADK agent to Google Cloud's Agent Runtime using 
 
 ## Part 1: Accelerated Deployment (Recommended)
 
-This method uses the Agent Starter Pack (ASP) to add deployment artifacts to your existing ADK project and deploy it.
+This method uses the Agents CLI to add deployment artifacts to your existing ADK project and deploy it.
 
 ### Step 1: Prepare the Agent Project
 1.  **Get an Agent:** For this lab, we'll use the `multi_tool_agent` from the Python Quickstart. If you don't have it, create it now. These instructions assume your project is in a directory structure like `your-project-directory/multi_tool_agent/`.
 2.  **Navigate to the Parent Directory:** In your terminal, navigate to the parent directory that contains your agent folder (e.g., `your-project-directory/`).
-3.  **Enhance the Project:** Run the ASP `enhance` command to add the required deployment files to your project.
+3.  **Scaffold the Project:** Run the Agents CLI `scaffold enhance` command to add the required deployment files to your project.
     ```shell
-    uvx agent-starter-pack enhance --uv run adk -d agent_engine
+    uvx google-agents-cli scaffold enhance -d agent_runtime
     ```
+    You may see a `❌ Missing: /app folder` message — this is expected with this directory layout and harmless; the command still completes successfully.
 4.  **Follow the Prompts:** The tool will ask you several questions. You can accept the defaults, but ensure you select a **supported region** for Agent Runtime (e.g., `us-central1`).
 
 ### Step 2: Connect to Your Google Cloud Project
@@ -56,9 +56,9 @@ This method uses the Agent Starter Pack (ASP) to add deployment artifacts to you
 
 ### Step 3: Deploy the Agent
 1.  **Ensure you are in the parent directory** (e.g., `your-project-directory/`).
-2.  **Run the Deployment Command:** This command uses the `Makefile` added by the ASP tool to provision the cloud infrastructure and deploy your agent. This process can take several minutes.
+2.  **Run the Deployment Command:** This command uses the files added by the Agents CLI to provision the cloud infrastructure and deploy your agent. This process can take several minutes.
     ```shell
-    make backend
+    uvx google-agents-cli deploy
     ```
 3.  **Find Your Agent:** Once the build is complete, navigate to **Agent Platform -> Agent Runtime** in the Cloud Console to find your deployed agent and its ID.
 
@@ -146,8 +146,8 @@ Follow the cleanup instructions in `lab-solution.md` to delete the Agent Runtime
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzUtZGVwbG95bWVudC1hZ2VudC1lbmdpbmUvbGFiLXNvbHV0aW9u`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMzUtZGVwbG95bWVudC1hZ2VudC1ydW50aW1lL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module35-deployment-agent-engine/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+    The direct link is: <a href="/doc-adk-training/module35-deployment-agent-runtime/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
 </div>

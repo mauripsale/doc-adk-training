@@ -13,10 +13,10 @@ This lab is a procedural tutorial. The solution for both parts is a successfully
 
 ### Part 1: Accelerated Deployment Solution
 
-After running `make backend`, a successful run of the command is the primary indicator of success.
+After running `uvx google-agents-cli deploy`, a successful run of the command is the primary indicator of success.
 
 **Expected Outcome:**
-*   The `make backend` command completes without errors in your terminal.
+*   The `uvx google-agents-cli deploy` command completes without errors in your terminal.
 *   A new agent with the name you configured appears in the **Agent Platform -> Agent Runtime** section of the Google Cloud Console.
 *   You can copy the **Agent Runtime ID** from the console to use with a client application.
 
@@ -197,10 +197,10 @@ if __name__ == "__main__":
 
 ### Self-Reflection Answers
 
-1.  **What are the primary advantages of using the Accelerated Deployment method with the Agent Starter Pack compared to the Standard Deployment method for production use?**
-    *   **Answer:** The Accelerated Deployment method with the Agent Starter Pack (ASP) is significantly more robust and recommended for production due to several advantages:
-        *   **Infrastructure as Code (IaC):** ASP generates Terraform configurations, ensuring that your cloud infrastructure is provisioned in a reproducible, auditable, and version-controlled manner. The Standard method requires manual `gcloud` commands or custom scripting for infrastructure.
-        *   **Built-in CI/CD:** ASP includes pre-configured Cloud Build pipelines (`Makefile`) for automated testing, building, and deploying. This streamlines development workflows and enforces best practices for continuous integration and delivery.
+1.  **What are the primary advantages of using the Accelerated Deployment method with the Agents CLI compared to the Standard Deployment method for production use?**
+    *   **Answer:** The Accelerated Deployment method with the Agents CLI is significantly more robust and recommended for production due to several advantages:
+        *   **Infrastructure as Code (IaC):** The Agents CLI generates Terraform configurations, ensuring that your cloud infrastructure is provisioned in a reproducible, auditable, and version-controlled manner. The Standard method requires manual `gcloud` commands or custom scripting for infrastructure.
+        *   **Built-in CI/CD:** The Agents CLI includes pre-configured Cloud Build pipelines for automated testing, building, and deploying. This streamlines development workflows and enforces best practices for continuous integration and delivery.
         *   **Best Practices:** It incorporates Google Cloud and ADK best practices for security (e.g., IAM roles, service accounts), reliability, and scalability from the start.
         *   **Reduced Manual Effort & Errors:** It minimizes manual configuration, reducing human error and accelerating time to market compared to the more involved Standard Deployment.
 
@@ -214,6 +214,6 @@ if __name__ == "__main__":
 3.  **For what scenarios might the Standard Deployment method (using `deploy.py` and the Vertex AI SDK) still be advantageous, even if Accelerated Deployment is generally recommended?**
     *   **Answer:** While Accelerated Deployment is the best practice for new production projects, the Standard Deployment method still has advantages for specific scenarios:
         *   **Learning & Understanding:** It provides a deeper understanding of the underlying Vertex AI SDK and Agent Runtime APIs, which is invaluable for debugging or custom integrations.
-        *   **Customization:** For highly specialized deployment workflows that deviate significantly from the ASP templates (e.g., integrating with existing, complex CI/CD systems or custom infrastructure), a manual script offers greater flexibility.
-        *   **Modifying Existing Deployments:** If you need to programmatically update specific aspects of an already deployed Agent Runtime instance that aren't covered by the ASP `Makefile` commands, a custom script is often necessary.
+        *   **Customization:** For highly specialized deployment workflows that deviate significantly from the Agents CLI templates (e.g., integrating with existing, complex CI/CD systems or custom infrastructure), a manual script offers greater flexibility.
+        *   **Modifying Existing Deployments:** If you need to programmatically update specific aspects of an already deployed Agent Runtime instance that aren't covered by the Agents CLI's `deploy` command, a custom script is often necessary.
         *   **Simplified Projects:** For very simple, one-off deployments or internal tools that don't require a full IaC/CI/CD setup, a direct script might be quicker to set up initially.

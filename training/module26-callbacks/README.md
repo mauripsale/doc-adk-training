@@ -59,7 +59,7 @@ app = App(
 )
 ```
 
-Note these operate one level below the `RetryConfig` you saw in Module 38, which retries a failed *Workflow node* on a raised Python exception. Together, the three cover a different layer each: node → tool response → model response.
+Note these operate one level below the `RetryConfig` you'll see in Module 38, which retries a failed *Workflow node* on a raised Python exception. Together, the three cover a different layer each: node → tool response → model response.
 
 These two plugins *recover* from errors. If you only need to be *notified* of an unrecoverable one — e.g. to page on-call before the app crashes — `BasePlugin` also exposes `on_agent_error_callback` and `on_run_error_callback`, notification-only hooks that always re-raise the original exception.
 

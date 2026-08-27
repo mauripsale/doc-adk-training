@@ -102,6 +102,7 @@ This part covers the essential features for making your agents robust, observabl
 *   📦 **[Module 23: Artifacts](./training/module23-artifacts/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🧪 **[Module 24: Evaluation](./training/module24-evaluation/)** (🧑‍💻 50 min / 👨‍🏫 75 min)
 *   📊 **[Module 25: Observability](./training/module25-observability/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
+*   🦺 **[Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🛡️ **[Module 26: Callbacks](./training/module26-callbacks/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 
 ### 🔌 Part 5: Advanced Integrations & UI (Modules 27-30)

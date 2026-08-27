@@ -29,12 +29,13 @@
 | 🤖🤖 [Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/) | High | 65 |
 | 🤖🤖 [Module 21: Distributed Graphs](./training/module21-distributed-graphs/) | High | 70 |
 | 🏁 [Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/) | Low | 30 |
-| **Day 4: Production Readiness** | | **315** |
+| **Day 4: Production Readiness** | | **370** |
 | 🧠 [Module 22: State and Memory](./training/module22-state-and-memory/) | Medium | 55 |
 | 📦 [Module 23: Artifacts](./training/module23-artifacts/) | Medium | 65 |
 | 🏭 [Module 24: Evaluation](./training/module24-evaluation/) | Medium | 75 |
 | 🏭 [Module 25: Observability](./training/module25-observability/) | High | 55 |
-| 🏭 [Module 26: Callbacks](./training/module26-callbacks/) | High | 65 |
+| 🦺 [Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/) | Medium | 55 |
+| 🛡️ [Module 26: Callbacks](./training/module26-callbacks/) | High | 65 |
 | **Day 5: Advanced Integrations & UI** | | **250** |
 | 🔌 [Module 27: Introduction to MCP](./training/module27-intro-to-mcp/) | High | 65 |
 | 🔌 [Module 28: Building MCP Tools](./training/module28-building-mcp-tools/) | High | 65 |
@@ -53,4 +54,4 @@
 | 🔌 [Module 39: ADK Plugins](./training/module39-plugins/) | High | 50 |
 | 🎓 [Module 39.5: Agent Skills](./training/module39_5-agent-skills/) | High | 50 |
 | 🎯 [Module 40: Advanced Capstone - Aegis Incident Response & AgentOps](./training/module40-advanced-capstone-aegis-incident-response/) | High | 140 |
-| **TOTAL** | | **44 Hours 35 Minutes** |
+| **TOTAL** | | **45 Hours 30 Minutes** |

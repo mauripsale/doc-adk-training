@@ -131,5 +131,3 @@ You have now mastered the three ways to run an ADK agent:
 *   `uv run adk run <agent_name>`: For quick tests and automated scripting in the terminal.
 *   `uv run adk api_server`: For running your agent as a service to be integrated with other applications.
 
-This completes the foundational part of the course. You are now ready to start extending your agent's capabilities with tools.
-

@@ -6,7 +6,7 @@ title: "Challenge Lab"
 # Lab 37: Building a Distributed Multi-Agent System Challenge
 
 ## Goal
-In this capstone lab, you will synthesize concepts from the entire course to build a distributed, multi-agent personalized shopping assistant. You will create three separate agents that collaborate using Agent-to-Agent (A2A) communication to provide a stateful, multimodal, and observable shopping experience.
+In this advanced challenge lab, you will synthesize concepts from the entire course so far to build a distributed, multi-agent personalized shopping assistant. You will create three separate agents that collaborate using Agent-to-Agent (A2A) communication to provide a stateful, multimodal, and observable shopping experience.
 
 ### Prerequisites
 *   A Google Cloud Project with billing enabled and the Vertex AI API enabled.
@@ -74,7 +74,7 @@ This agent will be the interface to the e-commerce website.
         ]
     )
 
-    a2a_app = to_a2a(root_agent)
+    a2a_app = to_a2a(root_agent, port=8001)
 
     if __name__ == "__main__":
         uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
@@ -139,7 +139,7 @@ This agent will be responsible for remembering user preferences.
         tools=[save_preference, get_preferences]
     )
 
-    a2a_app = to_a2a(root_agent)
+    a2a_app = to_a2a(root_agent, port=8002)
 
     if __name__ == "__main__":
         uvicorn.run(a2a_app, host="0.0.0.0", port=8002)
@@ -180,17 +180,20 @@ This is the main, user-facing agent that will coordinate the others.
     Open `agent.py` and replace its contents with the following skeleton. Your task is to define the `RemoteA2aAgent` instances and complete the `root_agent` definition.
 
     ```python
-    from google.adk.agents import Agent, RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+    from google.adk.agents import Agent
+    from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 
     # TODO: 1. Define remote specialist nodes
     web_specialist = RemoteA2aAgent(
         name="web_agent",
-        agent_card="http://localhost:8001/a2a/web_agent/.well-known/agent-card.json"
+        agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}",
+        use_legacy=False,
     )
 
     personalization_specialist = RemoteA2aAgent(
         name="personalization_agent",
-        agent_card="http://localhost:8002/a2a/personalization_agent/.well-known/agent-card.json"
+        agent_card=f"http://localhost:8002{AGENT_CARD_WELL_KNOWN_PATH}",
+        use_legacy=False,
     )
 
     # TODO: 2. Define the main Orchestrator Agent
@@ -255,7 +258,7 @@ This is a complex lab with multiple deployments. It is crucial to delete the res
     ```shell
     gcloud artifacts repositories delete adk-images --location=$GOOGLE_CLOUD_LOCATION --async
     ```
-3.  **Delete the GitHub Repository:** If you used the Agent Starter Pack, delete the GitHub repository you created.
+3.  **Delete the GitHub Repository:** If you used `agents-cli` to scaffold deployment, delete the GitHub repository you created.
 
 ### Self-Reflection Questions
 - This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?

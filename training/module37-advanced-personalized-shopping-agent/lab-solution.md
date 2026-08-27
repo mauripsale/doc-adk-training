@@ -37,7 +37,7 @@ root_agent = Agent(
     tools=[FunctionTool(search), FunctionTool(click)]
 )
 
-a2a_app = to_a2a(root_agent)
+a2a_app = to_a2a(root_agent, port=8001)
 
 if __name__ == "__main__":
     uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
@@ -72,7 +72,7 @@ root_agent = Agent(
     tools=[save_preference, get_preferences]
 )
 
-a2a_app = to_a2a(root_agent)
+a2a_app = to_a2a(root_agent, port=8002)
 
 if __name__ == "__main__":
     uvicorn.run(a2a_app, host="0.0.0.0", port=8002)
@@ -83,7 +83,8 @@ The master coordinator using `RemoteA2aAgent`.
 
 ```python
 import asyncio
-from google.adk.agents import Agent, RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+from google.adk.agents import Agent
+from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from dotenv import load_dotenv
@@ -93,12 +94,14 @@ load_dotenv()
 # Define remote nodes
 web_agent = RemoteA2aAgent(
     name="web_agent",
-    agent_card=f"http://localhost:8001/a2a/web_agent{AGENT_CARD_WELL_KNOWN_PATH}"
+    agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}",
+    use_legacy=False,
 )
 
 personalization_agent = RemoteA2aAgent(
     name="personalization_agent",
-    agent_card=f"http://localhost:8002/a2a/personalization_agent{AGENT_CARD_WELL_KNOWN_PATH}"
+    agent_card=f"http://localhost:8002{AGENT_CARD_WELL_KNOWN_PATH}",
+    use_legacy=False,
 )
 
 # Orchestrator

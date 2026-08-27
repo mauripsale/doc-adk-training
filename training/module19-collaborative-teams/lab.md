@@ -3,7 +3,7 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.7: Building a Collaborative Travel Team
+# Lab 19: Building a Collaborative Travel Team
 
 ## Goal
 

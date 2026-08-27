@@ -31,7 +31,8 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
     ```shell
     pip install Pillow
     ```
-4.  **Set up your `.env` file.**
+4.  **Sample images:** two sample product photos, `headphones.jpg` and `laptop.jpg`, are already provided in this module's folder (`module07-multimodal-and-images/`), one level up from `visual_catalog/`. That's why you must create `visual_catalog` directly inside this module's folder (as done in step 1 above) — the script below loads them with a relative `../` path. Feel free to swap in your own images later, as long as the filenames match.
+5.  **Set up your `.env` file.**
     Vision models require a Vertex AI configuration. Ensure your `.env` file looks like this:
     ```text
     GOOGLE_GENAI_USE_VERTEXAI=1
@@ -135,6 +136,8 @@ You have successfully built a multimodal agent! You have learned:
 *   How to package image bytes into a `types.Part` object.
 *   The importance of explicitly creating a **Session** when using `run_async` programmatically.
 *   How to construct a structured `types.Content` object for complex inputs.
+
+This completes **Part 1: Foundations**. You now know how to build, configure, run, and feed multimodal input to an agent. In Part 2, you'll start extending your agent's capabilities with tools.
 
 ### Self-Reflection Questions
 - Why did we have to call `create_session` manually this time, whereas in Module 6's `run_debug` we didn't?

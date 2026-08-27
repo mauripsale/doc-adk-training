@@ -121,35 +121,20 @@ In the lab for this module, you will put all these principles into practice by b
 - **Context Awareness:** Use `ToolContext` for advanced interaction with the ADK runtime.
 - **Workflow Ready:** Tools are nodes in your graph, allowing for modular and testable designs.
 
-## Limitations: Mixing Tool Types
+## A Note on Mixing Tool Types
 
-As you start building more complex agents, it's important to be aware of a current limitation in the ADK regarding tool usage.
+In older versions of the ADK, a single agent could generally only use **one type of tool at a time** — you couldn't easily mix a **Built-in Tool** (like `google_search`) with **Custom Function Tools** in the same agent definition.
 
-### One Built-in Tool Per Agent
-
-Currently, a single agent generally supports using **only one type of tool at a time**.
-
-Specifically, you cannot easily mix a **Built-in Tool** (like `google_search`) with **Custom Function Tools** or other capabilities (like a code executor) within the same agent definition.
-
-**Unsupported Example:**
-You cannot simply list both `google_search` and your own `custom_function` in the same `tools` list for a single agent.
+**As of the modern ADK, this limitation is gone.** You can freely list built-in tools alongside your own custom functions in the same `tools` list:
 
 ```python
-# This approach is NOT currently supported
 root_agent = Agent(
     name="MixedToolAgent",
     model="gemini-3.5-flash",
-    tools=[google_search, custom_function], # Mixing types may cause issues
+    tools=[google_search, custom_function], # Mixing types works fine now
 )
 ```
 
-### The Workaround: Multi-Agent Systems
+Module 12 covers this in depth, once you've also seen the other built-in tools.
 
-So, how do you build an agent that can search the web *and* use your custom calculator?
-
-The solution is to use a **Multi-Agent System**. Instead of one agent doing everything, you create two specialized agents:
-1.  A "Search Specialist" agent with the `google_search` tool.
-2.  A "Calculator Specialist" agent with your custom function tools.
-3.  A "Coordinator" agent that delegates tasks to the specialists.
-
-You will learn exactly how to build these powerful multi-agent architectures in **Module 15**. For now, focus on mastering custom tools within a single agent.
+That said, splitting search and calculation into two specialized agents coordinated by a third is still often the *better* architectural choice for complex systems — not because mixing is unsupported, but because it keeps each agent's instructions focused and its tool surface small. You'll learn exactly how to build these multi-agent architectures in **Module 15**.

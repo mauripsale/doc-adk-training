@@ -29,7 +29,7 @@ def store_name(name: str, tool_context: ToolContext) -> str:
     Saves the user's name to the session memory.
     Use this tool when the user tells you their name.
     """
-    # TODO: Save 'name' to tool_context.session.state under key "user_name"
+    # TODO: Save 'name' to tool_context.state under key "user_name"
     pass
 
 def recall_name(tool_context: ToolContext) -> str:
@@ -37,7 +37,7 @@ def recall_name(tool_context: ToolContext) -> str:
     Retrieves the user's name from the session memory.
     Use this tool if the user asks who they are or what their name is.
     """
-    # TODO: Get "user_name" from tool_context.session.state.
+    # TODO: Get "user_name" from tool_context.state.
     # Return the name, or "Stranger" if not found.
     pass
 ```
@@ -75,7 +75,7 @@ root_agent = Agent(
 
 You have successfully built an agent with programmable memory! You have learned:
 *   How to use **`ToolContext`** to access the ADK's session management.
-*   How to read and write to **`tool_context.session.state`**.
+*   How to read and write to **`tool_context.state`**.
 *   How to create a **Store and Recall** pattern to maintain context across multiple turns.
 
 ### Self-Reflection Questions

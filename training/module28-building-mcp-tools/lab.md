@@ -128,7 +128,12 @@ root_agent = Agent(
     ],
 )
 ```
-Also create an empty `__init__.py` and a `.env` file with `MODEL="gemini-3.5-flash"`.
+Also create an empty `__init__.py` and a `.env` file with your Vertex AI configuration:
+```
+GOOGLE_GENAI_USE_VERTEXAI=1
+GOOGLE_CLOUD_PROJECT=<your_gcp_project>
+GOOGLE_CLOUD_LOCATION=us-central1
+```
 
 ### Step 4: Test the Full System
 

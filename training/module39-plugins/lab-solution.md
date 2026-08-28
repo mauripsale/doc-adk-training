@@ -18,7 +18,10 @@ from google.adk.runners import InMemoryRunner
 from google.adk.apps.app import App
 from google.adk.plugins import ReflectAndRetryToolPlugin  # 1. Import
 from google.genai import types
+from dotenv import load_dotenv
 import asyncio
+
+load_dotenv()
 
 # The actual tool
 def secret_calculator(a: int, b: int) -> int:
@@ -47,7 +50,10 @@ async def main():
     )
 
     runner = InMemoryRunner(app=app)
-    
+
+    # /run_async requires a session that already exists.
+    await runner.session_service.create_session(app_name=app.name, user_id="test", session_id="1")
+
     print("User: What is 5 + 5?")
     # Running programmatically
     async for event in runner.run_async(

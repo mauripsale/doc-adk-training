@@ -84,7 +84,7 @@ You must always specify the **MIME type** (e.g., `image/png`, `application/pdf`)
 ```python
 # Saving an image
 image_data = b'\x89PNG\r\n...' # Raw bytes
-part = types.Part.from_bytes(image_data, mime_type='image/png')
+part = types.Part.from_bytes(data=image_data, mime_type='image/png')
 await context.save_artifact('chart.png', part)
 ```
 

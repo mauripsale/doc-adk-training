@@ -49,13 +49,14 @@ classifier = Agent(
 @node(rerun_on_resume=True)
 async def support_router_workflow(ctx: Context, node_input: str):
     # Step 3a: Run the classifier node.
-    # In ADK 2.0, run_node returns the node's output directly!
-    # No more manual digging into session state.
-    classification: SentimentClassification = await ctx.run_node(classifier, node_input)
+    # In ADK 2.0, run_node returns the node's output directly! No more manual
+    # digging into session state -- but note it comes back as a plain dict,
+    # even though the node's output_schema is a Pydantic model.
+    classification: dict = await ctx.run_node(classifier, node_input)
     
     # Step 3b: Routing Logic.
     # Use standard Python logic to choose the next node in the graph.
-    if classification.sentiment == "angry":
+    if classification["sentiment"] == "angry":
         chosen_agent = human_escalation
     else:
         chosen_agent = ai_support

@@ -31,7 +31,8 @@ In this lab, you will build a self-improving agent system that uses a **Dynamic 
 ```python
 # In agent.py (Starter Code)
 
-from google.adk import Agent, node, Context, Workflow
+from google.adk import Agent, Context, Workflow
+from google.adk.workflow import node
 
 # 1. Define the Specialist Agents
 

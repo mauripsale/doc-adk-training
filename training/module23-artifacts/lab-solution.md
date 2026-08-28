@@ -32,7 +32,7 @@ async def extract_text(document_name: str, tool_context: ToolContext) -> str:
     # In a real scenario, this would involve file reading and cleaning.
     extracted_content = f"EXTRACTED AND CLEANED TEXT FROM DOCUMENT: {document_name}"
     
-    part = types.Part.from_text(extracted_content)
+    part = types.Part.from_text(text=extracted_content)
     version = await tool_context.save_artifact(
         filename=f"{document_name}_extracted.txt", artifact=part
     )
@@ -49,7 +49,7 @@ async def summarize_document(document_name: str, tool_context: ToolContext) -> s
     # In a real scenario, this would involve an LLM call for summarization.
     summary_content = f"This is a concise summary of the document '{document_name}'."
     
-    part = types.Part.from_text(summary_content)
+    part = types.Part.from_text(text=summary_content)
     version = await tool_context.save_artifact(
         filename=f"{document_name}_summary.txt", artifact=part
     )
@@ -63,7 +63,7 @@ async def generate_chart(document_name: str, tool_context: ToolContext) -> str:
     dummy_png_bytes = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
     
     # IMPORTANT: Use .from_bytes for binary data and specify the MIME type!
-    part = types.Part.from_bytes(dummy_png_bytes, mime_type="image/png")
+    part = types.Part.from_bytes(data=dummy_png_bytes, mime_type="image/png")
     
     version = await tool_context.save_artifact(
         filename=f"{document_name}_chart.png", artifact=part
@@ -87,9 +87,9 @@ async def create_report(document_name: str, tool_context: ToolContext) -> str:
                 report += f"## Artifact: {name}\n\n```text\n{artifact.text[:500]}...\n```\n\n"
             else:
                  # It's binary (like our chart), so we just mention it
-                report += f"## Artifact: {name}\n\n*[Binary File Attached: {name} - Type: {artifact.mime_type}]*\n\n"
+                report += f"## Artifact: {name}\n\n*[Binary File Attached: {name} - Type: {artifact.inline_data.mime_type}]*\n\n"
 
-    part = types.Part.from_text(report)
+    part = types.Part.from_text(text=report)
     version = await tool_context.save_artifact(
         filename=f"{document_name}_FINAL_REPORT.md", artifact=part
     )
@@ -135,7 +135,7 @@ Workflow:
 
         ```python
         from google.adk.artifacts import GcsArtifactService
-        from google.adk.runner import Runner
+        from google.adk.runners import Runner
 
         # ... root_agent definition ...
 

@@ -89,7 +89,7 @@ Finally, let's run the agent as a background service. This mode is the foundatio
         ```bash
         curl -X POST http://127.0.0.1:8000/apps/support_analyzer/users/test_user/sessions/test_session
         ```
-    *   **The Result:** You should receive `{"status": "ok"}`. This tells the server to allocate memory (or database space) for a conversation named `test_session`.
+    *   **The Result:** You should receive the newly-created session as JSON (e.g. `{"id":"test_session","appName":"support_analyzer","userId":"test_user","state":{},"events":[],"lastUpdateTime":...}`). This tells you the server has allocated memory (or database space) for a conversation named `test_session`.
 
 4.  **Send the Message (Step C: Success):**
     *   Now, run the message command again, ensuring the `session_id` matches the one you just created (`test_session`):
@@ -103,7 +103,7 @@ Finally, let's run the agent as a background service. This mode is the foundatio
                    "new_message": {"role": "user", "parts": [{"text": "I can't log in to my account."}]}
                  }'
         ```
-    *   **The Result:** You will see a stream of JSON objects. Look for the events where `event.name == 'agent:response'` to find your structured analysis!
+    *   **The Result:** You will see a stream of JSON events. Look for the one where `is_final_response()` would be true if you were consuming this programmatically -- concretely, the event whose `content.parts[0].text` holds the final structured JSON analysis (it also carries `"author": "support_analyzer"` and no `partial: true` flag).
 
 5.  **Stop the API server:**
     Go back to the first terminal and press `Ctrl+C`.

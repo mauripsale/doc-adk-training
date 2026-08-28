@@ -18,7 +18,8 @@ This approach is more flexible because you have full control over the terminatio
 The most common pattern for iteration is the **Critic -> Refiner** loop. Instead of a dedicated class, you define it as a function:
 
 ```python
-from google.adk import node, Context, Agent
+from google.adk import Context, Agent
+from google.adk.workflow import node
 
 # 1. Define the specialist nodes
 critic = Agent(name="critic", ...)

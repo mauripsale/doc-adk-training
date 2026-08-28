@@ -45,7 +45,7 @@ FRANKFURTER_SPEC = {
         "description": "Free API for current and historical foreign exchange rates",
         "version": "1.0.0"
     },
-    "servers": [{"url": "https://api.frankfurter.app"}],
+    "servers": [{"url": "https://api.frankfurter.dev/v1"}],
     "paths": {
         "/latest": {
             "get": {
@@ -71,7 +71,7 @@ root_agent = Agent(...)
 
 1.  **Start the agent in terminal mode:** 
     ```bash
-    uv run adk run agent.py
+    uv run adk run .
     ```
 2.  **Interact with the agent:**
     *   Test its capabilities:

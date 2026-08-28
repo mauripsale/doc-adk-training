@@ -69,7 +69,9 @@ classifier = ...
 async def support_router_workflow(ctx: Context, node_input: str):
     # Step 2a: Run the classifier node.
     # Hint: result = await ctx.run_node(classifier, node_input)
-    # The result will be an instance of SentimentClassification!
+    # Even though the classifier's output_schema is the SentimentClassification
+    # Pydantic model, run_node() returns it as a plain dict at runtime --
+    # access fields with result["sentiment"], not result.sentiment.
     classification = None 
     
     # Step 2b: Routing Logic.

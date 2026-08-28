@@ -18,7 +18,7 @@ from typing import Any, Optional
 import uuid
 import time
 from google.cloud import firestore
-from google.adk.sessions.base_session_service import BaseSessionService, GetSessionConfig
+from google.adk.sessions.base_session_service import BaseSessionService, GetSessionConfig, ListSessionsResponse
 from google.adk.sessions.session import Session
 from google.adk.events.event import Event
 
@@ -43,7 +43,7 @@ class FirestoreSessionService(BaseSessionService):
         
         return Session(id=sid, app_name=app_name, user_id=user_id, state=doc.to_dict().get("state", {}) if doc.exists else (state or {}))
 
-    async def append_event(self, event: Event, session: Session) -> None:
+    async def append_event(self, session: Session, event: Event) -> Event:
         # Save event to sub-collection
         event_ref = self._client.collection("apps").document(session.app_name)\
             .collection("users").document(session.user_id)\
@@ -52,6 +52,7 @@ class FirestoreSessionService(BaseSessionService):
         
         await event_ref.set(event.model_dump())
         print(f"🔥 [Firestore] Persisted event from {event.author}")
+        return event
 
     async def update_session_state(self, session: Session) -> None:
         # Update the main session document's state
@@ -63,13 +64,13 @@ class FirestoreSessionService(BaseSessionService):
         print(f"🔥 [Firestore] Updated session state in cloud.")
 
     # Other methods (get_session, list_sessions, delete_session)
-    async def get_session(self, config: GetSessionConfig) -> Optional[Session]:
-        return await self.create_session(app_name=config.app_name, user_id=config.user_id, session_id=config.session_id)
+    async def get_session(self, *, app_name: str, user_id: str, session_id: str, config: Optional[GetSessionConfig] = None) -> Optional[Session]:
+        return await self.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
 
-    async def list_sessions(self, app_name: str, user_id: str) -> ListSessionsResponse:
+    async def list_sessions(self, *, app_name: str, user_id: Optional[str] = None) -> ListSessionsResponse:
         return ListSessionsResponse(sessions=[])
 
-    async def delete_session(self, app_name: str, user_id: str, session_id: str) -> None:
+    async def delete_session(self, *, app_name: str, user_id: str, session_id: str) -> None:
         pass
 ```
 

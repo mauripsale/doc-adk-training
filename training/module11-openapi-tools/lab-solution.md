@@ -29,7 +29,7 @@ FRANKFURTER_SPEC = {
         "description": "Free API for current and historical foreign exchange rates",
         "version": "1.0.0"
     },
-    "servers": [{"url": "https://api.frankfurter.app"}],
+    "servers": [{"url": "https://api.frankfurter.dev/v1"}],
     "paths": {
         "/latest": {
             "get": {
@@ -109,7 +109,7 @@ Always state the amount, the original currency, and the converted currency clear
 2.  Make sure your `.env` file contains your `GOOGLE_API_KEY`.
 3.  Run the interactive terminal:
     ```bash
-    uv run adk run agent.py
+    uv run adk run .
     ```
 
 ---

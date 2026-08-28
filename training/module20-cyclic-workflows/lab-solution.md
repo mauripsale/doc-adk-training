@@ -13,7 +13,8 @@ This file contains the complete code for the `agent.py` script using the ADK 2.0
 
 ```python
 from __future__ import annotations
-from google.adk import Agent, node, Context, Workflow
+from google.adk import Agent, Context, Workflow
+from google.adk.workflow import node
 
 # 1. Specialist Agents (Nodes)
 writer = Agent(

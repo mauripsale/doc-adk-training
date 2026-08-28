@@ -7,8 +7,6 @@ title: "Challenge Lab"
 
 ## Goal
 
-### Goal
-
 In this lab, you will learn how to integrate a tool from a popular third-party library, LangChain, into your ADK agent. You will build a "Fact-finder" agent that can look up information on Wikipedia.
 
 ### Step 1: Create the Agent Project and Install Dependencies
@@ -34,7 +32,7 @@ Because we are importing Python objects, we need to define our agent in a Python
 # In agent.py (Starter Code)
 
 from google.adk import Agent
-from google.adk.tools.langchain_tool import LangchainTool
+from google.adk.integrations.langchain import LangchainTool
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
 

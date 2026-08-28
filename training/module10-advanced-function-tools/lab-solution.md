@@ -20,8 +20,8 @@ def store_name(name: str, tool_context: ToolContext) -> str:
     Use this tool when the user tells you their name.
     """
     # Write to session state
-    tool_context.session.state["user_name"] = name
-    return f"Got it, Alex! I've saved your name."
+    tool_context.state["user_name"] = name
+    return f"Got it, {name}! I've saved your name."
 
 def recall_name(tool_context: ToolContext) -> str:
     """
@@ -29,7 +29,7 @@ def recall_name(tool_context: ToolContext) -> str:
     Use this tool if the user asks who they are or what their name is.
     """
     # Read from session state
-    name = tool_context.session.state.get("user_name", "Stranger")
+    name = tool_context.state.get("user_name", "Stranger")
     return f"Your name is {name}."
 ```
 
@@ -61,4 +61,4 @@ root_agent = Agent(
     *   **Answer:** Nothing bad! The ADK's `Runner` automatically isolates sessions based on the `user_id`. Each user has their own independent `state` dictionary, so Alice's "user_name" will never overwrite Bob's "user_name."
 
 3.  **How could you extend this agent to remember other things?**
-    *   **Answer:** You can create more tools that follow the same pattern (e.g., `store_preference(key, value)`, `recall_preference(key)`). Because `tool_context.session.state` is just a Python dictionary, you can store any JSON-serializable data there.
+    *   **Answer:** You can create more tools that follow the same pattern (e.g., `store_preference(key, value)`, `recall_preference(key)`). Because `tool_context.state` is just a Python dictionary, you can store any JSON-serializable data there.

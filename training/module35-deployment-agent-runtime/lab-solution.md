@@ -7,7 +7,7 @@ title: "Lab Solution"
 
 ## Goal
 
-This lab is a procedural tutorial. The solution for both parts is a successfully deployed Agent Runtime instance.
+This lab is a procedural tutorial. The solution for both parts is a successfully deployed Agent Runtime instance running the Customer Support system.
 
 ---
 
@@ -24,34 +24,40 @@ After running `uvx google-agents-cli deploy`, a successful run of the command is
 
 ### Part 2: Standard Deployment Solution
 
-This section contains the complete code for the `deploy.py` and `interact.py` scripts used in the manual deployment part of the lab.
+This section contains the complete code for `support_agent/agent.py`, `deploy.py`, and `interact.py` used in the manual deployment part of the lab.
 
-#### `multi_tool_agent/agent.py`
+#### `support_agent/agent.py`
 
-This file defines the agent using the modern ADK 2.0 `Agent` class.
+This file defines the same Customer Support system as Modules 32 and 33, but as Python `Agent` objects instead of YAML config — required because `deploy.py` needs to `import` `root_agent` directly.
 
 ```python
 from google.adk import Agent
-import random
 
-def roll_die(sides: int, count: int = 1) -> dict:
-    """Rolls a die with a specified number of sides, multiple times."""
-    rolls = [random.randint(1, sides) for _ in range(count)]
-    return {"rolls": rolls}
+billing_agent = Agent(
+    name="billing_agent",
+    model="gemini-3.5-flash",
+    description="Handles questions about billing, invoices, and payments.",
+    instruction="You are a billing support agent. Politely answer questions about billing and payment issues.",
+)
 
-def check_prime(number: int) -> dict:
-    """Checks if a number is prime."""
-    if number < 2:
-        is_prime = False
-    else:
-        is_prime = all(number % i != 0 for i in range(2, int(number**0.5) + 1))
-    return {"is_prime": is_prime}
+tech_support_agent = Agent(
+    name="tech_support_agent",
+    model="gemini-3.5-flash",
+    description="Handles technical support questions and troubleshooting.",
+    instruction="You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions.",
+)
 
 root_agent = Agent(
+    name="router_agent",
     model="gemini-3.5-flash",
-    name="multi_tool_agent",
-    instruction="You roll dice and answer questions about prime numbers.",
-    tools=[roll_die, check_prime],
+    description="The main customer support router.",
+    instruction="""
+You are the customer support router.
+Your job is to understand the user's request and delegate it to the correct specialist agent.
+- If the user has a question about billing, delegate to the `billing_agent`.
+- If the user has a technical problem, delegate to the `tech_support_agent`.
+""",
+    sub_agents=[billing_agent, tech_support_agent],
 )
 ```
 
@@ -62,33 +68,27 @@ This script uses the Vertex AI SDK to package and deploy the agent.
 ```python
 import vertexai
 from vertexai import agent_engines
-from google.adk.apps import App
-from multi_tool_agent.agent import root_agent
+from support_agent.agent import root_agent
 
 # --- CONFIGURATION ---
 PROJECT_ID = "your-gcp-project-id"
 LOCATION = "us-central1"
 STAGING_BUCKET = "gs://your-unique-bucket-name"
-AGENT_DISPLAY_NAME = "my-multi_tool_agent"
+AGENT_DISPLAY_NAME = "customer-support-agent"
 
 def main():
     # Initialize Vertex AI SDK
     vertexai.init(project=PROJECT_ID, location=LOCATION, staging_bucket=STAGING_BUCKET)
 
-    # 1. Wrap your agent in an App (Required for ADK 2.0 deployment)
-    print("Wrapping agent in App...")
-    app = App(
-        name="multi_tool_app",
-        root_agent=root_agent
-    )
+    # 1. Wrap your agent in an AdkApp
+    print("Wrapping agent in AdkApp...")
+    app = agent_engines.AdkApp(agent=root_agent)
 
     # 2. Deploy to Agent Runtime
-    # The 'agent_engines.create' function accepts an App object.
     print(f"Deploying '{AGENT_DISPLAY_NAME}' to Agent Runtime...")
     remote_app = agent_engines.create(
         agent_engine=app,
         display_name=AGENT_DISPLAY_NAME,
-        # Ensure the remote environment uses the modern SDK
         requirements=["google-cloud-aiplatform[adk,agent_engines]>=1.111"],
     )
 
@@ -98,6 +98,8 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+> **Note:** earlier versions of this lab passed `enable_tracing=True` to `AdkApp`. That parameter is now deprecated — telemetry is controlled via the `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` environment variable or the Cloud Console toggle instead, so it's simply omitted here.
 
 #### `interact.py`
 
@@ -111,7 +113,7 @@ from vertexai import agent_engines
 PROJECT_ID = "your-gcp-project-id"
 LOCATION = "us-central1"
 # Note: Replace this with the ID output by the deploy.py script.
-AGENT_ENGINE_ID = "YOUR_AGENT_ENGINE_ID" 
+AGENT_ENGINE_ID = "YOUR_AGENT_ENGINE_ID"
 
 async def main():
     vertexai.init(project=PROJECT_ID, location=LOCATION)
@@ -124,10 +126,10 @@ async def main():
     remote_session = await remote_app.async_create_session(user_id="test-user-123")
 
     # Send a query and stream the response
-    query = "Roll a 20-sided die 3 times."
+    query = "I have a question about my invoice, it seems too high this month."
     print(f"\nUser: {query}")
     print("Agent: ", end="")
-    
+
     final_response = ""
     async for event in remote_app.async_stream_query(
         session_id=remote_session["id"],
@@ -148,35 +150,33 @@ if __name__ == "__main__":
 
 #### `local_test.py` (Optional)
 
-This script shows the code for the optional local testing step.
+This script shows the code for the optional local testing step. Note that `async_create_session` returns a plain `dict`, not an object — access the session ID with `session["id"]`, not `session.id`.
 
 ```python
 import asyncio
 import vertexai
 from vertexai import agent_engines
-from multi_tool_agent.agent import root_agent
+from support_agent.agent import root_agent
 
 async def main():
     # Wrap the agent in an AdkApp object
-    app = agent_engines.AdkApp(
-        agent=root_agent,
-        enable_tracing=True,
-    )
+    app = agent_engines.AdkApp(agent=root_agent)
 
     # Create a local session to maintain conversation history
     session = await app.async_create_session(user_id="u_123")
-    print(f"Local session created: {session.id}")
+    print(f"Local session created: {session['id']}")
 
     # Send a query to the agent
     events = []
     async for event in app.async_stream_query(
         user_id="u_123",
-        session_id=session.id,
-        message="Roll a 6-sided die.",
+        session_id=session["id"],
+        message="My app keeps crashing every time I open it.",
     ):
         events.append(event)
 
-    # The full event stream shows the agent's thought process
+    # The full event stream shows the agent's thought process, including
+    # which specialist it delegated to
     print("\n--- Full Event Stream ---")
     for event in events:
         print(event)

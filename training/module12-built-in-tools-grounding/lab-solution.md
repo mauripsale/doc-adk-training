@@ -7,7 +7,7 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete code for the `agent.py` script in the Research Assistant lab, using ADK 2.0 practices.
+This file contains the complete code for `agent.py` and `main.py` in the Research Assistant lab: two agents, called in sequence, since `google_search` can't share an agent with custom function tools.
 
 ### `research_assistant/agent.py`
 
@@ -42,29 +42,78 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
     facts = [s.strip() for s in sentences if len(s.strip()) > 10][:num_facts]
     return {"status": "success", "facts": facts}
 
-# --- Agent Definition ---
+# --- Agent 1: Search Specialist ---
+# Only google_search -- it cannot be mixed with custom function tools in the
+# same agent (a Gemini API restriction: a mixed tools list constructs fine in
+# Python but fails at the first real model call with
+# `400 INVALID_ARGUMENT: Multiple tools are supported only when they are all
+# search tools.`).
 
-root_agent = Agent(
+research_agent = Agent(
     model='gemini-3.5-flash',
-    name='research_assistant',
-    description='Conducts web research and compiles findings',
-    instruction="""
-You are an expert research assistant.
-You have access to the web via `google_search` and custom text processing tools.
-
-When given a research topic, follow this workflow:
-1. Use `google_search` to find current information on the web.
-2. Use `extract_key_facts` to pull the most important points from the search results.
-3. Use `format_research_notes` to compile these facts into a professional report.
-4. Present the final, formatted document to the user as your final answer.
-""",
-    # In ADK 2.0, you can mix built-in and custom tools directly!
-    tools=[
-        google_search,
-        extract_key_facts,
-        format_research_notes
-    ]
+    name='research_agent',
+    instruction=(
+        "You are a research assistant. Use google_search to find current "
+        "information on the topic you're given, then summarize the key "
+        "findings in a few plain-text sentences."
+    ),
+    tools=[google_search],
 )
+
+# --- Agent 2: Formatter ---
+# Only the custom tools -- no google_search here.
+
+formatter_agent = Agent(
+    model='gemini-3.5-flash',
+    name='formatter_agent',
+    instruction="""
+You are a report formatter. The user will give you a topic and some research
+findings as plain text.
+1. Call extract_key_facts on the findings text to pull out the most important points.
+2. Call format_research_notes with the topic and those facts to produce a final report.
+Present the final formatted document as your answer, verbatim.
+""",
+    tools=[extract_key_facts, format_research_notes],
+)
+```
+
+### `research_assistant/main.py`
+
+```python
+import asyncio
+from google.adk.runners import InMemoryRunner
+from google.genai import types
+from agent import research_agent, formatter_agent
+
+async def run_agent(agent, app_name: str, message_text: str) -> str:
+    runner = InMemoryRunner(agent=agent, app_name=app_name)
+    await runner.session_service.create_session(app_name=app_name, user_id="student", session_id="s1")
+
+    final_text = ""
+    async for event in runner.run_async(
+        user_id="student",
+        session_id="s1",
+        new_message=types.Content(role="user", parts=[types.Part(text=message_text)]),
+    ):
+        if event.content and event.content.parts:
+            for part in event.content.parts:
+                if part.text:
+                    final_text = part.text
+    return final_text
+
+async def main():
+    topic = "the latest AI developments from Google"
+
+    findings = await run_agent(research_agent, "research_app", f"Research this topic: {topic}")
+    print("--- RESEARCH FINDINGS ---")
+    print(findings)
+
+    report = await run_agent(formatter_agent, "formatter_app", f"Topic: {topic}\n\nFindings: {findings}")
+    print("\n--- FINAL REPORT ---")
+    print(report)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Testing the Solution
@@ -76,20 +125,20 @@ When given a research topic, follow this workflow:
     uv add "google-adk>=2.1.0" python-dotenv
     ```
 2.  Configure `.env` for Vertex AI.
-3.  Run the agent:
+3.  Run the script:
     ```bash
-    uv run adk run .
+    uv run python main.py
     ```
 
 ---
 
 ## Self-Reflection Answers
 
-1.  **Earlier versions of ADK required a `GoogleSearchAgentTool` wrapper. Why is it better to mix tools directly now?**
-    *   **Answer:** It simplifies the architecture. Treating `google_search` just like any other Python function makes the developer experience consistent and intuitive.
+1.  **Why is `google_search` considered a "built-in" tool while `format_research_notes` is a "custom" tool?**
+    *   **Answer:** `google_search` runs inside Google's own infrastructure, invoked directly by the model with no code of yours executing -- Google built, hosts, and maintains it. `format_research_notes` is a plain Python function you wrote and control entirely; the ADK just exposes it to the model as a callable tool via its signature and docstring.
 
 2.  **Our `extract_key_facts` tool is very simple. How could you make it more robust?**
-    *   **Answer:** A better approach would be to use a separate **Agent** node (perhaps a smaller model like Gemini Flash) to perform semantic extraction from the search results.
+    *   **Answer:** A better approach would be to use a separate **Agent** node (perhaps a smaller model like Gemini Flash) to perform semantic extraction from the search results, instead of a naive `.split('.')`. That agent could even be folded into `formatter_agent` as a third specialist step, since it only needs text in and text out -- no built-in tools involved.
 
-3.  **The agent's instruction defines a specific, sequential workflow. What might happen if you didn't specify the order?**
-    *   **Answer:** The LLM might try to call tools out of sequence or skip steps. Explicitly defining the process (Search -> Extract -> Format) ensures reliable behavior.
+3.  **`main.py` passes `findings` between the two agents as a plain string. What would you have to change if you instead wanted `formatter_agent` to be able to ask `research_agent` follow-up questions?**
+    *   **Answer:** A one-way string handoff can't support a back-and-forth. You'd need `formatter_agent` to actually invoke `research_agent` as a *tool call*, not just receive its output as a static string -- for example, by wrapping `research_agent` as a sub-agent it can transfer control to and back, or by exposing a `call_research_agent(question: str)` function tool that internally runs `research_agent` and returns its answer. Either way, this pushes you from "sequential composition" into genuine multi-agent orchestration -- which is exactly what Module 15 covers next.

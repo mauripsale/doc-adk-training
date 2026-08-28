@@ -40,7 +40,20 @@ This file contains the complete code for the `index.html` custom chat client.
         const chatContainer = document.getElementById('chat-container');
         const inputForm = document.getElementById('input-form');
         const messageInput = document.getElementById('message-input');
+        const userId = "student-user";
         const sessionId = `session-${Date.now()}`; // Simple session ID for this example
+        let sessionReady = null;
+
+        function ensureSession() {
+            if (!sessionReady) {
+                sessionReady = fetch(`http://localhost:8080/apps/ui_agent/users/${userId}/sessions/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+            }
+            return sessionReady;
+        }
 
         inputForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -53,11 +66,14 @@ This file contains the complete code for the `index.html` custom chat client.
             const assistantMessageDiv = addMessage('', 'assistant');
             
             try {
+                await ensureSession();
+
                 const response = await fetch('http://localhost:8080/run_sse', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         app_name: "ui_agent",
+                        user_id: userId,
                         session_id: sessionId,
                         new_message: {
                             role: "user",

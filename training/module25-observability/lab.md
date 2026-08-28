@@ -28,28 +28,48 @@ In this lab, you will build a comprehensive observability system for an agent us
 
 ```python
 # In agent.py (Starter Code)
-from google.adk import Agent, node, Context, Workflow
+from google.adk import Agent
 from google.adk.apps import App
 from google.adk.plugins import BasePlugin
 from google.adk.events import Event
+
+# A tool that can genuinely fail, so there's a real exception for the
+# plugin to observe -- not just a simulated one.
+def risky_operation(should_fail: bool) -> dict:
+    """Performs an operation that can be made to fail, for testing error handling."""
+    if should_fail:
+        raise ValueError("Simulated failure!")
+    return {"status": "success"}
 
 class AlertingPlugin(BasePlugin):
     """A plugin that prints an alert after 3 consecutive request errors."""
     def __init__(self, name: str = 'alerting_plugin'):
         super().__init__(name)
         self.error_count = 0
+        self._had_error_this_turn = False
+
+    async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
+        # TODO: Implement alerting logic here.
+        # 1. Mark that this turn had an error (self._had_error_this_turn = True).
+        # 2. Increment self.error_count and print an alert, escalating to a
+        #    critical alert once you hit the threshold.
+        # 3. Return a dict (e.g. {"status": "error", "message": str(error)})
+        #    so the agent recovers gracefully instead of crashing the run --
+        #    returning None here would let the exception propagate.
+        pass
 
     async def on_event_callback(self, *, event: Event, **kwargs):
-        # TODO: Implement alerting logic
-        # 1. Check for 'request_complete' (reset counter)
-        # 2. Check for 'request_error' (increment and alert)
+        # TODO: When event.is_final_response() is True, if this turn had NO
+        # error, reset self.error_count to 0 -- a clean turn means we've
+        # recovered. Don't forget to reset self._had_error_this_turn too.
         pass
 
 # --- Create a simple Agent ---
 agent = Agent(
     name="monitored_agent",
     model="gemini-3.5-flash",
-    instruction="Answer the user. If they say 'FAIL', trigger an error (simulated)."
+    instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
+    tools=[risky_operation],
 )
 
 # --- Register Plugin with App ---
@@ -91,8 +111,8 @@ If you get stuck, you can find the complete, working code in the `lab-solution.m
 ### Lab Summary
 You have successfully built a modular observability system using the ADK's Plugin System and OpenTelemetry. You have learned to:
 *   Create custom plugins by inheriting from `BasePlugin`.
-*   Implement the `on_event_callback` method to intercept and process agent events.
-*   Filter events based on their `event_type` to implement specific logic.
+*   Implement `on_tool_error_callback` to intercept a tool's exception, recover gracefully, and still observe what failed.
+*   Use `on_event_callback` with `event.is_final_response()` to detect a clean turn (no errors) and reset your own tracking state.
 *   Configure enterprise-grade telemetry using **Cloud Trace** hooks.
 *   Register plugins and telemetry with the `App` object.
 

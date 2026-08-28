@@ -67,7 +67,23 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
         const messageInput = document.getElementById('message-input');
         // This is a simple client-side session ID for the lab.
         // In a real app, you would manage this more robustly.
+        const userId = "student-user";
         const sessionId = `session-${Date.now()}`;
+        let sessionReady = null;
+
+        // Provided: the `/run_sse` endpoint requires a session that already
+        // exists on the server -- it doesn't create one for you. This POSTs
+        // to the session-management endpoint once, before the first message.
+        function ensureSession() {
+            if (!sessionReady) {
+                sessionReady = fetch(`http://localhost:8080/apps/ui_agent/users/${userId}/sessions/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+            }
+            return sessionReady;
+        }
 
         inputForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -78,13 +94,18 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
             const assistantMessageDiv = addMessage('...', 'assistant');
             
             try {
+                await ensureSession();
+
                 // TODO: 1. Use the `fetch` API to make a POST request to the
                 // ADK's `/run_sse` endpoint (http://localhost:8080/run_sse).
+                // Remember to include `user_id` in the body -- it's required,
+                // and unlike `app_name`/`session_id` it's easy to forget.
                 const response = await fetch('http://localhost:8080/run_sse', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         app_name: "ui_agent",
+                        user_id: userId,
                         session_id: sessionId,
                         new_message: {
                             role: "user",
@@ -125,8 +146,8 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 ### Step 3: Run the Full-Stack Application
 
-1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `uv run adk api_server ui_agent`.
-    *   **Note on CORS:** The ADK API server automatically handles Cross-Origin Resource Sharing (CORS), allowing your web page on port 8081 to make requests to your agent on port 8080.
+1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `uv run adk api_server ui_agent --allow_origins=http://localhost:8081`.
+    *   **Note on CORS:** the ADK API server does *not* allow cross-origin requests by default — since your web page (port 8081) and your agent (port 8080) are different origins, you must explicitly allow the client's origin with `--allow_origins`, or the browser will reject every request with a 403.
 2.  **Terminal 2 (Client Server):** In the same directory, run `python3 -m http.server 8081`.
 
 ### Step 4: Test Your Custom UI

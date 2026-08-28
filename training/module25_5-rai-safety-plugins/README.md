@@ -27,11 +27,11 @@ from google.adk.events import Event
 
 class SafetyGuardrailPlugin(BasePlugin):
     async def on_event_callback(self, *, event: Event, **kwargs):
-        if event.event_type == 'request_complete':
+        if event.is_final_response() and event.content and event.content.parts:
             response_text = event.content.parts[0].text
             
             # Simple example: Block mentions of "Competitor X"
-            if "Competitor X" in response_text:
+            if response_text and "Competitor X" in response_text:
                 # 🛡️ THE INTERVENTION: Replace the output
                 event.content.parts[0].text = "I'm sorry, but I cannot discuss other companies. How can I help you with our products?"
                 print("🛑 [SAFETY] Response blocked due to policy violation.")

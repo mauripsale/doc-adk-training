@@ -35,11 +35,20 @@ my_skill_toolset = SkillToolset(
 )
 
 # 3. Configure the Agent.
-# The toolset is passed just like any other tool.
+# The toolset is passed just like any other tool. The instruction names the
+# skill and its trigger condition explicitly -- a generic "check your skills
+# if relevant" instruction is too weak in practice for a message as simple
+# as a greeting; the model won't reliably call load_skill() without being
+# told exactly when to.
 root_agent = Agent(
     model="gemini-3.5-flash",
     name="skill_user_agent",
     description="An agent that can use specialized skills.",
+    instruction=(
+        "You have a skill named 'greeting-skill'. Whenever the user greets "
+        "you or says hello, you MUST call load_skill('greeting-skill') "
+        "first, before responding, and then follow its instructions exactly."
+    ),
     tools=[my_skill_toolset]
 )
 ```
@@ -51,3 +60,6 @@ root_agent = Agent(
 
 2.  **Why do we have to wrap the skill in a `SkillToolset` before giving it to the agent? (Think about the other things a toolset might manage, like code executors or additional tools).**
     *   **Answer:** A single Skill often isn't just text; it can include executable scripts (in the `scripts/` folder) and require external standard Python functions to operate. The `SkillToolset` acts as a unified execution environment. It bundles the textual skills, the `additional_tools` (Python functions), and the `code_executor` (which handles the sandboxing and running of scripts) into a single package that the core `Agent` class knows how to interact with.
+
+3.  **Your `instruction` names `greeting-skill` and its trigger condition explicitly. What do you think would happen if you had 20 skills instead of 1 -- would naming every single one in the instruction still scale, and what does that suggest about the `search_skills`/Skill Registry pattern mentioned in "Going Further"?**
+    *   **Answer:** No, it wouldn't scale -- hand-writing "if the user does X, call skill Y" for 20 (or 200) skills would bloat the instruction into an unmaintainable list, and you'd have to update it every time a skill was added or removed. This is exactly the problem the Skill Registry's `search_skills(query)`/`load_skill(skill_name)` pattern solves: instead of the instruction enumerating every skill and its trigger, the agent semantically searches a catalog at runtime to find whichever skill is relevant to the current message, and only that one gets loaded. The trade-off is reliability versus scale: naming a single skill explicitly (as this lab does) is the most dependable way to guarantee it fires, while registry-based discovery scales to large skill catalogs at the cost of depending on the search step actually finding the right skill.

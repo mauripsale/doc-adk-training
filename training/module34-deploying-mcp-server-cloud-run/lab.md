@@ -7,7 +7,7 @@ title: "Challenge Lab"
 
 ## Goal
 
-In this lab, you will take the "Shopping Cart" MCP server from Module 30, re-architect it to be stateless, containerize it with a `Dockerfile`, and deploy it to Google Cloud Run. You will then configure an ADK agent to connect to this live, cloud-hosted tool.
+In this lab, you will take the "Shopping Cart" MCP server from Module 28, re-architect it to be stateless, containerize it with a `Dockerfile`, and deploy it to Google Cloud Run. You will then configure an ADK agent to connect to this live, cloud-hosted tool.
 
 **Note:** This is an advanced lab. For simplicity, we will simulate an external state store with a file written to a temporary directory. In a real production system, you would replace this with a connection to a service like Redis or Memorystore.
 
@@ -39,16 +39,15 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     ```
 
 2.  **Create the `stateless_cart_server.py` file:**
-    This is the modified server code. Instead of a global dictionary, it reads and writes the cart for each session to a separate JSON file in a `/tmp/carts` directory. This simulates an external persistence layer.
+    This is the modified server code, using `mcp.server.fastmcp.FastMCP` -- the MCP SDK's high-level API for building HTTP-based servers (much less boilerplate than the low-level `Server` class from Module 28, which is stdio-only). Instead of a single global list shared by everyone, it reads and writes each session's cart to its own separate JSON file in a `/tmp/carts` directory. This simulates an external persistence layer.
+
+    A real MCP session is still tracked over the wire (via the `Mcp-Session-Id` HTTP header) -- what's "stateless" here is the *server process*, not the protocol: any container instance can handle any request, because the actual cart data lives outside the process.
 
     ```python
     # Filename: stateless_cart_server.py
-    import asyncio
     import json
     import os
-    from mcp import types as mcp_types
-    from mcp.server.lowlevel import Server
-    import mcp.server.http_stream
+    from mcp.server.fastmcp import FastMCP, Context
 
     # --- Configuration ---
     # In a serverless environment, we can use the temporary filesystem for a simple demo.
@@ -59,7 +58,13 @@ We need to modify our server so it doesn't store the shopping carts in memory.
         os.makedirs(STATE_STORAGE_PATH)
 
     # --- MCP Server Setup ---
-    app = Server("stateless_shopping_cart_server")
+    mcp = FastMCP("stateless_shopping_cart_server")
+
+    def get_session_id(ctx: Context) -> str:
+        # The MCP session ID arrives as a standard HTTP header, tracked by the
+        # transport itself -- this is what ties requests to the same cart,
+        # regardless of which container instance handles each one.
+        return ctx.request_context.request.headers.get("mcp-session-id", "unknown")
 
     # Helper functions to simulate external state
     def get_cart(session_id: str) -> list:
@@ -74,47 +79,36 @@ We need to modify our server so it doesn't store the shopping carts in memory.
         with open(cart_file, 'w') as f:
             json.dump(cart, f)
 
-    @app.list_tools()
-    async def list_mcp_tools() -> list[mcp_types.Tool]:
-        # (Same as Module 30's list_tools function)
-        add_item_tool = mcp_types.Tool(name="add_item_to_cart", description="Adds an item to the cart.", inputSchema={"type": "object", "properties": {"item": {"type": "string"}}, "required": ["item"]})
-        view_cart_tool = mcp_types.Tool(name="view_cart", description="Views items in the cart.", inputSchema={"type": "object", "properties": {}})
-        return [add_item_tool, view_cart_tool]
-
-    @app.call_tool()
-    async def call_mcp_tool(name: str, arguments: dict, session_id: str) -> list[mcp_types.Content]:
-        print(f"[Server]: Handling '{name}' for session '{session_id}'")
+    @mcp.tool()
+    def add_item_to_cart(item: str, ctx: Context) -> dict:
+        """Adds an item to the cart."""
+        session_id = get_session_id(ctx)
+        print(f"[Server]: Handling add_item_to_cart for session '{session_id}'")
         cart = get_cart(session_id)
+        cart.append(item)
+        save_cart(session_id, cart)
+        return {"status": "success", "message": f"Added '{item}'."}
 
-        if name == "add_item_to_cart":
-            item = arguments.get("item")
-            cart.append(item)
-            save_cart(session_id, cart)
-            response_text = json.dumps({"status": "success", "message": f"Added '{item}'."})
-            return [mcp_types.TextContent(type="text", text=response_text)]
+    @mcp.tool()
+    def view_cart(ctx: Context) -> dict:
+        """Views items in the cart."""
+        session_id = get_session_id(ctx)
+        print(f"[Server]: Handling view_cart for session '{session_id}'")
+        cart = get_cart(session_id)
+        return {"status": "success", "cart": cart}
 
-        elif name == "view_cart":
-            response_text = json.dumps({"status": "success", "cart": cart})
-            return [mcp_types.TextContent(type="text", text=response_text)]
-        
-        else:
-            return [mcp_types.TextContent(type="text", text=json.dumps({"status": "error", "message": "Unknown tool."}))]
-
-    # --- Server Runner for HTTP ---
-    # This uses the HTTP stream runner, suitable for Cloud Run
-    main = mcp.server.http_stream.create_main(app)
-
-    if __name__ == "__main__":
-        main()
+    # --- ASGI app for HTTP, suitable for Cloud Run ---
+    # FastMCP mounts the MCP endpoint at /mcp by default.
+    app = mcp.streamable_http_app()
     ```
 
 ### Step 2: Containerize the MCP Server
 
 1.  **Create a `requirements.txt` file:**
-    Our server needs the `mcp` library.
+    Our server needs the `mcp` library and `uvicorn` to actually serve the ASGI app it produces.
 
     ```shell
-    echo "mcp" > requirements.txt
+    printf "mcp\nuvicorn\n" > requirements.txt
     ```
 
 2.  **Create the `Dockerfile`:**
@@ -126,9 +120,9 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     RUN pip install --no-cache-dir -r requirements.txt
     COPY stateless_cart_server.py .
     
-    # Cloud Run provides the PORT env var.
-    # The http_stream runner automatically uses it.
-    CMD ["python", "stateless_cart_server.py"]
+    # Cloud Run provides the PORT env var (defaults to 8080 locally).
+    # Shell form (not exec/JSON-array form) is required here so $PORT expands.
+    CMD python -m uvicorn stateless_cart_server:app --host 0.0.0.0 --port ${PORT:-8080}
     ```
 
 ### Step 3: Build and Deploy the Server to Cloud Run
@@ -146,7 +140,7 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     gcloud builds submit \
         --tag ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1
     ```
-    *(This assumes you created the `adk-images` repository in Module 19. If not, you may need to run `gcloud artifacts repositories create ...` first.)*
+    *(If you completed Module 33's cleanup, the `adk-images` repository no longer exists -- create it first with `gcloud artifacts repositories create adk-images --repository-format=docker --location=$GOOGLE_CLOUD_LOCATION`.)*
 
 3.  **Deploy to Cloud Run:**
 
@@ -163,23 +157,23 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 Now, create an ADK agent that connects to your newly deployed server.
 
 1.  **Create an `agent.py` file** in the same `cloud_mcp_server` directory.
-2.  **Add the following code**, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied.
+2.  **Add the following code**, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied. Note the `/mcp` suffix -- that's where `FastMCP` mounted the endpoint in Step 1, and the client needs to hit that exact path, not just the bare service URL.
 
     ```python
     # Filename: agent.py
     from google.adk import Agent
-    from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset
-    from mcp import StreamableHTTPConnectionParams # Import this for remote connections
+    from google.adk.tools.mcp_tool import McpToolset
+    from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
 
-    # The URL of your deployed MCP server
-    MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL"
+    # The URL of your deployed MCP server -- note the /mcp path suffix
+    MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL/mcp"
 
     root_agent = Agent(
         model='gemini-3.5-flash',
         name='cloud_shopping_agent',
         instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
         tools=[
-            MCPToolset(
+            McpToolset(
                 # Use StreamableHTTPConnectionParams for remote servers
                 connection_params=StreamableHTTPConnectionParams(
                     url=MCP_SERVER_URL,
@@ -190,10 +184,13 @@ Now, create an ADK agent that connects to your newly deployed server.
     ```
 3.  **Create `__init__.py` and `.env` files:**
     Create an empty `__init__.py` file in the `cloud_mcp_server` directory.
-    Create a `.env` file in the `cloud_mcp_server` directory with the following content:
+    Create a `.env` file in the `cloud_mcp_server` directory with your Vertex AI configuration:
     ```
-    MODEL="gemini-3.5-flash"
+    GOOGLE_GENAI_USE_VERTEXAI=1
+    GOOGLE_CLOUD_PROJECT=<your_gcp_project>
+    GOOGLE_CLOUD_LOCATION=us-central1
     ```
+    Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
 
 ### Step 5: Test the Full Cloud-Based System
 
@@ -217,7 +214,7 @@ You have learned to:
 *   Modify an application to be stateless by moving its state to an external store (simulated with the filesystem).
 *   Containerize a Python application with a `Dockerfile`.
 *   Deploy a custom server to Google Cloud Run.
-*   Configure the `MCPToolset` to connect to a remote HTTP-based MCP server using `StreamableHTTPConnectionParams`.
+*   Configure the `McpToolset` to connect to a remote HTTP-based MCP server using `StreamableHTTPConnectionParams`.
 
 ### Cleanup (Important!)
 
@@ -246,7 +243,7 @@ Cloud Run services and Artifact Registry repositories can incur costs if left ru
 ### Self-Reflection Questions
 - Our stateless server uses the `/tmp` directory for storage. Why is this approach not truly persistent, and what could happen to a user's shopping cart if the Cloud Run service scales down and then back up?
 - What are the advantages of using a managed service like Google Cloud Memorystore (Redis) for storing session state compared to the file-based approach used in this lab?
-- The `MCPToolset` on the client side doesn't need to know *how* the server is storing its state. Why is this separation of concerns a key benefit of the MCP architecture?
+- The `McpToolset` on the client side doesn't need to know *how* the server is storing its state. Why is this separation of concerns a key benefit of the MCP architecture?
 
 <hr/>
 

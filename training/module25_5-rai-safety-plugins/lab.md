@@ -40,15 +40,18 @@ class PIIGuardrailPlugin(BasePlugin):
         self.cc_pattern = re.compile(r"\b\d{4}-\d{4}-\d{4}-\d{4}\b")
 
     async def on_event_callback(self, *, event: Event, **kwargs):
-        # TODO: 1. Target the correct event type ('request_complete')
-        
-        # TODO: 2. Extract the response text
-        
+        # TODO: 1. Only act on final responses -- check event.is_final_response()
+        # (there's no separate "event_type" field to compare against).
+
+        # TODO: 2. Extract the response text from event.content.parts[0].text
+        # (guard against event.content or the text being empty/None).
+
         # TODO: 3. Use self.cc_pattern.search() to check for violations
-        
+
         # TODO: 4. If a violation is found:
         # - Overwrite event.content.parts[0].text with a safety warning.
-        # - Print a log message: "🛑 [PII] Response blocked."
+        # - Print a log message including event.invocation_id (events don't
+        #   have a session_id field).
         pass
 
 # --- Agent that might 'leak' data (for testing) ---

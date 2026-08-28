@@ -32,19 +32,21 @@ class PIIGuardrailPlugin(BasePlugin):
 
     async def on_event_callback(self, *, event: Event, **kwargs):
         # We only intercept final responses from the agent
-        if event.event_type == 'request_complete':
+        if event.is_final_response() and event.content and event.content.parts:
             # Extract the text from the content part
             response_text = event.content.parts[0].text
-            
+
             # Check for credit card patterns
-            if self.cc_pattern.search(response_text):
+            if response_text and self.cc_pattern.search(response_text):
                 # 🛡️ INTERVENTION: Overwrite the message before it reaches the user.
                 # In ADK 2.0, modifying the event.content directly updates the output.
                 event.content.parts[0].text = (
                     "🛑 [SECURITY BLOCK] This response was withheld because it contained "
                     "sensitive information (PII). Please do not share financial data."
                 )
-                print(f"🛑 [SAFETY] Blocked potentially sensitive response in session: {event.session_id}")
+                # Events don't have a session_id/user_id field -- invocation_id
+                # is the real identifier for correlating this back to a request.
+                print(f"🛑 [SAFETY] Blocked potentially sensitive response in invocation: {event.invocation_id}")
 
 # --- 2. Define the Agent ---
 
@@ -75,7 +77,7 @@ app = App(
     *   **Answer:** LLMs can be manipulated via prompt injection or complex reasoning to bypass their own instructions ("jailbreaking"). A Plugin is a **deterministic, programmatic layer** that runs outside the LLM's reasoning process. It provides a reliable "fail-closed" guarantee that instructions alone cannot offer.
 
 2.  **How would you extend this plugin to log all blocked responses to a security database for auditing?**
-    *   **Answer:** Inside the `if self.cc_pattern.search(...)` block, you could call an asynchronous logging function (using `asyncio.create_task` to avoid blocking) that writes the `event.session_id`, `event.user_id`, and the original `response_text` to BigQuery or a security log.
+    *   **Answer:** Inside the `if self.cc_pattern.search(...)` block, you could call an asynchronous logging function (using `asyncio.create_task` to avoid blocking) that writes the `event.invocation_id`, `event.author`, and the original `response_text` to BigQuery or a security log.
 
 3.  **Can you think of other "safety" use cases for this pattern?**
     *   **Answer:**

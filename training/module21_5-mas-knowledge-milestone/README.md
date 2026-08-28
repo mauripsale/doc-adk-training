@@ -16,7 +16,7 @@ Before we move on to operational concerns like State, Evaluation, and Observabil
 | Pattern | Module | Key ADK Primitives | Best For... |
 | :--- | :--- | :--- | :--- |
 | **Static Orchestration** | 16 | `Workflow`, Linear Edges, `JoinNode` | Predictable, fixed business processes with parallel steps. |
-| **Structured Routing** | 17 | `Workflow`, Conditional Edges (Dict) | Workflows that branch based on deterministic model outputs. |
+| **Structured Routing** | 17 | `Workflow`, Conditional Edges (Dict), a small `@node` to set `ctx.route` | Workflows that branch based on deterministic model outputs. |
 | **Dynamic Orchestration** | 18 | `@node`, `ctx.run_node()` | Complex logic, nested loops, and code-driven decision making. |
 | **Collaborative Teams** | 19 | `sub_agents`, `mode="task"` | Fluid hand-offs where specialists manage their own task lifecycle. |
 | **Cyclic Workflows** | 20 | Edges returning to previous nodes | Iterative refinement, self-correction, and "human-in-the-loop" review loops. |

@@ -23,6 +23,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# A tool that can genuinely fail, so there's a real exception for the
+# plugin to observe -- not just a simulated one.
+def risky_operation(should_fail: bool) -> dict:
+    """Performs an operation that can be made to fail, for testing error handling."""
+    if should_fail:
+        raise ValueError("Simulated failure!")
+    return {"status": "success"}
+
 # --- 1. Custom Business Logic Plugin ---
 
 class AlertingPlugin(BasePlugin):
@@ -31,18 +39,27 @@ class AlertingPlugin(BasePlugin):
         super().__init__(name)
         self.error_threshold = threshold
         self.consecutive_errors = 0
+        self._had_error_this_turn = False
+
+    async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
+        # Catching the exception here (instead of letting it crash the run)
+        # is what lets the plugin observe it AND lets the agent recover.
+        self._had_error_this_turn = True
+        self.consecutive_errors += 1
+        print(f"⚠️ [ALERT] Request Error ({self.consecutive_errors}/{self.error_threshold}): {error}")
+
+        if self.consecutive_errors >= self.error_threshold:
+            print("🔥 [CRITICAL ALERT] Persistent errors detected!")
+
+        # Returning a dict recovers gracefully; returning None would
+        # propagate the original exception and crash the run.
+        return {"status": "error", "message": f"The operation failed: {error}"}
 
     async def on_event_callback(self, *, event: Event, **kwargs):
-        # We only care about request-level events
-        if event.event_type == 'request_complete':
-            self.consecutive_errors = 0
-            
-        elif event.event_type == 'request_error':
-            self.consecutive_errors += 1
-            print(f"⚠️ [ALERT] Request Error ({self.consecutive_errors}/{self.error_threshold})")
-            
-            if self.consecutive_errors >= self.error_threshold:
-                print("🔥 [CRITICAL ALERT] Persistent errors detected!")
+        if event.is_final_response():
+            if not self._had_error_this_turn:
+                self.consecutive_errors = 0
+            self._had_error_this_turn = False
 
 # --- 2. Enterprise Telemetry Configuration ---
 
@@ -60,7 +77,8 @@ maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
 root_agent = Agent(
     name="monitored_agent",
     model="gemini-3.5-flash",
-    instruction="Answer the user. If they say 'FAIL', trigger an error."
+    instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
+    tools=[risky_operation],
 )
 
 app = App(

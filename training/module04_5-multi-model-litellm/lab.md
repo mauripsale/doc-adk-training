@@ -73,7 +73,7 @@ root_agent = Agent(
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDQuNS1tdWx0aS1tb2RlbC1saXRlbGxtL2xhYi1zb2x1dGlvbg==`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDRfNS1tdWx0aS1tb2RlbC1saXRlbGxtL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
     The direct link is: <a href="/doc-adk-training/module04_5-multi-model-litellm/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>

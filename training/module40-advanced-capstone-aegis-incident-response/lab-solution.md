@@ -246,3 +246,20 @@ if __name__ == "__main__":
 
 3.  **This lab simulates Model Armor, RAG, and the GCS upload with plain Python functions. What would have to change in `threat_intel_agent`, `mitigation_agent`, and their AgentOps hooks to call the real Google Cloud services instead?**
     *   **Answer:** `mask_security_secrets` would call the real Model Armor API instead of a local regex — same function signature, different implementation. `search_remediation_playbooks` would query a real Vertex AI Search app (via its client library or an MCP wrapper around it) instead of returning a fixed string. `build_and_upload_mitigation_brief` would actually render a PDF and call the Cloud Storage API (or a real GCS MCP server, following the same `McpToolset`/`StdioConnectionParams` or `StreamableHTTPConnectionParams` pattern already used for the BigQuery mock) to get a real signed URL. In the AgentOps hooks, the `print()` calls simulating telemetry export would be replaced with real OpenTelemetry SDK calls (spans and metrics), matching the pattern taught in Module 25 — the callback *signatures* (`before_model_callback`/`after_model_callback`) wouldn't need to change at all, only what happens inside them.
+
+---
+
+## You've Reached the End
+
+Take a moment with that — forty modules ago, Module 1 was a "scavenger hunt" through documentation with no code at all. Here, you just got three independent agents talking to each other over A2A, backed by a real MCP server, with production-shaped observability hooks, to hunt down a simulated security incident end to end. Every concept in between — tools, state, multi-agent orchestration, evaluation, callbacks, MCP, streaming UIs, deployment — was a real building block for this, not a detour.
+
+A few honest notes on what "done" means here:
+*   **You know what's real and what's simulated in this capstone**, and — more usefully — exactly how to flip each simulated piece to real, because you've now built the real version of each one in an earlier module (Model Armor-style masking in Module 26, Vertex AI Search patterns throughout Part 5, GCS/MCP servers in Module 28, OpenTelemetry in Module 25, deployment in Part 6).
+*   **The course itself keeps evolving.** ADK is under active development, and this repository gets updated as the framework changes — if something here ever looks off against a newer ADK release, that's worth an issue or a PR, not silent confusion.
+
+If you're looking for where to go next:
+*   Wire up one of the "Going Further" pieces above for real, in your own GCP project — it's the fastest way to turn "I followed a lab" into "I built something."
+*   Revisit the course's root `README.md` (in the repository, not this docs site) for the full course map, the semantic-versioning policy for this repo, and how to contribute back.
+*   Star and share the repo if it got you here — it's open source, and word of mouth is what keeps a self-service course like this alive.
+
+Welcome to the other side of "Zero to Hero."

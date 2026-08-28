@@ -7,8 +7,6 @@ title: "Challenge Lab"
 
 ## Goal
 
-### Goal
-
 In this lab, you will build a distributed multi-agent system. You will create a main **Orchestrator** agent and a separate, standalone **Research Specialist** agent. The Orchestrator will delegate tasks to the Research Specialist over the network using the ADK's A2A capabilities.
 
 ### Step 1: Create the Project Structure

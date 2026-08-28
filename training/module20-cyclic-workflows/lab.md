@@ -63,14 +63,6 @@ async def refinement_orchestrator(ctx: Context, initial_topic: str):
 
     return current_story
 
-...
-
-### 🕵️ Hidden Solution 🕵️
-
-Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMjAtbG9vcC1hZ2VudHMvbGFiLXNvbHV0aW9u`
-
-
 ### Step 3: Run and Test
 
 1.  **Start the Dev UI:**

@@ -14,10 +14,10 @@
 | **Part 2: Tools & Capabilities** | | **285** |
 | 🛠️ [Module 8: Introduction to Tools](./training/module08-intro-to-tools/) | Medium | 35 |
 | 🛠️ [Module 9: Intro to Custom Function Tools](./training/module09-intro-custom-function-tools/) | High | 45 |
-| 🛠️ [Module 10: Advanced Function Tools](./training/module10-advanced-function-tools/) | High | 40 |
+| 🛠️ [Module 10: Stateful Tools & ToolContext](./training/module10-advanced-function-tools/) | High | 40 |
 | 🛠️ [Module 11: OpenAPI Tools](./training/module11-openapi-tools/) | High | 35 |
 | 🛠️ [Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/) | Medium | 30 |
-| 🛠️ [Module 13: Tool Context](./training/module13-tool-context/) | High | 40 |
+| 🛠️ [Module 13: Advanced Interactions: Actions & HITL](./training/module13-tool-context/) | High | 40 |
 | 🛠️ [Module 13.5: Extending ADK - Custom Persistence with Firestore](./training/module13_5-firestore-persistence/) | High | 30 |
 | 🛠️ [Module 14: Third-Party Tools](./training/module14-third-party-tools/) | Medium | 30 |
 | **Part 3: Multi-Agent Systems** | | **275** |

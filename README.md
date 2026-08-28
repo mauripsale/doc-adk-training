@@ -76,10 +76,10 @@ This part focuses on giving your agents "superpowers" by connecting them to tool
 
 *   🧰 **[Module 8: Introduction to Tools](./training/module08-intro-to-tools/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🧰 **[Module 9: Intro to Custom Function Tools](./training/module09-intro-custom-function-tools/)** (🧑‍💻 45 min / 👨‍🏫 70 min)
-*   🧰 **[Module 10: Advanced Function Tools](./training/module10-advanced-function-tools/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🧰 **[Module 10: Stateful Tools & ToolContext](./training/module10-advanced-function-tools/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🧰 **[Module 11: OpenAPI Tools](./training/module11-openapi-tools/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🧰 **[Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
-*   🧰 **[Module 13: Tool Context](./training/module13-tool-context/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🧰 **[Module 13: Advanced Interactions: Actions & HITL](./training/module13-tool-context/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🧰 **[Module 13.5: Extending ADK - Custom Persistence with Firestore](./training/module13_5-firestore-persistence/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   🧰 **[Module 14: Third-Party Tools](./training/module14-third-party-tools/)** (🧑‍💻 30 min / 👨‍🏫 40 min)
 

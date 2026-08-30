@@ -26,26 +26,27 @@ critic = Agent(name="critic", ...)
 refiner = Agent(name="refiner", ...)
 
 # 2. Define the Orchestrator Node with a Python loop
-@node
-async def refinement_workflow(ctx: Context, initial_draft: str):
-    current_work = initial_draft
+# rerun_on_resume=True is required on every @node used with ctx.run_node().
+@node(rerun_on_resume=True)
+async def refinement_workflow(ctx: Context, node_input: str):
+    current_work = node_input
     
     # Standard Python loop for max_iterations
     for i in range(5):
         print(f"--- Iteration {i+1} ---")
         
-        # Call the Critic node
-        feedback = await ctx.run_node(critic, input=current_work)
+        # Call the Critic node. ctx.run_node()'s second argument is
+        # positional -- there's no `input=` keyword.
+        feedback = await ctx.run_node(critic, current_work)
         
         # Termination Condition
         if "APPROVED" in feedback:
             break
             
         # Call the Refiner node to improve the work
-        current_work = await ctx.run_node(refiner, input={
-            "work": current_work, 
-            "feedback": feedback
-        })
+        current_work = await ctx.run_node(
+            refiner, f"WORK:\n{current_work}\n\nFEEDBACK:\n{feedback}"
+        )
         
     return current_work
 ```

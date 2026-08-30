@@ -17,35 +17,58 @@ from google.adk import Agent, Context, Workflow
 from google.adk.workflow import node
 
 # 1. Specialist Agents (Nodes)
+# Note: these instructions describe the input in plain language rather than
+# using {template} placeholders -- ctx.run_node()'s second argument becomes
+# the node's input content directly, it does NOT populate {key} placeholders
+# in the instruction (those are only filled from session state).
 writer = Agent(
     name="writer",
     model="gemini-3.5-flash",
-    instruction="Write a 2-sentence story about: {topic}"
+    instruction="Write a 2-sentence story based on the topic you're given."
 )
 
-# ... [critic and refiner stay the same] ...
+critic = Agent(
+    name="critic",
+    model="gemini-3.5-flash",
+    instruction="""
+    You are a strict literary critic. Review the story you are given.
+    If it is good, respond with exactly the word 'APPROVED' and nothing else.
+    Otherwise, provide brief, actionable feedback on how to improve it.
+    """
+)
+
+refiner = Agent(
+    name="refiner",
+    model="gemini-3.5-flash",
+    instruction="""
+    You are a writer revising a story based on feedback. You will be given
+    the current story and the feedback on it. Rewrite the story addressing
+    the feedback. Return ONLY the revised story, with no extra commentary.
+    """
+)
 
 # 2. Dynamic Workflow Orchestrator
-@node
-async def refinement_orchestrator(ctx: Context, initial_topic: str):
+# rerun_on_resume=True is required on every @node used with ctx.run_node().
+@node(rerun_on_resume=True)
+async def refinement_orchestrator(ctx: Context, node_input: str):
     # Phase 1: Initial Creation
-    # We pass the 'initial_topic' as input to the writer node.
-    current_story = await ctx.run_node(writer, input={"topic": initial_topic})
-    
+    # ctx.run_node()'s second argument is positional -- there's no `input=`
+    # keyword.
+    current_story = await ctx.run_node(writer, f"Topic: {node_input}")
+
     # Phase 2: Iterative Refinement Loop
     for i in range(3):
         # A. Call the critic node
-        feedback = await ctx.run_node(critic, input=current_story)
+        feedback = await ctx.run_node(critic, current_story)
         
         # B. Termination Condition
         if "APPROVED" in feedback:
             break
             
         # C. Refinement
-        current_story = await ctx.run_node(refiner, input={
-            "story": current_story,
-            "feedback": feedback
-        })
+        current_story = await ctx.run_node(
+            refiner, f"STORY:\n{current_story}\n\nFEEDBACK:\n{feedback}"
+        )
         
     return current_story
 

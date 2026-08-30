@@ -35,6 +35,10 @@ from google.adk import Agent, Context, Workflow
 from google.adk.workflow import node
 
 # 1. Define the Specialist Agents
+# Note: write these instructions in plain language describing the input,
+# not with {template} placeholders -- ctx.run_node()'s second argument
+# becomes the node's input content directly, it does NOT populate {key}
+# placeholders in the instruction (those only come from session state).
 
 # TODO: Define the initial writer agent.
 writer = ...
@@ -48,21 +52,28 @@ critic = ...
 refiner = ...
 
 # 2. Define the Iterative Orchestrator
-@node
-async def refinement_orchestrator(ctx: Context, initial_topic: str):
-    # TODO: Implement the loop logic
-    # Step A: Get the initial draft from the 'writer'
-    # Hint: Pass 'initial_topic' to the writer node as 'topic'
-    current_story = await ctx.run_node(writer, input={"topic": initial_topic})
+# rerun_on_resume=True is required on every @node used with ctx.run_node().
+@node(rerun_on_resume=True)
+async def refinement_orchestrator(ctx: Context, node_input: str):
+    # Step A: Get the initial draft from the 'writer'.
+    # Note: ctx.run_node()'s second argument is positional, not a keyword
+    # (there's no `input=` parameter).
+    current_story = await ctx.run_node(writer, f"Topic: {node_input}")
 
     # Step B: Run the loop (max 3 times)
-    # 1. Call the 'critic'
-    # 2. Check if 'APPROVED' (break if so)
+    # 1. Call the 'critic' with ctx.run_node(critic, current_story)
+    # 2. Check if 'APPROVED' is in the feedback (break if so)
     # 3. Call the 'refiner' to improve 'current_story' based on feedback
 
     # [STUDENT TODO: Implement the loop here]
 
     return current_story
+
+root_agent = Workflow(
+    name="EssayRefiner",
+    edges=[("START", refinement_orchestrator)]
+)
+```
 
 ### Step 3: Run and Test
 

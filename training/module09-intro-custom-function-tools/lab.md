@@ -85,6 +85,7 @@ def divide(a: int, b: int) -> dict:
     # TODO: Handle the case where b is 0, returning an error dictionary.
     # Otherwise, calculate the division and return the result.
     pass
+```
 
 > **Pro Tip:** While we use simple dictionaries in this lab for simplicity, ADK 2.0 strongly recommends returning **Pydantic models** for better type safety and structured reasoning (as you will see in the Lab Solution).
 
@@ -101,10 +102,10 @@ root_agent = Agent(
     name="calculator_agent",
     model="gemini-3.5-flash",
     description="An agent node that performs arithmetic.",
-    instruction=\"\"\"
+    instruction="""
 You are a helpful calculator assistant.
 When the user asks you to perform a calculation, you MUST use the appropriate tool.
-\"\"\",
+""",
     # TODO: Add the four imported functions directly to this list.
     tools=[add, subtract, multiply, divide]
 )

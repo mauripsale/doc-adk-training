@@ -28,6 +28,7 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 **Exercise:** Open `agent.py`. Your task is to implement the logic for the six core callbacks. Use the `# TODO` comments as your guide.
 
 ```python
+import hashlib
 import os
 import re
 import logging
@@ -50,12 +51,26 @@ BLOCKED_WORDS = ['unsafe', 'offensive']
 # CALLBACK FUNCTIONS
 # ============================================================================
 
+def _cache_key(callback_context: CallbackContext) -> str:
+    """
+    TODO: Helper.
+    A cache keyed by a single global name (e.g. 'cached_response') would
+    return the SAME cached answer no matter what the user asks next — you
+    must derive the key from the CURRENT turn's user input instead.
+    Use callback_context.get_invocation_context().user_content to get the
+    current user message (a types.Content), concatenate its parts' text,
+    and hash it (e.g. hashlib.md5(...).hexdigest()) into a key such as
+    f"cache:{digest}".
+    """
+    pass
+
 def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
     """
     TODO: Caching (Check).
-    Read 'cached_response' from callback_context.state. If present, print a
-    cache-hit message and return a types.Content wrapping it (role="model")
-    to skip the LLM entirely. Otherwise return None.
+    Compute this turn's cache key with _cache_key() and read it from
+    callback_context.state. If present, print a cache-hit message and
+    return a types.Content wrapping it (role="model") to skip the LLM
+    entirely. Otherwise return None.
     """
     pass
 
@@ -64,7 +79,10 @@ def after_agent_callback(callback_context: CallbackContext) -> None:
     TODO: Caching (Save).
     Walk callback_context.session.events in reverse to find the last
     non-user event with content, and save its text into
-    callback_context.state['cached_response'] for future reuse.
+    callback_context.state[_cache_key(callback_context)] for future reuse.
+    Using the same per-input key as before_agent_callback is essential —
+    otherwise a later, unrelated question would incorrectly hit the cache
+    entry saved for a previous, different question.
     """
     pass
 

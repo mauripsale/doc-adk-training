@@ -12,6 +12,7 @@ This file contains the complete code for the `agent.py` script in the Best Pract
 ### `best_practices_v2/agent.py`
 
 ```python
+import json
 import time
 import random
 import functools
@@ -28,16 +29,29 @@ class ValidatedInput(BaseModel):
     query: str = Field(..., max_length=1000)
 
 @node
-def validate_input_node(node_input: dict):
-    """Validates inputs using a Pydantic model."""
+def validate_input_node(node_input: str):
+    """Validates inputs using a Pydantic model.
+
+    The Workflow Runner always delivers the entry node's input as the raw
+    user message coerced to `str` (never as a `dict`), so we parse it as
+    JSON here first. A malformed JSON payload, or one that fails the
+    ValidatedInput schema, raises — the workflow engine catches this and
+    stops execution (Fail-Closed).
+    """
+    try:
+        payload = json.loads(node_input)
+    except json.JSONDecodeError as e:
+        raise ValueError(
+            f"Malformed input: expected a JSON object, got: {node_input!r}"
+        ) from e
     # Instantiating the model will raise a ValidationError if inputs are invalid.
     # The workflow engine will catch this and stop execution (Fail-Closed).
-    ValidatedInput(**node_input)
+    ValidatedInput(**payload)
     return "Input is valid!"
 
 # --- 2. Resilience with Framework-Level Retries ---
 
-@node
+@node(retry_config=RetryConfig(max_attempts=4))
 async def flaky_api_node(node_input: str):
     """Simulates an API call that might fail."""
     print("Attempting to call the flaky API...")
@@ -75,8 +89,13 @@ root_agent = Workflow(
         (validate_input_node, flaky_api_node),
         (flaky_api_node, cache_node)
     ],
-    # Configure retry logic for all nodes in the workflow (or specific ones)
-    retry_config=RetryConfig(max_attempts=4)
+    # NOTE: retry_config is set on `flaky_api_node` itself (above), not here.
+    # `Workflow` extends the same `BaseNode` as every `@node`, so it accepts
+    # `retry_config` too — but that only governs retries of the Workflow
+    # *as a node* (relevant if this Workflow were nested inside a parent
+    # graph). It does NOT cascade to the nodes inside its own graph: a node
+    # that raises still fails after exactly one attempt unless that specific
+    # node has its own `retry_config`.
 )
 ```
 

@@ -29,11 +29,33 @@ def secret_calculator(a: int, b: int) -> int:
     return a + b
 
 # The agent with MISLEADING instructions
+#
+# NOTE on the wording: this needs to be forceful enough that the agent
+# actually *attempts* the nonexistent `super_calc` call on its first try —
+# a milder "you MUST use `super_calc`" gets ignored in practice, since
+# modern models tend to just call whatever tool is actually declared,
+# regardless of what the prompt claims its name is. But the no-deviation
+# rule is explicitly scoped to "the first attempt only", so that once the
+# tool-not-found error comes back, the agent is free to adapt instead of
+# stubbornly retrying the same broken name forever (an unscoped "never
+# deviate, under any circumstances" causes the agent to keep hammering
+# `super_calc` even after ReflectAndRetryToolPlugin reports that
+# `secret_calculator` is available).
 root_agent = Agent(
     name="confused_agent",
     model="gemini-3.5-flash",
-    # We lie to the agent about the tool name!
-    instruction="You are a helper. To add numbers, you MUST use the tool named 'super_calc'. Do not use any other tool name.",
+    instruction="""You are a helper that MUST call a function named exactly `super_calc`
+        to add numbers. This is a strict, non-negotiable rule for your FIRST
+        attempt only: you are FORBIDDEN from calling any function whose name
+        is not literally `super_calc` on your first try, even if a
+        differently-named function appears in your available tools. Always
+        attempt `super_calc(a, b)` first, no matter what.
+
+        However, if that first attempt fails or returns an error, the
+        no-deviation rule above no longer applies: you are then expected to
+        read the error message carefully and intelligently adapt, including
+        calling a different, correctly-named tool if the error tells you
+        one is available.""",
     tools=[FunctionTool(secret_calculator)]
 )
 

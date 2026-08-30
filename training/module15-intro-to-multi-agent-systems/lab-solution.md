@@ -74,4 +74,4 @@ Provide a single, warm greeting and then stop.
 3.  **This lab uses LLM-driven delegation (agent transfer). What might be the advantages or disadvantages of this approach compared to a Deterministic Workflow?**
     *   **Answer:**
         *   **Agent Transfer (Dynamic):** Great for natural language where the "key" isn't always obvious. The LLM understands intent.
-        *   **Deterministic (Module 21.6):** Faster and more reliable if you can extract a clear key (like a "language" code). It avoids unnecessary LLM reasoning for the routing step.
+        *   **Deterministic (Module 16):** Faster and more reliable if you can extract a clear key (like a "language" code). It avoids unnecessary LLM reasoning for the routing step.

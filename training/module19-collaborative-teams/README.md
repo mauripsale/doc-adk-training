@@ -37,6 +37,7 @@ researcher = Agent(
 # Coordinator
 root_agent = Agent(
     name="coordinator",
+    rerun_on_resume=True, # Required: the coordinator is part of the same dispatch chain
     sub_agents=[researcher], # Framework auto-injects 'request_task_researcher' tool
     instruction="Delegate research to the specialist, then write a conclusion."
 )

@@ -11,8 +11,9 @@ In this lab, you will upgrade your **"Support Analyzer"** agent to a production-
 ## Prerequisites
 1.  **Install LiteLLM:** 
     ```shell
-    pip install litellm
+    uv add "litellm==1.96.0"
     ```
+    > **Note:** We pin to `litellm==1.96.0` here. Newer `litellm` releases (1.97.0+, as of this writing) have known issues on Python 3.10 — 1.98.0 raises `ImportError: cannot import name 'NotRequired' from 'typing'` the moment the `LiteLlm` model path is actually exercised, and 1.97.0 hits an unrelated Pydantic model-definition error. `1.96.0` has been verified to work cleanly with `google-adk` on Python 3.10.
 
 ## Lab Tasks
 

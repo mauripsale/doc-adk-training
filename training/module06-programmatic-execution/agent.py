@@ -31,9 +31,19 @@ async def main():
         print(f'** User ({user_id}) says: {new_message}')
         # In ADK 2.0, we use run_debug for simple string interactions
         # or run_async for full control over the event stream.
+        # run_async requires an existing session, so we create one first,
+        # and it expects new_message as a types.Content object.
+        session_id = f"{user_id}_session"
+        await runner.session_service.create_session(
+            app_name=app.name,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        content = types.Content(role="user", parts=[types.Part(text=new_message)])
         async for event in runner.run_async(
             user_id=user_id,
-            new_message=new_message,
+            session_id=session_id,
+            new_message=content,
         ):
             if event.is_final_response():
                 print(f'** {event.author}: {event.content.parts[0].text}')

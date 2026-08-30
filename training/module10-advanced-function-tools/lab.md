@@ -11,7 +11,12 @@ In this lab, you will build an agent that can remember a user's name across mult
 
 ### Step 1: Prepare the Project
 
+We will use the `uv` workflow to initialize our project.
+
 ```bash
+uv init memory_agent --python 3.10
+cd memory_agent
+uv add "google-adk>=2.1.0" python-dotenv
 uv run adk create memory_agent
 cd memory_agent
 ```
@@ -65,7 +70,7 @@ root_agent = Agent(
 
 ### Step 4: Test the Memory
 
-1.  **Run:** `uv run adk run agent.py`
+1.  **Run:** `uv run adk run .` (run this from inside the `memory_agent` agent directory created in Step 1; `adk run` expects an agent directory, not a file)
 2.  **Test:**
     - "Hi, I'm Mario." -> Should call `store_name`.
     - "What is my name?" -> Should call `recall_name` and respond "Mario".

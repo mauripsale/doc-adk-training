@@ -23,7 +23,7 @@ Many real-world applications require agents to understand and process more than 
 The fundamental building block for multimodal content in the ADK is the `types.Part` object from the `google.genai` library. A user's prompt is no longer just a string, but a list of `Part` objects.
 
 A `Part` can contain:
-*   **Text:** `types.Part.from_text("Describe this image")`
+*   **Text:** `types.Part.from_text(text="Describe this image")`
 *   **Image Data:** `types.Part(inline_data=types.Blob(data=image_bytes, mime_type='image/png'))`
 
 When you send a list of these parts to a vision-capable model like `gemini-3.5-flash`, the model can reason about the text and the image(s) together.

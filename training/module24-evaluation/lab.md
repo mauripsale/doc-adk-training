@@ -141,13 +141,13 @@ The structure looks like this:
           "intermediate_data": {
             "tool_uses": [
               {
-                "name": "tools.calculator.add",
+                "name": "add",
                 "args": { "a": 10, "b": 5 }
               }
             ],
             "tool_responses": [
               {
-                "name": "tools.calculator.add",
+                "name": "add",
                 "response": { "status": "success", "result": 15 }
               }
             ]
@@ -193,11 +193,11 @@ While the Dev UI is great for creating and running evaluations interactively, yo
     The command will run the evaluation and print the results directly to your terminal.
 
     ```
-    Running evaluations for: .
-    Eval Set: calculator_tests
-      ✓ addition_test PASSED
-
-    Total: 1/1 passed (100%)
+    *********************************************************************
+    Eval Run Summary
+    calculator_tests:
+      Tests passed: 1
+      Tests failed: 0
     ```
 ### Bonus: Writing a Custom Metric (Optional)
 

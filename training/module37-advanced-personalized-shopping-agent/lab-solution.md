@@ -9,6 +9,116 @@ title: "Lab Solution"
 
 This solution provides the complete, tested code for the distributed, multi-agent personalized shopping assistant. It demonstrates the definitive ADK 2.0 A2A pattern.
 
+### 0. `web_agent/webshop_data.py`
+A minimal, dependency-free mock e-commerce catalog standing in for a real
+webshop, so `web_agent`'s `search`/`click` tools have something to operate
+on without any extra install step.
+
+```python
+"""A minimal, dependency-free mock e-commerce catalog and session model."""
+
+CATALOG = [
+    {
+        "id": "P001",
+        "name": "Floral Summer Dress",
+        "category": "dresses",
+        "price": 39.99,
+        "description": "A flowy, floral-print summer dress in breathable cotton.",
+    },
+    {
+        "id": "P002",
+        "name": "Men's Running Shoes",
+        "category": "shoes",
+        "price": 79.99,
+        "description": "Lightweight running shoes with a breathable mesh upper.",
+    },
+    {
+        "id": "P003",
+        "name": "Wireless Noise-Cancelling Headphones",
+        "category": "electronics",
+        "price": 199.99,
+        "description": "Over-ear headphones with active noise cancellation and 30-hour battery life.",
+    },
+    {
+        "id": "P004",
+        "name": "Stainless Steel Water Bottle",
+        "category": "home",
+        "price": 24.99,
+        "description": "Insulated 750ml water bottle, keeps drinks cold for 24 hours.",
+    },
+    {
+        "id": "P005",
+        "name": "Organic Cotton T-Shirt",
+        "category": "tops",
+        "price": 19.99,
+        "description": "Soft, breathable organic cotton crew-neck t-shirt.",
+    },
+]
+
+# Tiny in-process "session" tracking the currently viewed product, so
+# `click` can react to what `search` just showed.
+_session_state = {"current_product": None}
+
+def get_product(product_id: str):
+    return next((p for p in CATALOG if p["id"] == product_id), None)
+```
+
+### `web_agent/tools/search.py`
+
+```python
+from webshop_data import CATALOG
+
+def search(keywords: str) -> str:
+    """Search for keywords in the (mock) webshop."""
+    terms = keywords.lower().split()
+    matches = [
+        p for p in CATALOG
+        if any(
+            t in p["name"].lower() or t in p["description"].lower() or t in p["category"].lower()
+            for t in terms
+        )
+    ]
+    if not matches:
+        return "No products found matching your search. Try different keywords."
+    lines = [f"Found {len(matches)} product(s):"]
+    for p in matches:
+        lines.append(f"- [{p['id']}] {p['name']} — ${p['price']:.2f}")
+    return "\n".join(lines)
+```
+
+### `web_agent/tools/click.py`
+
+```python
+from webshop_data import _session_state, get_product
+
+def click(button: str) -> str:
+    """Simulate clicking a product ID or a navigation button in the (mock) webshop."""
+    normalized = button.strip().lower()
+
+    if normalized == "back to search":
+        _session_state["current_product"] = None
+        return "Returned to the search page. Use `search` to look for products again."
+
+    if normalized == "buy now":
+        product = _session_state["current_product"]
+        if not product:
+            return "No product selected. Click a product ID from the search results first."
+        return f"Order placed for '{product['name']}' (${product['price']:.2f}). Thank you for shopping!"
+
+    product = get_product(button.strip())
+    if not product:
+        return (
+            f"'{button}' is not a valid product ID or button. Try a product ID "
+            "from the search results, 'Buy Now', or 'Back to Search'."
+        )
+    _session_state["current_product"] = product
+    return (
+        f"{product['name']} — ${product['price']:.2f}\n"
+        f"{product['description']}\n"
+        "Options: [Buy Now] [Back to Search]"
+    )
+```
+
 ### 1. `web_agent/agent.py`
 This agent acts as the gateway to the webshop.
 
@@ -20,7 +130,9 @@ from dotenv import load_dotenv
 import uvicorn
 import os
 
-# Assume tools search and click are implemented locally
+# search/click are plain functions defined in tools/search.py and
+# tools/click.py, operating on the mock catalog in webshop_data.py above —
+# no OpenAPI spec, no external `web_agent_site` package.
 from tools.search import search
 from tools.click import click
 
@@ -57,12 +169,16 @@ load_dotenv()
 
 def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     """Saves a user's preference to the session state."""
-    tool_context.session.state[f"pref:{key}"] = value
+    # Use tool_context.state (the tracked delta proxy), NOT
+    # tool_context.session.state directly — writing to .session.state
+    # bypasses ADK's state-delta tracking, so the write never actually
+    # commits and is gone on the very next turn. See Module 22.
+    tool_context.state[f"pref:{key}"] = value
     return {"status": "success", "message": f"Saved {key}."}
 
 def get_preferences(tool_context: ToolContext) -> dict:
     """Retrieves all preferences for the current user."""
-    prefs = {k: v for k, v in tool_context.session.state.items() if k.startswith("pref:")}
+    prefs = {k: v for k, v in tool_context.state.to_dict().items() if k.startswith("pref:")}
     return {"status": "success", "preferences": prefs}
 
 root_agent = Agent(

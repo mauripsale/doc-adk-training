@@ -31,7 +31,7 @@ You will build a new agent that can answer questions about current events and to
     Use the `uv run adk create` command to create a new Python agent named `researcher_agent`.
 
     ```shell
-    uv run adk create --type=python researcher_agent
+    uv run adk create --type=code researcher_agent
     ```
 
     **Alternative (YAML approach):**

@@ -14,8 +14,14 @@ This file contains the complete code for the `agent.py` file in the Fact-finder 
 ```python
 from google.adk import Agent
 from google.adk.integrations.langchain import LangchainTool
+import wikipedia
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
+
+# Wikimedia now rate-limits the wikipedia package's generic default User-Agent
+# (it's shared by every user of the package). Setting a distinctive one fixes
+# the `requests.exceptions.JSONDecodeError` you'd otherwise see when the tool runs.
+wikipedia.set_user_agent("adk-training-fact-finder/1.0 (https://github.com/adk-training; contact@example.com)")
 
 # 1. According to LangChain documentation, instantiate the tool.
 # This sets up the connection to the Wikipedia API.

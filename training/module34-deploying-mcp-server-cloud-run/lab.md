@@ -105,10 +105,10 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 ### Step 2: Containerize the MCP Server
 
 1.  **Create a `requirements.txt` file:**
-    Our server needs the `mcp` library and `uvicorn` to actually serve the ASGI app it produces.
+    Our server needs the `mcp` library and `uvicorn` to actually serve the ASGI app it produces. Pin `mcp` to a `1.x` release: `mcp>=2.0` renamed `FastMCP` to `MCPServer` and removed the `mcp.server.fastmcp` module entirely, which breaks both this server's `from mcp.server.fastmcp import FastMCP` import and `google-adk`'s own `McpToolset` client code (it targets the pre-2.0 API too).
 
     ```shell
-    printf "mcp\nuvicorn\n" > requirements.txt
+    printf "mcp<2\nuvicorn\n" > requirements.txt
     ```
 
 2.  **Create the `Dockerfile`:**

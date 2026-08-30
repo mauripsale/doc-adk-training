@@ -38,7 +38,7 @@ This file contains the expected output for the `eval_results/calculator_tests.ev
           "intermediate_data": {
             "tool_uses": [
               {
-                "name": "tools.calculator.add",
+                "name": "add",
                 "args": {
                   "a": 10,
                   "b": 5
@@ -47,7 +47,7 @@ This file contains the expected output for the `eval_results/calculator_tests.ev
             ],
             "tool_responses": [
               {
-                "name": "tools.calculator.add",
+                "name": "add",
                 "response": {
                   "status": "success",
                   "result": 15
@@ -123,7 +123,7 @@ class ADKAgentUser(HttpUser):
               - name: Install dependencies
                 run: | 
                   pip install --upgrade pip
-                  pip install adk-python
+                  pip install google-adk
                   # Install any agent-specific dependencies
               - name: Run agent evaluations
                 run: uv run adk eval . eval_results/calculator_tests.evalset.json

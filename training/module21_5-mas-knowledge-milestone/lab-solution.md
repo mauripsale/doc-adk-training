@@ -34,13 +34,12 @@ This solution provides the architectural blueprints and justifications for the s
 **Recommended Pattern:** **Cyclic Workflow (Module 20)**
 
 *   **Design:**
-    1.  `START` -> `Writer`
-    2.  `Writer` -> `Critic`
-    3.  `Critic` -> `Writer` (IF "Too Scary") -- **The Cycle**
-    4.  `Critic` -> `END` (IF "Satisfied")
+    1.  `START` -> `refinement_orchestrator` — a single `@node(rerun_on_resume=True)` function. The `Workflow`'s `edges` are simply `[("START", refinement_orchestrator)]`; there is no edge that loops back to a previous node.
+    2.  Inside `refinement_orchestrator`, a plain Python `for` loop repeatedly calls `ctx.run_node(critic, current_story)` and, unless the critic responds "APPROVED", calls `ctx.run_node(refiner, ...)` to produce the next draft.
+    3.  The loop breaks as soon as the critic returns "APPROVED" (or a `max_iterations` cap is reached), and the function returns the final story.
 
 *   **Justification:**
-    *   **Iteration:** This scenario requires a feedback loop. A Cyclic graph is the most efficient way to represent self-correction without recursing into a deep call stack.
+    *   **Iteration:** This scenario requires a feedback loop. Rather than modeling the cycle as a graph edge that returns to a previous node, ADK 2.0 implements it with standard Python control flow (`for`/`while`) inside one orchestrator node, calling `ctx.run_node()` on `critic`/`refiner` for each pass -- simpler to reason about and debug than a literal cyclic graph.
 
 ---
 

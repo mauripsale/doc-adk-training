@@ -3,9 +3,6 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-export const GOOGLE_CLOUD_LOCATION = '${GOOGLE_CLOUD_LOCATION}';
-export const GOOGLE_CLOUD_PROJECT = '${GOOGLE_CLOUD_PROJECT}';
-
 # Lab 33: Manually Deploying an Agent to GKE Challenge
 
 ## Goal
@@ -92,7 +89,7 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     RUN pip install --no-cache-dir -r requirements.txt
     COPY . .
     EXPOSE 8080
-    CMD ["adk", "api_server", "--host", "0.0.0.0", "."]
+    CMD ["adk", "api_server", "--host", "0.0.0.0", "--port=8080", "."]
     ```
 
 ### Step 3: Build and Push the Container Image

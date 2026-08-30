@@ -89,7 +89,7 @@ root_agent = Workflow(
 You have successfully built an iterative system!
 - You used a **Dynamic Workflow** (`@node`) to manage execution logic.
 - You used a **standard Python loop** to implement `max_iterations`.
-- You learned how to pass data between nodes manually using the `input` parameter of `ctx.run_node()`.
+- You learned how to pass data between nodes manually by passing the node's input as the **positional** second argument to `ctx.run_node()` (there is no `input` keyword).
 
 ### Self-Reflection Questions
 - Why is the `max_iterations` limit a crucial safety feature for an iterative workflow? What could go wrong without it?

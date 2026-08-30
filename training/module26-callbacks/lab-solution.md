@@ -12,6 +12,7 @@ This file contains the complete code for the `agent.py` script in the Content Mo
 ### `content_moderator/agent.py`
 
 ```python
+import hashlib
 import os
 import re
 import logging
@@ -30,10 +31,29 @@ load_dotenv()
 # --- Configuration ---
 BLOCKED_WORDS = ['unsafe', 'offensive']
 
+# --- Caching helper: key the cache by the CURRENT turn's user input ---
+def _current_user_text(callback_context: CallbackContext) -> str:
+    """Extracts the text of the current turn's user message."""
+    user_content = callback_context.get_invocation_context().user_content
+    if not user_content or not user_content.parts:
+        return ""
+    return "".join(p.text or "" for p in user_content.parts)
+
+def _cache_key(callback_context: CallbackContext) -> str:
+    """
+    Derives a cache key from the current user input, not a single global
+    slot. Without this, ANY cached response would be replayed for EVERY
+    subsequent question in the session, regardless of what was asked.
+    """
+    user_text = _current_user_text(callback_context)
+    digest = hashlib.md5(user_text.strip().lower().encode("utf-8")).hexdigest()
+    return f"cache:{digest}"
+
 # --- Callback 1: Caching (Check) ---
 def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
-    """Intercepts execution to check for a cached response."""
-    cached_text = callback_context.state.get('cached_response')
+    """Intercepts execution to check for a cached response for THIS input."""
+    key = _cache_key(callback_context)
+    cached_text = callback_context.state.get(key)
     if cached_text:
         print("⚡ [CACHE HIT] Returning saved result, skipping LLM.")
         return types.Content(
@@ -44,13 +64,14 @@ def before_agent_callback(callback_context: CallbackContext) -> Optional[types.C
 
 # --- Callback 2: Caching (Save) ---
 def after_agent_callback(callback_context: CallbackContext) -> None:
-    """Saves the final response to the session state for future use."""
+    """Saves the final response to session state, keyed by the input that produced it."""
     # Find the last model response in the session history
     events = callback_context.session.events
     for event in reversed(events):
         if event.author != "user" and event.content:
             response_text = event.content.parts[0].text
-            callback_context.state['cached_response'] = response_text
+            key = _cache_key(callback_context)
+            callback_context.state[key] = response_text
             print("💾 [CACHE SAVE] Result persisted to session state.")
             break
 

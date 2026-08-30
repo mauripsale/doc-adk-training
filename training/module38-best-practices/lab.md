@@ -33,6 +33,7 @@ In this lab, you will build a **Best Practices Agent** that demonstrates several
 
 ```python
 # In agent.py (Starter Code)
+import json
 import time
 import random
 import functools
@@ -49,11 +50,21 @@ class ValidatedInput(BaseModel):
     # Define query as a string with max_length 1000.
     pass
 
+# IMPORTANT: the Workflow Runner always delivers the entry node's input as
+# the raw user message coerced to `str` — never as a `dict`. Annotating this
+# node's parameter as `dict` will crash with a Pydantic ValidationError on
+# EVERY invocation (not just malformed ones), because a `types.Content`/`str`
+# is never a valid `dict`. Accept `str`, and parse it as JSON yourself.
 @node
-def validate_input_node(node_input: dict):
+def validate_input_node(node_input: str):
     """Validates inputs using a Pydantic model."""
-    # TODO: Instantiate ValidatedInput(**node_input). 
-    # If it fails, Pydantic will raise a ValidationError and the workflow will stop (Fail-Closed).
+    # TODO 1: Parse node_input as JSON (json.loads). Wrap it in a try/except
+    #   json.JSONDecodeError and re-raise as a ValueError with a clear
+    #   "malformed input" message — this is what makes a bad/non-JSON chat
+    #   message fail gracefully instead of an unhandled crash.
+    # TODO 2: Instantiate ValidatedInput(**payload).
+    # If either step fails, an exception propagates and the workflow stops
+    # (Fail-Closed).
     return "Input is valid!"
 
 # --- 2. Resilience with Framework-Level Retries ---
@@ -87,6 +98,13 @@ def cache_node(node_input: str):
 # TODO: Define a Workflow that includes:
 # 1. A 'validate' step.
 # 2. A 'flaky_call' step configured with a RetryConfig(max_attempts=4).
+#    IMPORTANT: put `retry_config=RetryConfig(max_attempts=4)` directly on
+#    `flaky_api_node`'s `@node(...)` decorator, NOT on the `Workflow(...)`
+#    container. `Workflow` accepts `retry_config` too (it's a `BaseNode`
+#    field like any other node), but that only retries the Workflow *as a
+#    node* if it's nested inside a parent graph — it does NOT cascade to the
+#    nodes inside its own graph. A failing node without its own
+#    `retry_config` still fails after exactly one attempt.
 # 3. A 'caching' step.
 
 root_agent = Workflow(
@@ -105,7 +123,9 @@ root_agent = Workflow(
     ```
 2.  **Interact and Observe:**
     *   **Test Caching:** Run the 'caching' step twice. Notice the 2-second delay the first time, and the instant response the second time.
-    *   **Test Validation:** Send malformed input to the 'validate' step. Observe how the Workflow fails immediately with a validation error.
+    *   **Test Validation:** Since the whole pipeline starts at `validate_input_node`, send your chat message as a JSON object matching the `ValidatedInput` schema, e.g. `{"user_id": "student_01", "query": "hello"}`. That should sail through to the rest of the pipeline. Now try two kinds of "malformed input" and confirm the Workflow fails immediately (Fail-Closed) both times:
+        1.  Non-JSON text (e.g. just typing `hello`) — rejected by the `json.loads` parse step.
+        2.  Valid JSON that violates the schema (e.g. `{"user_id": "a", "query": "hello"}` — `user_id` is too short for the regex) — rejected by `ValidatedInput`'s own Pydantic validation.
     *   **Test Retries:** Run the 'flaky_call' step. Watch your terminal logs. You should see "Attempting..." multiple times as the **ADK Framework** automatically retries the node after the exception.
 
 ### Lab Summary

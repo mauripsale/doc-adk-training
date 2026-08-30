@@ -16,7 +16,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
     uv run adk create ui_agent
     cd ui_agent
     ```
-    Choose the **Programmatic (Python script)** option.
+    `adk create` will prompt you for a model (any option is fine, since you'll replace it in `agent.py` below) and a backend (choose the one matching your environment, e.g. **Vertex AI**).
 
 2.  **Implement the agent:**
     Open `agent.py` and replace its contents with this simple agent:
@@ -146,7 +146,7 @@ In this lab, you will build a simple, standalone HTML file with JavaScript that 
 
 ### Step 3: Run the Full-Stack Application
 
-1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `uv run adk api_server ui_agent --allow_origins=http://localhost:8081`.
+1.  **Terminal 1 (Agent Server):** In the `ui_agent` directory, run `uv run adk api_server --port=8080 --allow_origins=http://localhost:8081`. (Since you're already inside the `ui_agent` directory, `adk api_server` auto-detects it as the agent to serve — don't pass `ui_agent` again as an argument, or it will look for a subdirectory of that name and fail.)
     *   **Note on CORS:** the ADK API server does *not* allow cross-origin requests by default — since your web page (port 8081) and your agent (port 8080) are different origins, you must explicitly allow the client's origin with `--allow_origins`, or the browser will reject every request with a 403.
 2.  **Terminal 2 (Client Server):** In the same directory, run `python3 -m http.server 8081`.
 

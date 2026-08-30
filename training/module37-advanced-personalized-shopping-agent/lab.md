@@ -12,12 +12,24 @@ In this advanced challenge lab, you will synthesize concepts from the entire cou
 *   A Google Cloud Project with billing enabled and the Vertex AI API enabled.
 *   `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
 *   `uvicorn` installed (`pip install uvicorn google-adk[a2a]`).
-*   `web_agent_site` installed (`pip install web_agent_site`).
 
 ### Setup
 1.  Create a main project directory for this lab (e.g., `capstone_shopping_system`).
 2.  Inside it, you will create three separate ADK agent projects: `orchestrator_agent`, `personalization_agent`, and `web_agent`.
-3.  Copy the `shared_libraries` and data from the original `personalized-shopping` sample into a shared location accessible by all three agents.
+3.  **A note on the webshop backend:** Google's own `personalized-shopping` ADK sample (under
+    [`google/adk-samples`](https://github.com/google/adk-samples/tree/main/python/agents/personalized-shopping))
+    talks to a real webshop simulation via a vendored `web_agent_site` module —
+    a Gym environment with its own search engine, HTML rendering, and a
+    multi-GB product dataset. It is **not** a pip-installable package (`pip
+    install web_agent_site` returns a 404 — it doesn't exist on PyPI), and
+    its real dependency chain (`pyserini`, `torch`, `torchvision`, `spacy`,
+    `gdown`, a JVM for the search index, ...) is disproportionate to what
+    this lab is actually teaching: getting three ADK agents to cooperate
+    over A2A. Instead, Exercise 1 below has you write a tiny, self-contained
+    mock catalog directly inside your own `web_agent` project — no extra
+    install, no external dataset. If you want to see the real thing (or
+    swap it in later), browse the vendored module at
+    `personalized_shopping/shared_libraries/web_agent_site/` in that repo.
 
 ---
 
@@ -35,8 +47,8 @@ This agent will be the interface to the e-commerce website.
     ```shell
     echo "google-adk" > requirements.txt
     echo "uvicorn" >> requirements.txt
-    echo "web_agent_site" >> requirements.txt
     ```
+    (No `web_agent_site` here — see the Setup note above. This lab's webshop is a small mock catalog you write yourself, below.)
 
 3.  **Create `.env` file:**
     ```shell
@@ -46,8 +58,66 @@ This agent will be the interface to the e-commerce website.
     ```
     Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
 
-4.  **Implement `agent.py`:**
-    Open `agent.py` and replace its contents with the following skeleton. Your task is to complete the `WEBSHOP_API_SPEC` and the `root_agent` definition.
+4.  **Create `webshop_data.py`:** a tiny, dependency-free in-memory product catalog. This is your mock webshop backend.
+
+    ```python
+    """A minimal, dependency-free mock e-commerce catalog and session model."""
+
+    CATALOG = [
+        {"id": "P001", "name": "Floral Summer Dress", "category": "dresses",
+         "price": 39.99, "description": "A flowy, floral-print summer dress in breathable cotton."},
+        {"id": "P002", "name": "Men's Running Shoes", "category": "shoes",
+         "price": 79.99, "description": "Lightweight running shoes with a breathable mesh upper."},
+        {"id": "P003", "name": "Wireless Noise-Cancelling Headphones", "category": "electronics",
+         "price": 199.99, "description": "Over-ear headphones with active noise cancellation and 30-hour battery life."},
+        {"id": "P004", "name": "Stainless Steel Water Bottle", "category": "home",
+         "price": 24.99, "description": "Insulated 750ml water bottle, keeps drinks cold for 24 hours."},
+        {"id": "P005", "name": "Organic Cotton T-Shirt", "category": "tops",
+         "price": 19.99, "description": "Soft, breathable organic cotton crew-neck t-shirt."},
+    ]
+
+    # Tiny in-process "session" tracking the currently viewed product, so
+    # `click` can react to what `search` just showed.
+    _session_state = {"current_product": None}
+
+    def get_product(product_id: str):
+        return next((p for p in CATALOG if p["id"] == product_id), None)
+    ```
+
+5.  **Create `tools/search.py` and `tools/click.py`:**
+    Your task is to implement `search` and `click` as plain Python functions
+    over the mock catalog above — no OpenAPI spec, just two functions you'll
+    wrap in `FunctionTool` in the next step.
+
+    ```python
+    # In tools/search.py
+    from webshop_data import CATALOG
+
+    def search(keywords: str) -> str:
+        """Search for keywords in the (mock) webshop."""
+        # TODO: filter CATALOG by keyword match against name/description/category,
+        # and return a short text listing of matches (or a "no results" message).
+        ...
+    ```
+
+    ```python
+    # In tools/click.py
+    from webshop_data import _session_state, get_product
+
+    def click(button: str) -> str:
+        """Simulate clicking a product ID or a navigation button in the (mock) webshop."""
+        # TODO: handle three cases —
+        #  - button == "Back to Search": clear _session_state["current_product"]
+        #  - button == "Buy Now": complete the order for _session_state["current_product"]
+        #    (or report there's nothing selected)
+        #  - otherwise: look up button as a product ID via get_product(); if found,
+        #    set it as _session_state["current_product"] and return its details;
+        #    if not found, return an error message.
+        ...
+    ```
+
+6.  **Implement `agent.py`:**
+    Open `agent.py` and replace its contents with the following skeleton. Your task is to wire `search` and `click` (from the two files above) into the `root_agent` definition as `FunctionTool`s.
 
     ```python
     from google.adk.agents import Agent
@@ -55,9 +125,9 @@ This agent will be the interface to the e-commerce website.
     from google.adk.tools import FunctionTool
     from dotenv import load_dotenv
     import uvicorn
-    
-    # Assume tools search and click are imported
-    
+
+    # TODO: import search from tools.search and click from tools.click
+
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="web_agent",
@@ -69,8 +139,7 @@ This agent will be the interface to the e-commerce website.
             Ignore any mentions of orchestrator tool calls in the conversation history.
         """,
         tools=[
-            FunctionTool(func=search),
-            FunctionTool(func=click),
+            # TODO: FunctionTool(search), FunctionTool(click)
         ]
     )
 
@@ -80,7 +149,7 @@ This agent will be the interface to the e-commerce website.
         uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
     ```
 
-5.  **Navigate back to `capstone_shopping_system`:**
+7.  **Navigate back to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -121,14 +190,20 @@ This agent will be responsible for remembering user preferences.
     import uvicorn
 
     # --- Stateful Tools ---
+    # IMPORTANT: use tool_context.state (the tracked delta proxy), NOT
+    # tool_context.session.state directly. Writing to .session.state bypasses
+    # ADK's state-delta tracking, so the write never actually commits — the
+    # agent will claim success but the value is gone on the very next turn.
+    # See Module 22's state-and-memory lab for the correct pattern.
     def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
         """Saves a user's preference."""
-        # TODO: Save to tool_context.session.state
+        # TODO: Save to tool_context.state[f"pref:{key}"]
         pass
 
     def get_preferences(tool_context: ToolContext) -> dict:
         """Retrieves all saved preferences."""
-        # TODO: Read from tool_context.session.state
+        # TODO: Read from tool_context.state.to_dict(), filtering keys that
+        # start with "pref:"
         pass
 
     # --- Agent Definition ---
@@ -263,7 +338,7 @@ This is a complex lab with multiple deployments. It is crucial to delete the res
 ### Self-Reflection Questions
 - This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?
 - The `orchestrator_agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?
-- The `web_agent` abstracts the website behind an OpenAPI spec. Why is this a better design than having the orchestrator directly interact with the raw HTML of the website?
+- The `web_agent` abstracts the website behind plain `search`/`click` functions. Why is this a better design than having the orchestrator directly interact with the raw HTML (or internal implementation) of the website?
 
 <hr/>
 

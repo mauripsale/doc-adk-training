@@ -13,13 +13,13 @@ async def main():
         # 1. Check ADK Version
         version = importlib.metadata.version("google-adk")
         print(f"📦 Google ADK version: {version}")
-        
+
         major_version = int(version.split('.')[0])
         if major_version < 2:
             print(f"❌ Error: This course requires ADK version 2.0 or higher. You have {version}.")
             print("Please run: uv pip install -U 'google-adk>=2.1.0'")
             sys.exit(1)
-        
+
         print("✅ ADK 2.0+ is installed correctly.")
 
         # 2. Check Python Version
@@ -31,15 +31,16 @@ async def main():
         # 3. Basic Functionality Check (Using App/Runner Pattern)
         print("Attempting to connect to the Gemini Enterprise Agent Platform...")
         agent = Agent(
-            name="verify_agent", 
-            model="gemini-3.5-flash", 
+            name="verify_agent",
+            model="gemini-3.5-flash",
             instruction="You are a helpful assistant. Reply with 'ADK 2.0 is ready!' if you can hear me."
         )
         app = App(name="verify", root_agent=agent)
         runner = InMemoryRunner(app=app)
 
         response_text = ""
-        async for event in runner.run_async(user_id="verify_user", message="Verify connection"):
+        events = await runner.run_debug("Verify connection", user_id="verify_user")
+        for event in events:
             if event.is_final_response():
                 response_text = event.content.parts[0].text
 

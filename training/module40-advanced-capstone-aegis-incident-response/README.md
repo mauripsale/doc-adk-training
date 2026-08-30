@@ -65,7 +65,7 @@ Acts as an automated log investigator and threat hunter.
 
 ### 2. Aegis Orchestrator Agent (Orchestrator, runs locally)
 The central dispatch system for SOC analysts.
-*   **Coordination:** It acts as an A2A client that calls the Threat Intelligence and Mitigation agents as remote sub-agents.
+*   **Coordination:** It acts as an A2A client that calls the Threat Intelligence and Mitigation agents as `AgentTool`-wrapped remote agents — not via `sub_agents=[...]`/`transfer_to_agent`, which would permanently hand control to the first remote agent instead of returning to the orchestrator. `AgentTool` gives proper call-and-return semantics, so the orchestrator stays in control across both hops and can combine their results into one final answer.
 *   **Command Scope:** Understands commands like:
     *   *"Detect any brute-force attacks on our billing databases and generate patching plans."*
     *   *"Remediate recent SQL injection risks in the mid-market segment logs."*

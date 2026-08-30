@@ -110,17 +110,23 @@ def start_timer(callback_context: CallbackContext, llm_request: LlmRequest) -> N
 
 def end_timer_and_sanitize(callback_context: CallbackContext, llm_response: LlmResponse):
     """AgentOps: mask secrets in the response and log (simulated) telemetry export."""
-    if not llm_response.content:
-        return None
-
-    original_text = llm_response.content.parts[0].text
-    redacted_text = mask_security_secrets(original_text)
-
     elapsed_time = time.time() - callback_context.state.get("start_time", time.time())
     print("[AgentOps] Agent execution completed successfully.")
     print(f"[AgentOps] Latency: {elapsed_time:.3f}s")
     print("[AgentOps] (Simulated) Exporting OpenTelemetry span and token usage to Cloud Logging...")
 
+    # The model's first response here is often a function call (e.g. to
+    # query_security_audit_logs) rather than text. A function-call part has
+    # no text to sanitize, so skip masking entirely in that case instead of
+    # crashing on re.sub(..., None).
+    if not llm_response.content or not llm_response.content.parts:
+        return None
+
+    original_text = llm_response.content.parts[0].text
+    if not original_text:
+        return None
+
+    redacted_text = mask_security_secrets(original_text)
     if redacted_text == original_text:
         return None
     return llm_response.model_copy(update={
@@ -155,6 +161,7 @@ from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.apps.app import App
 from google.adk.runners import InMemoryRunner
+from google.adk.tools.agent_tool import AgentTool
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -184,7 +191,17 @@ root_agent = Agent(
         3. Send this profile to `mitigation_agent` to search playbooks, draft a patching script, and generate an Executive Security Brief.
         4. Present the resulting mitigation plan and brief details back to the SOC analyst.
     """,
-    sub_agents=[threat_intel_service, mitigation_service]
+    # NOTE: these two remote agents are wired as tools (AgentTool), NOT as
+    # `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent`
+    # mechanism, which is a *permanent*, one-way handoff — once the
+    # orchestrator transfers control to threat_intel_agent, threat_intel_agent
+    # becomes the active agent for the rest of the run, and it has no way to
+    # transfer onward to mitigation_agent or back to the orchestrator (it's a
+    # separate process with no knowledge of that agent tree). AgentTool gives
+    # proper call-and-return semantics instead: the orchestrator calls each
+    # remote agent like a function, gets its result back, and stays in
+    # control to make the next call and synthesize the final combined answer.
+    tools=[AgentTool(agent=threat_intel_service), AgentTool(agent=mitigation_service)],
 )
 
 app = App(name="aegis_incident_response_system", root_agent=root_agent)
@@ -199,7 +216,10 @@ runner = InMemoryRunner(app=app)
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import ToolContext
+from dotenv import load_dotenv
 import uvicorn
+
+load_dotenv()
 
 def search_remediation_playbooks(vulnerability_type: str) -> str:
     """

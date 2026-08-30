@@ -28,12 +28,11 @@ Here's how it works:
 
 The ADK wrapper handles all the translation behind the scenes. It inspects the third-party tool, extracts its name, description, and parameters, and generates the necessary schema for the Gemini LLM to understand it. When the LLM decides to call the tool, the wrapper receives the request, calls the underlying third-party tool's execution method, and then formats the result back into a standard dictionary that the ADK agent can understand.
 
-This seamless integration means you can mix and match tools from different sources:
-*   A built-in `google_search` tool.
-*   A custom `get_order_status` function tool you wrote.
-*   A `WikipediaQueryRun` tool from LangChain.
+Once wrapped, a third-party tool behaves just like a **custom function tool** you wrote yourself — you can freely mix multiple wrapped tools (e.g. a `WikipediaQueryRun` from LangChain alongside your own `get_order_status` function) in the same agent's `tools` list.
 
-Your ADK agent sees them all as a unified set of capabilities, and the LLM can reason about and choose the best one for the job, regardless of where it came from.
+**Important restriction:** As Module 12 covered, a **built-in tool** like `google_search` **cannot** share an agent's `tools` list with any custom function tools — and a wrapped third-party tool counts as a custom function tool for this purpose. This is a restriction from the Gemini API itself (not the ADK): it constructs fine in Python but fails the moment the model actually runs, with `400 INVALID_ARGUMENT: Multiple tools are supported only when they are all search tools.` So an agent can have `google_search` *or* a mix of custom/third-party tools, but not both together.
+
+If you need grounding *and* a third-party tool like Wikipedia search in the same system, use the same **sequential composition** pattern from Module 12: run a `google_search`-only agent, then feed its output into a second agent that has your wrapped third-party tool(s).
 
 ### Why is this important?
 
@@ -48,5 +47,6 @@ In the lab for this module, you will put this into practice by integrating a pow
 - The ADK uses a "Wrapper Pattern" (e.g., `LangchainTool`) to adapt third-party tools for use within an ADK agent.
 - This approach saves significant development time by allowing you to leverage a vast ecosystem of pre-built, community-maintained tools.
 - **Potential Risk:** Integrating third-party libraries, especially those with extensive dependencies (like LangChain), can introduce the risk of "dependency conflicts" (often called "dependency hell"), where different libraries require incompatible versions of the same underlying package.
+- A wrapped third-party tool counts as a custom function tool, so it can freely mix with your own function tools — but, as in Module 12, it still **cannot** share a `tools` list with a built-in tool like `google_search`; use sequential composition if you need both.
 
 This wraps up **Part 2: Tools & Capabilities** — your agent can now search, remember, call your own functions, and borrow tools from an entire ecosystem. In Part 3, you'll learn how to coordinate multiple specialized agents into **Multi-Agent Systems**.

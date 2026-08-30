@@ -67,11 +67,11 @@ This method uses the Agents CLI to add deployment artifacts to your existing ADK
         ```
 
 2.  **Navigate to the Parent Directory:** In your terminal, navigate to the parent directory that contains `support_agent/`.
-3.  **Scaffold the Project:** Run the Agents CLI `scaffold enhance` command to add the required deployment files to your project.
+3.  **Scaffold the Project:** Run the Agents CLI `scaffold enhance` command to add the required deployment files to your project. Pass `--agent-directory support_agent` so the CLI correctly detects your YAML config agent in `support_agent/` — without it, the CLI can't find your agent code and silently generates an unrelated generic stub agent instead.
     ```shell
-    uvx google-agents-cli scaffold enhance -d agent_runtime
+    uvx google-agents-cli scaffold enhance -d agent_runtime --agent-directory support_agent
     ```
-    You may see a `❌ Missing: /app folder` message — this is expected with this directory layout and harmless; the command still completes successfully.
+    The command should report `Found support_agent/root_agent.yaml (YAML config agent)` and generate a `support_agent/agent.py` shim (via `config_agent_utils.from_config(...)`) that loads your `router_agent` and its `billing_agent`/`tech_support_agent` sub-agents — that's how you know it picked up the right project.
 4.  **Follow the Prompts:** The tool will ask you several questions. You can accept the defaults, but ensure you select a **supported region** for Agent Runtime (e.g., `us-central1`).
 
 ### Step 2: Connect to Your Google Cloud Project
@@ -97,7 +97,6 @@ This method uses the Agents CLI to add deployment artifacts to your existing ADK
 3.  **Find Your Agent:** Once the build is complete, navigate to **Agent Platform -> Agent Runtime** in the Cloud Console to find your deployed agent and its ID.
 
 ---
-sidebar_position: 2
 
 ## Part 2: Standard Deployment (Manual)
 

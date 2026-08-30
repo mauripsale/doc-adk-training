@@ -11,7 +11,12 @@ In this lab, you will build a **Secure Finance Agent**. You will learn how to im
 
 ### Step 1: Prepare the Project
 
+We will use the `uv` workflow to initialize our project.
+
 ```bash
+uv init secure_finance --python 3.10
+cd secure_finance
+uv add "google-adk>=2.1.0" python-dotenv
 uv run adk create secure_finance
 cd secure_finance
 ```

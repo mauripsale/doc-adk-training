@@ -30,13 +30,13 @@ writer = Agent(name="writer", ...)
 
 # 2. Build the Dynamic Orchestrator
 @node(rerun_on_resume=True)
-async def newsletter_workflow(ctx: Context, topic: str):
+async def newsletter_workflow(ctx: Context, node_input: str):
     # Step A: Run the researcher node
     # ADK 2.0 returns the result directly!
-    research_notes = await ctx.run_node(researcher, input=topic)
+    research_notes = await ctx.run_node(researcher, node_input)
     
     # Step B: Run the writer node
-    final_article = await ctx.run_node(writer, input=research_notes)
+    final_article = await ctx.run_node(writer, research_notes)
     
     return final_article
 

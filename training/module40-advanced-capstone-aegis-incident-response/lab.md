@@ -141,9 +141,15 @@ def start_timer(callback_context: CallbackContext, llm_request: LlmRequest) -> N
 
 # TODO 3: AgentOps "after" hook — mask secrets and log (simulated) telemetry.
 # Signature must match ADK's after_model_callback: (callback_context, llm_response) -> Optional[LlmResponse]
-# - Redact llm_response.content.parts[0].text via mask_security_secrets()
 # - Compute elapsed time using callback_context.state.get("start_time", ...)
 # - Print the latency and a line simulating an OpenTelemetry/Cloud Logging export
+# - IMPORTANT: this agent's first LLM response is often a *function call*
+#   (e.g. to query_security_audit_logs), not text. A function-call part has
+#   llm_response.content.parts[0].text == None. Guard for this: if there's no
+#   content, no parts, or the first part's .text is falsy, return None
+#   immediately WITHOUT calling mask_security_secrets() on it (re.sub() on
+#   None raises TypeError). Only attempt redaction when there is actual text.
+# - Redact llm_response.content.parts[0].text via mask_security_secrets()
 # - If the text was actually redacted, return a new LlmResponse via
 #   llm_response.model_copy(update={"content": types.Content(parts=[types.Part(text=redacted_text)], role="model")})
 #   Otherwise return None (no change).
@@ -183,6 +189,7 @@ from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.apps.app import App
 from google.adk.runners import InMemoryRunner
+from google.adk.tools.agent_tool import AgentTool
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -197,6 +204,17 @@ threat_intel_service = ...
 mitigation_service = ...
 
 # TODO 2: Create the main Aegis Orchestrator Agent.
+# IMPORTANT: wire the two remote agents in as `tools=[AgentTool(agent=...), ...]`,
+# NOT as `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent`
+# mechanism, which is a *permanent*, one-way handoff: once the orchestrator
+# transfers control to threat_intel_agent, threat_intel_agent becomes the
+# active agent for the rest of the run and has no way to transfer onward to
+# mitigation_agent or back to the orchestrator (it's a separate process with
+# no knowledge of that agent tree) — so the documented 4-step flow would
+# silently stop after step 1. `AgentTool` gives proper call-and-return
+# semantics instead: the orchestrator calls each remote agent like a
+# function, gets its result back, and stays in control to make the next call
+# and synthesize the final combined answer.
 root_agent = Agent(
     model="gemini-3.5-flash",
     name="aegis_orchestrator",
@@ -210,7 +228,7 @@ root_agent = Agent(
         3. Send this profile to `mitigation_agent` to search playbooks, draft a patching script, and generate an Executive Security Brief.
         4. Present the resulting mitigation plan and brief details back to the SOC analyst.
     """,
-    sub_agents=[threat_intel_service, mitigation_service]
+    tools=[...],  # TODO: [AgentTool(agent=threat_intel_service), AgentTool(agent=mitigation_service)]
 )
 
 app = App(name="aegis_incident_response_system", root_agent=root_agent)
@@ -228,7 +246,10 @@ The **Mitigation Agent** receives an Incident Profile, looks up remediation play
 from google.adk.agents import Agent
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import ToolContext
+from dotenv import load_dotenv
 import uvicorn
+
+load_dotenv()
 
 # TODO 1: Write a tool to search Playbook reference documents.
 # This simulates a Vertex AI Search (RAG) lookup over CIS/NIST playbooks —

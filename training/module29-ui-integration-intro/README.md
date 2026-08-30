@@ -37,7 +37,7 @@ The ADK is flexible and supports several approaches for UI integration, each sui
                 | (WebSocket/SSE)
 +---------------------------------+
 |   Backend (Python/FastAPI)      |
-| - ag_ui_uv run adk (Protocol Adapter)  |
+| - ag_ui_adk (Protocol Adapter)  |
 | - Your ADK Agent                |
 +---------------------------------+
 ```

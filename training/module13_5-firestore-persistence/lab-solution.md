@@ -44,6 +44,12 @@ class FirestoreSessionService(BaseSessionService):
         return Session(id=sid, app_name=app_name, user_id=user_id, state=doc.to_dict().get("state", {}) if doc.exists else (state or {}))
 
     async def append_event(self, session: Session, event: Event) -> Event:
+        # Let the base implementation apply event.actions.state_delta to
+        # session.state in-memory first (it also handles temp-scoped state
+        # and trims it before we persist) -- without this, state changes are
+        # silently dropped: they'd never make it past this method.
+        event = await super().append_event(session=session, event=event)
+
         # Save event to sub-collection
         event_ref = self._client.collection("apps").document(session.app_name)\
             .collection("users").document(session.user_id)\
@@ -52,6 +58,10 @@ class FirestoreSessionService(BaseSessionService):
         
         await event_ref.set(event.model_dump())
         print(f"🔥 [Firestore] Persisted event from {event.author}")
+
+        # Persist the now-updated state too, so a fresh get_session() call
+        # (e.g. from a new process) sees it.
+        await self.update_session_state(session)
         return event
 
     async def update_session_state(self, session: Session) -> None:
@@ -65,7 +75,29 @@ class FirestoreSessionService(BaseSessionService):
 
     # Other methods (get_session, list_sessions, delete_session)
     async def get_session(self, *, app_name: str, user_id: str, session_id: str, config: Optional[GetSessionConfig] = None) -> Optional[Session]:
-        return await self.create_session(app_name=app_name, user_id=user_id, session_id=session_id)
+        session_ref = self._client.collection("apps").document(app_name)\
+            .collection("users").document(user_id)\
+            .collection("sessions").document(session_id)
+        doc = await session_ref.get()
+        if not doc.exists:
+            return None
+
+        # Rebuild the event history from the events sub-collection -- this is
+        # what actually gives the agent its memory across separate script
+        # runs. Returning state alone (without events) isn't enough: the
+        # model recalls prior turns from conversation history, not just the
+        # state dict.
+        events = []
+        async for event_doc in session_ref.collection("events").order_by("timestamp").stream():
+            events.append(Event.model_validate(event_doc.to_dict()))
+
+        return Session(
+            id=session_id,
+            app_name=app_name,
+            user_id=user_id,
+            state=doc.to_dict().get("state", {}),
+            events=events,
+        )
 
     async def list_sessions(self, *, app_name: str, user_id: Optional[str] = None) -> ListSessionsResponse:
         return ListSessionsResponse(sessions=[])

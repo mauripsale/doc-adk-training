@@ -20,7 +20,10 @@ from google.adk import Agent
 weather_agent = Agent(
     name="weather_checker",
     model="gemini-3.5-flash",
-    mode="single_turn", 
+    mode="single_turn",
+    # Required on every agent in a sub_agents dispatch chain -- without it:
+    # "ValueError: A node must have rerun_on_resume=True."
+    rerun_on_resume=True,
     instruction="Provide a brief, enthusiastic 3-day weather forecast for the user's destination."
 )
 
@@ -31,6 +34,9 @@ flight_agent = Agent(
     name="flight_booker",
     model="gemini-3.5-flash",
     mode="task",
+    # Required for any node that might pause and resume across turns --
+    # without it: "ValueError: A node must have rerun_on_resume=True."
+    rerun_on_resume=True,
     instruction="""
     Help the user book a flight. 
     1. Ask for their preferred airline or time if not provided.
@@ -44,6 +50,9 @@ flight_agent = Agent(
 root_agent = Agent(
     name="travel_planner",
     model="gemini-3.5-flash",
+    # The coordinator itself also needs this -- it's part of the same
+    # dispatch chain and can be "woken up" when a sub-agent's task resumes.
+    rerun_on_resume=True,
     instruction="""
     You are a travel planning coordinator.
     Your goal is to build a complete plan for the user.

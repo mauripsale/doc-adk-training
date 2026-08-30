@@ -32,11 +32,18 @@ Open `agent.py`. Your task is to define the team and configure their modes corre
 # In agent.py (Starter Code)
 from google.adk import Agent
 
+# Note: every agent below needs rerun_on_resume=True. Any node that's part
+# of a sub_agents dispatch chain can be "woken up" when a task-mode
+# sub-agent pauses and resumes across turns -- without the flag on ALL
+# three agents (coordinator included), you'll hit:
+# "ValueError: A node must have rerun_on_resume=True."
+
 # 1. Define the Weather Specialist
 # Hint: Use 'single_turn' mode for a quick, non-interactive lookup.
 weather_agent = Agent(
     name="weather_checker",
     model="gemini-3.5-flash",
+    rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to provide a brief 3-day forecast 
     # for the requested destination.
@@ -49,6 +56,7 @@ weather_agent = Agent(
 flight_agent = Agent(
     name="flight_booker",
     model="gemini-3.5-flash",
+    rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to help the user book a flight. 
     # Ask about preferred airline or time if not provided.
@@ -56,10 +64,12 @@ flight_agent = Agent(
 )
 
 # 3. Define the Coordinator
-# Hint: Coordinator should NOT have a mode set (it's the root).
+# Hint: Coordinator should NOT have a mode set (it's the root), but it
+# still needs rerun_on_resume=True (see note above).
 root_agent = Agent(
     name="travel_planner",
     model="gemini-3.5-flash",
+    rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to coordinate the team.
     # 1. Get weather from weather_checker.

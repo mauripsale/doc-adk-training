@@ -69,6 +69,8 @@ This allows you to build agents that can:
 
 In the lab, you will build a "Visual Product Catalog Analyzer" that uses a single, vision-capable agent to analyze a product image and generate a marketing description from that analysis.
 
+> **Going Further:** the lab below only covers *understanding* images (analysis), not *generating* them -- actually calling an image-generation model is a separate integration (a custom tool wrapping the Imagen API) and is out of scope here. If you want to try it hands-on, the shape is the same pattern as any other custom tool from Module 9: a function that calls the generation API and returns image bytes as a `types.Part` (the same `Part` type you're about to use for analysis, just produced instead of consumed).
+
 ### Key Takeaways
 - Multimodal models like Gemini can process text and images together, enabling vision-enabled agents.
 - The `google.genai.types.Part` object is the building block for multimodal content, allowing you to combine text and image data in a single prompt.

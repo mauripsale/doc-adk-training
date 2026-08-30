@@ -30,6 +30,7 @@ from google.adk import Agent
 researcher = Agent(
     name="researcher",
     mode="task", # 🔄 Automatic return to parent!
+    rerun_on_resume=True, # Required whenever a node can pause/resume across turns
     instruction="Research the topic and provide a summary."
 )
 

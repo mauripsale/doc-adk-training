@@ -168,7 +168,7 @@ root_agent = Agent(
 
 ### Step 3: Run and Test
 
-Start the agent and try both paths: a normal prompt (should reach the model), and a prompt containing a blocked word like "unsafe" (should be refused by `before_model_callback` without ever calling the model). Then repeat the same prompt in the same session — `before_agent_callback` should return the cached response instantly.
+Start the agent and try both paths: a normal prompt (should reach the model), and a prompt containing a blocked word like "unsafe" (should be refused by `before_model_callback` without ever calling the model). Then repeat the same prompt in the same session — `before_agent_callback` should return the cached response instantly. Finally, ask a *different* question in the same session — this should NOT return the previous answer; it should call the LLM again and get a fresh, correct response. This third check is what actually proves the cache is keyed per-question rather than one global slot for the whole session.
 
 ```shell
 uv run adk run content_moderator

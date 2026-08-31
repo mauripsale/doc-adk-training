@@ -9,7 +9,7 @@ title: "Module 37: Advanced - Building a Personalized Shopping Agent"
 
 ### Introduction
 
-In this advanced module, we'll build a sophisticated AI agent capable of navigating a simulated e-commerce website to help a user find and purchase a product. This agent will demonstrate how to integrate external web environments and use a combination of tools to perform complex, multi-step tasks.
+Welcome to **Part 7: Capstone Project & Best Practices**, and the first of the two capstone-scale projects that close out the course. This is your first real chance to put nearly everything you've learned so far to work in one system: multi-agent orchestration, distributed A2A, state, tools, and multimodal input. In this advanced module, we'll build a sophisticated AI agent capable of navigating a simulated e-commerce website to help a user find and purchase a product. This agent will demonstrate how to integrate external web environments and use a combination of tools to perform complex, multi-step tasks.
 
 ### Agent Architecture
 

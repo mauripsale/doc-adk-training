@@ -48,7 +48,7 @@ root_agent = Agent(
 
 ### Self-Reflection Questions
 - Why is it better to use `output_schema` instead of just asking the LLM to "respond in JSON" in the text instructions?
-- What happened to the agent's ability to use tools once you enabled `output_schema`? Why does the ADK enforce this restriction?
+- Can the agent still call tools while `output_schema` is set? What exactly does `output_schema` constrain, and what does it leave free?
 - Look at the Dev UI's "Session State". How could another agent in a future multi-agent system use the data stored in the `"last_ticket_analysis"` key?
 
 <hr/>

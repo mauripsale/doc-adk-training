@@ -133,5 +133,5 @@ This is essential for building multi-agent systems where one agent's output is n
 ### Key Takeaways
 - The **`Agent`** class is the "brain" of an ADK 2.0 application.
 - The `instruction` parameter is the most powerful tool for controlling behavior.
-- **`output_schema`**: Enforces strict JSON output via Pydantic (disables tools/transfers).
+- **`output_schema`**: Enforces strict JSON output via Pydantic on the final response -- the agent can still call tools during its thought loop; only the final answer is constrained to the schema.
 - **`output_key`**: Automatically saves the agent's response into the session state for cross-node data passing.

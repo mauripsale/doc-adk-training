@@ -1,9 +1,9 @@
 ---
 sidebar_position: 4.5
-title: "Module 4.5: Professional Model Configuration & Resiliency"
+title: "Module 4.5: Professional Model Configuration, Resiliency & Portability"
 ---
 
-# Module 4.5: Professional Model Configuration & Resiliency
+# Module 4.5: Professional Model Configuration, Resiliency & Portability
 
 ## Theory
 

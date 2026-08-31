@@ -201,6 +201,8 @@ While the Dev UI is great for creating and running evaluations interactively, yo
     ```
 ### Bonus: Writing a Custom Metric (Optional)
 
+> **Heads up:** the three Bonus/Extra Challenge sections below (Custom Metric, Dynamic User Simulation, Locust load testing) are each substantially denser than the core lab -- each introduces new API surface (`EvalConfig`, `ConversationScenarios`, Locust) on its own. Treat Steps 1-8 as the complete lab, and budget extra time separately if you plan to work through the bonus sections too.
+
 Built-in criteria like `tool_trajectory_avg_score` can't check business-specific logic — for example, whether the calculator's result is actually mathematically correct. For that, you write a custom metric: a Python function matching ADK's expected signature, wired into `EvalConfig.custom_metrics`.
 
 1.  **Create `custom_metrics.py`** in your `calculator_agent` directory:

@@ -199,11 +199,14 @@ The master coordinator using `RemoteA2aAgent` nodes wired in as `AgentTool`s.
 
 ```python
 import asyncio
+from typing import Any, Dict, Optional
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
+from google.adk.tools import ToolContext
 from google.adk.tools.agent_tool import AgentTool
+from google.adk.tools.base_tool import BaseTool
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -220,6 +223,14 @@ personalization_agent = RemoteA2aAgent(
     agent_card=f"http://localhost:8002{AGENT_CARD_WELL_KNOWN_PATH}",
     use_legacy=False,
 )
+
+def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext) -> Optional[Dict[str, Any]]:
+    """AgentOps: logs every delegation to a remote specialist. This is pure
+    observability -- it never blocks or alters the call (always returns
+    None), so it can be added, changed, or removed without touching the
+    orchestrator's instruction or reasoning at all."""
+    print(f"[DELEGATION] shopping_orchestrator -> {tool.name}")
+    return None
 
 # Orchestrator
 root_agent = Agent(
@@ -243,6 +254,7 @@ root_agent = Agent(
     # back, and stays in control to make the next call and synthesize the
     # final combined answer.
     tools=[AgentTool(agent=web_agent), AgentTool(agent=personalization_agent)],
+    before_tool_callback=log_delegation,
 )
 
 app = App(name="shopping_system", root_agent=root_agent)
@@ -251,13 +263,13 @@ runner = InMemoryRunner(app=app)
 
 ### Self-Reflection Answers
 
-1.  **Advantages of Distributed Architecture?**
+1.  **This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?**
     *   **Scalability:** Each agent can be deployed and scaled independently (e.g. 10 instances of `web_agent` for 1 instance of `personalization_agent`).
-    *   **Reusability:** Other apps can use the same `personalization_agent` endpoint.
-    *   **Security:** The `personalization_agent` can run in a more restricted network zone.
+    *   **Maintainability:** Changes to the website's logic only require updating `web_agent` -- the orchestrator and `personalization_agent` are untouched.
+    *   **Reusability:** Other apps in the organization could call the same `personalization_agent` endpoint instead of reimplementing preference storage.
 
-2.  **Why use `ToolContext` for state?**
-    *   It ensures that the agent's "memory" is structured and separate from the chat history, making it reliable even in long conversations.
+2.  **The `orchestrator_agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?**
+    *   **Answer:** `log_delegation` never appears in the orchestrator's `instruction` and never changes what the orchestrator decides to do -- it always returns `None`, so the tool call proceeds exactly as the LLM requested. It's registered once on the `Agent` and fires automatically before every tool call, including calls to `web_agent`/`personalization_agent` that the model decides to make on its own. You could delete the callback entirely (or swap it for something that writes to Cloud Logging instead of `print`) without touching the instruction or the delegation logic at all -- observability and business logic evolve independently.
 
-3.  **Why A2A over standard sub-agents?**
-    *   A2A allows agents to live in different codebases, use different languages, or be managed by different teams, while still working together as a single system.
+3.  **The `web_agent` abstracts the website behind plain `search`/`click` functions. Why is this a better design than having the orchestrator directly interact with the raw HTML (or internal implementation) of the website?**
+    *   **Answer:** The orchestrator only ever needs to reason about two simple signatures, `search(keywords: str)` and `click(button: str)` -- not HTML parsing, CSS selectors, or the mock catalog's internal data structures. If the website's implementation changes (a real backend replaces the mock catalog, or the HTML structure changes), only `web_agent`'s tool implementations need to change; the orchestrator's instruction and reasoning are completely unaffected. This is the same separation-of-concerns benefit as `OpenAPIToolset` in Module 11, applied at the level of a whole remote agent instead of a single tool.

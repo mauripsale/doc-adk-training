@@ -110,7 +110,7 @@ This method involves writing a custom Python script to deploy the agent. Unlike 
     mkdir support_agent
     touch support_agent/__init__.py
     ```
-2.  **Action:** Create `support_agent/agent.py`, translating the same router + two specialists design from Module 15/32 into Python `Agent` objects (instead of YAML config). Use the skeleton below and fill in the `# TODO` sections.
+2.  **Action:** Create `support_agent/agent.py`, translating the same router + two specialists design from Module 32 into Python `Agent` objects (instead of YAML config). Use the skeleton below and fill in the `# TODO` sections.
     ```python
     # In support_agent/agent.py
     from google.adk import Agent

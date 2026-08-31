@@ -9,6 +9,8 @@ title: "Module 22: State and Memory - Persistent Agent Context"
 
 ### Giving Agents Memory
 
+Welcome to **Part 4: Production Readiness**. You've spent Part 3 learning to orchestrate multiple agents into real systems -- now it's time to make those systems production-ready, starting with the most basic requirement of all: an agent that actually remembers things.
+
 A key feature that elevates a simple chatbot to a capable assistant is **memory**. The ADK provides a robust system for managing two different kinds of memory: short-term **State** and long-term **Memory**.
 
 ### Session State (`session.state`)

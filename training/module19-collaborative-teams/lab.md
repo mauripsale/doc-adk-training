@@ -104,6 +104,7 @@ You have built a Collaborative Agent Team!
 - Why would you use `single_turn` instead of `task` for a database lookup node?
 - What happens to the conversation history when a sub-agent is in `task` mode? (Hint: Check the Trace tab).
 - How does the `mode` setting improve the reliability of complex, multi-step workflows compared to standard `chat` mode?
+- In this lab, `travel_planner` consults two sub-agents (`weather_checker`, `flight_booker`) and combines their results, because both use `mode="task"`/`"single_turn"`, which forces the return to the coordinator. Now imagine `weather_checker` and `flight_booker` were both `RemoteA2aAgent`s -- separate services -- registered via a bare `sub_agents=[...]` with no `mode` set. What would happen the first time the coordinator delegated? What are two different ways to fix it?
 
 <hr/>
 

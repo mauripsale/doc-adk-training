@@ -9,6 +9,8 @@ title: "Module 27: Introduction to MCP & Stateful Tools"
 
 ### The Limits of Stateless Tools
 
+Welcome to **Part 5: Advanced Integrations & UI**. Your agents from Part 4 are production-ready -- they remember, they're evaluated, they're observed, they're guarded by callbacks. Now it's time to give them richer capabilities and connect them to the outside world, starting with how they talk to tools.
+
 The custom function tools you've built so far are powerful, but they have a fundamental limitation: they are **stateless**. Every time your agent calls a tool like `add(a, b)`, the tool executes from scratch, performs its calculation, returns a result, and then forgets everything.
 
 This is perfect for many tasks, but it falls short for more complex, ongoing interactions where a tool needs to maintain its own memory or state across multiple turns of a conversation (e.g., managing a database connection, a multi-step booking process, or an interactive data analysis session).

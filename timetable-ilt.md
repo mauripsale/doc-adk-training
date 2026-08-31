@@ -7,7 +7,7 @@
 | 📖 [Module 2: Setting Up Your Development Environment](./training/module02-environment-setup/) | Medium | 60 |
 | 📖 [Module 3: Your First Agent: The "Echo" Agent](./training/module03-first-agent-echo/) | Low | 55 |
 | 📖 [Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-agent-deep-dive/) | Low | 50 |
-| 📖 [Module 4.5: Professional Model Configuration & Resiliency](./training/module04_5-multi-model-litellm/) | Medium | 45 |
+| 📖 [Module 4.5: Professional Model Configuration, Resiliency & Portability](./training/module04_5-multi-model-litellm/) | Medium | 45 |
 | 📖 [Module 5: Running and Interacting with Agents](./training/module05-running-agents/) | Medium | 50 |
 | 📖 [Module 6: Running an Agent Programmatically](./training/module06-programmatic-execution/) | Medium | 55 |
 | 📖 [Module 7: Multimodal and Images 📸](./training/module07-multimodal-and-images/) | High | 60 |
@@ -32,7 +32,7 @@
 | **Day 4: Production Readiness** | | **370** |
 | 🧠 [Module 22: State and Memory](./training/module22-state-and-memory/) | Medium | 55 |
 | 📦 [Module 23: Artifacts](./training/module23-artifacts/) | Medium | 65 |
-| 🏭 [Module 24: Evaluation](./training/module24-evaluation/) | Medium | 75 |
+| 🏭 [Module 24: Evaluation](./training/module24-evaluation/) | Medium-High | 75 |
 | 🏭 [Module 25: Observability](./training/module25-observability/) | High | 55 |
 | 🦺 [Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/) | Medium | 55 |
 | 🛡️ [Module 26: Callbacks](./training/module26-callbacks/) | High | 65 |

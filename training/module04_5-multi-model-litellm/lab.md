@@ -3,14 +3,17 @@ sidebar_position: 6
 title: "Challenge Lab"
 ---
 
-# Lab 4.5 Challenge: Professional Model Configuration
+# Lab 4.5 Challenge: Professional Model Configuration, Resiliency & Portability
 
 ## Goal
 In this lab, you will upgrade your **"Support Analyzer"** agent to a production-ready state. You will learn how to implement advanced retry logic using a custom `Gemini` subclass and how to provide a multi-model fallback using `LiteLlm`.
 
 ## Prerequisites
-1.  **Install LiteLLM:** 
+This lab modifies the `support_analyzer` agent from Module 4, in place -- it's not a fresh project. Starting here instead of continuing from Module 4? You'll need that project first -- `lab-solution.md` in Module 4 has the complete `support_analyzer` code to recreate it, then come back here.
+
+1.  **Navigate to your `support_analyzer` project and install LiteLLM:**
     ```shell
+    cd /path/to/your/adk-training/support_analyzer
     uv add "litellm==1.96.0"
     ```
     > **Note:** We pin to `litellm==1.96.0` here. Newer `litellm` releases (1.97.0+, as of this writing) have known issues on Python 3.10 — 1.98.0 raises `ImportError: cannot import name 'NotRequired' from 'typing'` the moment the `LiteLlm` model path is actually exercised, and 1.97.0 hits an unrelated Pydantic model-definition error. `1.96.0` has been verified to work cleanly with `google-adk` on Python 3.10.

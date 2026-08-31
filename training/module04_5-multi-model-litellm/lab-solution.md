@@ -3,7 +3,7 @@ sidebar_position: 7
 title: "Lab Solution"
 ---
 
-# Lab 4.5 Solution: Professional Model Configuration
+# Lab 4.5 Solution: Professional Model Configuration, Resiliency & Portability
 
 ## Goal
 

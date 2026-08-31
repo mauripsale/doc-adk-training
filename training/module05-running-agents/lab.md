@@ -8,6 +8,8 @@ title: "Challenge Lab"
 ## Goal
 Your task is to run and interact with your **"Support Analyzer"** agent using the three primary execution modes provided by the ADK CLI. **Always run these commands from your main `adk-training` directory.**
 
+Starting here instead of continuing from Module 4? You'll need that project first -- `lab-solution.md` in Module 4 has the complete `support_analyzer` code to recreate it, then come back here.
+
 ## Lab Tasks
 1.  **`uv run adk web`:**
     *   Run the command `uv run adk web`.

@@ -15,7 +15,7 @@ In this lab, you will create a simple ADK Skill on your file system and configur
     ```shell
     uv run adk create skills_agent
     ```
-    Choose the **Programmatic (Python script)** option.
+    When prompted to choose a type for the root agent, choose **2. Code**.
 
 2.  **Navigate to the directory:**
     ```shell

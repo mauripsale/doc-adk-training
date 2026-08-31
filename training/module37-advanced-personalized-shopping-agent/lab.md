@@ -254,9 +254,12 @@ This is the main, user-facing agent that will coordinate the others.
 4.  **Implement `agent.py`:**
     Open `agent.py` and replace its contents with the following skeleton. Your task is to define the `RemoteA2aAgent` instances and complete the `root_agent` definition.
 
+    **Important:** wire the two remote agents in as **`AgentTool`s** (`tools=[...]`), not as `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent` mechanism, which is a *permanent*, one-way handoff — once the orchestrator transfers control to one remote agent, it can never call the other remote agent or regain control to combine their results. `AgentTool` gives proper call-and-return semantics: the orchestrator calls each remote agent like a function, gets its result back, and stays in control to make the next call and synthesize a final combined answer — exactly what a multi-step instruction like "check preferences, then search the web" requires.
+
     ```python
     from google.adk.agents import Agent
     from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+    from google.adk.tools.agent_tool import AgentTool
 
     # TODO: 1. Define remote specialist nodes
     web_specialist = RemoteA2aAgent(
@@ -271,12 +274,14 @@ This is the main, user-facing agent that will coordinate the others.
         use_legacy=False,
     )
 
-    # TODO: 2. Define the main Orchestrator Agent
+    # TODO: 2. Define the main Orchestrator Agent.
+    # Wire web_specialist and personalization_specialist in as AgentTools
+    # (tools=[...]), NOT as sub_agents=[...] — see the note above.
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="shopping_orchestrator",
         instruction="""You are a master shopping assistant. Coordinate with specialists.""",
-        sub_agents=[web_specialist, personalization_specialist]
+        tools=[AgentTool(agent=web_specialist), AgentTool(agent=personalization_specialist)]
     )
     ```
 

@@ -195,7 +195,7 @@ if __name__ == "__main__":
 ```
 
 ### 3. `orchestrator_agent/agent.py`
-The master coordinator using `RemoteA2aAgent`.
+The master coordinator using `RemoteA2aAgent` nodes wired in as `AgentTool`s.
 
 ```python
 import asyncio
@@ -203,6 +203,7 @@ from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
+from google.adk.tools.agent_tool import AgentTool
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -230,7 +231,18 @@ root_agent = Agent(
         2. Search web via `web_agent`.
         3. Help user checkout.
     """,
-    sub_agents=[web_agent, personalization_agent]
+    # NOTE: these two remote agents are wired as tools (AgentTool), NOT as
+    # `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent`
+    # mechanism, which is a *permanent*, one-way handoff — once the
+    # orchestrator transfers control to personalization_agent,
+    # personalization_agent becomes the active agent for the rest of the run,
+    # and it has no way to transfer onward to web_agent or back to the
+    # orchestrator (it's a separate process with no knowledge of that agent
+    # tree). AgentTool gives proper call-and-return semantics instead: the
+    # orchestrator calls each remote agent like a function, gets its result
+    # back, and stays in control to make the next call and synthesize the
+    # final combined answer.
+    tools=[AgentTool(agent=web_agent), AgentTool(agent=personalization_agent)],
 )
 
 app = App(name="shopping_system", root_agent=root_agent)

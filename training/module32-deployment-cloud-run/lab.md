@@ -7,7 +7,7 @@ title: "Challenge Lab"
 
 ## Goal
 
-In this lab, you will take the multi-agent customer support system you built in Module 15 and deploy it to Google Cloud Run. This will make your agent accessible via a public URL, transforming it from a local project into a shareable, cloud-hosted service.
+In this lab, you will build a multi-agent customer support system (a `billing_agent` and a `tech_support_agent` behind a router, config-defined in YAML) and deploy it to Google Cloud Run. This will make your agent accessible via a public URL, transforming it from a local project into a shareable, cloud-hosted service. You'll reuse this same system in later modules to compare deployment targets.
 
 ### Prerequisites
 
@@ -35,7 +35,7 @@ The `uv run adk deploy cloud_run` command is a powerful tool that automates most
     ```
 
 2.  **Create a new project for this lab:**
-    We'll use the multi-agent customer support system from Module 15. Let's create a fresh copy to ensure it's set up correctly.
+    We'll build a fresh multi-agent customer support system for this lab.
 
     ```shell
     # Create the main project directory
@@ -48,7 +48,7 @@ The `uv run adk deploy cloud_run` command is a powerful tool that automates most
     ```
 
 3.  **Re-create the agent files:**
-    Inside the `support_agent` directory, create the three YAML files from Module 15.
+    Inside the `support_agent` directory, create the following three YAML files.
 
     *   **`billing_agent.yaml`:**
         ```yaml

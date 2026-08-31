@@ -15,7 +15,7 @@ In this lab, you will build a comprehensive observability system for an agent us
     ```shell
     uv run adk create observability_agent
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
+    When prompted to choose a type for the root agent, choose **2. Code**.
 
 2.  **Navigate into the new directory:**
     ```shell

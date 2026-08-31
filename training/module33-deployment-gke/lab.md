@@ -182,7 +182,7 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     Once you see an IP, press `Ctrl+C` to exit.
 
 2.  **Access the Agent:**
-    Copy the external IP address and paste it into your web browser. You should see the ADK Dev UI running on GKE. Test the same routing logic as in Module 32: a billing question should route to `billing_agent`, and a technical question should route to `tech_support_agent`.
+    Unlike Module 32's `--with_ui` deployment, this container's `Dockerfile` runs `adk api_server` with no UI flag -- opening the external IP in a browser shows a bare `{"detail":"Not Found"}`, not a UI, exactly as intended for a production service (see this module's Key Takeaways). Test the same routing logic with `curl` instead: create a session against `/apps/support_agent/users/u1/sessions/s1`, then send a message via `/run_sse` -- a billing question should route to `billing_agent`, and a technical question should route to `tech_support_agent`.
 
 ### Lab Summary
 You have successfully deployed the same multi-agent Customer Support system to GKE that you deployed to Cloud Run in Module 32. You learned to:

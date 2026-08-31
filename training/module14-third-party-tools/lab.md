@@ -11,13 +11,20 @@ In this lab, you will learn how to integrate a tool from a popular third-party l
 
 ### Step 1: Create the Agent Project and Install Dependencies
 
-1.  **Create the agent project:**
+1.  **Initialize the project:**
+    ```shell
+    uv init fact_finder_agent --python 3.10
+    cd fact_finder_agent
+    uv add "google-adk>=2.1.0" python-dotenv
+    ```
+
+2.  **Create the agent scaffold:**
     ```shell
     uv run adk create --type=config fact_finder_agent
     cd fact_finder_agent
     ```
 
-2.  **Install LangChain dependencies:**
+3.  **Install LangChain dependencies:**
     ```shell
     uv add langchain_community wikipedia
     ```

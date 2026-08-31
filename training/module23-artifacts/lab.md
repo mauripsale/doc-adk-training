@@ -22,7 +22,7 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
     ```shell
     uv run adk create doc_processor
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
+    When prompted to choose a type for the root agent, choose **2. Code**.
 
 2.  **Navigate into the new directory:**
     ```shell

@@ -27,7 +27,7 @@ You will build a tutor that:
     ```shell
     uv run adk create personal_tutor
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
+    When prompted to choose a type for the root agent, choose **2. Code**.
 
 2.  **Navigate into the new directory:**
     ```shell

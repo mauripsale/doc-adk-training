@@ -117,7 +117,7 @@ analyzer_agent = Agent(
     output_schema=SentimentOutput # Force JSON output
 )
 ```
-**CRITICAL LIMITATION:** When `output_schema` is set, the agent **cannot use tools** or perform **Agent Transfers** (delegation). Use it for data extraction, classification, or formatting tasks where reasoning is the final step.
+**Note:** ADK 2.0 supports using `output_schema` and `tools` together -- the agent can still call tools during its thought loop, and structure is only enforced on the final output. `output_schema` is best suited for data extraction, classification, or formatting tasks where the final answer needs a strict shape.
 
 #### 2. Passing Data with `output_key`
 The `output_key` parameter (a string) tells the ADK to take the final text of the agent's response and save it automatically into the session state dictionary (`ctx.session.state`).

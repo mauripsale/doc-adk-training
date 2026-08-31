@@ -58,7 +58,7 @@ name: ... # Give your agent a name (e.g., "echo_agent")
 model: ... # Specify the model to use (e.g., "gemini-3.5-flash")
 instruction: ... # Provide the instruction for the echo agent.
 ```
-> **Note:** If both `agent.py` and `root_agent.yaml` exist in the same directory, the ADK will use the `root_agent.yaml` file.
+> **Note:** If both `agent.py` and `root_agent.yaml` exist in the same directory, the ADK will use `agent.py` -- the generated `__init__.py` hard-imports it, regardless of a sibling YAML file. Avoid keeping both in the same directory.
 
 ### Self-Reflection Questions
 - What are the advantages of defining an agent in a Python script versus a YAML file?

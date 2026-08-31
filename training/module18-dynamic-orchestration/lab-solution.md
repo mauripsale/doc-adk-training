@@ -77,7 +77,7 @@ root_agent = Workflow(
 ### Self-Reflection Answers
 
 1.  **How is `ctx.run_node()` in ADK 2.0 different from the way we passed data between agents in ADK 1.x?**
-    *   **Answer:** In ADK 1.x, you had to set an `output_key` on an agent and then manually retrieve that data from the `ctx.session.state` dictionary in the parent agent. In ADK 2.0, `ctx.run_node()` returns the result of the node execution directly (as a string or a Pydantic object), making the data flow much more intuitive and "Pythonic".
+    *   **Answer:** In ADK 1.x, you had to set an `output_key` on an agent and then manually retrieve that data from the `ctx.session.state` dictionary in the parent agent. In ADK 2.0, `ctx.run_node()` returns the result of the node execution directly (as a string, or as a plain `dict` when the node has an `output_schema` -- never a Pydantic instance), making the data flow much more intuitive and "Pythonic".
 
 2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
     *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.

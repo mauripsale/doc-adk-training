@@ -15,7 +15,7 @@ In this lab, you will build a **Best Practices Agent** that demonstrates several
     ```shell
     uv run adk create best_practices_v2
     ```
-    Choose the **Programmatic (Python script)** option.
+    When prompted to choose a type for the root agent, choose **2. Code**.
 
 2.  **Navigate into the new directory:**
     ```shell

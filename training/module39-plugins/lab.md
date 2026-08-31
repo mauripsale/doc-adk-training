@@ -15,7 +15,7 @@ In this lab, you will work with an agent that has been given misleading instruct
     ```shell
     uv run adk create retry_agent
     ```
-    Choose the **Programmatic (Python script)** option.
+    When prompted to choose a type for the root agent, choose **2. Code**.
 
 2.  **Navigate to the directory:**
     ```shell

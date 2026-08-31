@@ -31,7 +31,7 @@ The `EXTERNAL-IP` is the public address of your agent.
 
 ### Expected Behavior
 
-When you navigate to the `http://<EXTERNAL-IP>` address in your browser, you should see the ADK Developer UI. You can interact with the Customer Support system exactly as in Module 32 — a billing question routes to `billing_agent`, a technical question routes to `tech_support_agent` — but this time it's running on your own GKE cluster instead of Cloud Run.
+Navigating to `http://<EXTERNAL-IP>` in a browser returns a bare `{"detail":"Not Found"}` -- unlike Module 32's `--with_ui` Cloud Run deployment, this container's `Dockerfile` runs a headless `adk api_server` with no UI attached, which is exactly the point for a production deployment (see this module's Key Takeaways). Interact with the Customer Support system via `curl` instead: create a session against `/apps/support_agent/users/<id>/sessions/<id>`, then send a message via `/run_sse`. A billing question routes to `billing_agent`, a technical question routes to `tech_support_agent` — but this time it's running on your own GKE cluster instead of Cloud Run.
 
 ### Troubleshooting Common GKE Errors
 

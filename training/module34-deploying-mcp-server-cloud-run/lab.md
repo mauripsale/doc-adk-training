@@ -198,7 +198,7 @@ Now, create an ADK agent that connects to your newly deployed server.
     This will run your *client* agent from the parent directory.
 
     ```shell
-    uv run adk web cloud_shopping_agent
+    uv run adk web cloud_mcp_server
     ```
 
 2.  **Interact with the agent:**

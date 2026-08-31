@@ -101,7 +101,7 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
     description: An agent that repeats the user's input.
     instruction: You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it. Do not add any extra words or explanations.
     ```
-    > **Note:** If both `agent.py` and `root_agent.yaml` exist, the ADK will use the `root_agent.yaml` file.
+    > **Note:** If both `agent.py` and `root_agent.yaml` exist, the ADK will use `agent.py` -- the generated `__init__.py` hard-imports it, regardless of a sibling YAML file. Avoid keeping both in the same directory.
 
 ### Step 3: Run the Agent
 

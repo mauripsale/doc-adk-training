@@ -43,13 +43,14 @@ class FirestoreSessionService(BaseSessionService):
         # In a real app, you would perform an initial write here.
         return Session(id=sid, app_name=app_name, user_id=user_id, state=state or {})
 
-    async def get_session(self, config: GetSessionConfig) -> Optional[Session]:
+    async def get_session(self, *, app_name: str, user_id: str, session_id: str, config: Optional[GetSessionConfig] = None) -> Optional[Session]:
         # Logic to retrieve session and its events from Firestore
         pass # Implementation details hidden for brevity
 
-    async def append_event(self, event: Event, session: Session) -> None:
+    async def append_event(self, session: Session, event: Event) -> Event:
         # Logic to write a new event to the Firestore sub-collection
         print(f"🔥 [Firestore] Appending event: {event.author}")
+        return event
 
     async def update_session_state(self, session: Session) -> None:
         # Logic to update the session document with current state

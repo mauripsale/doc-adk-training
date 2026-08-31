@@ -49,18 +49,21 @@ Even without modes, an agent can decide to hand over the entire conversation to 
 
 The framework automatically injects tools like `request_task_<agent_name>` into the parent's toolkit based on the `sub_agents` list. The LLM then "calls" these tools to perform the hand-off.
 
-**Without a `mode`, this is a permanent, one-way handoff.** A bare `sub_agents=[...]` entry defaults to `chat` mode -- once control transfers, that sub-agent becomes the active agent for the rest of the run, with no framework-enforced way back. As Section 1 showed, setting `mode="task"` or `mode="single_turn"` fixes this for *local* agents: the framework enforces the return, so a coordinator can call several `task`/`single_turn` sub-agents in sequence and combine their results (exactly what this lab's `travel_planner` does with `weather_checker` and `flight_booker`).
+**Without a `mode`, there's no *automatic* return.** A bare `sub_agents=[...]` entry defaults to `chat` mode: once control transfers, that sub-agent becomes the active agent, and the framework does not force it back the way `task`/`single_turn` do. That's not the same as being stuck, though: every local agent's `transfer_to_agent` tool is, by default, aimed at its parent *and* its peers too (unless you set `disallow_transfer_to_parent`/`disallow_transfer_to_peers`), so a `chat`-mode sub-agent is free to transfer back to its coordinator, or sideways to a sibling, the moment the model decides to -- even chaining several hops together within one turn. Verified live: a coordinator with two plain local `sub_agents` and no `mode` set at all can have the first specialist transfer to the second, which then transfers back to the coordinator, all in a single turn, purely because the model chose to call `transfer_to_agent` each time. As Section 1 showed, `mode="task"` or `mode="single_turn"` upgrades that from "possible if the model decides to" to "guaranteed": the framework enforces the return after one step, so a coordinator can call several `task`/`single_turn` sub-agents in sequence and combine their results without depending on each one's judgment (exactly what this lab's `travel_planner` does with `weather_checker` and `flight_booker`).
 
 ### 4. Call-and-Return for Remote Agents: `AgentTool`
 
-`mode` is a field on every agent, including a `RemoteA2aAgent` -- but for remote agents, ADK 2.0 gives you a second, often clearer way to get the same call-and-return behavior: **`AgentTool`**. It wraps another agent (local or remote) as a normal entry in a `tools=[...]` list. The calling agent invokes it like any other function tool, gets a result back, and *stays in control* -- free to call another `AgentTool`, or the same one again, before composing a final answer. Unlike a hand-off, it shows up in the trace as an explicit tool call, not an implicit transfer -- and you don't have to reason about which `mode` a remote agent should run in.
+`RemoteA2aAgent` does expose a `mode` field, but it's much narrower than a local agent's: it only accepts `"task"` or `None` -- there is no `"chat"` or `"single_turn"` for a remote peer. With the default `None`, a `RemoteA2aAgent` is a plain `transfer_to_agent` target, and once the coordinator transfers to it, there is genuinely no framework-provided way back *within that turn*. That's not a matter of policy or configuration, it's structural: `RemoteA2aAgent` doesn't subclass `LlmAgent`, so it has no `disallow_transfer_to_parent`/`disallow_transfer_to_peers` fields, and it runs its own request/response loop against the remote HTTP service instead of ADK's usual LLM tool-calling flow -- so it never gets a `transfer_to_agent` tool injected once it becomes the active agent. And even that undersells it: the remote agent is a separate process running its own, independently-defined agent tree, with no notion of "the orchestrator that called me" or "the sibling agent next door" to transfer to, even in principle. `mode="task"` closes part of that gap -- it hands control back to the parent automatically once the remote task reaches a terminal state -- but only if the remote agent explicitly invokes a `finish_task` signal to report completion, which is a protocol both sides have to implement, not something you get for free the way local `task`/`single_turn` mode is.
+
+ADK 2.0 gives you a second, often clearer way to get call-and-return behavior with any agent, local or remote: **`AgentTool`**. It wraps another agent as a normal entry in a `tools=[...]` list. The calling agent invokes it like any other function tool, gets a result back, and *stays in control* -- free to call another `AgentTool`, or the same one again, before composing a final answer. Unlike a hand-off, it shows up in the trace as an explicit tool call, not an implicit transfer -- and you don't have to configure `mode`, or implement a `finish_task` protocol on the remote side, at all.
 
 ```python
 from google.adk import Agent
 from google.adk.tools.agent_tool import AgentTool
 
-# sub_agents, default mode: a permanent, one-way handoff to whichever
-# specialist is chosen -- right when delegation is genuinely final.
+# sub_agents, default (chat) mode: hands control to whichever specialist is
+# chosen, and it stays active until it decides to transfer again -- a good
+# fit when routing is meant to be final, like a support triage handoff.
 coordinator_handoff = Agent(
     name="coordinator",
     instruction="Route the user to the right specialist.",
@@ -69,7 +72,8 @@ coordinator_handoff = Agent(
 
 # AgentTool: call-and-return, explicit, no mode to configure. The
 # orchestrator can consult BOTH specialists in the same turn and combine
-# their results itself.
+# their results itself -- and this works identically whether the
+# specialists are local Agents or RemoteA2aAgents.
 orchestrator = Agent(
     name="orchestrator",
     instruction="""
@@ -81,7 +85,7 @@ orchestrator = Agent(
 )
 ```
 
-Picture a shopping assistant that must both check a user's saved preferences *and* search a product catalog before it can answer, where both specialists are `RemoteA2aAgent`s running as separate services. Wired with a bare `sub_agents=[...]` (default `chat` mode), the orchestrator would transfer to `preferences_specialist`, get its answer -- and get stuck there, with no way to also consult `catalog_specialist` in the same turn. `mode="task"` on each `RemoteA2aAgent` would fix that, but `AgentTool` gets you there without touching `mode` at all, and reads more naturally when you're composing several remote capabilities like tools. This exact mix-up -- registering multiple specialists via bare `sub_agents` and expecting call-and-return -- is a real, common bug in multi-agent designs: an orchestrator that silently stops after consulting only the first specialist it was supposed to combine.
+Picture a shopping assistant that must both check a user's saved preferences *and* search a product catalog before it can answer, where both specialists are `RemoteA2aAgent`s running as separate services. Wired with a bare `sub_agents=[...]` (default, `mode=None`), the orchestrator would transfer to `preferences_specialist`, get its answer -- and get stuck there, with no way to also consult `catalog_specialist` in the same turn: this is verified, reproducible behavior, not a hypothetical -- once `preferences_specialist` is active, there is no `transfer_to_agent` tool available to it at all, so it just answers from its own tools and the turn ends without `catalog_specialist` ever being consulted. `mode="task"` on each `RemoteA2aAgent` would fix that, provided both remote agents implement the `finish_task` signal it requires, but `AgentTool` gets you there without touching `mode`, or asking anything extra of the remote side, at all -- and it reads more naturally when you're composing several remote capabilities like tools. This exact mix-up -- registering multiple specialists via bare `sub_agents` and expecting call-and-return -- is a real, common bug in multi-agent designs: an orchestrator that silently stops after consulting only the first specialist it was supposed to combine.
 
 ### Why use Collaborative Teams?
 
@@ -93,4 +97,4 @@ Picture a shopping assistant that must both check a user's saved preferences *an
 - **Collaboration Modes** (`chat`, `task`, `single_turn`) manage sub-agent lifecycle.
 - **`mode="task"`** is the standard for delegation where you want the specialist to finish and "come back" to the main flow.
 - The framework handles the low-level tool injection (`request_task_...`) automatically.
-- **`sub_agents` vs. `AgentTool`:** a bare `sub_agents` entry (default `chat` mode) is a permanent, one-way handoff -- use it when delegation is final. `mode="task"`/`"single_turn"` gives local sub-agents call-and-return semantics; `AgentTool` gives the same call-and-return semantics explicitly, without configuring `mode`, and is the natural choice for composing remote (`RemoteA2aAgent`) specialists as tools.
+- **`sub_agents` vs. `AgentTool`:** a bare `sub_agents` entry (default `chat` mode) hands control to one agent at a time with no *automatic* return -- fine when delegation is meant to be final, and for **local** agents still reversible any time the active agent decides to transfer back (parent and peers are valid transfer targets by default). `mode="task"`/`"single_turn"` makes that return automatic for local sub-agents. For **remote** (`RemoteA2aAgent`) specialists, plain `sub_agents` has no framework-injected way back at all within a turn -- `mode="task"` is the only escape, and it requires the remote side to implement a `finish_task` signal -- so `AgentTool` is the natural choice for composing several remote capabilities that need to be consulted together.

@@ -244,15 +244,22 @@ root_agent = Agent(
     """,
     # NOTE: these two remote agents are wired as tools (AgentTool), NOT as
     # `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent`
-    # mechanism, which is a *permanent*, one-way handoff — once the
-    # orchestrator transfers control to personalization_agent,
-    # personalization_agent becomes the active agent for the rest of the run,
-    # and it has no way to transfer onward to web_agent or back to the
-    # orchestrator (it's a separate process with no knowledge of that agent
-    # tree). AgentTool gives proper call-and-return semantics instead: the
-    # orchestrator calls each remote agent like a function, gets its result
-    # back, and stays in control to make the next call and synthesize the
-    # final combined answer.
+    # mechanism, and for a RemoteA2aAgent that mechanism is a dead end within
+    # the turn it's used: RemoteA2aAgent isn't an LlmAgent, so it never gets
+    # a transfer_to_agent tool of its own once it becomes the active agent —
+    # there is no framework-injected way for it to consult a sibling or hand
+    # control back to the orchestrator before the turn ends. It's also a
+    # separate process running its own independently-defined agent, with no
+    # notion of "the orchestrator that called me" or "the sibling agent next
+    # door" to transfer to, even in principle. (Verified live: an
+    # orchestrator wired with sub_agents=[personalization_agent, web_agent]
+    # and asked to consult both in one turn transfers to
+    # personalization_agent and stops there, answering only from
+    # personalization_agent's own tools — web_agent is never reached.)
+    # AgentTool avoids the problem entirely: the orchestrator calls each
+    # remote agent like a function, gets its result back, and stays in
+    # control to make the next call and synthesize the final combined
+    # answer.
     tools=[AgentTool(agent=web_agent), AgentTool(agent=personalization_agent)],
     before_tool_callback=log_delegation,
 )

@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 28: Building a "Shopping Cart" MCP Server Challenge
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will build your own simple, standalone MCP server from scratch. This server will manage a stateful shopping cart, allowing clients to add items and view the cart's contents. You will then connect an ADK agent to your custom server.
 
 ### Step 1: Install MCP and Create Project
+
+<Setup/>
 
 1.  **Install the `mcp` library (via the ADK's compatible extra):**
     ```shell

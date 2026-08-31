@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 21: Building a Distributed Research System Challenge
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will build a distributed multi-agent system. You will create a main **Orchestrator** agent and a separate, standalone **Research Specialist** agent. The Orchestrator will delegate tasks to the Research Specialist over the network using the ADK's A2A capabilities.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create two separate agent projects** that will run independently.
     ```shell

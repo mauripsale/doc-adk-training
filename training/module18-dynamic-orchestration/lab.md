@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 18: Building a Smart Support Router with Dynamic Workflows
 
 ## Goal
@@ -12,6 +14,8 @@ In this lab, you will build a sophisticated orchestration system using a **Dynam
 This exercise demonstrates the power of ADK 2.0: using standard Python logic to orchestrate multiple AI components with deterministic control.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create a new project:**
     ```shell

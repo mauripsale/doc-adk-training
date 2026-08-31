@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 9: Building a "Calculator" Agent Challenge
 
 ## Goal
@@ -11,13 +13,12 @@ In this lab, you will build an agent that can perform basic arithmetic. You will
 
 ### Step 1: Create the Project and File Structure
 
-We will use `uv` to create a modern Python environment for our agent.
+<Setup/>
 
-1.  **Initialize the agent project:**
+1.  **Create the agent project:**
     ```bash
-    uv init calculator_agent --python 3.10
+    uv run adk create calculator_agent
     cd calculator_agent
-    uv add google.adk python-dotenv
     ```
 
 2.  **Setup Authentication:**

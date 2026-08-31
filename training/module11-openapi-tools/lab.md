@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 11: Building a "Global Market Analyst" Challenge
 
 ## Goal
@@ -11,13 +13,12 @@ In this lab, you will build an agent that can retrieve live currency exchange ra
 
 ### Step 1: Create the Agent Project
 
-We will continue using the modern `uv` workflow.
+<Setup/>
 
-1.  **Initialize the project:**
+1.  **Create the agent project:**
     ```shell
-    uv init market_analyst --python 3.10
+    uv run adk create market_analyst
     cd market_analyst
-    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Set up your API key** in the `.env` file for the Gemini model. (The Frankfurter Currency API we are using is completely free and requires no authentication).

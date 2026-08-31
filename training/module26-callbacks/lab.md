@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Module 26: Callbacks and Guardrails - Building a Content Moderator
 
 ## Lab 26: Building a Content Moderation Assistant with Caching
@@ -12,6 +14,8 @@ title: "Challenge Lab"
 In this lab, you will implement a suite of callbacks to create a **Content Moderation Assistant**. You will learn to build safety guardrails, validate tool arguments, filter responses, and, crucially, implement a **Caching mechanism** using `before_agent_callback` to save tokens and time.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create the agent project:**
     ```shell

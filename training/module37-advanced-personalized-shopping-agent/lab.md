@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 37: Building a Distributed Multi-Agent System Challenge
 
 ## Goal
@@ -14,6 +16,9 @@ In this advanced challenge lab, you will synthesize concepts from the entire cou
 *   `uvicorn` installed (`pip install uvicorn google-adk[a2a]`).
 
 ### Setup
+
+<Setup/>
+
 1.  Create a main project directory for this lab (e.g., `capstone_shopping_system`).
 2.  Inside it, you will create three separate ADK agent projects: `orchestrator_agent`, `personalization_agent`, and `web_agent`.
 3.  **A note on the webshop backend:** Google's own `personalized-shopping` ADK sample (under

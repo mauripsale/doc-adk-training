@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 23: Building a Document Processing Pipeline Challenge
 
 ## Goal
@@ -17,6 +19,8 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
 4.  **Report:** Reads all previously generated artifacts and compiles them into a final report artifact.
 
 ### Step 1: Create the Agent Project
+
+<Setup/>
 
 1.  **Create the agent project:**
     ```shell

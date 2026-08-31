@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 13.5: Extending ADK with Custom Firestore Persistence
 
 ## Goal
@@ -16,6 +18,9 @@ By the end of this lab, you will have an agent that persists its memory to Googl
 1.  **Enable Firestore:** In the GCP Console, ensure you have a Firestore database in **Native mode**.
 2.  **Auth:** `gcloud auth application-default login`
 3.  **Dependencies:**
+
+    <Setup/>
+
     ```bash
     uv add google-cloud-firestore
     ```

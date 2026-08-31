@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 25.5: Building a "Fail-Closed" Safety Guardrail
 
 ## Goal
@@ -12,6 +14,8 @@ In this lab, you will implement a professional **RAI (Responsible AI) Plugin** t
 This demonstrates the **Fail-Closed** pattern used in enterprise AI applications.
 
 ### Step 1: Create the Project
+
+<Setup/>
 
 1.  **Create a new project:**
     ```shell

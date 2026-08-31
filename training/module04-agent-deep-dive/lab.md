@@ -3,12 +3,17 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 4 Challenge: Customer Support Analyzer
 
 ## Goal
 Your task is to build a **"Support Analyzer"** agent. Instead of returning plain text, the agent must analyze the user's support ticket and return a JSON object containing the categorization, sentiment, and a brief summary of the issue.
 
 ## Lab Tasks
+
+<Setup/>
+
 1.  Open your terminal, ensure you are in your `adk-training` directory, and run the following command to scaffold a new agent:
     ```shell
     uv run adk create support_analyzer

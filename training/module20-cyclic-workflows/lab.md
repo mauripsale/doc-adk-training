@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 20: Building an Essay Refinement System
 
 ## Goal
@@ -18,6 +20,8 @@ In this lab, you will build a self-improving agent system that uses a **Dynamic 
     *   **Termination:** The loop breaks if the Critic returns "APPROVED" or after 3 iterations.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create the project:**
     ```shell

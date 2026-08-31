@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 16: Building a Hybrid News Aggregator
 
 ## Goal
@@ -21,6 +23,8 @@ START ──┼                           ├──→ JoinNode → Summarizer �
 ```
 
 ### Step 1: Create the Project
+
+<Setup/>
 
 ```bash
 uv run adk create news_aggregator

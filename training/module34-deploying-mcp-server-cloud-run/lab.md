@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 34: Deploying the "Shopping Cart" Server Challenge
 
 ## Goal
@@ -29,6 +31,8 @@ In this lab, you will take the "Shopping Cart" MCP server from Module 28, re-arc
 ### Step 1: Create the Stateless MCP Server
 
 We need to modify our server so it doesn't store the shopping carts in memory.
+
+<Setup/>
 
 1.  **Create a new project directory:**
 

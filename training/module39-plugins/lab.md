@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 39: Fixing a "Hallucinating" Agent with Plugins
 
 ## Goal
@@ -12,6 +14,9 @@ In this lab, you will work with an agent that has been given misleading instruct
 ### Step 1: Create the Project
 
 1.  **Create a new agent project:**
+
+    <Setup/>
+
     ```shell
     uv run adk create retry_agent
     ```

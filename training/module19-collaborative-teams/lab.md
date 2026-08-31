@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 19: Building a Collaborative Travel Team
 
 ## Goal
@@ -16,6 +18,8 @@ In this lab, you will build a **Travel Planning Team** consisting of a **Coordin
 - Finally, the Coordinator synthesizes the plan.
 
 ### Step 1: Create the Project
+
+<Setup/>
 
 ```shell
 uv run adk create travel_team

@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 40: Aegis Incident Response & AgentOps Multi-Agent System Challenge
 
 ## Goal
@@ -16,6 +18,9 @@ This lab runs entirely on your local machine — no billing, no GCP project requ
 *   No GCP project, billing, or Google Cloud APIs are required for this lab.
 
 ### Step 0: Project Setup
+
+<Setup/>
+
 1.  **Create three sibling agent projects:**
     ```shell
     uv run adk create threat_intel_agent

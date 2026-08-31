@@ -18,6 +18,8 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
 
 ### Step 1: Create and Prepare the Project
 
+> **Note:** unlike other modules, `visual_catalog` must live directly inside this module's own folder (`module07-multimodal-and-images/`) rather than in your shared `adk-training` project -- see point 3 below for why. If this is the first agent you're creating from inside this folder, set up a local environment here first: `uv init --python 3.10 && uv add "google-adk>=2.1.0" python-dotenv`.
+
 1.  **Create the agent project:**
     ```shell
     uv run adk create visual_catalog

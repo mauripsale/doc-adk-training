@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 32: Deploying the Customer Support Agent Challenge
 
 ## Goal
@@ -27,6 +29,8 @@ In this lab, you will build a multi-agent customer support system (a `billing_ag
 ### Step 1: Prepare Your Project for Deployment
 
 The `uv run adk deploy cloud_run` command is a powerful tool that automates most of the deployment process. Let's prepare our project and then use the command.
+
+<Setup/>
 
 1.  **Navigate to your training directory:**
 

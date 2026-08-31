@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 17: Building a Market Analyst with Deterministic Edges
 
 ## Goal
@@ -12,6 +14,8 @@ In this lab, you will build a structured workflow that analyzes currency convers
 This demonstrates how to create predictable AI pipelines in ADK 2.0 with just a few lines of routing glue code, instead of hand-writing full `if`/`else` orchestration for every branch.
 
 ### Step 1: Create the Project
+
+<Setup/>
 
 1.  **Create a new project:**
     ```shell

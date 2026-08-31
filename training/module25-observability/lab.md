@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 25: Building an Observability System with Plugins Challenge
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will build a comprehensive observability system for an agent using the ADK's **Plugin System**. You will implement separate plugins for metrics collection, alerting, and performance profiling.
 
 ### Step 1: Create the Agent Project
+
+<Setup/>
 
 1.  **Create the agent project:**
     ```shell

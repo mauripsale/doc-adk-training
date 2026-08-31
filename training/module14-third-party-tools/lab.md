@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 14: Integrating a LangChain Wikipedia Tool Challenge
 
 ## Goal
@@ -11,20 +13,15 @@ In this lab, you will learn how to integrate a tool from a popular third-party l
 
 ### Step 1: Create the Agent Project and Install Dependencies
 
-1.  **Initialize the project:**
-    ```shell
-    uv init fact_finder_agent --python 3.10
-    cd fact_finder_agent
-    uv add "google-adk>=2.1.0" python-dotenv
-    ```
+<Setup/>
 
-2.  **Create the agent scaffold:**
+1.  **Create the agent scaffold:**
     ```shell
     uv run adk create --type=config fact_finder_agent
     cd fact_finder_agent
     ```
 
-3.  **Install LangChain dependencies:**
+2.  **Install LangChain dependencies:**
     ```shell
     uv add langchain_community wikipedia
     ```

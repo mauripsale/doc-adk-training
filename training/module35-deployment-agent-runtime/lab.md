@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 35: Deploying an Agent to Agent Runtime Challenge
 
 ## Goal
@@ -31,6 +33,9 @@ In this lab, you will deploy the same multi-agent Customer Support system from M
 This method uses the Agents CLI to add deployment artifacts to your existing ADK project and deploy it.
 
 ### Step 1: Prepare the Agent Project
+
+<Setup/>
+
 1.  **Re-create the Customer Support Agent:** We'll use the same multi-agent Customer Support system from Modules 32 and 33. Create a fresh directory and the same three YAML files:
     ```shell
     mkdir support_agent
@@ -103,6 +108,9 @@ This method uses the Agents CLI to add deployment artifacts to your existing ADK
 This method involves writing a custom Python script to deploy the agent. Unlike Part 1, this script needs to `import` your `root_agent` directly as a Python object — so this part uses a **Python-code version** of the same Customer Support system, instead of the YAML config version.
 
 ### Step 1: Prepare the Agent Project
+
+<Setup/>
+
 1.  **Create the Python version of the Customer Support agent:**
     ```shell
     mkdir deploy_manual

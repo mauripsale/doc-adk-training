@@ -2,6 +2,8 @@
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Module 22: State and Memory - Building a Personal Tutor Agent
 
 ## Lab 22: Building a Personal Learning Tutor
@@ -22,6 +24,8 @@ You will build a tutor that:
 *   Simulates searching its **long-term memory** for past lessons.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create the agent project:**
     ```shell

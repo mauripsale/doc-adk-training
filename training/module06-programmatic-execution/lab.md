@@ -17,6 +17,7 @@ This will teach you the canonical way to execute an agent as part of a larger Py
     ```shell
     cd /path/to/your/adk-training/support_analyzer
     ```
+    Starting here instead of continuing from Module 4? You'll need that project first -- `lab-solution.md` in Module 4 has the complete `support_analyzer` code to recreate it, then come back here.
 
 2.  **Create the execution script:**
     In the same directory as your `agent.py`, create a new Python file named `main.py`. This is where you will write the code to run your agent.

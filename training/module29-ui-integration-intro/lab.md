@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 29: Building a Simple Custom Chat UI Challenge
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will build a simple, standalone HTML file with JavaScript that acts as a custom chat client for an ADK agent, demonstrating how to connect a UI to the ADK's native API server.
 
 ### Step 1: Create the Agent Project
+
+<Setup/>
 
 1.  **Create and navigate to the agent project:**
     ```shell

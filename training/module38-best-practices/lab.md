@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 38: Building a Production-Ready Agent with ADK 2.0
 
 ## Goal
@@ -12,6 +14,9 @@ In this lab, you will build a **Best Practices Agent** that demonstrates several
 ### Step 1: Create the Project Structure
 
 1.  **Create a new project:**
+
+    <Setup/>
+
     ```shell
     uv run adk create best_practices_v2
     ```

@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 33: Manually Deploying an Agent to GKE Challenge
 
 ## Goal
@@ -17,6 +19,8 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
 *   Docker running on your local machine.
 
 ### Step 1: Prepare Your Project
+
+<Setup/>
 
 1.  **Re-create the Customer Support Agent:**
     We'll use the same multi-agent Customer Support system from Module 32. Let's create a fresh copy in its own directory.

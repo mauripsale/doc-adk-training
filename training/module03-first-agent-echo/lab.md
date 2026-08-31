@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 3 Challenge: Build and Run the "Echo" Agent
 
 ## Goal
@@ -18,6 +20,9 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
 | "12345" | "12345" | "You entered the numbers 1 through 5." |
 
 ## Lab Tasks
+
+<Setup/>
+
 1.  Use the `uv run adk create` command to scaffold a new agent named `echo_agent`. By default, this will create a Python-based project structure:
     ```shell
     uv run adk create echo_agent

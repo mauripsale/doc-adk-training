@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 39.5: Loading and Using Agent Skills
 
 ## Goal
@@ -12,6 +14,9 @@ In this lab, you will create a simple ADK Skill on your file system and configur
 ### Step 1: Create the Project
 
 1.  **Create a new agent project:**
+
+    <Setup/>
+
     ```shell
     uv run adk create skills_agent
     ```

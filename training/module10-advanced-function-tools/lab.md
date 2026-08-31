@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 10: Building a "Memory" Agent with Stateful Tools
 
 ## Goal
@@ -11,12 +13,9 @@ In this lab, you will build an agent that can remember a user's name across mult
 
 ### Step 1: Prepare the Project
 
-We will use the `uv` workflow to initialize our project.
+<Setup/>
 
 ```bash
-uv init memory_agent --python 3.10
-cd memory_agent
-uv add "google-adk>=2.1.0" python-dotenv
 uv run adk create memory_agent
 cd memory_agent
 ```

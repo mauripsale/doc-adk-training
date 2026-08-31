@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 30: Interacting with a Custom Voice Client Challenge
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will run an ADK agent as a backend API server and interact with it using a custom, standalone HTML/JavaScript client, talking to the real `/run_live` WebSocket endpoint with a real Gemini Live API model. This will demonstrate how to build your own voice-enabled applications on top of the ADK's streaming capabilities.
 
 ### Step 1: Prepare the Streaming Agent
+
+<Setup/>
 
 1.  **Create the project directory and agent:**
     ```shell

@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 12: Building a Research Assistant with Web Search Challenge
 
 ## Goal
@@ -14,13 +16,12 @@ In this lab, you will build a **Research Assistant** that can access up-to-date 
 
 ### Step 1: Create and Prepare the Project
 
-We will use the `uv` workflow to initialize our research project.
+<Setup/>
 
-1.  **Initialize the project:**
+1.  **Create the agent project:**
     ```bash
-    uv init research_assistant --python 3.10
+    uv run adk create research_assistant
     cd research_assistant
-    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Configure Authentication:** Ensure your `.env` file has your project ID and location set for Agent Platform.

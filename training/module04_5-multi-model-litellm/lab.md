@@ -3,13 +3,16 @@ sidebar_position: 6
 title: "Challenge Lab"
 ---
 
+import { ChainSetup } from '../_chain-setup-snippet.mdx';
+
 # Lab 4.5 Challenge: Professional Model Configuration, Resiliency & Portability
 
 ## Goal
 In this lab, you will upgrade your **"Support Analyzer"** agent to a production-ready state. You will learn how to implement advanced retry logic using a custom `Gemini` subclass and how to provide a multi-model fallback using `LiteLlm`.
 
 ## Prerequisites
-This lab modifies the `support_analyzer` agent from Module 4, in place -- it's not a fresh project. Starting here instead of continuing from Module 4? You'll need that project first -- `lab-solution.md` in Module 4 has the complete `support_analyzer` code to recreate it, then come back here.
+
+<ChainSetup module={4} project="support_analyzer" />
 
 1.  **Navigate to your `support_analyzer` project and install LiteLLM:**
     ```shell

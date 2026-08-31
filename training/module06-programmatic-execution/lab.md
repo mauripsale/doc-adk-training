@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import { ChainSetup } from '../_chain-setup-snippet.mdx';
+
 # Lab 6: Programmatic Execution: Apps and Runners
 
 ## Goal
@@ -13,11 +15,12 @@ This will teach you the canonical way to execute an agent as part of a larger Py
 
 ### Step 1: Prepare the Project
 
+<ChainSetup module={4} project="support_analyzer" />
+
 1.  **Navigate to your `adk-training/support_analyzer` directory:**
     ```shell
     cd /path/to/your/adk-training/support_analyzer
     ```
-    Starting here instead of continuing from Module 4? You'll need that project first -- `lab-solution.md` in Module 4 has the complete `support_analyzer` code to recreate it, then come back here.
 
 2.  **Create the execution script:**
     In the same directory as your `agent.py`, create a new Python file named `main.py`. This is where you will write the code to run your agent.

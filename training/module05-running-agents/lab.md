@@ -3,12 +3,14 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import { ChainSetup } from '../_chain-setup-snippet.mdx';
+
 # Lab 5: Exploring Different Execution Modes Challenge
 
 ## Goal
 Your task is to run and interact with your **"Support Analyzer"** agent using the three primary execution modes provided by the ADK CLI. **Always run these commands from your main `adk-training` directory.**
 
-Starting here instead of continuing from Module 4? You'll need that project first -- `lab-solution.md` in Module 4 has the complete `support_analyzer` code to recreate it, then come back here.
+<ChainSetup module={4} project="support_analyzer" />
 
 ## Lab Tasks
 1.  **`uv run adk web`:**

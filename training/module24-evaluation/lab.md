@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import { ChainSetup } from '../_chain-setup-snippet.mdx';
+
 # Lab 24: Creating an Evaluation Case for the Calculator Agent Challenge
 
 ## Goal
@@ -11,12 +13,13 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
 
 ### Step 1: Prepare the Agent
 
+<ChainSetup module={9} project="calculator_agent" />
+
 1.  **Navigate to your Calculator Agent directory:**
 
     ```shell
     cd /path/to/your/adk-training/calculator_agent
     ```
-    Starting here instead of continuing from Module 9? You'll need that project first -- `lab-solution.md` in Module 9 has the complete `calculator_agent` code to recreate it, then come back here.
 
 2.  **Ensure your virtual environment is active** and your `.env` file is configured with your API key. Also make sure the evaluation extra is installed — `adk eval` (Step 8) will fail without it:
     ```shell

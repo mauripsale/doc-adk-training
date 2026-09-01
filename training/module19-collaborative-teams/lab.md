@@ -94,8 +94,10 @@ root_agent = Agent(
 2.  **Verify the Flow:**
     - Ask: "I want to go to Tokyo next week."
     - **Observe:** The `travel_planner` should call the `weather_checker`. 
-    - **Observe:** Then it should call the `flight_booker`. The flight booker might ask you "Which airline do you prefer?" or "Do you want a morning flight?". 
-    - **Final Check:** After you answer, notice how control **automatically returns** to the `travel_planner` without any "hand-off" code.
+    - **Observe:** Then it should call the `flight_booker`. The flight booker might ask you "Which airline do you prefer?" or "Do you want a morning flight?". Keep answering -- it may take more than one exchange before it has everything it needs.
+    - **Final Check:** Watch the Trace tab for the turn where `flight_booker` decides it's done: it calls the framework-injected `finish_task` tool, and control **returns to `travel_planner` immediately, within that same turn** -- not on a separate follow-up turn -- with no "hand-off" code written by you. `travel_planner` then presents the final combined plan in that same response.
+
+> **Bonus (optional):** Try rewiring `weather_checker` as an `AgentTool` instead of a `sub_agents` entry: drop `mode="single_turn"`, remove it from `sub_agents`, and instead give `travel_planner` `tools=[AgentTool(agent=weather_agent)]` (import from `google.adk.tools.agent_tool`). Re-run the same request and compare the Trace tab: with `AgentTool` the whole weather lookup happens *inside* `travel_planner`'s own function call -- there's no separate `weather_checker` author entry the way there was with `mode="single_turn"`. Same call-and-return result, different plumbing.
 
 ### Lab Summary
 

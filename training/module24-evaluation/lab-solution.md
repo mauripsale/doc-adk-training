@@ -7,60 +7,93 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the expected output for the `eval_results/calculator_tests.evalset.json` file that is generated during the lab. This demonstrates the structure of a "golden path" test case that can be used for automated regression testing.
+This file contains the expected output for the `calculator_tests.evalset.json` file that is generated during the lab, directly inside the `calculator_agent` directory (not in a separate `eval_results/` folder). This demonstrates the structure of a "golden path" test case that can be used for automated regression testing.
 
-### `eval_results/calculator_tests.evalset.json`
+### `calculator_tests.evalset.json`
 
 ```json
 {
   "eval_set_id": "calculator_tests",
+  "name": "calculator_tests",
   "eval_cases": [
     {
       "eval_id": "addition_test",
       "conversation": [
         {
+          "invocation_id": "e-933e9ee1-7815-4968-8efb-87526500b140",
           "user_content": {
-            "role": "user",
             "parts": [
               {
                 "text": "What is 10 + 5?"
               }
-            ]
+            ],
+            "role": "user"
           },
           "final_response": {
-            "role": "model",
             "parts": [
               {
-                "text": "The result of 10 + 5 is 15."
+                "text": "The sum of 10 and 5 is 15."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "invocation_events": [
+              {
+                "author": "calculator_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-a88c727b-cc15-491e-824e-dce2dd58429c",
+                        "args": {
+                          "a": 10,
+                          "b": 5
+                        },
+                        "name": "add"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
+              {
+                "author": "calculator_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-a88c727b-cc15-491e-824e-dce2dd58429c",
+                        "name": "add",
+                        "response": {
+                          "result": {
+                            "status": "success",
+                            "result": 15.0
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
               }
             ]
           },
-          "intermediate_data": {
-            "tool_uses": [
-              {
-                "name": "add",
-                "args": {
-                  "a": 10,
-                  "b": 5
-                }
-              }
-            ],
-            "tool_responses": [
-              {
-                "name": "add",
-                "response": {
-                  "status": "success",
-                  "result": 15
-                }
-              }
-            ]
-          }
+          "creation_timestamp": 1788247633.650866
         }
-      ]
+      ],
+      "session_input": {
+        "app_name": "calculator_agent",
+        "user_id": "u"
+      },
+      "creation_timestamp": 1788247717.6404831
     }
-  ]
+  ],
+  "creation_timestamp": 1788247708.200742
 }
 ```
+
+(Some noisy fields, such as `thought_signature`, are trimmed here for readability — the real file includes them.)
 
 ### Extra Challenge: `locustfile.py` Template
 
@@ -123,10 +156,10 @@ class ADKAgentUser(HttpUser):
               - name: Install dependencies
                 run: | 
                   pip install --upgrade pip
-                  pip install google-adk
+                  pip install "google-adk[eval]"
                   # Install any agent-specific dependencies
               - name: Run agent evaluations
-                run: uv run adk eval . eval_results/calculator_tests.evalset.json
+                run: PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json
         ```
         If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed. This provides an automated safety net for agent development.
 

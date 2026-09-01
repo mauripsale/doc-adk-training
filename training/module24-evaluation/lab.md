@@ -28,8 +28,10 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
 
 3.  **Start the web server:**
 
+    `agent.py` does `from tools.calculator import ...` — a local package that lives inside `calculator_agent/`. Unlike `adk run` (which adds the current directory to Python's import path automatically), `adk web` does not — without `PYTHONPATH=.` you'll hit `ModuleNotFoundError: No module named 'tools'` the moment you try to chat with the agent. The same is true for `adk eval` later (Step 8), so get in the habit of setting it now:
+
     ```shell
-    uv run adk web calculator_agent
+    PYTHONPATH=. uv run adk web .
     ```
 
 ### Step 2: Record the "Golden Path" Conversation
@@ -62,7 +64,7 @@ Now, let's save this conversation as a reusable test.
 4.  **Inspect the Saved Case:**
     *   You will now see `addition_test` in the list of evaluation cases.
     *   Click on it. The UI will show you the recorded conversation, including the user message, the expected tool calls, and the expected final response. This is the "golden path" that future test runs will be compared against.
-    *   Behind the scenes, the Dev UI has created a file in your agent directory at `eval_results/calculator_tests.evalset.json` containing this test case data. The `eval_results` directory is automatically created by the ADK.
+    *   Behind the scenes, the Dev UI has created a file at `calculator_tests.evalset.json`, directly inside your agent's directory — there is no separate `eval_results/` folder.
 
 ### Step 4: Run the Evaluation
 
@@ -81,7 +83,9 @@ Now that we have a saved test case, we can run it to validate the agent's behavi
 3.  **Analyze the Results:**
     *   The evaluation will run. This involves the ADK running the user message ("What is 10 + 5?") through the agent again and capturing the new results.
     *   You should see a **"Pass"** result appear in the "Evaluation History".
-    *   Click on the "Pass" result to see the details. It will show you that the `tool_trajectory_score` was 1.0 (a perfect match) and the `response_match_score` was also 1.0.
+    *   Click on the "Pass" result to see the details. It will show you that the `tool_trajectory_score` was 1.0 (a perfect match) and the `response_match_score` was also 1.0 for this run.
+
+    > **Note:** LLMs aren't perfectly deterministic. If you re-run this eval later, don't be surprised if `response_match_score` comes back slightly below 1.0 (e.g. the agent says "The sum of 10 and 5 is 15." instead of the recorded "The result of 10 + 5 is 15."). As long as the score stays above the 0.8 threshold, the case still passes — see the Self-Reflection Questions for why this fuzzy matching exists.
 
 ### Step 5: Test a Failure (Optional)
 
@@ -91,7 +95,7 @@ Let's see what a failure looks like.
     *   Stop the `uv run adk web` server (`Ctrl+C`).
     *   Open `tools/calculator.py`.
     *   In the `add` function, change the calculation to `result = a + b + 1`.
-    *   Start the server again: `uv run adk web`.
+    *   Start the server again: `PYTHONPATH=. uv run adk web`.
 
 2.  **Re-run the evaluation:**
     *   Go back to the "Eval" tab.
@@ -122,44 +126,73 @@ In Step 4, we used the default metrics. However, for a production agent, you mig
 
 ### Step 7: Understanding the EvalSet File
 
-When you saved the evaluation case, the ADK created a JSON file in your agent's directory at `eval_results/calculator_tests.evalset.json`. Understanding this file is key to creating more complex tests manually.
+When you saved the evaluation case, the ADK created a JSON file at `calculator_tests.evalset.json`, directly inside your agent's directory. Understanding this file is key to creating more complex tests manually.
 
-The structure looks like this:
+The structure looks like this (some noisy fields like `thought_signature` and generated ids are trimmed here for readability):
 
 ```json
 {
   "eval_set_id": "calculator_tests",
+  "name": "calculator_tests",
   "eval_cases": [
     {
       "eval_id": "addition_test",
       "conversation": [
         {
+          "invocation_id": "e-933e9ee1-7815-4968-8efb-87526500b140",
           "user_content": {
-            "role": "user",
-            "parts": [{ "text": "What is 10 + 5?" }]
+            "parts": [{ "text": "What is 10 + 5?" }],
+            "role": "user"
           },
           "final_response": {
-            "role": "model",
-            "parts": [{ "text": "The result of 10 + 5 is 15." }]
+            "parts": [{ "text": "The sum of 10 and 5 is 15." }],
+            "role": "model"
           },
           "intermediate_data": {
-            "tool_uses": [
+            "invocation_events": [
               {
-                "name": "add",
-                "args": { "a": 10, "b": 5 }
-              }
-            ],
-            "tool_responses": [
+                "author": "calculator_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_call": {
+                        "id": "adk-a88c727b-cc15-491e-824e-dce2dd58429c",
+                        "args": { "a": 10, "b": 5 },
+                        "name": "add"
+                      }
+                    }
+                  ],
+                  "role": "model"
+                }
+              },
               {
-                "name": "add",
-                "response": { "status": "success", "result": 15 }
+                "author": "calculator_agent",
+                "content": {
+                  "parts": [
+                    {
+                      "function_response": {
+                        "id": "adk-a88c727b-cc15-491e-824e-dce2dd58429c",
+                        "name": "add",
+                        "response": { "result": { "status": "success", "result": 15.0 } }
+                      }
+                    }
+                  ],
+                  "role": "user"
+                }
               }
             ]
-          }
+          },
+          "creation_timestamp": 1788247633.650866
         }
-      ]
+      ],
+      "session_input": {
+        "app_name": "calculator_agent",
+        "user_id": "u"
+      },
+      "creation_timestamp": 1788247717.6404831
     }
-  ]
+  ],
+  "creation_timestamp": 1788247708.200742
 }
 ```
 
@@ -169,8 +202,7 @@ The structure looks like this:
 *   **`user_content`**: The user's message for this turn.
 *   **`final_response`**: The expected final text from the agent.
 *   **`intermediate_data`**: This is where the expected **trajectory** is defined.
-    *   **`tool_uses`**: A list of the tools the agent is expected to call, with the exact arguments.
-    *   **`tool_responses`**: The expected results from those tool calls.
+    *   **`invocation_events`**: The raw list of ADK events recorded for this turn. A tool call shows up as an event whose `content.parts` contains a `function_call` (the tool name and arguments); the tool's result shows up in the following event as a `function_response`. This is what `tool_trajectory_avg_score` replays and compares against.
 
 ### Step 8: Running Evaluations from the Command Line
 
@@ -186,12 +218,12 @@ While the Dev UI is great for creating and running evaluations interactively, yo
     From your `calculator_agent` directory, run the following command:
 
     ```shell
-    PYTHONPATH=. uv run adk eval . eval_results/calculator_tests.evalset.json
+    PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json
     ```
-    *   **`PYTHONPATH=.`**: Required so that `agent.py`'s `from tools.calculator import ...` resolves — unlike `adk run`, `adk eval` doesn't add the current directory to Python's import path automatically.
+    *   **`PYTHONPATH=.`**: Required for the same reason as Step 1 — `adk eval` (like `adk web`) doesn't add the current directory to Python's import path automatically, so without it `agent.py`'s `from tools.calculator import ...` fails to resolve.
     *   **`uv run adk eval`**: The main command.
     *   **`.`**: The path to the agent to be tested (the current directory, `calculator_agent`).
-    *   **`eval_results/calculator_tests.evalset.json`**: The path to the evaluation file to run.
+    *   **`calculator_tests.evalset.json`**: The path to the evaluation file to run, relative to the agent directory (this is where the Dev UI actually saved it in Step 3 — not under `eval_results/`).
 
 3.  **Analyze the Output:**
     The command will run the evaluation and print the results directly to your terminal.
@@ -244,7 +276,7 @@ Built-in criteria like `tool_trajectory_avg_score` can't check business-specific
 
 3.  **Run the evaluation, pointing at your config file:**
     ```shell
-    PYTHONPATH=. uv run adk eval . eval_results/calculator_tests.evalset.json --config_file_path eval_config.json
+    PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json --config_file_path eval_config.json
     ```
     Your custom metric now runs alongside the built-in ones in the same report.
 
@@ -270,7 +302,7 @@ Static "Golden Path" cases are great for regression testing, but they can't test
     { "app_name": "calculator_agent", "user_id": "test_user" }
     ```
 
-3.  **Create a new eval set and add the scenario to it.** Unlike the Dev UI (which stores eval sets under `eval_results/`), the `adk eval_set` CLI commands always store them directly in your agent's root directory — so this uses a separate eval set (`user_sim_tests`) rather than mixing locations with `calculator_tests`:
+3.  **Create a new eval set and add the scenario to it.** Just like the Dev UI, the `adk eval_set` CLI commands store eval sets directly in your agent's root directory — so this uses a separate eval set (`user_sim_tests`) rather than mixing dynamic scenarios into `calculator_tests`:
     ```shell
     uv run adk eval_set create . user_sim_tests
     uv run adk eval_set add_eval_case . user_sim_tests \
@@ -278,13 +310,21 @@ Static "Golden Path" cases are great for regression testing, but they can't test
         --session_input_file session_input.json
     ```
 
-4.  **Run the evaluation** against the new eval set:
-    ```shell
-    PYTHONPATH=. uv run adk eval . user_sim_tests.evalset.json
+4.  **Create a `user_sim_eval_config.json`** pointing at reference-free metrics. There's no single "expected" response for a dynamically generated conversation, so the default criteria (`tool_trajectory_avg_score`, `response_match_score`) don't work here — both require an `expected_invocations` reference, and running them against a user-simulation eval set fails with `expected_invocations is required for this metric`. Use metrics that judge the resulting conversation on its own merits instead, like `safety_v1` and `hallucinations_v1`:
+    ```json
+    {
+      "criteria": {
+        "safety_v1": 0.8,
+        "hallucinations_v1": 0.8
+      }
+    }
     ```
-    Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things.
 
-5.  Since there's no single "expected" response for a dynamically generated conversation, pair this with reference-free metrics like `safety_v1` and `hallucinations_v1` rather than `response_match_score`.
+5.  **Run the evaluation** against the new eval set, pointing at your config file:
+    ```shell
+    PYTHONPATH=. uv run adk eval . user_sim_tests.evalset.json --config_file_path user_sim_eval_config.json
+    ```
+    Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things — then the `safety_v1` and `hallucinations_v1` judges score the resulting conversation instead of comparing it against a fixed reference.
 
 ### Extra Challenge: Performance Load Testing with Locust (Optional)
 

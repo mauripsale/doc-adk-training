@@ -32,7 +32,7 @@ This is the mode you've used so far. Let's explore its features more deeply.
     ```
 
 3.  **Explore the Dev UI:**
-    *   Open the UI in your browser (`http://127.0.0.1:8080`).
+    *   Open the UI in your browser (`http://127.0.0.1:8000`).
     *   Select `support_analyzer` from the dropdown menu if it's not already selected.
     *   Have a short conversation with your analyzer agent.
     *   **Trace View:** On the right side of the screen, click on the "Trace" tab. You will see a waterfall diagram. Click on the **Agent** node to expand it. Here you can see the full prompt sent to the Gemini model, including your detailed instruction and the user's message. This view is critical for debugging why an agent behaves a certain way.
@@ -103,7 +103,7 @@ Finally, let's run the agent as a background service. This mode is the foundatio
                    "new_message": {"role": "user", "parts": [{"text": "I can't log in to my account."}]}
                  }'
         ```
-    *   **The Result:** You will see a stream of JSON events. Look for the one where `is_final_response()` would be true if you were consuming this programmatically -- concretely, the event whose `content.parts[0].text` holds the final structured JSON analysis (it also carries `"author": "support_analyzer"` and no `partial: true` flag).
+    *   **The Result:** You will see a stream of JSON events. Look for the one where `is_final_response()` would be true if you were consuming this programmatically -- concretely, the event whose `content.parts[0].text` holds the final structured JSON analysis (it also carries `"author": "support_analyzer_agent"` and no `partial: true` flag).
 
 5.  **Stop the API server:**
     Go back to the first terminal and press `Ctrl+C`.

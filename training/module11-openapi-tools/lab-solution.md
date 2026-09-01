@@ -100,13 +100,14 @@ Always state the amount, the original currency, and the converted currency clear
 
 ### Running the Agent
 
-1.  Make sure your project is initialized and dependencies are installed:
-    ```bash
-    uv init market_analyst --python 3.10
-    cd market_analyst
-    uv add "google-adk>=2.1.0" python-dotenv
+1.  Make sure your `market_analyst` project exists and dependencies are installed. If you followed the steps above, this was already done for you via the `<Setup/>` block (which creates the `adk-training` project and installs `google-adk`/`python-dotenv`) followed by `uv run adk create market_analyst`. If you're picking this lab up fresh, run those two steps first.
+2.  Make sure your `.env` file is configured for Vertex AI (consistent with the rest of the course), not just a bare API key:
     ```
-2.  Make sure your `.env` file contains your `GOOGLE_API_KEY`.
+    GOOGLE_GENAI_USE_VERTEXAI=1
+    GOOGLE_CLOUD_PROJECT=<your_gcp_project>
+    GOOGLE_CLOUD_LOCATION=us-central1
+    ```
+    Make sure you've also run `gcloud auth application-default login` so Application Default Credentials are available. (If you're using a plain Gemini API key instead, set `GOOGLE_API_KEY` in `.env` and omit the Vertex AI variables.)
 3.  Run the interactive terminal:
     ```bash
     uv run adk run .

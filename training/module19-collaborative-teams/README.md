@@ -16,7 +16,7 @@ ADK 2.0 introduces **Collaboration Modes** and **Native Hand-offs** to create fl
 When you add a sub-agent to an `Agent` or `Workflow`, you can specify its **`mode`**. This setting controls how the sub-agent behaves and how it returns control to the parent.
 
 *   **`chat` (Default):** Full multi-turn interaction. The sub-agent keeps control until it explicitly performs another transfer.
-*   **`task`:** The sub-agent can ask the user questions but **automatically returns control** to the parent once its task is complete.
+*   **`task`:** The sub-agent can ask the user questions but **automatically returns control** to the parent once its task is complete -- the model signals "complete" by calling the framework-injected `finish_task` tool, and the moment it does, the return to the parent happens immediately, within that same turn (not on a separate follow-up turn). Until the model calls `finish_task`, the sub-agent stays active across as many turns as it needs.
 *   **`single_turn`:** No user interaction allowed. The sub-agent performs a single reasoning step and returns the result immediately.
 
 ### 2. The Power of `task` Mode
@@ -59,6 +59,7 @@ ADK 2.0 gives you a second, often clearer way to get call-and-return behavior wi
 
 ```python
 from google.adk import Agent
+from google.adk.agents.remote_a2a_agent import RemoteA2aAgent
 from google.adk.tools.agent_tool import AgentTool
 
 # sub_agents, default (chat) mode: hands control to whichever specialist is
@@ -70,10 +71,26 @@ coordinator_handoff = Agent(
     sub_agents=[billing_specialist, tech_specialist],
 )
 
+# preferences_specialist and catalog_specialist are separate services --
+# their own independently-defined agent trees, each running as its own
+# process -- exposed over A2A, not plain local Agent objects. Each
+# RemoteA2aAgent is constructed from the remote service's agent card (a URL
+# or file path is fine; this module doesn't stand up real A2A servers, so
+# treat the URLs below as illustrative).
+preferences_specialist = RemoteA2aAgent(
+    name="preferences_specialist",
+    agent_card="https://preferences-service.example.com/a2a/agent-card.json",
+)
+catalog_specialist = RemoteA2aAgent(
+    name="catalog_specialist",
+    agent_card="https://catalog-service.example.com/a2a/agent-card.json",
+)
+
 # AgentTool: call-and-return, explicit, no mode to configure. The
-# orchestrator can consult BOTH specialists in the same turn and combine
-# their results itself -- and this works identically whether the
-# specialists are local Agents or RemoteA2aAgents.
+# orchestrator can consult BOTH remote specialists in the same turn and
+# combine their results itself. This is the case AgentTool is actually
+# built for: composing several RemoteA2aAgents, which have no
+# framework-injected transfer-back at all.
 orchestrator = Agent(
     name="orchestrator",
     instruction="""
@@ -85,7 +102,9 @@ orchestrator = Agent(
 )
 ```
 
-Picture a shopping assistant that must both check a user's saved preferences *and* search a product catalog before it can answer, where both specialists are `RemoteA2aAgent`s running as separate services. Wired with a bare `sub_agents=[...]` (default, `mode=None`), the orchestrator would transfer to `preferences_specialist`, get its answer -- and get stuck there, with no way to also consult `catalog_specialist` in the same turn: this is verified, reproducible behavior, not a hypothetical -- once `preferences_specialist` is active, there is no `transfer_to_agent` tool available to it at all, so it just answers from its own tools and the turn ends without `catalog_specialist` ever being consulted. `mode="task"` on each `RemoteA2aAgent` would fix that, provided both remote agents implement the `finish_task` signal it requires, but `AgentTool` gets you there without touching `mode`, or asking anything extra of the remote side, at all -- and it reads more naturally when you're composing several remote capabilities like tools. This exact mix-up -- registering multiple specialists via bare `sub_agents` and expecting call-and-return -- is a real, common bug in multi-agent designs: an orchestrator that silently stops after consulting only the first specialist it was supposed to combine.
+For **local** agents specifically, this isn't the recommended pattern: `AgentTool`'s own docstring (in `google/adk/tools/agent_tool.py`) says "direct usage of `AgentTool` is discouraged" for that case and tells you to prefer `mode="single_turn"` on a `sub_agents` entry instead, since the framework then exposes the sub-agent as a tool automatically -- verified live, a local coordinator with two `mode="single_turn"` sub_agents calls both specialists as tools and combines their results in one turn, identically to the `AgentTool` version above. `AgentTool`'s real strength is remote agents, which is why the example above uses `RemoteA2aAgent`.
+
+Picture a shopping assistant that must both check a user's saved preferences *and* search a product catalog before it can answer, where both specialists are `RemoteA2aAgent`s running as separate services (as above). Wired with a bare `sub_agents=[...]` (default, `mode=None`), the orchestrator would transfer to `preferences_specialist`, get its answer -- and get stuck there, with no way to also consult `catalog_specialist` in the same turn: this is verified, reproducible behavior, not a hypothetical -- once `preferences_specialist` is active, there is no `transfer_to_agent` tool available to it at all, so it just answers from its own tools and the turn ends without `catalog_specialist` ever being consulted. `mode="task"` on each `RemoteA2aAgent` would fix that, provided both remote agents implement the `finish_task` signal it requires, but `AgentTool` gets you there without touching `mode`, or asking anything extra of the remote side, at all -- and it reads more naturally when you're composing several remote capabilities like tools. This exact mix-up -- registering multiple specialists via bare `sub_agents` and expecting call-and-return -- is a real, common bug in multi-agent designs: an orchestrator that silently stops after consulting only the first specialist it was supposed to combine.
 
 ### Why use Collaborative Teams?
 
@@ -97,4 +116,4 @@ Picture a shopping assistant that must both check a user's saved preferences *an
 - **Collaboration Modes** (`chat`, `task`, `single_turn`) manage sub-agent lifecycle.
 - **`mode="task"`** is the standard for delegation where you want the specialist to finish and "come back" to the main flow.
 - The framework handles the low-level tool injection (`request_task_...`) automatically.
-- **`sub_agents` vs. `AgentTool`:** a bare `sub_agents` entry (default `chat` mode) hands control to one agent at a time with no *automatic* return -- fine when delegation is meant to be final, and for **local** agents still reversible any time the active agent decides to transfer back (parent and peers are valid transfer targets by default). `mode="task"`/`"single_turn"` makes that return automatic for local sub-agents. For **remote** (`RemoteA2aAgent`) specialists, plain `sub_agents` has no framework-injected way back at all within a turn -- `mode="task"` is the only escape, and it requires the remote side to implement a `finish_task` signal -- so `AgentTool` is the natural choice for composing several remote capabilities that need to be consulted together.
+- **`sub_agents` vs. `AgentTool`:** a bare `sub_agents` entry (default `chat` mode) hands control to one agent at a time with no *automatic* return -- fine when delegation is meant to be final, and for **local** agents still reversible any time the active agent decides to transfer back (parent and peers are valid transfer targets by default). `mode="task"`/`"single_turn"` makes that return automatic for local sub-agents, and `AgentTool`'s own docstring says to prefer `mode="single_turn"` there instead of wrapping a local agent in `AgentTool` directly. For **remote** (`RemoteA2aAgent`) specialists, plain `sub_agents` has no framework-injected way back at all within a turn -- `mode="task"` is the only escape, and it requires the remote side to implement a `finish_task` signal -- so `AgentTool` is the natural choice for composing several remote capabilities that need to be consulted together.

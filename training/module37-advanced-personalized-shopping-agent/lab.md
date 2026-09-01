@@ -133,6 +133,8 @@ This agent will be the interface to the e-commerce website.
 
     # TODO: import search from tools.search and click from tools.click
 
+    load_dotenv()
+
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="web_agent",
@@ -162,7 +164,7 @@ This agent will be the interface to the e-commerce website.
 ---
 
 ### Exercise 2: Build and Expose the Personalization Agent
-This agent will be responsible for remembering user preferences.
+This agent will be responsible for remembering user preferences. **Note:** this works reliably when you talk to `personalization_agent` directly. When you get to Exercise 3 and put it behind the orchestrator, keep an eye out for a real limitation you'll be asked to observe for yourself — see the callout at the end of Exercise 3.
 
 1.  **Create the `personalization_agent` project** (programmatic).
     ```shell
@@ -192,7 +194,10 @@ This agent will be responsible for remembering user preferences.
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
     from google.adk.tools import ToolContext
+    from dotenv import load_dotenv
     import uvicorn
+
+    load_dotenv()
 
     # --- Stateful Tools ---
     # IMPORTANT: use tool_context.state (the tracked delta proxy), NOT
@@ -305,6 +310,8 @@ This is the main, user-facing agent that will coordinate the others.
     cd ..
     ```
 
+> **Known limitation to observe:** once you get to "Running the System" below, try this: ask the orchestrator to save a preference, then — in a **separate follow-up message of the same conversation** — ask it what preferences it has saved for you. You'll find it comes back empty, even though the exact same request sent straight to `personalization_agent` (bypassing the orchestrator) works fine across turns. This is a real, verified limitation of the current ADK 2.8.0 A2A stack, not a bug in your code: `AgentTool` creates and discards a brand-new session on every single call, which breaks `RemoteA2aAgent`'s mechanism for resuming the same remote conversation (it looks for context left behind in session history that no longer exists by the next turn). See the README's "Known Limitation" section for the full technical explanation and what we checked for a fix. It's worth understanding this kind of constraint — distributed multi-agent systems have real seams like this one.
+
 ---
 
 ### Exercise 4: Add Multimodal Vision
@@ -359,6 +366,7 @@ This is a complex lab with multiple deployments. It is crucial to delete the res
 - This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?
 - The `orchestrator_agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?
 - The `web_agent` abstracts the website behind plain `search`/`click` functions. Why is this a better design than having the orchestrator directly interact with the raw HTML (or internal implementation) of the website?
+- You observed that preferences don't survive across separate orchestrator turns, even though the same request sent directly to `personalization_agent` works. Walk through *why*, in terms of what `AgentTool` does to the session on every call. What would you need to change about the wiring (not just the prompt) to fix it?
 
 <hr/>
 

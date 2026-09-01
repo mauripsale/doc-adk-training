@@ -8,7 +8,7 @@ import { ChainSetup } from '../_chain-setup-snippet.mdx';
 # Lab 4.5 Challenge: Professional Model Configuration, Resiliency & Portability
 
 ## Goal
-In this lab, you will upgrade your **"Support Analyzer"** agent to a production-ready state. You will learn how to implement advanced retry logic using a custom `Gemini` subclass and how to provide a multi-model fallback using `LiteLlm`.
+In this lab, you will upgrade your **"Support Analyzer"** agent to a production-ready state, in place -- keeping its Module 4 structured-output contract (`SupportAnalysis`, `output_schema`, `output_key`) fully working. You will learn how to implement advanced retry logic using a custom `Gemini` subclass and how to provide a multi-model fallback using `LiteLlm`, layered on top of the agent you already built.
 
 ## Prerequisites
 
@@ -33,20 +33,30 @@ In this lab, you will upgrade your **"Support Analyzer"** agent to a production-
     *   If the environment variable `USE_LOCAL_MODEL` is set to `"1"`, use `LiteLlm` with `ollama_chat/mistral`.
     *   Otherwise, use your new `ResilientGemini` class.
 
-3.  **Verify the Configuration:**
+3.  **Keep the Module 4 structured output intact:**
+    *   Your `SupportAnalysis` Pydantic model, `output_schema=SupportAnalysis`, and `output_key="last_ticket_analysis"` from Module 4 should still be set on `root_agent` -- you're only changing *which model* powers the agent, not the fact that it returns structured JSON.
+
+4.  **Verify the Configuration:**
     *   Run the agent using `uv run adk run support_analyzer`.
-    *   Verify it works as expected. (Note: You won't "see" the retries unless a network error occurs, but your code is now protected!).
+    *   Verify it still returns a schema-conforming JSON response, exactly like it did at the end of Module 4. (Note: You won't "see" the retries unless a network error occurs, but your code is now protected!).
 
 ### Python Approach (Primary)
-Modify `agent.py` to use the advanced configuration patterns.
+Modify `agent.py` to use the advanced configuration patterns, on top of the `SupportAnalysis` schema you already built in Module 4.
 
 ```python
 import os
 from functools import cached_property
+from pydantic import BaseModel
 from google.adk import Agent
 from google.adk.models import Gemini
 from google.adk.models.lite_llm import LiteLlm
 from google.genai import Client, types
+
+# Carried over from Module 4 -- keep this working!
+class SupportAnalysis(BaseModel):
+    category: str
+    sentiment: str
+    summary: str
 
 # TODO: Step 1 - Define the ResilientGemini subclass
 class ResilientGemini(Gemini):
@@ -66,7 +76,9 @@ else:
 root_agent = Agent(
     name="support_analyzer_agent",
     model=model_to_use,
-    instruction="Analyze customer support issues."
+    instruction="Analyze customer support issues.",
+    output_schema=SupportAnalysis,  # TODO: Keep this from Module 4
+    output_key="last_ticket_analysis",  # TODO: Keep this from Module 4
 )
 ```
 

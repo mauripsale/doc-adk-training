@@ -20,12 +20,13 @@ In this lab, you will build an agent that can retrieve live currency exchange ra
     uv run adk create market_analyst
     cd market_analyst
     ```
+    > **Note:** `adk create` prompts you interactively to choose a model and backend. If this course's target model isn't in the numbered list, choose the **"Other models (fill later)"** option and set the model manually afterward (in `agent.py`, and in `.env` if you're using an API key) rather than picking a model you don't intend to use.
 
 2.  **Set up your API key** in the `.env` file for the Gemini model. (The Frankfurter Currency API we are using is completely free and requires no authentication).
 
 ### Step 2: Define the OpenAPI Specification
 
-**Exercise:** Open `agent.py`. A skeleton for the OpenAPI specification is provided below. Your task is to complete the spec for the `/latest` endpoint's `get` operation. You can deduce the necessary parameters from the Frankfurter API documentation (or the theory section).
+**Exercise:** Open the generated `agent.py`. `adk create` scaffolds it with generic boilerplate, not this lab's code -- replace the *entire contents* of the file with the skeleton below. Your task is to complete the spec for the `/latest` endpoint's `get` operation. You can deduce the necessary parameters from the Frankfurter API documentation (or the theory section).
 
 ```python
 # In agent.py

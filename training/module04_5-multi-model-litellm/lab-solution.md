@@ -7,19 +7,26 @@ title: "Lab Solution"
 
 ## Goal
 
-In this lab, you learned how to transition from simple string-based model selection to a professional, enterprise-grade configuration using `Gemini` subclasses and `LiteLlm` abstractions.
+In this lab, you learned how to transition from simple string-based model selection to a professional, enterprise-grade configuration using `Gemini` subclasses and `LiteLlm` abstractions -- while keeping the Module 4 structured-output contract (`SupportAnalysis`, `output_schema`, `output_key`) fully intact. The model-resiliency features and the structured-output feature are independent and layer on top of each other cleanly.
 
 ### `support_analyzer/agent.py`
 
-Here is the complete code implementing the resilient subclass and the multi-model fallback logic:
+Here is the complete code implementing the resilient subclass and the multi-model fallback logic, built on top of the `SupportAnalysis` schema from Module 4:
 
 ```python
 import os
 from functools import cached_property
+from pydantic import BaseModel
 from google.adk import Agent
 from google.adk.models import Gemini
 from google.adk.models.lite_llm import LiteLlm
 from google.genai import Client, types
+
+# Structured output schema (carried over from Module 4)
+class SupportAnalysis(BaseModel):
+    category: str
+    sentiment: str
+    summary: str
 
 # Step 1: Define the ResilientGemini subclass
 class ResilientGemini(Gemini):
@@ -53,10 +60,17 @@ else:
 root_agent = Agent(
     name="support_analyzer_agent",
     model=model_to_use,
+    description="An agent that categorizes customer support tickets and extracts sentiment.",
     instruction="""
-        You are a customer support analyzer. 
-        Analyze the incoming ticket and provide a structured JSON response.
-    """
+      You are an expert customer support analyzer. Your task is to:
+      1. Determine the category of the user's issue ("billing", "technical", or "general").
+      2. Analyze the sentiment of the message ("positive", "negative", or "neutral").
+      3. Write a concise, 1-sentence summary of the user's issue.
+
+      You MUST respond only with a JSON object matching the requested schema. Do not try to solve their problem.
+    """,
+    output_schema=SupportAnalysis,  # Keep the Module 4 structured-output contract
+    output_key="last_ticket_analysis",  # Automatically save the JSON to session state
 )
 ```
 
@@ -65,6 +79,7 @@ root_agent = Agent(
 1.  **Centralization via Subclassing:** By creating `ResilientGemini`, you avoid repeating complex `HttpRetryOptions` for every agent in your codebase. If you need to change the region from `us-central1` to `global`, you only update it in one place.
 2.  **The Thundering Herd Problem:** By adding `jitter=0.5`, you ensure that if multiple agent requests fail at the same time, they won't all retry at the exact same millisecond, which helps prevent overwhelming your API backend.
 3.  **Environment-Driven Architecture:** Using `os.getenv("USE_LOCAL_MODEL")` makes your code highly portable. You can run it on your laptop using Ollama and then deploy it to the cloud without changing a single line of code—only the environment variables change.
+4.  **Model Configuration Is Orthogonal to Output Structure:** Notice that `output_schema` and `output_key` are set on the `Agent` itself, not on the model. This is why swapping `model_to_use` between `ResilientGemini` and `LiteLlm` has no effect on the structured-output behavior you built in Module 4 -- the agent still validates and stores the `SupportAnalysis` JSON in `last_ticket_analysis` regardless of which model backend answers the request.
 
 ### Self-Reflection Answers
 

@@ -1,9 +1,6 @@
 {
   "name": "Google ADK Training (From Zero to Hero)",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "features": {
-    "ghcr.io/devcontainers/features/google-cloud-cli:1": {}
-  },
   "customizations": {
     "vscode": {
       "settings": {

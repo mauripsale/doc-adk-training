@@ -18,6 +18,8 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
 
 ### Step 1: Create and Prepare the Project
 
+> **Note:** unlike other modules, `visual_catalog` must live directly inside this module's own folder (`module07-multimodal-and-images/`) rather than in your shared `adk-training` project -- see point 3 below for why. If this is the first agent you're creating from inside this folder, set up a local environment here first: `uv init --python 3.10 && uv add "google-adk>=2.1.0" python-dotenv`.
+
 1.  **Create the agent project:**
     ```shell
     uv run adk create visual_catalog
@@ -26,11 +28,7 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
     ```shell
     cd visual_catalog
     ```
-3.  **Install Dependencies:**
-    This lab requires the `Pillow` library for image handling.
-    ```shell
-    pip install Pillow
-    ```
+3.  **Sample images:** two sample product photos, `headphones.jpg` and `laptop.jpg`, are already provided in this module's folder (`module07-multimodal-and-images/`), one level up from `visual_catalog/`. That's why you must create `visual_catalog` directly inside this module's folder (as done in step 1 above) — the script below loads them with a relative `../` path. Feel free to swap in your own images later, as long as the filenames match.
 4.  **Set up your `.env` file.**
     Vision models require a Vertex AI configuration. Ensure your `.env` file looks like this:
     ```text
@@ -47,12 +45,16 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
 
 ```python
 import asyncio
+import logging
 import os
 from google.adk import Agent
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 from dotenv import load_dotenv
+
+# Optional: Suppress noisy ADK/httpx logs
+logging.getLogger("google.adk").setLevel(logging.WARNING)
 
 # Helper function to load an image from a local file path
 def load_image_from_file(path: str) -> types.Part:
@@ -130,11 +132,15 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
+> **Cleanup:** Unlike other modules, this lab's project was created directly inside `module07-multimodal-and-images/` (the actual course repo folder) rather than in your separate `adk-training` scratch directory. Once you're done, delete `visual_catalog/`, `.venv/`, `pyproject.toml`, and `uv.lock` from inside this module's folder so they don't accidentally get committed to the repo.
+
 ### Lab Summary
 You have successfully built a multimodal agent! You have learned:
 *   How to package image bytes into a `types.Part` object.
 *   The importance of explicitly creating a **Session** when using `run_async` programmatically.
 *   How to construct a structured `types.Content` object for complex inputs.
+
+This completes **Part 1: Foundations**. You now know how to build, configure, run, and feed multimodal input to an agent. In Part 2, you'll start extending your agent's capabilities with tools.
 
 ### Self-Reflection Questions
 - Why did we have to call `create_session` manually this time, whereas in Module 6's `run_debug` we didn't?

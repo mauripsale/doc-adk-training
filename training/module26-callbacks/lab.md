@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Module 26: Callbacks and Guardrails - Building a Content Moderator
 
 ## Lab 26: Building a Content Moderation Assistant with Caching
@@ -12,6 +14,8 @@ title: "Challenge Lab"
 In this lab, you will implement a suite of callbacks to create a **Content Moderation Assistant**. You will learn to build safety guardrails, validate tool arguments, filter responses, and, crucially, implement a **Caching mechanism** using `before_agent_callback` to save tokens and time.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create the agent project:**
     ```shell
@@ -25,9 +29,10 @@ In this lab, you will implement a suite of callbacks to create a **Content Moder
 
 ### Step 2: Implement the Callbacks
 
-**Exercise:** Open `agent.py`. Your task is to implement the logic for the five core callbacks. Use the `# TODO` comments as your guide.
+**Exercise:** Open `agent.py`. Your task is to implement the logic for the six core callbacks. Use the `# TODO` comments as your guide.
 
 ```python
+import hashlib
 import os
 import re
 import logging
@@ -50,12 +55,26 @@ BLOCKED_WORDS = ['unsafe', 'offensive']
 # CALLBACK FUNCTIONS
 # ============================================================================
 
+def _cache_key(callback_context: CallbackContext) -> str:
+    """
+    TODO: Helper.
+    A cache keyed by a single global name (e.g. 'cached_response') would
+    return the SAME cached answer no matter what the user asks next — you
+    must derive the key from the CURRENT turn's user input instead.
+    Use callback_context.get_invocation_context().user_content to get the
+    current user message (a types.Content), concatenate its parts' text,
+    and hash it (e.g. hashlib.md5(...).hexdigest()) into a key such as
+    f"cache:{digest}".
+    """
+    pass
+
 def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
     """
     TODO: Caching (Check).
-    Read 'cached_response' from callback_context.state. If present, print a
-    cache-hit message and return a types.Content wrapping it (role="model")
-    to skip the LLM entirely. Otherwise return None.
+    Compute this turn's cache key with _cache_key() and read it from
+    callback_context.state. If present, print a cache-hit message and
+    return a types.Content wrapping it (role="model") to skip the LLM
+    entirely. Otherwise return None.
     """
     pass
 
@@ -64,7 +83,10 @@ def after_agent_callback(callback_context: CallbackContext) -> None:
     TODO: Caching (Save).
     Walk callback_context.session.events in reverse to find the last
     non-user event with content, and save its text into
-    callback_context.state['cached_response'] for future reuse.
+    callback_context.state[_cache_key(callback_context)] for future reuse.
+    Using the same per-input key as before_agent_callback is essential —
+    otherwise a later, unrelated question would incorrectly hit the cache
+    entry saved for a previous, different question.
     """
     pass
 
@@ -89,6 +111,9 @@ def after_model_callback(
     TODO: Output Filtering.
     Use re.sub to redact email addresses from the LLM response text.
     If redacted, return a new LlmResponse; otherwise return None.
+    Note: llm_response.content.parts[0].text can be None — the model's
+    response may be a pure function call (e.g. deciding to invoke
+    generate_text) with no text to filter. Guard against that first.
     """
     pass
 
@@ -105,6 +130,22 @@ def before_tool_callback(
     """
     pass
 
+def after_tool_callback(
+    tool: BaseTool,
+    args: Dict[str, Any],
+    tool_context: ToolContext,
+    tool_response: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    """
+    TODO: Output Audit.
+    If tool.name == 'generate_text', check tool_response['text'] against
+    BLOCKED_WORDS (defense-in-depth, in case the model injects one via
+    arguments). If found, print a warning and return a modified copy of
+    tool_response with the blocked words replaced by '***'. Otherwise,
+    print an audit log line (e.g. tool name + status) and return None.
+    """
+    pass
+
 # --- Tools ---
 def generate_text(topic: str, word_count: int) -> dict:
     """Generates text on a topic."""
@@ -114,7 +155,7 @@ def generate_text(topic: str, word_count: int) -> dict:
 # AGENT DEFINITION
 # ============================================================================
 
-# TODO: Define root_agent and register ALL five callbacks defined above.
+# TODO: Define root_agent and register ALL six callbacks defined above.
 root_agent = Agent(
     name="secure_moderator",
     model="gemini-3.5-flash",
@@ -125,12 +166,13 @@ root_agent = Agent(
     # before_model_callback=...,
     # after_model_callback=...,
     # before_tool_callback=...,
+    # after_tool_callback=...,
 )
 ```
 
 ### Step 3: Run and Test
 
-Start the agent and try both paths: a normal prompt (should reach the model), and a prompt containing a blocked word like "unsafe" (should be refused by `before_model_callback` without ever calling the model). Then repeat the same prompt in the same session — `before_agent_callback` should return the cached response instantly.
+Start the agent and try both paths: a normal prompt (should reach the model), and a prompt containing a blocked word like "unsafe" (should be refused by `before_model_callback` without ever calling the model). Then repeat the same prompt in the same session — `before_agent_callback` should return the cached response instantly. Finally, ask a *different* question in the same session — this should NOT return the previous answer; it should call the LLM again and get a fresh, correct response. This third check is what actually proves the cache is keyed per-question rather than one global slot for the whole session.
 
 ```shell
 uv run adk run content_moderator

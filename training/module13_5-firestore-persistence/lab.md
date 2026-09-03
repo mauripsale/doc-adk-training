@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 13.5: Extending ADK with Custom Firestore Persistence
 
 ## Goal
@@ -16,6 +18,9 @@ By the end of this lab, you will have an agent that persists its memory to Googl
 1.  **Enable Firestore:** In the GCP Console, ensure you have a Firestore database in **Native mode**.
 2.  **Auth:** `gcloud auth application-default login`
 3.  **Dependencies:**
+
+    <Setup/>
+
     ```bash
     uv add google-cloud-firestore
     ```
@@ -28,6 +33,7 @@ Create a file named `firestore_provider.py`. This contains the implementation th
 # firestore_provider.py
 from typing import Any, Optional
 import uuid
+import time
 from google.cloud import firestore
 from google.adk.sessions.base_session_service import BaseSessionService, GetSessionConfig, ListSessionsResponse
 from google.adk.sessions.session import Session
@@ -39,27 +45,81 @@ class FirestoreSessionService(BaseSessionService):
 
     async def create_session(self, *, app_name: str, user_id: str, state: Optional[dict] = None, session_id: Optional[str] = None) -> Session:
         sid = session_id or str(uuid.uuid4())
-        # Simplified for the lab: logic to save to apps/{app}/users/{user}/sessions/{sid}
-        # In a real app, you would perform an initial write here.
-        return Session(id=sid, app_name=app_name, user_id=user_id, state=state or {})
+        # Reference: apps/{app}/users/{user}/sessions/{sid}
+        session_ref = self._client.collection("apps").document(app_name)\
+            .collection("users").document(user_id)\
+            .collection("sessions").document(sid)
 
-    async def get_session(self, config: GetSessionConfig) -> Optional[Session]:
-        # Logic to retrieve session and its events from Firestore
-        pass # Implementation details hidden for brevity
+        # Check if exists, else create
+        doc = await session_ref.get()
+        if not doc.exists:
+            await session_ref.set({
+                "created_at": time.time(),
+                "state": state or {}
+            })
 
-    async def append_event(self, event: Event, session: Session) -> None:
-        # Logic to write a new event to the Firestore sub-collection
-        print(f"🔥 [Firestore] Appending event: {event.author}")
+        return Session(id=sid, app_name=app_name, user_id=user_id, state=doc.to_dict().get("state", {}) if doc.exists else (state or {}))
+
+    async def get_session(self, *, app_name: str, user_id: str, session_id: str, config: Optional[GetSessionConfig] = None) -> Optional[Session]:
+        session_ref = self._client.collection("apps").document(app_name)\
+            .collection("users").document(user_id)\
+            .collection("sessions").document(session_id)
+        doc = await session_ref.get()
+        if not doc.exists:
+            return None
+
+        # Rebuild the event history from the events sub-collection -- this is
+        # what actually gives the agent its memory across separate script
+        # runs. Returning state alone (without events) isn't enough: the
+        # model recalls prior turns from conversation history, not just the
+        # state dict.
+        events = []
+        async for event_doc in session_ref.collection("events").order_by("timestamp").stream():
+            events.append(Event.model_validate(event_doc.to_dict()))
+
+        return Session(
+            id=session_id,
+            app_name=app_name,
+            user_id=user_id,
+            state=doc.to_dict().get("state", {}),
+            events=events,
+        )
+
+    async def append_event(self, session: Session, event: Event) -> Event:
+        # Let the base implementation apply event.actions.state_delta to
+        # session.state in-memory first (it also handles temp-scoped state
+        # and trims it before we persist) -- without this, state changes are
+        # silently dropped: they'd never make it past this method.
+        event = await super().append_event(session=session, event=event)
+
+        # Save event to sub-collection
+        event_ref = self._client.collection("apps").document(session.app_name)\
+            .collection("users").document(session.user_id)\
+            .collection("sessions").document(session.id)\
+            .collection("events").document(event.invocation_id)
+
+        await event_ref.set(event.model_dump())
+        print(f"🔥 [Firestore] Persisted event from {event.author}")
+
+        # Persist the now-updated state too, so a fresh get_session() call
+        # (e.g. from a new process) sees it.
+        await self.update_session_state(session)
+        return event
 
     async def update_session_state(self, session: Session) -> None:
-        # Logic to update the session document with current state
-        print(f"🔥 [Firestore] Syncing state for session: {session.id}")
+        # Update the main session document's state
+        session_ref = self._client.collection("apps").document(session.app_name)\
+            .collection("users").document(session.user_id)\
+            .collection("sessions").document(session.id)
+
+        await session_ref.update({"state": session.state})
+        print(f"🔥 [Firestore] Updated session state in cloud.")
 
     # Mandatory stubs for BaseSessionService
-    async def list_sessions(self, app_name: str, user_id: str) -> ListSessionsResponse:
+    async def list_sessions(self, *, app_name: str, user_id: Optional[str] = None) -> ListSessionsResponse:
         return ListSessionsResponse(sessions=[])
 
-    async def delete_session(self, app_name: str, user_id: str, session_id: str) -> None:
+    async def delete_session(self, *, app_name: str, user_id: str, session_id: str) -> None:
         pass
 ```
 
@@ -126,5 +186,5 @@ Looking for the solution? Here's a hint (Base64 decode me):
 `L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMTNfNS1maXJlc3RvcmUtcGVyc2lzdGVuY2UvbGFiLXNvbHV0aW9u`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module13.5-firestore-persistence/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
+    The direct link is: <a href="/doc-adk-training/module13_5-firestore-persistence/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
 </div>

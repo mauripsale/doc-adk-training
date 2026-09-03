@@ -26,11 +26,11 @@ The ADK is an open-source project with repositories on GitHub. These repositorie
 
 1.  **Find the ADK Python Repository:** Search on Google or GitHub for "Google ADK Python".
 2.  **Verify the Version:** Check the latest releases. You should see references to **ADK 2.0 GA** or higher.
-3.  **Explore the `examples` directory:** Look for samples that use the `Workflow` class. Navigating into `contributing/samples/hello_world` is still a great starting point, but notice how it now uses the `App` and `Runner` pattern.
-4.  **Examine the Code:** Click on the Python files (`agent.py` and `main.py`). Read through the code and the comments. Try to connect what you see in the code with the concepts you skimmed in the documentation (e.g., creating an `Agent`).
+3.  **Explore the `examples` directory:** Look for samples that use the `Workflow` class. Navigating into `contributing/samples/core/hello_world` is still a great starting point, but notice how it now uses the `Runner` pattern.
+4.  **Examine the Code:** Click on `agent.py` and read through `README.md`. Try to connect what you see in the code with the concepts you skimmed in the documentation (e.g., creating an `Agent`). Note that this sample doesn't ship a standalone `main.py` — instead, the README's "Running and Inspecting the Agent Programmatically" section shows the entry-point pattern inline.
 
 ***Scavenger Hunt!***
-> Find the `hello_world` example and identify the name of the main function used to run the agent.
+> Find the `hello_world` example and identify the class and method used to actually run the agent programmatically (hint: look at the code sample in the README, not a separate script file).
 
 **Key Takeaway:** The official examples are the best place to find working code that you can learn from and adapt for your own projects.
 

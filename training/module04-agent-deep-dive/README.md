@@ -30,16 +30,16 @@ While the `name` and `model` are essential, the **`instruction`** parameter is w
 A well-crafted instruction tells the agent:
 
 *   **Its Persona:** How should it behave? Is it a formal assistant, a witty pirate, a helpful teacher?
-    *   *Example:* `"You are a cheerful and enthusiastic assistant."*
+    *   *Example:* `"You are a cheerful and enthusiastic assistant."`
 *   **Its Core Goal:** What is its primary function?
-    *   *Example:* `"Your main goal is to help users find information about movies."*
+    *   *Example:* `"Your main goal is to help users find information about movies."`
 *   **Its Constraints and Rules:** What should it *not* do? Are there topics it should avoid?
-    *   *Example:* `"You must never give financial advice. If asked, politely decline."*
+    *   *Example:* `"You must never give financial advice. If asked, politely decline."`
     *   **Production Readiness:** Defining clear constraints is a critical practice for ensuring the safety and reliability of an agent in a production environment.
 *   **Its Process:** If the task involves multiple steps, you can outline them.
-    *   *Example:* `"First, ask the user for their location. Second, find the weather for that location. Third, report the weather to the user."*
+    *   *Example:* `"First, ask the user for their location. Second, find the weather for that location. Third, report the weather to the user."`
 *   **Its Output Format:** How should it format its responses?
-    *   *Example:* `"Always present your final answer as a JSON object with a 'result' key."*
+    *   *Example:* `"Always present your final answer as a JSON object with a 'result' key."`
 
 ### Tips for Effective Instructions (Prompt Engineering)
 
@@ -117,7 +117,7 @@ analyzer_agent = Agent(
     output_schema=SentimentOutput # Force JSON output
 )
 ```
-**CRITICAL LIMITATION:** When `output_schema` is set, the agent **cannot use tools** or perform **Agent Transfers** (delegation). Use it for data extraction, classification, or formatting tasks where reasoning is the final step.
+**Note:** ADK 2.0 supports using `output_schema` and `tools` together -- the agent can still call tools during its thought loop, and structure is only enforced on the final output. `output_schema` is best suited for data extraction, classification, or formatting tasks where the final answer needs a strict shape.
 
 #### 2. Passing Data with `output_key`
 The `output_key` parameter (a string) tells the ADK to take the final text of the agent's response and save it automatically into the session state dictionary (`ctx.session.state`).
@@ -133,5 +133,5 @@ This is essential for building multi-agent systems where one agent's output is n
 ### Key Takeaways
 - The **`Agent`** class is the "brain" of an ADK 2.0 application.
 - The `instruction` parameter is the most powerful tool for controlling behavior.
-- **`output_schema`**: Enforces strict JSON output via Pydantic (disables tools/transfers).
+- **`output_schema`**: Enforces strict JSON output via Pydantic on the final response -- the agent can still call tools during its thought loop; only the final answer is constrained to the schema.
 - **`output_key`**: Automatically saves the agent's response into the session state for cross-node data passing.

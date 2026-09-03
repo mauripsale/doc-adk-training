@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import { ChainSetup } from '../_chain-setup-snippet.mdx';
+
 # Lab 6: Programmatic Execution: Apps and Runners
 
 ## Goal
@@ -12,6 +14,8 @@ In this lab, you will move beyond the CLI and trigger your **"Support Analyzer"*
 This will teach you the canonical way to execute an agent as part of a larger Python application (like a web server or a bot).
 
 ### Step 1: Prepare the Project
+
+<ChainSetup module={4} project="support_analyzer" />
 
 1.  **Navigate to your `adk-training/support_analyzer` directory:**
     ```shell

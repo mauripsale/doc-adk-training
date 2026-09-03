@@ -37,7 +37,7 @@ In ADK 1.x, you were taught to catch all exceptions in tools. In ADK 2.0, you sh
 2.  **Human-in-the-Loop (HITL):** Broad `except Exception:` blocks can accidentally trap `NodeInterruptedError`, which the framework uses to pause workflows for user input.
 
 #### Configuring Retries
-You can configure retry logic globally or per-node in your Workflow:
+You configure retry logic per-node, on the node itself (either as a constructor argument like `Agent(..., retry_config=...)`, or via `@node(retry_config=...)` for function nodes):
 
 ```python
 from google.adk.workflow import RetryConfig
@@ -48,6 +48,8 @@ my_agent_node = Agent(
     retry_config=RetryConfig(max_attempts=3, initial_delay=2.0)
 )
 ```
+
+**Important:** `retry_config` does not cascade from a container to the nodes inside it. Setting `retry_config` on a `Workflow(...)` only governs retries of that `Workflow` *as a node* (relevant if it's nested inside a parent graph) — it has no effect on the nodes in its own `edges`. If you want a specific node inside a `Workflow` to retry, put `retry_config` directly on that node.
 
 ### 3. Performance Optimization
 

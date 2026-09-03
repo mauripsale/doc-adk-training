@@ -45,7 +45,7 @@ When you run this command, it performs a series of steps behind the scenes:
 
 The result is a publicly accessible HTTPS endpoint for your agent, all from a single command. This streamlined process allows you to focus on building your agent's logic, not on the complexities of cloud infrastructure.
 
-In the lab for this module, you will use the `uv run adk deploy cloud_run` command to deploy the multi-agent customer support system you built in Module 15.
+In the lab for this module, you will use the `uv run adk deploy cloud_run` command to deploy the multi-agent customer support system you'll build in this lab.
 
 ### Key Takeaways
 - **Deployment** is the process of packaging an agent into a **container** and running it on a production server.

@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 13: Building a Secure Agent with HITL and Actions
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will build a **Secure Finance Agent**. You will learn how to implement **Human-in-the-Loop (HITL)** for sensitive transactions and how to use **`tool_context.actions`** to dynamically escalate a conversation to a supervisor node.
 
 ### Step 1: Prepare the Project
+
+<Setup/>
 
 ```bash
 uv run adk create secure_finance
@@ -48,7 +52,7 @@ def execute_investment(amount: float, tool_context: ToolContext) -> str:
 # In agent.py
 from google.adk import Agent, Workflow
 from google.adk.tools import FunctionTool
-from tools.finance import execute_investment
+from .tools.finance import execute_investment
 
 # --- 1. Define the Supervisor Node ---
 supervisor = Agent(
@@ -86,7 +90,7 @@ root_agent = Workflow(
     - **Observe:** A confirmation box should appear. The code only runs if you click "Approve."
 3.  **Test Dynamic Transfer:**
     - Ask: "Invest $50,000 for me."
-    - **Observe:** The tool should trigger an escalation. In the Trace, you will see the `active_agent` change from `finance_agent` to `supervisor`.
+    - **Observe:** Since `require_confirmation=True` wraps the tool unconditionally, you will see the *same* confirmation pop-up as above first — click "Approve" to let the tool actually run. Only then does the escalation logic inside `execute_investment` fire. In the Trace, you will see the `active_agent` change from `finance_agent` to `supervisor`.
 
 ### Lab Summary
 

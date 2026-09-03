@@ -2,6 +2,8 @@
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Module 22: State and Memory - Building a Personal Tutor Agent
 
 ## Lab 22: Building a Personal Learning Tutor
@@ -23,11 +25,13 @@ You will build a tutor that:
 
 ### Step 1: Create the Project Structure
 
+<Setup/>
+
 1.  **Create the agent project:**
     ```shell
     uv run adk create personal_tutor
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
+    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
 
 2.  **Navigate into the new directory:**
     ```shell

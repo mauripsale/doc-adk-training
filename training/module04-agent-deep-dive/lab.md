@@ -3,12 +3,17 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 4 Challenge: Customer Support Analyzer
 
 ## Goal
 Your task is to build a **"Support Analyzer"** agent. Instead of returning plain text, the agent must analyze the user's support ticket and return a JSON object containing the categorization, sentiment, and a brief summary of the issue.
 
 ## Lab Tasks
+
+<Setup/>
+
 1.  Open your terminal, ensure you are in your `adk-training` directory, and run the following command to scaffold a new agent:
     ```shell
     uv run adk create support_analyzer
@@ -48,7 +53,7 @@ root_agent = Agent(
 
 ### Self-Reflection Questions
 - Why is it better to use `output_schema` instead of just asking the LLM to "respond in JSON" in the text instructions?
-- What happened to the agent's ability to use tools once you enabled `output_schema`? Why does the ADK enforce this restriction?
+- Can the agent still call tools while `output_schema` is set? What exactly does `output_schema` constrain, and what does it leave free?
 - Look at the Dev UI's "Session State". How could another agent in a future multi-agent system use the data stored in the `"last_ticket_analysis"` key?
 
 <hr/>
@@ -56,7 +61,7 @@ root_agent = Agent(
 ### 🕵️ Hidden Solution 🕵️
 
 Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDQtbGxtYWdlbnQtZGVlcC1kaXZlL2xhYi1zb2x1dGlvbg==`
+`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDQtYWdlbnQtZGVlcC1kaXZlL2xhYi1zb2x1dGlvbg==`
 
 <div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
     The direct link is: <a href="/doc-adk-training/module04-agent-deep-dive/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>

@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 3 Challenge: Build and Run the "Echo" Agent
 
 ## Goal
@@ -18,10 +20,14 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
 | "12345" | "12345" | "You entered the numbers 1 through 5." |
 
 ## Lab Tasks
+
+<Setup/>
+
 1.  Use the `uv run adk create` command to scaffold a new agent named `echo_agent`. By default, this will create a Python-based project structure:
     ```shell
     uv run adk create echo_agent
     ```
+    > **Note:** This is an interactive wizard — it will prompt you for choices like the model, backend, GCP project, and region. Answer the prompts as they appear.
 2.  Follow the **Python Approach** below to define the agent's behavior.
 3.  **Instruction Strategy:** Craft an instruction that forces the agent to only echo and explicitly forbids it from answering questions or being helpful.
 4.  Configure the `.env` file with your Google API key or Google Cloud project details.
@@ -40,6 +46,7 @@ from google.adk import Agent
 root_agent = Agent(
     name=...,  # TODO: Give your agent a name (e.g., "echo_agent")
     model=..., # TODO: Specify the model to use (e.g., "gemini-3.5-flash")
+    description=...,  # TODO: Provide a short description of what the agent does.
     instruction=...,  # TODO: Provide the instruction for the echo agent.
 )
 ```
@@ -58,7 +65,7 @@ name: ... # Give your agent a name (e.g., "echo_agent")
 model: ... # Specify the model to use (e.g., "gemini-3.5-flash")
 instruction: ... # Provide the instruction for the echo agent.
 ```
-> **Note:** If both `agent.py` and `root_agent.yaml` exist in the same directory, the ADK will use the `root_agent.yaml` file.
+> **Note:** If both `agent.py` and `root_agent.yaml` exist in the same directory, the ADK will use `agent.py` -- the generated `__init__.py` hard-imports it, regardless of a sibling YAML file. Avoid keeping both in the same directory.
 
 ### Self-Reflection Questions
 - What are the advantages of defining an agent in a Python script versus a YAML file?

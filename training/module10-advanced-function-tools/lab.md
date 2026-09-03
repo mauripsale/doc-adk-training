@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 10: Building a "Memory" Agent with Stateful Tools
 
 ## Goal
@@ -10,6 +12,8 @@ title: "Challenge Lab"
 In this lab, you will build an agent that can remember a user's name across multiple turns. You will learn how to use the **`ToolContext`** to read from and write to the session state.
 
 ### Step 1: Prepare the Project
+
+<Setup/>
 
 ```bash
 uv run adk create memory_agent
@@ -29,7 +33,7 @@ def store_name(name: str, tool_context: ToolContext) -> str:
     Saves the user's name to the session memory.
     Use this tool when the user tells you their name.
     """
-    # TODO: Save 'name' to tool_context.session.state under key "user_name"
+    # TODO: Save 'name' to tool_context.state under key "user_name"
     pass
 
 def recall_name(tool_context: ToolContext) -> str:
@@ -37,7 +41,7 @@ def recall_name(tool_context: ToolContext) -> str:
     Retrieves the user's name from the session memory.
     Use this tool if the user asks who they are or what their name is.
     """
-    # TODO: Get "user_name" from tool_context.session.state.
+    # TODO: Get "user_name" from tool_context.state.
     # Return the name, or "Stranger" if not found.
     pass
 ```
@@ -49,7 +53,7 @@ def recall_name(tool_context: ToolContext) -> str:
 ```python
 # In agent.py
 from google.adk import Agent
-from tools.memory import store_name, recall_name
+from .tools.memory import store_name, recall_name
 
 root_agent = Agent(
     name="memory_agent",
@@ -65,7 +69,7 @@ root_agent = Agent(
 
 ### Step 4: Test the Memory
 
-1.  **Run:** `uv run adk run agent.py`
+1.  **Run:** `uv run adk run .` (run this from inside the `memory_agent` agent directory created in Step 1; `adk run` expects an agent directory, not a file)
 2.  **Test:**
     - "Hi, I'm Mario." -> Should call `store_name`.
     - "What is my name?" -> Should call `recall_name` and respond "Mario".
@@ -75,7 +79,7 @@ root_agent = Agent(
 
 You have successfully built an agent with programmable memory! You have learned:
 *   How to use **`ToolContext`** to access the ADK's session management.
-*   How to read and write to **`tool_context.session.state`**.
+*   How to read and write to **`tool_context.state`**.
 *   How to create a **Store and Recall** pattern to maintain context across multiple turns.
 
 ### Self-Reflection Questions

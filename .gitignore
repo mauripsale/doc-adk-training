@@ -185,6 +185,13 @@ docs/site
 # Claude Code
 .claude
 
+# Root docs copied into training/ by doc/CI for the Docusaurus build
+# (regenerated fresh on every build — never a source of truth, never commit)
+/training/README.md
+/training/CONTRIBUTING.md
+/training/timetable-*.md
+/training/variant-*.md
+
 # Bash files
 ***/*.sh
 nanobanana-output/

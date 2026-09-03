@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 27: Using a Stateful File System Tool Challenge
 
 ## Goal
@@ -14,6 +16,8 @@ In this lab, you will learn how to connect your ADK agent to an external, statef
 *   **Node.js and npx:** The MCP server we will use is a Node.js package. If you don't have it, install Node.js (which includes npx) from the [official website](https://nodejs.org/).
 
 ### Step 1: Create the Agent Project
+
+<Setup/>
 
 1.  **Navigate to your training directory:**
     ```shell

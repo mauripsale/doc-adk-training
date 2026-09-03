@@ -123,33 +123,33 @@ In the lab for this module, you will put all these principles into practice by b
 
 ## Limitations: Mixing Tool Types
 
-As you start building more complex agents, it's important to be aware of a current limitation in the ADK regarding tool usage.
+As you start building more complex agents, it's important to be aware of a current limitation regarding tool usage.
 
 ### One Built-in Tool Per Agent
 
-Currently, a single agent generally supports using **only one type of tool at a time**.
+A single agent generally supports using **only one type of tool at a time**.
 
-Specifically, you cannot easily mix a **Built-in Tool** (like `google_search`) with **Custom Function Tools** or other capabilities (like a code executor) within the same agent definition.
-
-**Unsupported Example:**
-You cannot simply list both `google_search` and your own `custom_function` in the same `tools` list for a single agent.
+Specifically, you cannot mix a **Built-in Tool** (like `google_search`) with **Custom Function Tools** within the same agent definition — this isn't an arbitrary ADK restriction, it's the underlying Gemini API itself rejecting the request:
 
 ```python
-# This approach is NOT currently supported
+# This is NOT supported -- it constructs fine in Python, but the first real
+# model call fails with:
+#   400 INVALID_ARGUMENT: Multiple tools are supported only when they are
+#   all search tools.
 root_agent = Agent(
     name="MixedToolAgent",
     model="gemini-3.5-flash",
-    tools=[google_search, custom_function], # Mixing types may cause issues
+    tools=[google_search, custom_function],
 )
 ```
 
 ### The Workaround: Multi-Agent Systems
 
-So, how do you build an agent that can search the web *and* use your custom calculator?
+So, how do you build a system that can search the web *and* use your custom calculator?
 
-The solution is to use a **Multi-Agent System**. Instead of one agent doing everything, you create two specialized agents:
-1.  A "Search Specialist" agent with the `google_search` tool.
-2.  A "Calculator Specialist" agent with your custom function tools.
-3.  A "Coordinator" agent that delegates tasks to the specialists.
+The solution is to use **separate agents**, each with its own single tool type, coordinated together:
+1.  A "Search Specialist" agent with only the `google_search` tool.
+2.  A "Calculator Specialist" agent with only your custom function tools.
+3.  Either a coordinating agent, or your own Python code, that calls each one in turn and combines their results.
 
-You will learn exactly how to build these powerful multi-agent architectures in **Module 15**. For now, focus on mastering custom tools within a single agent.
+You'll learn exactly how to build these multi-agent architectures in **Module 15**. Module 12 revisits this same constraint hands-on, once you've seen `google_search` and the other built-in tools in more depth.

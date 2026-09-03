@@ -40,17 +40,30 @@ my_workflow = Workflow(
 ```
 
 #### Router Edges (Conditional)
-To build a router without writing a full `@node` function, you can use a **dictionary as the target of an edge**. The key in the dictionary corresponds to the **output** of the previous node.
+You can use a **dictionary as the target of an edge** to route to different nodes without writing a full `if`/`else` orchestrator. The key that gets matched isn't the node's raw output, though — it's `ctx.route`, a value the source node must set explicitly.
+
+A plain `Agent` never sets `ctx.route` on its own, even with a Pydantic `output_schema` — so the source of a Router Edge needs to be a small `@node` function that runs the classifier and then sets the route from its result:
 
 ```python
-from google.adk import Workflow
+from google.adk import Workflow, Context
+from google.adk.workflow import node
 
-# A system that routes based on a classifier's output
+# The classifier itself is a plain Agent with a Pydantic output_schema
+classifier_node = Agent(..., output_schema=RequestType)
+
+# A tiny @node wrapper is what actually makes the dictionary routing work
+@node(rerun_on_resume=True)
+async def classify_and_route(ctx: Context, node_input: str):
+    result = await ctx.run_node(classifier_node, node_input)  # a dict, not the Pydantic instance
+    ctx.route = result["category"]
+    return node_input
+
+# A system that routes based on ctx.route
 my_workflow = Workflow(
     name="SmartRouter",
     edges=[
-        ("START", classifier_node),
-        (classifier_node, {
+        ("START", classify_and_route),
+        (classify_and_route, {
             "technical": tech_agent,
             "billing": billing_agent,
             "other": general_agent
@@ -58,6 +71,8 @@ my_workflow = Workflow(
     ]
 )
 ```
+
+The specialist branches (`tech_agent`, `billing_agent`, `general_agent`) stay fully declarative — only the classifier needs this small amount of glue code, which is what keeps this pattern meaningfully simpler than a full Dynamic Workflow (Module 18), where *every* routing decision is hand-written Python.
 
 ### The "START" and "END" Reserved Keywords
 - **`START`**: The entry point of your workflow. Every workflow must have at least one edge originating from `"START"`.
@@ -67,10 +82,10 @@ my_workflow = Workflow(
 
 In a deterministic `Workflow`, the output of one node is automatically passed as the input to the next node. 
 - If `NodeA` returns a string, `NodeB` receives that string as its input.
-- If you use a **Router Dictionary**, the output of the previous node must match one of the keys in the dictionary.
+- If you use a **Router Dictionary**, routing is decided separately from data flow: it's `ctx.route` (set explicitly, as shown above) that must match one of the dictionary's keys — not necessarily the value passed along as input to the next node.
 
 ### Key Takeaways
 - **Deterministic Workflows** define fixed paths using the `edges` parameter.
-- **Edges** can be simple tuples or use dictionaries for conditional routing.
+- **Edges** can be simple tuples or use dictionaries for conditional routing — but the dictionary matches against `ctx.route`, which only a `@node` function can set. A plain `Agent`, even with a Pydantic `output_schema`, never sets it on its own.
 - This approach is **preferred for well-defined business processes** where you want maximum predictability and lowest latency.
 - You can mix and match: a node in a deterministic `Workflow` can itself be a dynamic `@node` workflow!

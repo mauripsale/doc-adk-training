@@ -23,7 +23,7 @@ Many real-world applications require agents to understand and process more than 
 The fundamental building block for multimodal content in the ADK is the `types.Part` object from the `google.genai` library. A user's prompt is no longer just a string, but a list of `Part` objects.
 
 A `Part` can contain:
-*   **Text:** `types.Part.from_text("Describe this image")`
+*   **Text:** `types.Part.from_text(text="Describe this image")`
 *   **Image Data:** `types.Part(inline_data=types.Blob(data=image_bytes, mime_type='image/png'))`
 
 When you send a list of these parts to a vision-capable model like `gemini-3.5-flash`, the model can reason about the text and the image(s) together.
@@ -68,6 +68,8 @@ This allows you to build agents that can:
 *   Create charts and diagrams from data.
 
 In the lab, you will build a "Visual Product Catalog Analyzer" that uses a single, vision-capable agent to analyze a product image and generate a marketing description from that analysis.
+
+> **Going Further:** the lab below only covers *understanding* images (analysis), not *generating* them -- actually calling an image-generation model is a separate integration (a custom tool wrapping the Imagen API) and is out of scope here. If you want to try it hands-on, the shape is the same pattern as any other custom tool from Module 9: a function that calls the generation API and returns image bytes as a `types.Part` (the same `Part` type you're about to use for analysis, just produced instead of consumed).
 
 ### Key Takeaways
 - Multimodal models like Gemini can process text and images together, enabling vision-enabled agents.

@@ -9,6 +9,8 @@ title: "Module 22: State and Memory - Persistent Agent Context"
 
 ### Giving Agents Memory
 
+Welcome to **Part 4: Production Readiness**. You've spent Part 3 learning to orchestrate multiple agents into real systems -- now it's time to make those systems production-ready, starting with the most basic requirement of all: an agent that actually remembers things.
+
 A key feature that elevates a simple chatbot to a capable assistant is **memory**. The ADK provides a robust system for managing two different kinds of memory: short-term **State** and long-term **Memory**.
 
 ### Session State (`session.state`)
@@ -57,6 +59,8 @@ The ADK supports **rewinding** a session to a previous point. This is useful for
 *   **How it works:** You specify an `invocation_id` to rewind *before*. The system restores the session state and artifacts to that moment.
 *   **What is restored:** Session-level state and artifacts.
 *   **What is NOT restored:** Global resources like `app:` or `user:` state, and external side effects (like API calls already made).
+
+> **Going Further:** this module's lab doesn't exercise Session Rewind hands-on — it's a niche enough feature that a dedicated exercise wasn't worth the extra lab time. If you want to try it, add a small script that calls `session_service.get_session()`, notes an `invocation_id` partway through a multi-turn conversation, makes a few more turns, then rewinds to that point and confirms the state matches.
 
 ### Memory Service
 

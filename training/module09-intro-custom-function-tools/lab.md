@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 9: Building a "Calculator" Agent Challenge
 
 ## Goal
@@ -11,13 +13,12 @@ In this lab, you will build an agent that can perform basic arithmetic. You will
 
 ### Step 1: Create the Project and File Structure
 
-We will use `uv` to create a modern Python environment for our agent.
+<Setup/>
 
-1.  **Initialize the agent project:**
+1.  **Create the agent project:**
     ```bash
-    uv init calculator_agent --python 3.10
+    uv run adk create calculator_agent
     cd calculator_agent
-    uv add google.adk python-dotenv
     ```
 
 2.  **Setup Authentication:**
@@ -85,6 +86,7 @@ def divide(a: int, b: int) -> dict:
     # TODO: Handle the case where b is 0, returning an error dictionary.
     # Otherwise, calculate the division and return the result.
     pass
+```
 
 > **Pro Tip:** While we use simple dictionaries in this lab for simplicity, ADK 2.0 strongly recommends returning **Pydantic models** for better type safety and structured reasoning (as you will see in the Lab Solution).
 
@@ -95,16 +97,16 @@ def divide(a: int, b: int) -> dict:
 ```python
 # In agent.py
 from google.adk import Agent
-from tools.calculator import add, subtract, multiply, divide
+from .tools.calculator import add, subtract, multiply, divide
 
 root_agent = Agent(
     name="calculator_agent",
     model="gemini-3.5-flash",
     description="An agent node that performs arithmetic.",
-    instruction=\"\"\"
+    instruction="""
 You are a helpful calculator assistant.
 When the user asks you to perform a calculation, you MUST use the appropriate tool.
-\"\"\",
+""",
     # TODO: Add the four imported functions directly to this list.
     tools=[add, subtract, multiply, divide]
 )

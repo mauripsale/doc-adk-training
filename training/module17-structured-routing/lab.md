@@ -3,15 +3,19 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.6: Building a Market Analyst with Deterministic Edges
+import Setup from '../_setup-snippet.mdx';
+
+# Lab 17: Building a Market Analyst with Deterministic Edges
 
 ## Goal
 
 In this lab, you will build a structured workflow that analyzes currency conversion requests. You will use a **Deterministic Workflow** with explicit edges to create a pipeline that classifies a request and routes it to a specific specialist tool.
 
-This demonstrates how to create predictable AI pipelines in ADK 2.0 without writing complex routing code.
+This demonstrates how to create predictable AI pipelines in ADK 2.0 with just a few lines of routing glue code, instead of hand-writing full `if`/`else` orchestration for every branch.
 
 ### Step 1: Create the Project
+
+<Setup/>
 
 1.  **Create a new project:**
     ```shell
@@ -31,12 +35,12 @@ Open `agent.py`. We will create three main components:
 ```python
 from __future__ import annotations
 from pydantic import BaseModel
-from google.adk import Agent, Workflow, Context, Event
+from google.adk import Agent, Workflow, Context
+from google.adk.workflow import node
 from typing import Literal
 
 # 1. Define the Classification Schema
 class MarketRoute(BaseModel):
-    # The output of this agent must be one of these keys for the router to work!
     currency: Literal["USD", "EUR", "GBP"]
 
 # 2. Create the Classifier Node
@@ -51,6 +55,21 @@ classifier = ...
 usd_analyst = ...
 eur_analyst = ...
 gbp_analyst = ...
+
+# 4. Wrap the classifier so it can set ctx.route.
+# A plain Agent never sets ctx.route on its own -- not even with a Pydantic
+# output_schema -- so a small @node wrapper is what makes the Router
+# Dictionary below actually work.
+# TODO: Complete this function:
+#   a. Call `await ctx.run_node(classifier, node_input)` and store the result.
+#      Note: the result comes back as a plain dict, e.g. {"currency": "EUR"},
+#      even though MarketRoute is a Pydantic model.
+#   b. Set `ctx.route` to the "currency" value from that dict.
+#   c. Return node_input (unchanged) so the chosen specialist still receives
+#      the original user request.
+@node(rerun_on_resume=True)
+async def classify_and_route(ctx: Context, node_input: str):
+    ...
 ```
 
 ### Step 3: Build the Deterministic Workflow
@@ -58,19 +77,19 @@ gbp_analyst = ...
 **Exercise:** Complete the `root_agent` definition using the `edges` parameter. 
 
 You need to:
-1.  Connect `"START"` to the `classifier`.
-2.  Create a **Router Dictionary** that connects the `classifier` to the three specialist agents based on the `currency` field in the `MarketRoute` object.
+1.  Connect `"START"` to `classify_and_route` (not `classifier` directly -- it's the wrapper that sets `ctx.route`).
+2.  Create a **Router Dictionary** that connects `classify_and_route` to the three specialist agents based on the route it set.
 
 ```python
 # TODO: Complete the Workflow definition
 root_agent = Workflow(
     name="MarketSystem",
     edges=[
-        # Edge 1: Start at the classifier
+        # Edge 1: Start at the classify_and_route node
         ("START", ...),
         
-        # Edge 2: Route based on classifier output
-        (classifier, {
+        # Edge 2: Route based on ctx.route
+        (classify_and_route, {
             "USD": ...,
             "EUR": ...,
             "GBP": ...
@@ -94,14 +113,14 @@ root_agent = Workflow(
 ### Lab Summary
 
 You have successfully built a deterministic workflow!
-- You used **Pydantic** to ensure the classifier's output matches your router keys.
-- You defined **explicit edges** to create a transparent execution graph.
-- You learned that ADK 2.0 handles the data passing between nodes automatically.
+- You used **Pydantic** to ensure the classifier's output is one of your router keys.
+- You learned that Router Dictionaries match against `ctx.route`, not a node's raw output -- and that a plain `Agent` needs a small `@node` wrapper to set it.
+- You defined **explicit edges** to create a transparent execution graph, where only the classifier needed custom code and the specialist branches stayed fully declarative.
 
 ### Self-Reflection Questions
-- What happens if the `classifier` returns a value that isn't in your dictionary (e.g., "JPY")?
+- What happens if `classify_and_route` sets `ctx.route` to a value that isn't in your dictionary (e.g., "JPY")?
 - Can you add an `"other"` key to the dictionary to handle unknown inputs?
-- How does this approach compare to the `@node` dynamic workflow in terms of code complexity?
+- `classify_and_route` is a `@node` function, just like in Module 18 -- so what's actually different about this pattern compared to a full Dynamic Workflow?
 
 <hr/>
 

@@ -59,7 +59,7 @@ app = App(
 )
 ```
 
-Note these operate one level below the `RetryConfig` you saw in Module 38, which retries a failed *Workflow node* on a raised Python exception. Together, the three cover a different layer each: node → tool response → model response.
+Note these operate one level below the `RetryConfig` you'll see in Module 38, which retries a failed *Workflow node* on a raised Python exception. Together, the three cover a different layer each: node → tool response → model response.
 
 These two plugins *recover* from errors. If you only need to be *notified* of an unrecoverable one — e.g. to page on-call before the app crashes — `BasePlugin` also exposes `on_agent_error_callback` and `on_run_error_callback`, notification-only hooks that always re-raise the original exception.
 
@@ -68,3 +68,5 @@ These two plugins *recover* from errors. If you only need to be *notified* of an
 - **Node-level scope:** Callbacks are registered on the `Agent` object.
 - **Overriding:** You can bypass expensive LLM calls or risky tool executions by returning a value from a "before" callback.
 - **Type Safety:** ADK 2.0 enforces specific signatures for each callback type to ensure robust data flow.
+
+This closes out **Part 4: Production Readiness** — your agent now has memory, artifacts, evaluation, observability, and guardrails. In Part 5, you'll connect it to external systems and real user interfaces, starting with the **Model Context Protocol (MCP)** — and callbacks like these become even more important once your agent is talking to tools and services outside your own codebase.

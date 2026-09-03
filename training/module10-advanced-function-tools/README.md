@@ -25,29 +25,29 @@ def remember_info(data: str, tool_context: ToolContext):
     ...
 ```
 
-### 2. State Management (`tool_context.session.state`)
+### 2. State Management (`tool_context.state`)
 
 This is the most powerful feature of the context. It gives your tool direct read/write access to the current conversation's state.
 
 *   **Writing to State:** Save information to be used later.
     ```python
-    tool_context.session.state["user_name"] = "Alice"
+    tool_context.state["user_name"] = "Alice"
     ```
 *   **Reading from State:** Make decisions based on historical data.
     ```python
-    name = tool_context.session.state.get("user_name", "Stranger")
+    name = tool_context.state.get("user_name", "Stranger")
     ```
 
 ### The "Memory" Pattern
 
 The most common use case for stateful tools is a **Store and Recall** pair:
-1.  **Store Tool:** Takes user input and saves it to a specific key in `tool_context.session.state`.
+1.  **Store Tool:** Takes user input and saves it to a specific key in `tool_context.state`.
 2.  **Recall Tool:** Reads that key from the state and returns it to the agent.
 
 This allows the agent to maintain a "structured memory" that is more reliable than just relying on the raw chat history.
 
 ### Key Takeaways
 - Use **`ToolContext`** to securely access the ADK runtime.
-- **`tool_context.session.state`** allows tools to persist data across turns.
+- **`tool_context.state`** allows tools to persist data across turns.
 - Stateful tools enable agents to have a structured, programmable memory.
 - **Rule:** Never describe `tool_context` in your docstring; it's for the framework, not the LLM.

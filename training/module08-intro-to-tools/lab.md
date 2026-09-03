@@ -3,12 +3,16 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 8: Creating a "Researcher" Agent with Google Search Challenge
 
 ## Goal
 Your task is to build and configure a new agent that can search the web to answer questions about current events.
 
 ## Lab Tasks
+
+<Setup/>
 
 1.  **Create a new agent** named `researcher_agent` using the `uv run adk create` command, specifying the Python type.
 2.  **Enable the Vertex AI API** in your Google Cloud project.

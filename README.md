@@ -66,7 +66,7 @@ This part covers the absolute basics of AI agents and the ADK, getting your envi
 *   📖 **[Module 2: Setting Up Your Development Environment](./training/module02-environment-setup/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
 *   📖 **[Module 3: Your First Agent: The "Echo" Agent](./training/module03-first-agent-echo/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   📖 **[Module 4: Core Agent Concepts: `LlmAgent` Deep Dive](./training/module04-agent-deep-dive/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
-*   📖 **[Module 4.5: Professional Model Configuration & Resiliency](./training/module04_5-multi-model-litellm/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
+*   📖 **[Module 4.5: Professional Model Configuration, Resiliency & Portability](./training/module04_5-multi-model-litellm/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   📖 **[Module 5: Running and Interacting with Agents](./training/module05-running-agents/)** (🧑‍💻 30 min / 👨‍🏫 50 min)
 *   📖 **[Module 6: Running an Agent Programmatically](./training/module06-programmatic-execution/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   📖 **[Module 7: Multimodal and Images 📸](./training/module07-multimodal-and-images/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
@@ -76,10 +76,10 @@ This part focuses on giving your agents "superpowers" by connecting them to tool
 
 *   🧰 **[Module 8: Introduction to Tools](./training/module08-intro-to-tools/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🧰 **[Module 9: Intro to Custom Function Tools](./training/module09-intro-custom-function-tools/)** (🧑‍💻 45 min / 👨‍🏫 70 min)
-*   🧰 **[Module 10: Advanced Function Tools](./training/module10-advanced-function-tools/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🧰 **[Module 10: Stateful Tools & ToolContext](./training/module10-advanced-function-tools/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🧰 **[Module 11: OpenAPI Tools](./training/module11-openapi-tools/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🧰 **[Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
-*   🧰 **[Module 13: Tool Context](./training/module13-tool-context/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🧰 **[Module 13: Advanced Interactions: Actions & HITL](./training/module13-tool-context/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🧰 **[Module 13.5: Extending ADK - Custom Persistence with Firestore](./training/module13_5-firestore-persistence/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
 *   🧰 **[Module 14: Third-Party Tools](./training/module14-third-party-tools/)** (🧑‍💻 30 min / 👨‍🏫 40 min)
 
@@ -102,6 +102,7 @@ This part covers the essential features for making your agents robust, observabl
 *   📦 **[Module 23: Artifacts](./training/module23-artifacts/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 *   🧪 **[Module 24: Evaluation](./training/module24-evaluation/)** (🧑‍💻 50 min / 👨‍🏫 75 min)
 *   📊 **[Module 25: Observability](./training/module25-observability/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
+*   🦺 **[Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/)** (🧑‍💻 35 min / 👨‍🏫 55 min)
 *   🛡️ **[Module 26: Callbacks](./training/module26-callbacks/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
 
 ### 🔌 Part 5: Advanced Integrations & UI (Modules 27-30)
@@ -179,4 +180,4 @@ Software components, such as the code in the `sample-agents` directory, are lice
 
 ## 🙏 Acknowledgements
 
-This training course was inspired by the structure and content of the original ADK Training Hub created by Raphael Mansuy. While all content has been originally rewritten and adapted, we gratefully acknowledge his foundational work.
+This training course was initially inspired by the ADK Training Hub created by Raphael Mansuy. The course has since evolved its own structure and challenge-lab-based pedagogy, with all content originally written and adapted — but we gratefully acknowledge his early influence.

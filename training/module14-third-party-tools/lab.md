@@ -3,17 +3,19 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 14: Integrating a LangChain Wikipedia Tool Challenge
 
 ## Goal
-
-### Goal
 
 In this lab, you will learn how to integrate a tool from a popular third-party library, LangChain, into your ADK agent. You will build a "Fact-finder" agent that can look up information on Wikipedia.
 
 ### Step 1: Create the Agent Project and Install Dependencies
 
-1.  **Create the agent project:**
+<Setup/>
+
+1.  **Create the agent scaffold:**
     ```shell
     uv run adk create --type=config fact_finder_agent
     cd fact_finder_agent
@@ -21,7 +23,7 @@ In this lab, you will learn how to integrate a tool from a popular third-party l
 
 2.  **Install LangChain dependencies:**
     ```shell
-    pip install langchain_community wikipedia
+    uv add langchain_community wikipedia
     ```
 
 ### Step 2: Write the Agent Code
@@ -30,13 +32,20 @@ Because we are importing Python objects, we need to define our agent in a Python
 
 **Exercise:** Create a new file named `agent.py`. Inside this file, complete the `# TODO` items to build the agent. You will need to instantiate the LangChain tool, wrap it, and then define your agent to use the wrapped tool.
 
+> **Heads-up: Wikipedia now requires a distinctive `User-Agent`.** Wikimedia rate-limits the generic default `User-Agent` string that the `wikipedia` package sends (it's shared by every user of the package, so Wikimedia throttles it collectively). Without a fix, calls to the tool fail with a `requests.exceptions.JSONDecodeError`. The fix is one line: call `wikipedia.set_user_agent("your-app-name/1.0 (contact-info)")` once, before the tool makes any requests. It's already included in the starter code below.
+
 ```python
 # In agent.py (Starter Code)
 
 from google.adk import Agent
-from google.adk.tools.langchain_tool import LangchainTool
+from google.adk.integrations.langchain import LangchainTool
+import wikipedia
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper
+
+# Wikimedia now rate-limits the wikipedia package's generic default User-Agent.
+# Set a distinctive one before making any requests.
+wikipedia.set_user_agent("adk-training-fact-finder/1.0 (https://github.com/adk-training; contact@example.com)")
 
 # TODO: 1. Instantiate the LangChain tool.
 # - Create a WikipediaAPIWrapper.
@@ -83,6 +92,8 @@ root_agent = Agent(
     *   "Who was Marie Curie?"
     *   "What is the theory of relativity?"
 2.  **Examine the Trace View** to confirm that the `WikipediaQueryRun` tool was called.
+
+> **If the tool call still fails** with a network or JSON error even after setting the `User-Agent`, wait a few seconds and try again. Wikimedia occasionally rate-limits shared or cloud IP ranges (like Cloud Shell or CI runners) regardless of a correctly-set `User-Agent` -- this is a separate, transient issue from the User-Agent fix above, and it usually clears up on retry.
 
 ### Having Trouble?
 

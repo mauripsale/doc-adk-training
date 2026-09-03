@@ -3,7 +3,9 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.7: Building a Collaborative Travel Team
+import Setup from '../_setup-snippet.mdx';
+
+# Lab 19: Building a Collaborative Travel Team
 
 ## Goal
 
@@ -16,6 +18,8 @@ In this lab, you will build a **Travel Planning Team** consisting of a **Coordin
 - Finally, the Coordinator synthesizes the plan.
 
 ### Step 1: Create the Project
+
+<Setup/>
 
 ```shell
 uv run adk create travel_team
@@ -32,11 +36,18 @@ Open `agent.py`. Your task is to define the team and configure their modes corre
 # In agent.py (Starter Code)
 from google.adk import Agent
 
+# Note: every agent below needs rerun_on_resume=True. Any node that's part
+# of a sub_agents dispatch chain can be "woken up" when a task-mode
+# sub-agent pauses and resumes across turns -- without the flag on ALL
+# three agents (coordinator included), you'll hit:
+# "ValueError: A node must have rerun_on_resume=True."
+
 # 1. Define the Weather Specialist
 # Hint: Use 'single_turn' mode for a quick, non-interactive lookup.
 weather_agent = Agent(
     name="weather_checker",
     model="gemini-3.5-flash",
+    rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to provide a brief 3-day forecast 
     # for the requested destination.
@@ -49,6 +60,7 @@ weather_agent = Agent(
 flight_agent = Agent(
     name="flight_booker",
     model="gemini-3.5-flash",
+    rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to help the user book a flight. 
     # Ask about preferred airline or time if not provided.
@@ -56,10 +68,12 @@ flight_agent = Agent(
 )
 
 # 3. Define the Coordinator
-# Hint: Coordinator should NOT have a mode set (it's the root).
+# Hint: Coordinator should NOT have a mode set (it's the root), but it
+# still needs rerun_on_resume=True (see note above).
 root_agent = Agent(
     name="travel_planner",
     model="gemini-3.5-flash",
+    rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to coordinate the team.
     # 1. Get weather from weather_checker.
@@ -80,8 +94,10 @@ root_agent = Agent(
 2.  **Verify the Flow:**
     - Ask: "I want to go to Tokyo next week."
     - **Observe:** The `travel_planner` should call the `weather_checker`. 
-    - **Observe:** Then it should call the `flight_booker`. The flight booker might ask you "Which airline do you prefer?" or "Do you want a morning flight?". 
-    - **Final Check:** After you answer, notice how control **automatically returns** to the `travel_planner` without any "hand-off" code.
+    - **Observe:** Then it should call the `flight_booker`. The flight booker might ask you "Which airline do you prefer?" or "Do you want a morning flight?". Keep answering -- it may take more than one exchange before it has everything it needs.
+    - **Final Check:** Watch the Trace tab for the turn where `flight_booker` decides it's done: it calls the framework-injected `finish_task` tool, and control **returns to `travel_planner` immediately, within that same turn** -- not on a separate follow-up turn -- with no "hand-off" code written by you. `travel_planner` then presents the final combined plan in that same response.
+
+> **Bonus (optional):** Try rewiring `weather_checker` as an `AgentTool` instead of a `sub_agents` entry: drop `mode="single_turn"`, remove it from `sub_agents`, and instead give `travel_planner` `tools=[AgentTool(agent=weather_agent)]` (import from `google.adk.tools.agent_tool`). Re-run the same request and compare the Trace tab: with `AgentTool` the whole weather lookup happens *inside* `travel_planner`'s own function call -- there's no separate `weather_checker` author entry the way there was with `mode="single_turn"`. Same call-and-return result, different plumbing.
 
 ### Lab Summary
 
@@ -94,6 +110,7 @@ You have built a Collaborative Agent Team!
 - Why would you use `single_turn` instead of `task` for a database lookup node?
 - What happens to the conversation history when a sub-agent is in `task` mode? (Hint: Check the Trace tab).
 - How does the `mode` setting improve the reliability of complex, multi-step workflows compared to standard `chat` mode?
+- In this lab, `travel_planner` consults two sub-agents (`weather_checker`, `flight_booker`) and combines their results, because both use `mode="task"`/`"single_turn"`, which forces the return to the coordinator. Now imagine `weather_checker` and `flight_booker` were both `RemoteA2aAgent`s -- separate services -- registered via a bare `sub_agents=[...]` with no `mode` set. What would happen the first time the coordinator delegated? What are two different ways to fix it?
 
 <hr/>
 

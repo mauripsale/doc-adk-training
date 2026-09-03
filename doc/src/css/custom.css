@@ -1,0 +1,63 @@
+/**
+ * ADK Training brand theme.
+ * Palette/type from the "graph & node" design direction (see repo /assets).
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --adk-signal: #c97a12;
+  --adk-signal-ink: #4a2e00;
+  --adk-signal-soft: #fbebd3;
+  --adk-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+  --adk-sans: 'Public Sans', -apple-system, 'Segoe UI', sans-serif;
+
+  --ifm-color-primary: var(--adk-signal);
+  --ifm-color-primary-dark: #b46f10;
+  --ifm-color-primary-darker: #a9690f;
+  --ifm-color-primary-darkest: #8b560d;
+  --ifm-color-primary-light: #de8514;
+  --ifm-color-primary-lighter: #e28c1d;
+  --ifm-color-primary-lightest: #e9a13f;
+
+  --ifm-font-family-base: var(--adk-sans);
+  --ifm-font-family-monospace: var(--adk-mono);
+  --ifm-heading-font-family: var(--adk-mono);
+  --ifm-heading-font-weight: 700;
+  --ifm-code-font-size: 92%;
+
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-footer-background-color: #10162b;
+}
+
+[data-theme='dark'] {
+  --adk-signal: #ffb454;
+  --adk-signal-ink: #2a1b00;
+  --adk-signal-soft: rgba(255, 180, 84, 0.14);
+
+  --ifm-color-primary: var(--adk-signal);
+  --ifm-color-primary-dark: #ffa62e;
+  --ifm-color-primary-darker: #ffa020;
+  --ifm-color-primary-darkest: #db8400;
+  --ifm-color-primary-light: #ffc27a;
+  --ifm-color-primary-lighter: #ffc98a;
+  --ifm-color-primary-lightest: #ffdcb5;
+
+  --ifm-background-color: #0a0e1a;
+  --ifm-navbar-background-color: #0a0e1a;
+}
+
+.navbar__title,
+.navbar__brand {
+  font-family: var(--adk-mono);
+  font-weight: 700;
+}
+
+.navbar__logo img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.footer--dark {
+  --ifm-footer-background-color: #10162b;
+}

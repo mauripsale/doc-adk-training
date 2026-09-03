@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 23: Building a Document Processing Pipeline Challenge
 
 ## Goal
@@ -18,11 +20,13 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
 
 ### Step 1: Create the Agent Project
 
+<Setup/>
+
 1.  **Create the agent project:**
     ```shell
     uv run adk create doc_processor
     ```
-    When prompted, choose the **Programmatic (Python script)** option.
+    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
 
 2.  **Navigate into the new directory:**
     ```shell

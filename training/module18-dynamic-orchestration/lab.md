@@ -3,7 +3,9 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
-# Lab 21.5: Building a Smart Support Router with Dynamic Workflows
+import Setup from '../_setup-snippet.mdx';
+
+# Lab 18: Building a Smart Support Router with Dynamic Workflows
 
 ## Goal
 
@@ -12,6 +14,8 @@ In this lab, you will build a sophisticated orchestration system using a **Dynam
 This exercise demonstrates the power of ADK 2.0: using standard Python logic to orchestrate multiple AI components with deterministic control.
 
 ### Step 1: Create the Project Structure
+
+<Setup/>
 
 1.  **Create a new project:**
     ```shell
@@ -69,7 +73,9 @@ classifier = ...
 async def support_router_workflow(ctx: Context, node_input: str):
     # Step 2a: Run the classifier node.
     # Hint: result = await ctx.run_node(classifier, node_input)
-    # The result will be an instance of SentimentClassification!
+    # Even though the classifier's output_schema is the SentimentClassification
+    # Pydantic model, run_node() returns it as a plain dict at runtime --
+    # access fields with result["sentiment"], not result.sentiment.
     classification = None 
     
     # Step 2b: Routing Logic.

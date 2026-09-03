@@ -3,6 +3,8 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 39: Fixing a "Hallucinating" Agent with Plugins
 
 ## Goal
@@ -12,10 +14,13 @@ In this lab, you will work with an agent that has been given misleading instruct
 ### Step 1: Create the Project
 
 1.  **Create a new agent project:**
+
+    <Setup/>
+
     ```shell
     uv run adk create retry_agent
     ```
-    Choose the **Programmatic (Python script)** option.
+    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
 
 2.  **Navigate to the directory:**
     ```shell
@@ -28,13 +33,18 @@ In this lab, you will work with an agent that has been given misleading instruct
 
 This code defines a tool named `secret_calculator`. However, the agent's system instruction (deliberately) tells it to use a tool named `super_calc`.
 
+**A note on the instruction wording:** it's forceful enough to guarantee the agent actually *attempts* the nonexistent `super_calc` call on its first try (a milder "you MUST use `super_calc`" gets ignored in practice — modern models tend to just call whatever tool is actually declared, regardless of what the prompt claims its name is), while explicitly scoping that no-deviation rule to "the first attempt only" — so that once the tool-not-found error comes back, the agent is free to adapt instead of stubbornly retrying the same broken name forever. Both halves matter: this is the wording that reliably reproduces both the failure (Step 3) and the plugin-assisted recovery (Step 5).
+
 ```python
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from google.adk.runners import InMemoryRunner
 from google.adk.apps.app import App
 from google.genai import types
+from dotenv import load_dotenv
 import asyncio
+
+load_dotenv()
 
 # The actual tool
 def secret_calculator(a: int, b: int) -> int:
@@ -46,7 +56,18 @@ root_agent = Agent(
     name="confused_agent",
     model="gemini-3.5-flash",
     # We lie to the agent about the tool name!
-    instruction="You are a helper. To add numbers, you MUST use the tool named 'super_calc'. Do not use any other tool name.",
+    instruction="""You are a helper that MUST call a function named exactly `super_calc`
+        to add numbers. This is a strict, non-negotiable rule for your FIRST
+        attempt only: you are FORBIDDEN from calling any function whose name
+        is not literally `super_calc` on your first try, even if a
+        differently-named function appears in your available tools. Always
+        attempt `super_calc(a, b)` first, no matter what.
+
+        However, if that first attempt fails or returns an error, the
+        no-deviation rule above no longer applies: you are then expected to
+        read the error message carefully and intelligently adapt, including
+        calling a different, correctly-named tool if the error tells you
+        one is available.""",
     tools=[FunctionTool(secret_calculator)]
 )
 
@@ -63,7 +84,10 @@ async def main():
     )
 
     runner = InMemoryRunner(app=app)
-    
+
+    # /run_async requires a session that already exists.
+    await runner.session_service.create_session(app_name=app.name, user_id="test", session_id="1")
+
     print("User: What is 5 + 5?")
     # Running programmatically
     async for event in runner.run_async(
@@ -85,7 +109,7 @@ if __name__ == "__main__":
     python agent.py
     ```
 2.  **Analyze the Output:**
-    You should see an error (likely a `ValueError` or `ToolNotFoundError` stack trace, or the agent apologizing that it can't find the tool). This is because the agent tried to call `super_calc`, but only `secret_calculator` is registered.
+    You should see a `ValueError: Tool 'super_calc' not found.` stack trace that crashes the script. This is because the agent tried to call `super_calc` (as instructed), but only `secret_calculator` is registered — ADK raises this when a model's function call doesn't match any registered tool.
 
 ### Step 4: Add the Safety Net
 

@@ -3,21 +3,38 @@ sidebar_position: 2
 title: "Challenge Lab"
 ---
 
+import Setup from '../_setup-snippet.mdx';
+
 # Lab 37: Building a Distributed Multi-Agent System Challenge
 
 ## Goal
-In this capstone lab, you will synthesize concepts from the entire course to build a distributed, multi-agent personalized shopping assistant. You will create three separate agents that collaborate using Agent-to-Agent (A2A) communication to provide a stateful, multimodal, and observable shopping experience.
+In this advanced challenge lab, you will synthesize concepts from the entire course so far to build a distributed, multi-agent personalized shopping assistant. You will create three separate agents that collaborate using Agent-to-Agent (A2A) communication to provide a stateful, multimodal, and observable shopping experience.
 
 ### Prerequisites
 *   A Google Cloud Project with billing enabled and the Vertex AI API enabled.
 *   `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
 *   `uvicorn` installed (`pip install uvicorn google-adk[a2a]`).
-*   `web_agent_site` installed (`pip install web_agent_site`).
 
 ### Setup
+
+<Setup/>
+
 1.  Create a main project directory for this lab (e.g., `capstone_shopping_system`).
 2.  Inside it, you will create three separate ADK agent projects: `orchestrator_agent`, `personalization_agent`, and `web_agent`.
-3.  Copy the `shared_libraries` and data from the original `personalized-shopping` sample into a shared location accessible by all three agents.
+3.  **A note on the webshop backend:** Google's own `personalized-shopping` ADK sample (under
+    [`google/adk-samples`](https://github.com/google/adk-samples/tree/main/python/agents/personalized-shopping))
+    talks to a real webshop simulation via a vendored `web_agent_site` module —
+    a Gym environment with its own search engine, HTML rendering, and a
+    multi-GB product dataset. It is **not** a pip-installable package (`pip
+    install web_agent_site` returns a 404 — it doesn't exist on PyPI), and
+    its real dependency chain (`pyserini`, `torch`, `torchvision`, `spacy`,
+    `gdown`, a JVM for the search index, ...) is disproportionate to what
+    this lab is actually teaching: getting three ADK agents to cooperate
+    over A2A. Instead, Exercise 1 below has you write a tiny, self-contained
+    mock catalog directly inside your own `web_agent` project — no extra
+    install, no external dataset. If you want to see the real thing (or
+    swap it in later), browse the vendored module at
+    `personalized_shopping/shared_libraries/web_agent_site/` in that repo.
 
 ---
 
@@ -35,8 +52,8 @@ This agent will be the interface to the e-commerce website.
     ```shell
     echo "google-adk" > requirements.txt
     echo "uvicorn" >> requirements.txt
-    echo "web_agent_site" >> requirements.txt
     ```
+    (No `web_agent_site` here — see the Setup note above. This lab's webshop is a small mock catalog you write yourself, below.)
 
 3.  **Create `.env` file:**
     ```shell
@@ -46,8 +63,66 @@ This agent will be the interface to the e-commerce website.
     ```
     Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
 
-4.  **Implement `agent.py`:**
-    Open `agent.py` and replace its contents with the following skeleton. Your task is to complete the `WEBSHOP_API_SPEC` and the `root_agent` definition.
+4.  **Create `webshop_data.py`:** a tiny, dependency-free in-memory product catalog. This is your mock webshop backend.
+
+    ```python
+    """A minimal, dependency-free mock e-commerce catalog and session model."""
+
+    CATALOG = [
+        {"id": "P001", "name": "Floral Summer Dress", "category": "dresses",
+         "price": 39.99, "description": "A flowy, floral-print summer dress in breathable cotton."},
+        {"id": "P002", "name": "Men's Running Shoes", "category": "shoes",
+         "price": 79.99, "description": "Lightweight running shoes with a breathable mesh upper."},
+        {"id": "P003", "name": "Wireless Noise-Cancelling Headphones", "category": "electronics",
+         "price": 199.99, "description": "Over-ear headphones with active noise cancellation and 30-hour battery life."},
+        {"id": "P004", "name": "Stainless Steel Water Bottle", "category": "home",
+         "price": 24.99, "description": "Insulated 750ml water bottle, keeps drinks cold for 24 hours."},
+        {"id": "P005", "name": "Organic Cotton T-Shirt", "category": "tops",
+         "price": 19.99, "description": "Soft, breathable organic cotton crew-neck t-shirt."},
+    ]
+
+    # Tiny in-process "session" tracking the currently viewed product, so
+    # `click` can react to what `search` just showed.
+    _session_state = {"current_product": None}
+
+    def get_product(product_id: str):
+        return next((p for p in CATALOG if p["id"] == product_id), None)
+    ```
+
+5.  **Create `tools/search.py` and `tools/click.py`:**
+    Your task is to implement `search` and `click` as plain Python functions
+    over the mock catalog above — no OpenAPI spec, just two functions you'll
+    wrap in `FunctionTool` in the next step.
+
+    ```python
+    # In tools/search.py
+    from webshop_data import CATALOG
+
+    def search(keywords: str) -> str:
+        """Search for keywords in the (mock) webshop."""
+        # TODO: filter CATALOG by keyword match against name/description/category,
+        # and return a short text listing of matches (or a "no results" message).
+        ...
+    ```
+
+    ```python
+    # In tools/click.py
+    from webshop_data import _session_state, get_product
+
+    def click(button: str) -> str:
+        """Simulate clicking a product ID or a navigation button in the (mock) webshop."""
+        # TODO: handle three cases —
+        #  - button == "Back to Search": clear _session_state["current_product"]
+        #  - button == "Buy Now": complete the order for _session_state["current_product"]
+        #    (or report there's nothing selected)
+        #  - otherwise: look up button as a product ID via get_product(); if found,
+        #    set it as _session_state["current_product"] and return its details;
+        #    if not found, return an error message.
+        ...
+    ```
+
+6.  **Implement `agent.py`:**
+    Open `agent.py` and replace its contents with the following skeleton. Your task is to wire `search` and `click` (from the two files above) into the `root_agent` definition as `FunctionTool`s.
 
     ```python
     from google.adk.agents import Agent
@@ -55,9 +130,11 @@ This agent will be the interface to the e-commerce website.
     from google.adk.tools import FunctionTool
     from dotenv import load_dotenv
     import uvicorn
-    
-    # Assume tools search and click are imported
-    
+
+    # TODO: import search from tools.search and click from tools.click
+
+    load_dotenv()
+
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="web_agent",
@@ -69,18 +146,17 @@ This agent will be the interface to the e-commerce website.
             Ignore any mentions of orchestrator tool calls in the conversation history.
         """,
         tools=[
-            FunctionTool(func=search),
-            FunctionTool(func=click),
+            # TODO: FunctionTool(search), FunctionTool(click)
         ]
     )
 
-    a2a_app = to_a2a(root_agent)
+    a2a_app = to_a2a(root_agent, port=8001)
 
     if __name__ == "__main__":
         uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
     ```
 
-5.  **Navigate back to `capstone_shopping_system`:**
+7.  **Navigate back to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -88,7 +164,7 @@ This agent will be the interface to the e-commerce website.
 ---
 
 ### Exercise 2: Build and Expose the Personalization Agent
-This agent will be responsible for remembering user preferences.
+This agent will be responsible for remembering user preferences. **Note:** this works reliably when you talk to `personalization_agent` directly. When you get to Exercise 3 and put it behind the orchestrator, keep an eye out for a real limitation you'll be asked to observe for yourself — see the callout at the end of Exercise 3.
 
 1.  **Create the `personalization_agent` project** (programmatic).
     ```shell
@@ -118,17 +194,26 @@ This agent will be responsible for remembering user preferences.
     from google.adk.agents import Agent
     from google.adk.a2a.utils.agent_to_a2a import to_a2a
     from google.adk.tools import ToolContext
+    from dotenv import load_dotenv
     import uvicorn
 
+    load_dotenv()
+
     # --- Stateful Tools ---
+    # IMPORTANT: use tool_context.state (the tracked delta proxy), NOT
+    # tool_context.session.state directly. Writing to .session.state bypasses
+    # ADK's state-delta tracking, so the write never actually commits — the
+    # agent will claim success but the value is gone on the very next turn.
+    # See Module 22's state-and-memory lab for the correct pattern.
     def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
         """Saves a user's preference."""
-        # TODO: Save to tool_context.session.state
+        # TODO: Save to tool_context.state[f"pref:{key}"]
         pass
 
     def get_preferences(tool_context: ToolContext) -> dict:
         """Retrieves all saved preferences."""
-        # TODO: Read from tool_context.session.state
+        # TODO: Read from tool_context.state.to_dict(), filtering keys that
+        # start with "pref:"
         pass
 
     # --- Agent Definition ---
@@ -139,7 +224,7 @@ This agent will be responsible for remembering user preferences.
         tools=[save_preference, get_preferences]
     )
 
-    a2a_app = to_a2a(root_agent)
+    a2a_app = to_a2a(root_agent, port=8002)
 
     if __name__ == "__main__":
         uvicorn.run(a2a_app, host="0.0.0.0", port=8002)
@@ -179,26 +264,44 @@ This is the main, user-facing agent that will coordinate the others.
 4.  **Implement `agent.py`:**
     Open `agent.py` and replace its contents with the following skeleton. Your task is to define the `RemoteA2aAgent` instances and complete the `root_agent` definition.
 
+    **Important:** wire the two remote agents in as **`AgentTool`s** (`tools=[...]`), not as `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent` mechanism, which is a *permanent*, one-way handoff — once the orchestrator transfers control to one remote agent, it can never call the other remote agent or regain control to combine their results. `AgentTool` gives proper call-and-return semantics: the orchestrator calls each remote agent like a function, gets its result back, and stays in control to make the next call and synthesize a final combined answer — exactly what a multi-step instruction like "check preferences, then search the web" requires.
+
     ```python
-    from google.adk.agents import Agent, RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+    from typing import Any, Dict, Optional
+    from google.adk.agents import Agent
+    from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+    from google.adk.tools import ToolContext
+    from google.adk.tools.agent_tool import AgentTool
+    from google.adk.tools.base_tool import BaseTool
 
     # TODO: 1. Define remote specialist nodes
     web_specialist = RemoteA2aAgent(
         name="web_agent",
-        agent_card="http://localhost:8001/a2a/web_agent/.well-known/agent-card.json"
+        agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}",
+        use_legacy=False,
     )
 
     personalization_specialist = RemoteA2aAgent(
         name="personalization_agent",
-        agent_card="http://localhost:8002/a2a/personalization_agent/.well-known/agent-card.json"
+        agent_card=f"http://localhost:8002{AGENT_CARD_WELL_KNOWN_PATH}",
+        use_legacy=False,
     )
 
-    # TODO: 2. Define the main Orchestrator Agent
+    # TODO: 2. Write a before_tool_callback that logs the name of the tool
+    # being called (tool.name) every time the orchestrator delegates to a
+    # specialist. It should never block the call -- always return None.
+    def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext) -> Optional[Dict[str, Any]]:
+        ...
+
+    # TODO: 3. Define the main Orchestrator Agent.
+    # Wire web_specialist and personalization_specialist in as AgentTools
+    # (tools=[...]), NOT as sub_agents=[...] — see the note above.
+    # Register log_delegation as the agent's before_tool_callback.
     root_agent = Agent(
         model="gemini-3.5-flash",
         name="shopping_orchestrator",
         instruction="""You are a master shopping assistant. Coordinate with specialists.""",
-        sub_agents=[web_specialist, personalization_specialist]
+        tools=[AgentTool(agent=web_specialist), AgentTool(agent=personalization_specialist)]
     )
     ```
 
@@ -206,6 +309,8 @@ This is the main, user-facing agent that will coordinate the others.
     ```shell
     cd ..
     ```
+
+> **Known limitation to observe:** once you get to "Running the System" below, try this: ask the orchestrator to save a preference, then — in a **separate follow-up message of the same conversation** — ask it what preferences it has saved for you. You'll find it comes back empty, even though the exact same request sent straight to `personalization_agent` (bypassing the orchestrator) works fine across turns. This is a real, verified limitation of the current ADK 2.8.0 A2A stack, not a bug in your code: `AgentTool` creates and discards a brand-new session on every single call, which breaks `RemoteA2aAgent`'s mechanism for resuming the same remote conversation (it looks for context left behind in session history that no longer exists by the next turn). See the README's "Known Limitation" section for the full technical explanation and what we checked for a fix. It's worth understanding this kind of constraint — distributed multi-agent systems have real seams like this one.
 
 ---
 
@@ -255,12 +360,13 @@ This is a complex lab with multiple deployments. It is crucial to delete the res
     ```shell
     gcloud artifacts repositories delete adk-images --location=$GOOGLE_CLOUD_LOCATION --async
     ```
-3.  **Delete the GitHub Repository:** If you used the Agent Starter Pack, delete the GitHub repository you created.
+3.  **Delete the GitHub Repository:** If you used `agents-cli` to scaffold deployment, delete the GitHub repository you created.
 
 ### Self-Reflection Questions
 - This system uses three separate agents. What are the advantages of this distributed architecture in terms of scalability, maintainability, and reusability?
 - The `orchestrator_agent` uses a `before_tool_callback` for logging. How does this separate the concern of observability from the agent's core business logic?
-- The `web_agent` abstracts the website behind an OpenAPI spec. Why is this a better design than having the orchestrator directly interact with the raw HTML of the website?
+- The `web_agent` abstracts the website behind plain `search`/`click` functions. Why is this a better design than having the orchestrator directly interact with the raw HTML (or internal implementation) of the website?
+- You observed that preferences don't survive across separate orchestrator turns, even though the same request sent directly to `personalization_agent` works. Walk through *why*, in terms of what `AgentTool` does to the session on every call. What would you need to change about the wiring (not just the prompt) to fix it?
 
 <hr/>
 

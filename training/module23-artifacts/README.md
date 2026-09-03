@@ -84,7 +84,7 @@ You must always specify the **MIME type** (e.g., `image/png`, `application/pdf`)
 ```python
 # Saving an image
 image_data = b'\x89PNG\r\n...' # Raw bytes
-part = types.Part.from_bytes(image_data, mime_type='image/png')
+part = types.Part.from_bytes(data=image_data, mime_type='image/png')
 await context.save_artifact('chart.png', part)
 ```
 
@@ -105,6 +105,8 @@ While you can store simple secrets in the session state, the ADK provides a more
 *   **`await context.load_credential(auth_config)`**
 
 This system uses a more complex `AuthConfig` object and is designed for production scenarios requiring robust security. For many use cases, storing simple API keys in the `user:` or `app:` state is a sufficient and simpler alternative.
+
+> **Going Further:** this module's lab doesn't exercise Credential Management hands-on — setting up a real OAuth flow is more infrastructure than a single lab warrants. If you want to try it, wire up `save_credential`/`load_credential` around a real third-party OAuth provider and confirm a tool can use the stored token on a later call, in a later session.
 
 ### Key Takeaways
 - The ADK's **Artifacts** system provides persistent, versioned file storage for agents.

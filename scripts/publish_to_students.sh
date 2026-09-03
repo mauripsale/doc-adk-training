@@ -29,28 +29,19 @@ echo -e "${GREEN}🔄 Switching to 'main' and merging changes from 'solution'...
 git checkout main
 git pull origin main
 
-# Merge solution into main
-# We use --no-commit to allow us to remove the solution files before finalizing if needed,
-# or simply to have a chance to clean up immediately after.
-# Actually, better strategy: Merge, then force remove.
-git merge solution --no-edit || {
-    echo -e "${RED}💥 Merge conflict! Please resolve conflicts manually, remove solution files if re-added, and commit.${NC}"
-    exit 1
+# Merge solution into main with -X theirs strategy to accept solution as single source of truth
+git merge solution -X theirs --no-commit --no-edit || {
+    echo -e "${YELLOW}⚠️ Handling conflict cleanup automatically...${NC}"
+    git checkout --theirs . 2>/dev/null || true
 }
 
 # 3. Clean up solution files
 echo -e "${YELLOW}🧹 Ensuring no solution files exist in 'main'...${NC}"
-find . -name "lab-solution.md" -type f -print0 | xargs -0 git rm -f --ignore-unmatch
+find . -name "lab-solution.md" -type f -delete
+git add -A
+git commit -m "chore: sync updates from solution to main without solutions" || echo "Nothing to commit"
 
-# 4. Commit the cleanup if there are changes (i.e. if the merge brought back solution files)
-if [[ -n $(git status --porcelain) ]]; then
-    echo -e "${GREEN}💾 Committing removal of solution files...${NC}"
-    git commit -m "chore: Remove solution files after merge from solution"
-else
-    echo -e "${GREEN}✨ No solution files needed removal.${NC}"
-fi
-
-# 5. Push to origin
+# 4. Push to origin
 echo -e "${GREEN}⬆️ Pushing 'main' to origin...${NC}"
 git push origin main
 

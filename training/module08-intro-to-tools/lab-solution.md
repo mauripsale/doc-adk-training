@@ -125,7 +125,7 @@ To use the `google_search` tool, you need to enable the **Vertex AI API** in you
     *   Ask a question that the LLM wouldn't know from its training data:
         *   "Who won the last Super Bowl?"
         *   "What are the latest headlines about space exploration?"
-    *   **Examine the Trace View:** Click on the "Trace" tab. You will see a new step in the execution flow: `execute_tool`. Expand it to see that the `google_search` tool was called, confirming the agent is using its new tool correctly.
+    *   **Examine the Trace View:** Click on the "Trace" tab. Unlike a custom function tool, `google_search` is a **server-side grounding tool** — Gemini itself performs the search, so you won't see a separate `execute_tool` span for it. Instead, expand the `call_llm` (`generate_content`) span: its response payload includes `groundingMetadata` (with `web_search_queries` and grounding chunks/citations), which is your evidence that the model actually invoked Google Search while producing its answer. You can also confirm it from the final response itself, since grounded answers typically include inline citations or links back to source pages.
 
 ### Lab Summary
 

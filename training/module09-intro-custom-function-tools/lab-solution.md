@@ -11,11 +11,10 @@ This file contains the complete, step-by-step guide to creating the "Calculator"
 
 ### Step 1: Create the Calculator Agent Project
 
-1.  **Initialize the project:**
+1.  **Create the agent project:**
     ```shell
-    uv init calculator_agent --python 3.10
+    uv run adk create calculator_agent
     cd calculator_agent
-    uv add "google-adk>=2.1.0" python-dotenv
     ```
 
 2.  **Set up authentication:**
@@ -74,7 +73,7 @@ Open `agent.py` and replace its contents with the following. We use the modern *
 
 ```python
 from google.adk import Agent
-from tools.calculator import add, subtract, multiply, divide
+from .tools.calculator import add, subtract, multiply, divide
 
 root_agent = Agent(
     name="calculator_agent",

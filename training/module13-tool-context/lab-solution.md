@@ -34,7 +34,7 @@ def execute_investment(amount: float, tool_context: ToolContext) -> str:
 ```python
 from google.adk import Agent, Workflow
 from google.adk.tools import FunctionTool
-from tools.finance import execute_investment
+from .tools.finance import execute_investment
 
 # 1. Define the Specialist Node (Supervisor)
 supervisor = Agent(

@@ -16,19 +16,19 @@ The primary source for all information related to the Google Agent Development K
 *   [About the ADK](https://google.github.io/adk-docs/get-started/about)
 *   [Installation Guide](https://google.github.io/adk-docs/get-started/installation)
 *   [Quickstart Tutorial](https://google.github.io/adk-docs/get-started/quickstart)
-*   [Agent](https://google.github.io/adk-docs/agents/llm-agent)
+*   [Agent](https://google.github.io/adk-docs/agents/llm-agents)
 *   [Built-in Tools](https://google.github.io/adk-docs/tools/built-in-tools)
 *   [Function Tools](https://google.github.io/adk-docs/tools/function-tools)
 
 ***Scavenger Hunt Answer:***
-> For the `hello_world` example, the agent is run as a Python module. The main function used to run the agent is `main()` within the `main.py` file. The command to run it would be `python -m contributing.samples.hello_world.main`.
+> The `contributing/samples/core/hello_world` sample doesn't include a standalone `main.py` script. Instead, `README.md`'s "Running and Inspecting the Agent Programmatically" section shows the entry-point pattern: an `InMemoryRunner` is created around the agent, a session is created via `runner.session_service.create_session(...)`, and the agent is actually run by iterating `async for event in runner.run_async(user_id=..., session_id=..., new_message=...)`. So the key entry point is the `Runner`'s `run_async()` method, not a `main()` function.
 
 ### 2. Official Code Repositories
 
 The source code, examples, and issue trackers for the ADK.
 
 *   **ADK Python Repository:** [https://github.com/google/adk-python](https://github.com/google/adk-python)
-*   **Hello World Example:** [https://github.com/google/adk-python/tree/main/contributing/samples/hello_world](https://github.com/google/adk-python/tree/main/contributing/samples/hello_world)
+*   **Hello World Example:** [https://github.com/google/adk-python/tree/main/contributing/samples/core/hello_world](https://github.com/google/adk-python/tree/main/contributing/samples/core/hello_world)
 
 ### 3. Community and Support
 

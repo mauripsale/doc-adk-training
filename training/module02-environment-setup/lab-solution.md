@@ -22,7 +22,8 @@ Make sure you have an IDE installed and open.
 ```bash
 uv --version
 ```
-**Requirement:** You must see the `uv` version printed. If not, follow the installation instructions in the lab challenge. `uv` handles Python installation automatically, so you no longer need to worry about checking your Python version manually!
+**Requirement:** You must see the `uv` version printed. If not, follow the installation instructions in the lab challenge. `uv` handles Python installation automatically, so you no longer need to worry about checking your Python version manually! *(Note: If you are using the DevContainer / GitHub Codespaces environment, `uv` and Python 3.11 are already pre-installed and available).*
+
 
 ## Step 2: Create the Project Structure
 
@@ -64,6 +65,8 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 *Note: If using Agent Platform, ensure you have run `gcloud auth application-default login`.*
 
+> **Note on `adk create` and `.env` variables:** Later modules use `uv run adk create <name>` to scaffold a project. That command is an **interactive wizard** — it will prompt you for choices like the model, backend, GCP project, and region, so don't be surprised when it asks questions instead of just running silently. Also, the `.env` file it auto-generates may show `GOOGLE_GENAI_USE_ENTERPRISE=1` instead of the `GOOGLE_GENAI_USE_VERTEXAI=1` used above. Both variables are real and fully supported — they are functionally equivalent ways of telling the ADK to use Vertex AI/Agent Platform. If you see `GOOGLE_GENAI_USE_ENTERPRISE=1` in a generated `.env` file, that's fine; there's no need to "fix" it to match the `GOOGLE_GENAI_USE_VERTEXAI=1` shown elsewhere in the docs.
+
 ## Step 5: Run Verification
 
 Create `verify_setup.py` (using the modern `Agent` and `App` patterns) and run it using `uv run`. `uv run` ensures the script is executed using the exact Python version (3.10) and dependencies stored in your virtual environment.
@@ -86,6 +89,7 @@ If you see a `404 NOT_FOUND` error for `gemini-3.5-flash`, it is likely a region
 1.  Open your `.env` file.
 2.  Update `GOOGLE_CLOUD_LOCATION` to a region where the model is available (e.g., `us-east4`, `us-west1`, or `europe-west9`).
 3.  Run the verification script again.
+4.  If switching regions doesn't resolve it, the model may simply not be enabled/allowlisted for your specific GCP project at all. Check the Vertex AI Model Garden in your project, or contact your project admin to confirm access.
 
 ---
 

@@ -22,11 +22,9 @@ In this lab, you will build a distributed multi-agent system. You will create a 
     ```
 
 2.  **Install Server Dependencies:**
-    Navigate into the `research_specialist` directory and install `uvicorn`, which is needed to run the agent as a web server.
+    From your `adk-training` root, install `uvicorn`, which is needed to run the agent as a web server (plain `pip install` fails on PEP 668-managed Pythons and doesn't reach your `uv`-managed venv anyway):
     ```shell
-    cd research_specialist
-    pip install uvicorn sse_starlette google-adk[a2a]
-    cd ..
+    uv add uvicorn sse-starlette "google-adk[a2a]"
     ```
 
 ### Step 2: Build the Research Specialist (The Server)
@@ -71,7 +69,7 @@ coordinator = ...
 # TODO: 3. Build the Distributed Workflow Graph (edges START -> coordinator)
 root_agent = ...
 ```
-**Action:** Create a `.env` file in this directory for the orchestrator's Gemini model.
+**Action:** Confirm the `.env` file `adk create` generated in this directory is configured for the orchestrator's Gemini model.
 
 ### Step 4: Run and Test the Distributed System
 
@@ -86,7 +84,7 @@ This requires two separate terminals.
     *   Run `uv run adk web a2a_orchestrator`.
 
 3.  **Interact with the System:**
-    *   Open the Dev UI for the orchestrator (`http://localhost:8080`).
+    *   Open the Dev UI for the orchestrator (`http://localhost:8000` -- `adk web`'s default port).
     *   Give it a research task, like: "Please research the latest advancements in quantum computing."
     *   Observe the **Trace View** to confirm that the `orchestrator_agent` successfully delegates the task to the `remote_researcher`.
 

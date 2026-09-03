@@ -20,7 +20,7 @@ In this lab, you will work with an agent that has been given misleading instruct
     ```shell
     uv run adk create retry_agent
     ```
-    When prompted to choose a type for the root agent, choose **2. Code**.
+    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
 
 2.  **Navigate to the directory:**
     ```shell

@@ -45,12 +45,16 @@ You will use the **App and Runner** pattern you learned in Module 6 to build a P
 
 ```python
 import asyncio
+import logging
 import os
 from google.adk import Agent
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 from dotenv import load_dotenv
+
+# Optional: Suppress noisy ADK/httpx logs
+logging.getLogger("google.adk").setLevel(logging.WARNING)
 
 # Helper function to load an image from a local file path
 def load_image_from_file(path: str) -> types.Part:
@@ -127,6 +131,8 @@ async def main():
 if __name__ == '__main__':
     asyncio.run(main())
 ```
+
+> **Cleanup:** Unlike other modules, this lab's project was created directly inside `module07-multimodal-and-images/` (the actual course repo folder) rather than in your separate `adk-training` scratch directory. Once you're done, delete `visual_catalog/`, `.venv/`, `pyproject.toml`, and `uv.lock` from inside this module's folder so they don't accidentally get committed to the repo.
 
 ### Lab Summary
 You have successfully built a multimodal agent! You have learned:

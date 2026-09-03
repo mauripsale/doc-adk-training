@@ -26,7 +26,7 @@ In this lab, you will build a **Document Processor** agent that uses a multi-ste
     ```shell
     uv run adk create doc_processor
     ```
-    When prompted to choose a type for the root agent, choose **2. Code**.
+    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
 
 2.  **Navigate into the new directory:**
     ```shell

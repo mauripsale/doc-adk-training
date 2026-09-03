@@ -30,16 +30,16 @@ While the `name` and `model` are essential, the **`instruction`** parameter is w
 A well-crafted instruction tells the agent:
 
 *   **Its Persona:** How should it behave? Is it a formal assistant, a witty pirate, a helpful teacher?
-    *   *Example:* `"You are a cheerful and enthusiastic assistant."*
+    *   *Example:* `"You are a cheerful and enthusiastic assistant."`
 *   **Its Core Goal:** What is its primary function?
-    *   *Example:* `"Your main goal is to help users find information about movies."*
+    *   *Example:* `"Your main goal is to help users find information about movies."`
 *   **Its Constraints and Rules:** What should it *not* do? Are there topics it should avoid?
-    *   *Example:* `"You must never give financial advice. If asked, politely decline."*
+    *   *Example:* `"You must never give financial advice. If asked, politely decline."`
     *   **Production Readiness:** Defining clear constraints is a critical practice for ensuring the safety and reliability of an agent in a production environment.
 *   **Its Process:** If the task involves multiple steps, you can outline them.
-    *   *Example:* `"First, ask the user for their location. Second, find the weather for that location. Third, report the weather to the user."*
+    *   *Example:* `"First, ask the user for their location. Second, find the weather for that location. Third, report the weather to the user."`
 *   **Its Output Format:** How should it format its responses?
-    *   *Example:* `"Always present your final answer as a JSON object with a 'result' key."*
+    *   *Example:* `"Always present your final answer as a JSON object with a 'result' key."`
 
 ### Tips for Effective Instructions (Prompt Engineering)
 

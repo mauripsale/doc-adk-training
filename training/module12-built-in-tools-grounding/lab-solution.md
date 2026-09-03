@@ -118,11 +118,10 @@ if __name__ == "__main__":
 
 ### Testing the Solution
 
-1.  Initialize the project:
+1.  Create the agent project:
     ```bash
-    uv init research_assistant --python 3.10
+    uv run adk create research_assistant
     cd research_assistant
-    uv add "google-adk>=2.1.0" python-dotenv
     ```
 2.  Configure `.env` for Vertex AI.
 3.  Run the script:

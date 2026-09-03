@@ -27,6 +27,7 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
     ```shell
     uv run adk create echo_agent
     ```
+    > **Note:** This is an interactive wizard — it will prompt you for choices like the model, backend, GCP project, and region. Answer the prompts as they appear.
 2.  Follow the **Python Approach** below to define the agent's behavior.
 3.  **Instruction Strategy:** Craft an instruction that forces the agent to only echo and explicitly forbids it from answering questions or being helpful.
 4.  Configure the `.env` file with your Google API key or Google Cloud project details.
@@ -45,6 +46,7 @@ from google.adk import Agent
 root_agent = Agent(
     name=...,  # TODO: Give your agent a name (e.g., "echo_agent")
     model=..., # TODO: Specify the model to use (e.g., "gemini-3.5-flash")
+    description=...,  # TODO: Provide a short description of what the agent does.
     instruction=...,  # TODO: Provide the instruction for the echo agent.
 )
 ```

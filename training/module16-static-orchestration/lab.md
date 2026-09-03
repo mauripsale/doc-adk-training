@@ -59,6 +59,8 @@ summarizer = ...
 
 **Exercise:** Complete the `root_agent` definition using the `edges` parameter to implement the Fan-out/Join pattern.
 
+> **Tip:** A 3-element edge tuple `(A, B, C)` is shorthand for two chained edges, `A → B` and `B → C`. So a parallel branch that both starts at `"START"` and converges on the `syncer` can be written as one tuple, `("START", tech_researcher, syncer)`, instead of two separate tuples.
+
 ```python
 # 1. Create the synchronization point
 syncer = JoinNode(name="news_sync")
@@ -89,12 +91,15 @@ root_agent = Workflow(
 2.  **Test:** Send the prompt "Give me today's update."
 3.  **Inspect:** Open the **Graph View**. Verify that the researchers start at the same time and the summarizer only runs after both finish.
 
+> **Known issue (upstream `google-adk` 2.8.0):** the main static **Graph View** tab works fine for `Workflow`/`JoinNode` graphs like this one. However, clicking into an individual event's Graph inspector (the per-event highlight view in the Trace) currently throws a 500 error -- `AttributeError: 'Workflow' object has no attribute '_graph'` -- for this graph type specifically. This is an upstream ADK tooling bug, not something you did wrong. Workaround: use the main Graph View tab to inspect the overall structure instead of the per-event inspector.
+
 ### Lab Summary
 
 You have built a hybrid multi-agent graph!
 - You mastered **Fan-out** by defining multiple edges from START.
 - You mastered **Fan-in** using the **`JoinNode`**.
 - You learned that sequential and parallel execution are just different edge configurations.
+- **A few things worth internalizing:** the `JoinNode` waits for *every* incoming edge -- if one parallel branch fails, it won't fire, so production graphs need retry/error handling to guarantee convergence. Adding a third parallel branch (e.g. a `sports_researcher`) is just one more `("START", sports_researcher, syncer)` edge -- the `syncer` automatically waits for all of them. And `output_key` matters specifically *because* a `JoinNode` merges multiple upstream outputs into one: it saves each branch's result into session state under its own name, so the `summarizer` can reliably pull `{tech_news}` and `{market_news}` as separate variables instead of one ambiguous blob.
 
 <hr/>
 

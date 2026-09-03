@@ -11,25 +11,29 @@ Before you begin, ensure you have the following tools ready:
     *   [VS Code](https://code.visualstudio.com/) (Local)
     *   [Project IDX](https://idx.dev/) (Cloud-based)
     *   [Google Cloud Shell Editor](https://shell.cloud.google.com/) (Cloud-based)
-*   **uv:** You must install the `uv` package manager. If you don't have it, install it via your terminal:
-    *   macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-    *   Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
+*   **Environment Choice (Pick one - see README for full step-by-step guides):**
+    *   **Option A — GitHub Codespaces (1-Click in Browser):** Open repo on GitHub → Click **`<> Code`** → **Codespaces** → **"Create codespace"**. Ready in under 1 minute without installing anything locally!
+    *   **Option B — VS Code Dev Containers (Local Docker):** Open the repo in VS Code with Docker Desktop running and click **"Reopen in Container"**.
+    *   **Option C — Standard Local Setup (`uv` on Host OS):** Install `uv` via terminal:
+        *   macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+        *   Windows (PowerShell): `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`
 
 ## Goal
-Your task is to prepare your local machine for enterprise agent development using modern tools. Try to complete the steps below using your existing knowledge. If you get stuck, the `lab-solution.md` file provides a detailed, step-by-step walkthrough.
+Your task is to prepare your environment for enterprise agent development using modern tools. Try to complete the steps below using your existing knowledge. If you get stuck, the `lab-solution.md` file provides a detailed, step-by-step walkthrough.
 
 ## Lab Tasks
 
 ### Step 0: Ensure Python 3.10+ (Crucial)
 Before you start, you must ensure you are using a modern version of Python. The ADK **requires Python 3.10 or higher**. Using older versions (like 3.9) will result in numerous warnings and potential crashes.
 
-Fortunately, `uv` makes this easy. Even if your system doesn't have Python 3.10, you can tell `uv` to install and use it for your project.
+Fortunately, `uv` makes this easy. Even if your system doesn't have Python 3.10, you can tell `uv` to install and use it for your project. (If you are using Codespaces or DevContainer, Python 3.11 is already the active default).
 
 ### Step 1: Create the Project Structure with `uv`
 1.  Use `uv` to initialize a new Python project named `adk-training`. Use the `--python 3.10` flag to guarantee you meet the ADK's requirements:
     ```bash
     uv init adk-training --python 3.10
     ```
+    *(Note: Run this in your terminal — whether on your local host or inside the DevContainer/Codespaces terminal)*.
 2.  Navigate into the `adk-training` directory.
 3.  Use `uv add` to install the modern ADK and dotenv:
     ```bash
@@ -56,6 +60,8 @@ Create a file named `.env` in your `adk-training` directory. This file will secu
     GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
     GOOGLE_CLOUD_LOCATION="us-central1"
     ```
+
+> **Note on `adk create` and `.env` variables:** Later modules use `uv run adk create <name>` to scaffold a project. That command is an **interactive wizard** — it will prompt you for choices like the model, backend, GCP project, and region, so don't be surprised when it asks questions instead of just running silently. Also, the `.env` file it auto-generates may show `GOOGLE_GENAI_USE_ENTERPRISE=1` instead of the `GOOGLE_GENAI_USE_VERTEXAI=1` used in this lab's examples. Both variables are real and fully supported — they are functionally equivalent ways of telling the ADK to use Vertex AI/Agent Platform. If you see `GOOGLE_GENAI_USE_ENTERPRISE=1` in a generated `.env` file, that's fine; there's no need to "fix" it to match the `GOOGLE_GENAI_USE_VERTEXAI=1` shown elsewhere in the docs.
 
 ### Step 3: Verification Script
 
@@ -131,6 +137,7 @@ If you see an error like `Publisher Model ... gemini-3.5-flash was not found`, i
 1.  Open your `.env` file.
 2.  Change `GOOGLE_CLOUD_LOCATION` to a different supported region, such as `us-east4`, `us-west1`, or `europe-west9`.
 3.  Run the verification script again.
+4.  If switching regions doesn't resolve it, the model may simply not be enabled/allowlisted for your specific GCP project at all. Check the Vertex AI Model Garden in your project, or contact your project admin to confirm access.
 
 > **Note:** You might see a `UserWarning` regarding an `[EXPERIMENTAL]` feature (like `PLUGGABLE_AUTH`). You can safely ignore this; it is just the ADK informing you of its internal development state and does not affect your lab.
 

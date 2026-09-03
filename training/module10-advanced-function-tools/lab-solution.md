@@ -37,7 +37,7 @@ def recall_name(tool_context: ToolContext) -> str:
 
 ```python
 from google.adk import Agent
-from tools.memory import store_name, recall_name
+from .tools.memory import store_name, recall_name
 
 root_agent = Agent(
     name="memory_agent",

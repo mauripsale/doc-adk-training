@@ -97,7 +97,7 @@ def divide(a: int, b: int) -> dict:
 ```python
 # In agent.py
 from google.adk import Agent
-from tools.calculator import add, subtract, multiply, divide
+from .tools.calculator import add, subtract, multiply, divide
 
 root_agent = Agent(
     name="calculator_agent",

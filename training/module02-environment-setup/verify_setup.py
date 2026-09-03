@@ -17,7 +17,7 @@ async def main():
         major_version = int(version.split('.')[0])
         if major_version < 2:
             print(f"❌ Error: This course requires ADK version 2.0 or higher. You have {version}.")
-            print("Please run: uv pip install -U 'google-adk>=2.1.0'")
+            print("Please run: uv add 'google-adk>=2.1.0'")
             sys.exit(1)
 
         print("✅ ADK 2.0+ is installed correctly.")

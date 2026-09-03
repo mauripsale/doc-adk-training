@@ -13,12 +13,16 @@ This file contains the complete code for the `main.py` script in the Visual Prod
 
 ```python
 import asyncio
+import logging
 import os
 from google.adk import Agent
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.genai import types
 from dotenv import load_dotenv
+
+# Optional: Suppress noisy ADK/httpx logs
+logging.getLogger("google.adk").setLevel(logging.WARNING)
 
 # Helper function to load an image from a local file path
 def load_image_from_file(path: str) -> types.Part:
@@ -108,6 +112,8 @@ async def main():
 if __name__ == '__main__':
     asyncio.run(main())
 ```
+
+> **Cleanup:** Unlike other modules, this project lives directly inside `module07-multimodal-and-images/` (the actual course repo folder) rather than in a separate `adk-training` scratch directory. Once you're done, delete `visual_catalog/`, `.venv/`, `pyproject.toml`, and `uv.lock` from inside this module's folder so they don't accidentally get committed to the repo.
 
 ### Self-Reflection Answers
 

@@ -31,7 +31,7 @@ You will build a tutor that:
     ```shell
     uv run adk create personal_tutor
     ```
-    When prompted to choose a type for the root agent, choose **2. Code**.
+    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
 
 2.  **Navigate into the new directory:**
     ```shell

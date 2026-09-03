@@ -38,10 +38,8 @@ First, let's define what each agent in our system will do.
 
 *   **Purpose:** This is our specialist sub-agent. Its only job is to provide a friendly greeting in Spanish.
 *   **Type:** **`Agent`**.
-*   **Description (for the router):** This is a critical piece of information. The `router_agent`'s LLM will read this description to understand what the `spanish_greeter_agent` is capable of. A good description would be:
-    ```
-    "An expert at providing friendly greetings in Spanish."
-    ```
+*   **Description (for the router):** This is a critical piece of information -- the `router_agent`'s LLM reads this description to decide whether this specialist is the right match for a given request.
+    **Your task:** write this description yourself, in one sentence, before moving on. A good description is specific and action-oriented (what does this agent actually *do*?) and would clearly distinguish it from any other specialist you might add later (say, a future `french_greeter_agent`). Jot it down here -- you'll reuse it in Step 3's plan and in the next module's implementation. (Check the `lab-solution.md` file for one example of a description that works well, once you've written your own.)
 *   **Initial Instruction Idea:**
     ```
     You are a friendly assistant who only speaks Spanish.
@@ -59,7 +57,7 @@ Now, let's trace the path of a user's request through our designed system.
 1.  **User Input:** The user starts a conversation with the `router_agent` and says: `"Can you greet me in Spanish?"`
 2.  **Router Receives:** The ADK's runner passes this input to the `router_agent`.
 3.  **Router Reasons:** The `router_agent`'s LLM receives the user input, its own instruction, and the list of available sub-agents along with their descriptions.
-4.  **Router Delegates:** Based on its instructions ("If the user asks for... Spanish, ...delegate to the `spanish_greeter_agent`") and the sub-agent's description ("...expert at... greetings in Spanish"), the LLM decides to perform an **agent transfer**.
+4.  **Router Delegates:** Based on its instructions ("If the user asks for... Spanish, ...delegate to the `spanish_greeter_agent`") and the description you wrote for the sub-agent in Step 1, the LLM decides to perform an **agent transfer**.
 5.  **Framework Transfers Control:** The ADK framework intercepts this decision and transfers control of the conversation to the `spanish_greeter_agent`.
 6.  **Specialist Executes:** The `spanish_greeter_agent` now takes over. It executes its own instruction ("greet the user warmly in Spanish").
 7.  **Specialist Responds:** The `spanish_greeter_agent` generates the final response to the user, such as `"¡Hola, mucho gusto!"`
@@ -112,7 +110,7 @@ In the next module, you will bring this design to life by implementing this Gree
 ### Self-Reflection Questions
 - What is the most important piece of information that allows the `router_agent` to decide which specialist to delegate to?
 - How would you extend this system to support a new language, like French? What new files or modifications would you need to make?
-- This lab uses LLM-driven delegation (agent transfer). What might be the advantages or disadvantages of this approach compared to the `router_agent` using an `AgentTool` to explicitly call the `spanish_greeter_agent`?
+- This lab uses LLM-driven delegation (agent transfer). What might be the advantages or disadvantages of this approach compared to the `router_agent` using an `AgentTool` to explicitly call the `spanish_greeter_agent`? (You haven't built an `AgentTool` yet -- Module 19 covers it in depth. For now, just think about the difference between a permanent, one-way *handoff* to another agent versus calling that agent like a function and getting a result back so you can keep working.)
 
 <hr/>
 

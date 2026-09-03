@@ -93,6 +93,8 @@ root_agent = Agent(
     *   "What is the theory of relativity?"
 2.  **Examine the Trace View** to confirm that the `WikipediaQueryRun` tool was called.
 
+> **If the tool call still fails** with a network or JSON error even after setting the `User-Agent`, wait a few seconds and try again. Wikimedia occasionally rate-limits shared or cloud IP ranges (like Cloud Shell or CI runners) regardless of a correctly-set `User-Agent` -- this is a separate, transient issue from the User-Agent fix above, and it usually clears up on retry.
+
 ### Having Trouble?
 
 If you get stuck, you can find the complete, working code in the `lab-solution.md` file.

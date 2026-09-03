@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-module05-running-agents/lab-solution" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Lab Solution | ADK: From Zero to Hero</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://mauripsale.github.io/doc-adk-training/img/social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://mauripsale.github.io/doc-adk-training/img/social-card.jpg"><meta data-rh="true" property="og:url" content="https://mauripsale.github.io/doc-adk-training/docs/module05-running-agents/lab-solution"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Lab Solution | ADK: From Zero to Hero"><meta data-rh="true" name="description" content="Goal"><meta data-rh="true" property="og:description" content="Goal"><link data-rh="true" rel="icon" href="/doc-adk-training/img/favicon.png"><link data-rh="true" rel="canonical" href="https://mauripsale.github.io/doc-adk-training/docs/module05-running-agents/lab-solution"><link data-rh="true" rel="alternate" href="https://mauripsale.github.io/doc-adk-training/docs/module05-running-agents/lab-solution" hreflang="en"><link data-rh="true" rel="alternate" href="https://mauripsale.github.io/doc-adk-training/docs/module05-running-agents/lab-solution" hreflang="x-default"><link rel="stylesheet" href="/doc-adk-training/assets/css/styles.9ff12705.css">
+<script src="/doc-adk-training/assets/js/runtime~main.a5f8d605.js" defer="defer"></script>
+<script src="/doc-adk-training/assets/js/main.adc95e2d.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/doc-adk-training/"><div class="navbar__logo"><img src="/doc-adk-training/img/favicon.png" alt="Maurizio Ipsale" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/doc-adk-training/img/favicon.png" alt="Maurizio Ipsale" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">ADK: From Zero to Hero</b></a><a class="navbar__item navbar__link" href="/doc-adk-training/docs/module01-intro-to-ai-agents/">Modules</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/mauripsale/doc-adk-training" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><main class="docMainContainer_TBSr docMainContainerEnhanced_lQrH"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>Lab 5 Solution: Exploring Different Execution Modes</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="goal">Goal<a href="#goal" class="hash-link" aria-label="Direct link to Goal" title="Direct link to Goal" translate="no">​</a></h2>
+<p>In this lab, you will learn how to run and interact with your <strong>&quot;Support Analyzer&quot;</strong> agent using the three primary execution modes provided by the ADK CLI: <code>uv run adk web</code>, <code>uv run adk run</code>, and <code>uv run adk api_server</code>.</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="prerequisites">Prerequisites<a href="#prerequisites" class="hash-link" aria-label="Direct link to Prerequisites" title="Direct link to Prerequisites" translate="no">​</a></h2>
+<ul>
+<li class="">You have successfully completed Module 4.</li>
+<li class="">You have the <code>support_analyzer</code> configured in your <code>adk-training</code> directory.</li>
+<li class="">Your virtual environment is active.</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="part-1-interactive-development-with-uv-run-adk-web">Part 1: Interactive Development with <code>uv run adk web</code><a href="#part-1-interactive-development-with-uv-run-adk-web" class="hash-link" aria-label="Direct link to part-1-interactive-development-with-uv-run-adk-web" title="Direct link to part-1-interactive-development-with-uv-run-adk-web" translate="no">​</a></h2>
+<p>This is the mode you&#x27;ve used so far. Let&#x27;s explore its features more deeply.</p>
+<ol>
+<li class="">
+<p><strong>Navigate to your project directory:</strong>
+Make sure you are in your main <code>adk-training</code> directory.</p>
+<div class="language-shell codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">cd /path/to/your/adk-training</span><br></span></code></pre></div></div>
+</li>
+<li class="">
+<p><strong>Start the web UI:</strong>
+Run the command from the parent directory. When run from the parent, the ADK will discover all agents in the subdirectories.</p>
+<div class="language-shell codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">uv run adk web</span><br></span></code></pre></div></div>
+</li>
+<li class="">
+<p><strong>Explore the Dev UI:</strong></p>
+<ul>
+<li class="">Open the UI in your browser (<code>http://127.0.0.1:8000</code>).</li>
+<li class="">Select <code>support_analyzer</code> from the dropdown menu if it&#x27;s not already selected.</li>
+<li class="">Have a short conversation with your analyzer agent.</li>
+<li class=""><strong>Trace View:</strong> On the right side of the screen, click on the &quot;Trace&quot; tab. You will see a waterfall diagram. Click on the <strong>Agent</strong> node to expand it. Here you can see the full prompt sent to the Gemini model, including your detailed instruction and the user&#x27;s message. This view is critical for debugging why an agent behaves a certain way.</li>
+<li class=""><strong>State View:</strong> Click the &quot;State&quot; tab. This view shows the agent&#x27;s short-term memory for the current conversation. You should see the <code>last_ticket_analysis</code> key populated with JSON.</li>
+</ul>
+</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="part-2-headless-interaction-with-uv-run-adk-run">Part 2: Headless Interaction with <code>uv run adk run</code><a href="#part-2-headless-interaction-with-uv-run-adk-run" class="hash-link" aria-label="Direct link to part-2-headless-interaction-with-uv-run-adk-run" title="Direct link to part-2-headless-interaction-with-uv-run-adk-run" translate="no">​</a></h2>
+<p>Now, let&#x27;s chat with the agent directly in the terminal.</p>
+<ol>
+<li class="">
+<p><strong>Stop the web server:</strong>
+Go back to your terminal where <code>uv run adk web</code> is running and press <code>Ctrl+C</code> to stop it.</p>
+</li>
+<li class="">
+<p><strong>Start the command-line runner:</strong>
+Again, run this from the parent <code>adk-training</code> directory.</p>
+<div class="language-shell codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">uv run adk run support_analyzer</span><br></span></code></pre></div></div>
+</li>
+<li class="">
+<p><strong>Chat with the agent:</strong></p>
+<ul>
+<li class="">You will see a prompt like <code>[user]:</code>.</li>
+<li class="">Type a message, for example: <code>My bill is way too high this month!</code></li>
+<li class="">The agent will respond directly in the terminal with a JSON object.</li>
+<li class="">To exit, press <code>Ctrl+C</code>.</li>
+</ul>
+</li>
+</ol>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="part-3-running-as-a-service-with-uv-run-adk-api_server">Part 3: Running as a Service with <code>uv run adk api_server</code><a href="#part-3-running-as-a-service-with-uv-run-adk-api_server" class="hash-link" aria-label="Direct link to part-3-running-as-a-service-with-uv-run-adk-api_server" title="Direct link to part-3-running-as-a-service-with-uv-run-adk-api_server" translate="no">​</a></h2>
+<p>Finally, let&#x27;s run the agent as a background service. This mode is the foundation for production deployments where your agent acts as a backend API for other applications.</p>
+<ol>
+<li class="">
+<p><strong>Start the API server:</strong>
+From the <code>adk-training</code> directory, run:</p>
+<div class="language-shell codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-shell codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">uv run adk api_server</span><br></span></code></pre></div></div>
+<p>The server will start and listen for HTTP requests on <code>http://127.0.0.1:8000</code>.</p>
+</li>
+<li class="">
+<p><strong>Interact with the API (Step A: The Intentional Failure):</strong></p>
+<ul>
+<li class="">Open a <strong>new, separate terminal window</strong>.</li>
+<li class="">Try to send a message to the agent immediately using <code>curl</code>:<!-- -->
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">curl -X POST http://127.0.0.1:8000/run_sse \</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">     -H &quot;Content-Type: application/json&quot; \</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">     -d &#x27;{</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;app_name&quot;: &quot;support_analyzer&quot;,</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;user_id&quot;: &quot;test_user&quot;,</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;session_id&quot;: &quot;missing_session&quot;,</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;new_message&quot;: {&quot;role&quot;: &quot;user&quot;, &quot;parts&quot;: [{&quot;text&quot;: &quot;Hello&quot;}]}</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">         }&#x27;</span><br></span></code></pre></div></div>
+</li>
+<li class=""><strong>The Result:</strong> You will receive an error: <code>{&quot;detail&quot;:&quot;Session not found&quot;}</code>.</li>
+<li class=""><strong>The Explanation:</strong> Unlike <code>uv run adk web</code> or <code>uv run adk run</code>, which handle session creation for you behind the scenes, the <code>api_server</code> is a raw interface. It requires an existing session to store the conversation state. If you try to talk to a session ID that hasn&#x27;t been created yet, it will fail.</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Create the Session (Step B: The Fix):</strong></p>
+<ul>
+<li class="">Before sending a message, you must explicitly create the session resource. Run this command:<!-- -->
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">curl -X POST http://127.0.0.1:8000/apps/support_analyzer/users/test_user/sessions/test_session</span><br></span></code></pre></div></div>
+</li>
+<li class=""><strong>The Result:</strong> You should receive the newly-created session as JSON (e.g. <code>{&quot;id&quot;:&quot;test_session&quot;,&quot;appName&quot;:&quot;support_analyzer&quot;,&quot;userId&quot;:&quot;test_user&quot;,&quot;state&quot;:{},&quot;events&quot;:[],&quot;lastUpdateTime&quot;:...}</code>). This tells you the server has allocated memory (or database space) for a conversation named <code>test_session</code>.</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Send the Message (Step C: Success):</strong></p>
+<ul>
+<li class="">Now, run the message command again, ensuring the <code>session_id</code> matches the one you just created (<code>test_session</code>):<!-- -->
+<div class="language-bash codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#bfc7d5;--prism-background-color:#292d3e"><div class="codeBlockContent_QJqH"><pre tabindex="0" class="prism-code language-bash codeBlock_bY9V thin-scrollbar" style="color:#bfc7d5;background-color:#292d3e"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#bfc7d5"><span class="token plain">curl -X POST http://127.0.0.1:8000/run_sse \</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">     -H &quot;Content-Type: application/json&quot; \</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">     -d &#x27;{</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;app_name&quot;: &quot;support_analyzer&quot;,</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;user_id&quot;: &quot;test_user&quot;,</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;session_id&quot;: &quot;test_session&quot;,</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">           &quot;new_message&quot;: {&quot;role&quot;: &quot;user&quot;, &quot;parts&quot;: [{&quot;text&quot;: &quot;I can&#x27;t log in to my account.&quot;}]}</span><br></span><span class="token-line" style="color:#bfc7d5"><span class="token plain">         }&#x27;</span><br></span></code></pre></div></div>
+</li>
+<li class=""><strong>The Result:</strong> You will see a stream of JSON events. Look for the one where <code>is_final_response()</code> would be true if you were consuming this programmatically -- concretely, the event whose <code>content.parts[0].text</code> holds the final structured JSON analysis (it also carries <code>&quot;author&quot;: &quot;support_analyzer_agent&quot;</code> and no <code>partial: true</code> flag).</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Stop the API server:</strong>
+Go back to the first terminal and press <code>Ctrl+C</code>.</p>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="self-reflection-answers">Self-Reflection Answers<a href="#self-reflection-answers" class="hash-link" aria-label="Direct link to Self-Reflection Answers" title="Direct link to Self-Reflection Answers" translate="no">​</a></h3>
+<ol>
+<li class="">
+<p><strong>In what scenarios would the detailed &quot;Trace View&quot; in <code>uv run adk web</code> be more useful than the simple chat interface of <code>uv run adk run</code>?</strong></p>
+<ul>
+<li class=""><strong>Answer:</strong> The &quot;Trace View&quot; in <code>uv run adk web</code> is invaluable for debugging complex agent behaviors. It allows developers to see the exact sequence of events, including LLM calls, tool executions, and state changes. This is crucial when an agent isn&#x27;t behaving as expected, as it provides a granular understanding of its internal reasoning process. In contrast, <code>uv run adk run</code> is better for quick, high-level testing of an agent&#x27;s output.</li>
+</ul>
+</li>
+<li class="">
+<p><strong>The <code>curl</code> command in the <code>uv run adk api_server</code> section is a simple example of a programmatic client. What kind of real-world applications could you build that would interact with your agent&#x27;s API in this way?</strong></p>
+<ul>
+<li class=""><strong>Answer:</strong> Programmatic interaction with <code>uv run adk api_server</code> enables a wide range of real-world applications, such as:<!-- -->
+<ul>
+<li class=""><strong>Chatbots/Virtual Assistants:</strong> Integrating the agent into a custom web or mobile application.</li>
+<li class=""><strong>Automated Workflows:</strong> Triggering agent actions from other systems (e.g., a CRM, an email client).</li>
+<li class=""><strong>Backend Services:</strong> Using the agent as a component within a larger microservice architecture.</li>
+<li class=""><strong>Data Processing:</strong> Feeding structured data to the agent for analysis or transformation.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="">
+<p><strong>Why is it necessary to run the <code>uv run adk api_server</code> and the <code>curl</code> command in two separate terminal windows? What does this separation represent in a real-world application architecture?</strong></p>
+<ul>
+<li class=""><strong>Answer:</strong> Running <code>uv run adk api_server</code> and <code>curl</code> in separate terminal windows is necessary because <code>uv run adk api_server</code> starts a long-running process that occupies the terminal. The <code>curl</code> command then acts as a client, sending requests to this running server. This separation represents a fundamental architectural pattern: <strong>client-server architecture</strong>. In a real-world application, the <code>uv run adk api_server</code> would be deployed as a backend service (e.g., on Cloud Run), and the <code>curl</code> command would be analogous to a separate client application (e.g., a web frontend, a mobile app, or another backend service) making API calls to that deployed service.</li>
+</ul>
+</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="lab-summary">Lab Summary<a href="#lab-summary" class="hash-link" aria-label="Direct link to Lab Summary" title="Direct link to Lab Summary" translate="no">​</a></h3>
+<p>You have now mastered the three ways to run an ADK agent:</p>
+<ul>
+<li class=""><code>uv run adk web</code>: For interactive development and deep debugging with the Trace View.</li>
+<li class=""><code>uv run adk run &lt;agent_name&gt;</code>: For quick tests and automated scripting in the terminal.</li>
+<li class=""><code>uv run adk api_server</code>: For running your agent as a service to be integrated with other applications.</li>
+</ul></div></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#goal" class="table-of-contents__link toc-highlight">Goal</a></li><li><a href="#prerequisites" class="table-of-contents__link toc-highlight">Prerequisites</a></li><li><a href="#part-1-interactive-development-with-uv-run-adk-web" class="table-of-contents__link toc-highlight">Part 1: Interactive Development with <code>uv run adk web</code></a></li><li><a href="#part-2-headless-interaction-with-uv-run-adk-run" class="table-of-contents__link toc-highlight">Part 2: Headless Interaction with <code>uv run adk run</code></a></li><li><a href="#part-3-running-as-a-service-with-uv-run-adk-api_server" class="table-of-contents__link toc-highlight">Part 3: Running as a Service with <code>uv run adk api_server</code></a><ul><li><a href="#self-reflection-answers" class="table-of-contents__link toc-highlight">Self-Reflection Answers</a></li><li><a href="#lab-summary" class="table-of-contents__link toc-highlight">Lab Summary</a></li></ul></li></ul></div></div></div></div></main></div></div></div><footer class="theme-layout-footer footer footer--dark"><div class="container container-fluid"><div class="row footer__links"><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Course</div><ul class="footer__items clean-list"><li class="footer__item"><a class="footer__link-item" href="/doc-adk-training/docs/module01-intro-to-ai-agents/">Start Module 01</a></li><li class="footer__item"><a class="footer__link-item" href="/doc-adk-training/docs/">All Modules</a></li></ul></div><div class="theme-layout-footer-column col footer__col"><div class="footer__title">Instructor</div><ul class="footer__items clean-list"><li class="footer__item"><a href="https://www.linkedin.com/in/maurizioipsale/" target="_blank" rel="noopener noreferrer" class="footer__link-item">LinkedIn<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li><li class="footer__item"><a href="https://github.com/mauripsale/doc-adk-training" target="_blank" rel="noopener noreferrer" class="footer__link-item">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a></li></ul></div></div><div class="footer__bottom text--center"><div class="footer__copyright">Copyright © 2026 Maurizio Ipsale. Built with Docusaurus.</div></div></div></footer></div>
+</body>
+</html>

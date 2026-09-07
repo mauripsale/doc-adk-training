@@ -87,6 +87,9 @@ def after_agent_callback(callback_context: CallbackContext) -> None:
     Using the same per-input key as before_agent_callback is essential —
     otherwise a later, unrelated question would incorrectly hit the cache
     entry saved for a previous, different question.
+    Guard against event.content.parts being empty before indexing
+    parts[0] — a content object with no parts would otherwise raise an
+    IndexError.
     """
     pass
 
@@ -96,10 +99,16 @@ def before_model_callback(
 ) -> Optional[LlmResponse]:
     """
     TODO: Input Guardrail.
-    Concatenate the text of llm_request.contents and check it against
-    BLOCKED_WORDS. If a blocked word is found, print a warning and return an
-    LlmResponse with a refusal message instead of calling the model.
-    Otherwise return None.
+    Check ONLY the current turn's user input against BLOCKED_WORDS — do
+    NOT scan the full llm_request.contents history. llm_request.contents
+    holds the ENTIRE conversation so far, and once a blocked word appears
+    anywhere in it, every later turn would keep matching and get refused
+    forever, even completely unrelated questions. Mirror the pattern
+    _cache_key() uses: pull the current message via
+    callback_context.get_invocation_context().user_content, concatenate
+    its parts' text, and check only that against BLOCKED_WORDS. If a
+    blocked word is found, print a warning and return an LlmResponse with
+    a refusal message instead of calling the model. Otherwise return None.
     """
     pass
 

@@ -88,6 +88,12 @@ app = App(
 
 **Exercise:** Now, let's enable native **Cloud Trace** integration. In a real production environment, this would send data to Google Cloud. Here, we will configure the hooks.
 
+`get_gcp_exporters` needs the OpenTelemetry GCP exporter packages, which aren't installed by the base `google-adk` dependency. Install the `gcp` extra first:
+
+```shell
+uv add "google-adk[gcp]"
+```
+
 ```python
 # Add this to your agent.py imports
 from google.adk.telemetry.google_cloud import get_gcp_exporters

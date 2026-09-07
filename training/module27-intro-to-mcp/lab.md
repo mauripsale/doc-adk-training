@@ -58,10 +58,10 @@ Because the `McpToolset` requires Python code to configure the connection, we mu
 1.  **Create the `agent.py` file:**
     In the `mcp_agent` directory, create a file named `agent.py`.
 
-2.  **Create the `__init__.py` file:**
-    This empty file is crucial. It tells Python to treat the `mcp_agent` directory as a package, allowing `uv run adk web` to discover and load your `agent.py`.
+2.  **Confirm the `__init__.py` file exists:**
+    `uv run adk create` already generated this empty file for you in Step 1. It's crucial: it tells Python to treat the `mcp_agent` directory as a package, allowing `uv run adk web` to discover and load your `agent.py`.
     ```shell
-    touch __init__.py
+    ls __init__.py
     ```
 
 3.  **Complete the `agent.py` script:**
@@ -124,7 +124,7 @@ Because the `McpToolset` requires Python code to configure the connection, we mu
     *   Select the `filesystem_agent` from the dropdown.
     *   **Turn 1: List the files.**
         *   **User:** "What files are in my directory?"
-        *   **Expected Response:** The agent should respond with a message indicating that it sees `hello.txt`.
+        *   **Expected Response:** The agent should respond with a message indicating that it sees `hello.txt`. Note that the discovered `list_directory` tool takes a generic `path` argument with no hint of what "my directory" maps to, so the agent may instead ask a clarifying question like "Which directory would you like me to look into?" -- if that happens, just reply "the current directory" (or rephrase your first message to something less ambiguous, like "List the files in the directory you have access to").
     *   **Turn 2: Read the file.**
         *   **User:** "Great, can you read the content of hello.txt for me?"
         *   **Expected Response:** The agent should respond with the content of the file: "Hello from the MCP world!"

@@ -160,8 +160,12 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 
 Now, create an ADK agent that connects to your newly deployed server.
 
-1.  **Create an `agent.py` file** in the same `cloud_mcp_server` directory.
-2.  **Add the following code**, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied. Note the `/mcp` suffix -- that's where `FastMCP` mounted the endpoint in Step 1, and the client needs to hit that exact path, not just the bare service URL.
+1.  **Install the MCP client extra.** The `McpToolset` you're about to import needs the `mcp` package installed in *this* project too, not just in the server's container `requirements.txt`:
+    ```shell
+    uv add "google-adk[mcp]"
+    ```
+2.  **Create an `agent.py` file** in the same `cloud_mcp_server` directory.
+3.  **Add the following code**, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied. Note the `/mcp` suffix -- that's where `FastMCP` mounted the endpoint in Step 1, and the client needs to hit that exact path, not just the bare service URL.
 
     ```python
     # Filename: agent.py
@@ -186,7 +190,7 @@ Now, create an ADK agent that connects to your newly deployed server.
         ],
     )
     ```
-3.  **Create `__init__.py` and `.env` files:**
+4.  **Create `__init__.py` and `.env` files:**
     Create an empty `__init__.py` file in the `cloud_mcp_server` directory.
     Create a `.env` file in the `cloud_mcp_server` directory with your Vertex AI configuration:
     ```

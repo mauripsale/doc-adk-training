@@ -2425,3 +2425,617 @@ All three paths are now robustly configured and tested.
 
 
 
+
+---
+# 🎓 Student Evaluation Report: Module 25.5 - Responsible AI (RAI) & Safety Plugins
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+The theory section (README.md) is short and effective: it names the "Fail-Closed" pattern explicitly, explains the Intercept/Evaluate/Action flow, and even shows a fully worked "Competitor X" example using `event.is_final_response()` and `event.content.parts[0].text`. By the time I opened lab.md, I already understood exactly which `Event` attributes to use and why.
+
+The lab itself was a smooth, confidence-building exercise. After scaffolding the project with `uv run adk create safety_guardrail` (which interactively prompted for model/backend/project/region -- not mentioned in lab.md, but self-explanatory and not specific to this module), I opened `agent.py` and worked through the four TODOs. Because the TODO comments were unusually explicit about the API surface -- "there's no separate `event_type` field to compare against" and "events don't have a session_id field" -- I never reached for a non-existent attribute. This reads exactly like a comment a mentor would leave after having watched a previous student get burned by guessing at the API, which is a great pedagogical move.
+
+I wrote:
+```python
+async def on_event_callback(self, *, event: Event, **kwargs):
+    if not event.is_final_response():
+        return
+    if not event.content or not event.content.parts:
+        return
+    response_text = event.content.parts[0].text
+    if not response_text:
+        return
+    if self.cc_pattern.search(response_text):
+        event.content.parts[0].text = "I'm sorry, I can't share that information."
+        print(f"safety block invocation_id={event.invocation_id}")
+```
+
+I tested it live against the real API (Vertex AI, substituting `gemini-2.5-flash` for the unavailable `gemini-3.5-flash` in my own attempt only):
+* `uv run adk run safety_guardrail "Give me some test data."` -> the agent's raw model output contained `1234-5678-9012-3456`, but the plugin fired and the user-visible final response was correctly replaced with the safety message. This is a genuine, verified Fail-Closed interception, not a hypothetical.
+* `uv run adk run safety_guardrail "What is the capital of Italy?"` -> answered normally ("Rome"), confirming no false positives.
+* `uv run adk web .` on a free port also launched cleanly and served `/list-apps` with a 200, confirming the Step 3 instruction is technically valid, even though I validated the actual leak-blocking behavior via `adk run` for scriptability rather than manually driving the browser UI.
+
+I never needed to consult `lab-solution.md` to get unstuck -- the Stuck Protocol was not invoked.
+
+## 🚧 Friction Points & Bugs
+* **No bugs found.** This is the key finding: the previously reported defect (starter code/TODOs referencing non-existent `event.event_type` and `event.session_id`) is fully resolved in the current lab.md. The TODOs now correctly point to `event.is_final_response()` and `event.invocation_id`, and both attributes work exactly as documented against the live ADK 2.8.0 API (`Event.is_final_response()` method exists; `Event.session_id` does not exist; `Event.invocation_id` does).
+* Minor, non-module-specific friction: `uv run adk create safety_guardrail` is interactive (prompts for model choice, backend, GCP project ID, region) and this isn't mentioned in lab.md. A first-time-ever ADK student might pause here, but by Module 25.5 a student has run `adk create`/`adk web` many times already in the course, so this is not something to flag as a defect of this specific module.
+* `gemini-3.5-flash` (used in both lab.md's starter code and lab-solution.md) was not available in the test GCP project/region (`404 NOT_FOUND`), requiring the substitution to `gemini-2.5-flash` per my task instructions. This is an environment/quota issue, not a course content defect, and I did not alter any course files because of it.
+
+## 🏁 Solution Review
+`lab-solution.md` is functionally identical in structure to what I wrote: it guards with `event.is_final_response() and event.content and event.content.parts`, extracts `response_text = event.content.parts[0].text`, checks `self.cc_pattern.search(response_text)`, overwrites the text, and logs `event.invocation_id`. It even repeats the same clarifying comment ("Events don't have a session_id/user_id field -- invocation_id is the real identifier") that appeared in the lab.md TODOs, so the guidance is consistent end-to-end between the exercise and its answer key.
+
+The solution's self-reflection answers are strong: they correctly explain why a plugin is more robust than a prompt-only instruction (deterministic layer vs. LLM reasoning that can be jailbroken), and they give concrete, actionable extensions (async logging to BigQuery, competitor masking, secondary safety-model classification, URL allowlisting).
+
+## 💡 Suggestions for Improvement
+* Consider a one-line note in lab.md before Step 1 mentioning that `adk create` will interactively prompt for model/backend/project/region, just to preempt any hesitation for students working through modules out of order.
+* Everything else about this module is in excellent shape. The explicit "there's no X field" callouts in the TODO comments are a good pattern -- worth reusing in other modules where students are likely to guess at `Event`/`Content` attributes from intuition rather than the actual API.
+
+
+---
+# 🎓 Student Evaluation Report: Module 25 - Advanced Observability with Plugins
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 4
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 4
+* **Solution Quality (lab-solution.md):** 4
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Read README.md and lab.md only, then simulated a genuinely blind first attempt: `uv init`, `uv add "google-adk>=2.1.0" python-dotenv` (google-adk 2.8.0 resolved), then ran `uv run adk create observability_agent` exactly as instructed.
+
+The corrected CLI description in lab.md Step 1 ("prompts for a model choice and, if needed, a backend -- there's no separate 'type' prompt") was verified against the real interactive CLI and is now 100% accurate: the actual sequence is (1) model choice [gemini-3.5-flash / Other], (2) backend choice [Google AI / Vertex AI / Login with Google], and, only when Vertex AI is chosen, (3) project ID and (4) region. There is indeed no separate "type"/template prompt — `agent.py` is generated directly. This was previously a source of confusion and is now fixed.
+
+Filled in the `AlertingPlugin` TODOs in `agent.py` using only lab.md's guidance (increment/escalate/return-dict logic in `on_tool_error_callback`, reset logic in `on_event_callback`), then added the OTel/Cloud Trace hooks per Step 3. `gemini-3.5-flash` was not available in the test GCP project (404 NOT_FOUND), so I substituted `gemini-2.5-flash` for my own run only, per the evaluation instructions — not a lab defect.
+
+Hit one real, reproducible blocker: `get_gcp_exporters(...)` in Step 3 raised `ModuleNotFoundError: No module named 'opentelemetry.exporter'`. I resolved it myself by recalling README.md's inline code comment ("Requires: pip install \"google-adk[gcp]>=2.1.0\"") from Step 1 reconnaissance and running `uv add "google-adk[gcp]>=2.1.0"` — this is *not* the Stuck Protocol (I never opened lab-solution.md), but it is a real friction point since lab.md's Step 3 itself never mentions this dependency.
+
+After fixing that, verified the full exercise live via `uv run adk run . <query>` in a single session:
+- "FAIL" → `ALERT: Tool 'risky_operation' failed (1 consecutive)...`
+- "FAIL" again → `(2 consecutive)`
+- "FAIL" again → `CRITICAL ALERT: 3 consecutive errors!`
+- "hello" (clean turn) → counter reset internally
+- "FAIL" again → back to `(1 consecutive)`, confirming the reset logic works correctly.
+
+The agent recovered gracefully every time (never crashed), confirming the plugin's dict-return behavior works as designed. Also confirmed `adk web .` starts cleanly and serves the agent (`list-apps` returned `["observability_agent"]"`).
+
+## 🚧 Friction Points & Bugs
+1. **Missing dependency note in lab.md Step 3 (real bug):** Calling `get_gcp_exporters()` throws an unhandled `ModuleNotFoundError: No module named 'opentelemetry.exporter'` unless `google-adk[gcp]` is installed. This requirement is only mentioned in a code *comment* in README.md's theory section, not in lab.md's Step 3 instructions or TODOs, where a student would actually need it. The resulting stack trace doesn't obviously point to a missing pip extra, making this a plausible real stumbling block for students who don't connect the two docs.
+2. **Verified fix — CLI prompt description:** The previously-fabricated "choose a type" prompt wording is gone and the new description matches the real `adk create` interactive flow exactly (model → backend → project/region-if-Vertex). No remaining issue here.
+3. **Verified fix — `on_tool_error_callback` redesign:** Live-tested the full escalate/reset cycle across a multi-turn session; behavior exactly matches the documented intent (alert → alert → critical alert → reset on clean turn → alert again). No trace of the old fabricated `event.error_code` pattern remains.
+4. **Minor solution/starter inconsistency:** `lab-solution.md`'s `agent.py` adds `import os` (unused/dead), `from dotenv import load_dotenv`, and a `load_dotenv()` call that are absent from lab.md's starter code. I confirmed by testing with `env -u GOOGLE_GENAI_USE_VERTEXAI -u GOOGLE_CLOUD_PROJECT -u GOOGLE_CLOUD_LOCATION uv run adk run . "hello"` that `adk run`/`adk web` auto-load the agent folder's `.env` regardless, so this addition is unnecessary and could mildly confuse a student diffing their attempt against the solution.
+5. **Environment note (not a module defect):** ADK 2.8.0's `adk create` now writes `GOOGLE_GENAI_USE_ENTERPRISE=1` to `.env` instead of `GOOGLE_GENAI_USE_VERTEXAI=1` (the latter is now a deprecated-but-supported legacy alias). This is auto-generated by the CLI, not authored by the student, and both work — flagging only for awareness in case a future ADK version drops the legacy alias.
+
+## 🏁 Solution Review
+`lab-solution.md` (retrieved via `git show solution:training/module25-observability/lab-solution.md`, since this worktree's checkout had solutions stripped) matches my independent attempt almost line-for-line in logic: same escalate-and-print pattern in `on_tool_error_callback`, same reset pattern in `on_event_callback`, same telemetry setup, same agent/App wiring. The self-reflection answers are accurate and well-reasoned (correctly ties `node_info` to graph-aware Cloud Trace visibility, correctly distinguishes Plugins vs. native OTel use cases). The only difference is the extraneous `load_dotenv()`/`import os` noted above, which is harmless but unnecessary.
+
+## 💡 Suggestions for Improvement
+1. Add an explicit note to lab.md Step 3 (mirroring README.md's comment): `> Requires: uv add "google-adk[gcp]>=2.1.0"` before the `get_gcp_exporters` TODO, so students don't hit an opaque `ModuleNotFoundError`.
+2. Either drop the unused `import os` and `load_dotenv()` call from `lab-solution.md`'s `agent.py` (since `adk run`/`adk web` auto-load `.env` anyway), or add the same lines to lab.md's starter for consistency — right now the two silently diverge on a point that isn't part of the exercise's learning objective.
+3. Consider a one-line callout in Step 4 telling students what a "clean" trace/console output should look like after a critical alert and a subsequent successful call, so they have a concrete expected-result checkpoint (I only knew what to expect because I read the solution afterward).
+
+Everything else — the plugin skeleton, the TODOs' guidance text, and the corrected `adk create` CLI walkthrough — is in strong shape and matched real tool behavior exactly during this blind run.
+
+---
+# 🎓 Student Evaluation Report: Module 28 - Building a Custom MCP Tool
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 2
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Read README.md and lab.md only. `uv init --python 3.10` in a scratch folder, then `uv add "google-adk[mcp]"` (resolved google-adk 2.8.0 cleanly). Created `custom_mcp_server/` with `__init__.py` and `.env` exactly as instructed, then filled in the four `# TODO`s in `cart_server.py` (defining `add_item_to_cart` and `view_cart` as `mcp_types.Tool` objects with JSON-schema `inputSchema`s, then implementing the `call_tool` branch logic against a module-level `CART` list) and the two TODOs in `agent.py` (`PATH_TO_SERVER = str(pathlib.Path(__file__).parent / "cart_server.py")` and wiring `McpToolset(connection_params=StdioConnectionParams(server_params=StdioServerParameters(command='python3', args=[PATH_TO_SERVER])))`).
+
+README's theory section was accurate and well-paced: I verified live that `from google.adk.tools.mcp_tool import McpToolset, StdioConnectionParams` imports correctly, and that the "Going Further" experimental aside about `to_mcp_server(agent)` also imports correctly from `google.adk.tools.mcp_tool` — both theory claims check out against the real ADK 2.8.0 API.
+
+`gemini-3.5-flash` (as specified in lab.md's starter `agent.py`) 404'd against the test GCP project/region, so I substituted `gemini-2.5-flash` for my own run only, per my task instructions — not counted against the module.
+
+Ran `uv run adk web custom_mcp_server` from the parent directory exactly as Step 4 instructs, then drove the agent through the REST API (equivalent to the Dev UI) across three turns in one session:
+1. "Please add milk to my cart." → agent called `add_item_to_cart(item="milk")`, server logged `[Server]: Client called tool 'add_item_to_cart'.`, cart updated.
+2. "Also add eggs." → `add_item_to_cart(item="eggs")` called, cart now `["milk", ..., "eggs"]`.
+3. "What is in my shopping cart?" → `view_cart()` called, returned full contents; agent summarized correctly in natural language.
+
+State persistence across turns worked perfectly. I also incidentally confirmed the lab's own first self-reflection question empirically: because `CART` is a bare module-level global and the MCP server subprocess is not restarted between ADK sessions, a *second, brand-new* ADK session I created (`s2`) inherited leftover items from the first session's (`s1`) tool calls — a live demonstration of exactly why a plain global list is unsuitable for multi-user production use.
+
+The lab was complete, unambiguous, and worked end-to-end on the first attempt with zero blockers. I did **not** need to invoke the Stuck Protocol — lab-solution.md was consulted only for the mandatory Step 4 validation, not because I was stuck, so Clarity is not penalized.
+
+## 🚧 Friction Points & Bugs
+No bugs or friction in README.md or lab.md themselves. One environment note: `gemini-3.5-flash` (used in lab.md's starter code) is not available in the test project/region — a pre-existing, out-of-scope quota/availability issue, not a defect I'm charging to this module.
+
+**However, a significant, confirmed defect exists in `lab-solution.md`** (see Solution Review below) — this is a Solution Quality issue, not a lab.md/Clarity issue, since I completed the entire lab correctly without ever looking at it.
+
+## 🏁 Solution Review
+Note on provenance: `lab-solution.md` does not exist anywhere in the `solution` branch's `training/module28-building-mcp-tools/` directory (confirmed via `find`) — nor in any other module directory in this repo state, which only ships `README.md` + `lab.md`. The file referenced by lab.md's "Having Trouble?" section and its base64-encoded doc-site link only exists on the `chore/docusaurus-docs` branch (`git show chore/docusaurus-docs:training/module28-building-mcp-tools/lab-solution.md`), which is presumably what actually gets published to the live docs site. I retrieved and tested that version.
+
+The solution **diverges substantially from the current lab.md** and contains real, verified-by-execution bugs:
+
+1. **Confirmed crash bug — missing required `capabilities` argument.** The solution's `run_mcp_stdio_server()` calls `InitializationOptions(server_name=app.name, server_version="0.1.0")` — omitting `capabilities`. I instantiated this exact call against the installed `mcp` library (pulled in via `google-adk[mcp]` 2.8.0) and it raises:
+   ```
+   pydantic_core.ValidationError: 1 validation error for InitializationOptions
+   capabilities
+     Field required [type=missing, ...]
+   ```
+   The solution's server would crash immediately on startup, before ever accepting a client connection. lab.md's own starter code (correctly) includes `capabilities=app.get_capabilities(NotificationOptions(), {})` — meaning the *current* lab.md is more correct than its own solution on this exact point.
+
+2. **Confirmed crash bug — fabricated `session_id` parameter.** The solution rewrites state as `SESSION_CARTS = {}` keyed by a `session_id` argument added to the handler signature: `async def call_mcp_tool(name, arguments, session_id)`. I registered this exact handler against the real `Server.call_tool()` decorator and invoked it as the framework does; the low-level `mcp` `Server` class's decorator only ever calls `await func(tool_name, arguments)` — two positional arguments, never a `session_id`. The actual result returned was:
+   ```
+   CallToolResult(isError=True, content=[TextContent(text="call_mcp_tool() missing 1 required positional argument: 'session_id'")])
+   ```
+   So every single tool call in the solution would silently fail with a wrapped `TypeError`, delivered back to the agent as an opaque error string. There is no such automatic session-id injection in the low-level `mcp.server.lowlevel.Server` API used by this lab — this appears to be carried over from either an older/different `mcp` library version or a fabricated capability.
+3. **Self-reflection question mismatch.** lab.md's second self-reflection question asks about `capabilities` negotiation in the MCP handshake. lab-solution.md's second answer instead answers a *different, unasked* question about why `session_id` matters for multi-user isolation — a question that doesn't exist in the current lab.md and depends on the fabricated parameter from bug #2. lab.md's actual capabilities-handshake question is never answered anywhere.
+4. **Minor:** the solution's file-header comments use `custom-mcp-server/` (hyphen) while lab.md instructs `mkdir custom_mcp_server` (underscore) — cosmetic, not functional.
+5. **Minor:** the solution's committed code block contains four stray literal lines reading `sidebar_position: 3` interspersed between section-comment lines (e.g. between `# --- Server State ---` and the `SESSION_CARTS = {}` line) — clearly leaked Docusaurus frontmatter from a bad edit/templating step. These don't break Python syntax (bare annotation statements), so they wouldn't crash execution, but they'd be highly confusing noise if a student copy-pasted the block verbatim.
+6. Imports differ from lab.md's specified imports (`LlmAgent` instead of `Agent`; `MCPToolset` instead of `McpToolset`) — I verified both spellings actually resolve against the installed package, so this alone is not a bug, just an unexplained inconsistency with what lab.md told the student to write.
+
+In short: my own from-scratch implementation, produced by literally following lab.md's TODOs, is materially more correct than the "complete, working code" a stuck student would be pointed to.
+
+## 💡 Suggestions for Improvement
+1. **Fix `lab-solution.md` on `chore/docusaurus-docs`** (or wherever the published solution content is sourced from) to match the current lab.md: keep the flat `CART` list (or, if session-scoping is desired pedagogically, verify against the actual `mcp` library whether/how per-session context is exposed — e.g. via `mcp.server.lowlevel.Server`'s request context/session APIs — rather than inventing a `session_id` handler parameter that the framework never supplies) and always pass `capabilities=app.get_capabilities(NotificationOptions(), {})` to `InitializationOptions`.
+2. Remove the stray `sidebar_position: 3` lines leaked into the solution's code block.
+3. Align the solution's self-reflection answers 1:1 with lab.md's actual three questions (the capabilities/handshake question currently has no answer at all).
+4. Consider moving `lab-solution.md` into the same location/branch as `README.md`/`lab.md` (or documenting clearly where solution files live) — its complete absence from the `solution` branch's training tree, while still being linked from lab.md, is a structural inconsistency that could confuse anyone auditing or maintaining the course from this branch.
+5. The lab itself (README.md + lab.md) needs no changes — it is clear, technically accurate, and the starter code's TODOs are appropriately scoped for a first MCP-server-building exercise. This is one of the stronger modules encountered in this evaluation series precisely because the *exercise* is correct even though its answer key is not.
+
+
+---
+# 🎓 Student Evaluation Report: Module 29 - Introduction to UI Integration
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Read README.md and lab.md only, then genuinely attempted the lab: `uv init adk-training --python 3.10`, `uv add "google-adk>=2.1.0" python-dotenv` (resolved `google-adk==2.8.0`), then `uv run adk create ui_agent` exactly as instructed. Chose model "gemini-3.5-flash" then backend "Vertex AI" with project `qwiklabs-asl-03-4e75c295d8e8` / region `us-central1`, matching my environment. Replaced `agent.py` with the lab's exact snippet, then filled in the three TODOs in `index.html` (fetch to `/run_sse` with `user_id` included, `reader = response.body.getReader()`, and a `while(true)` loop decoding chunks, splitting on `\n`, filtering `data:` lines, `JSON.parse`-ing them, and appending `content.parts[].text` to the assistant bubble).
+
+Started the agent server from inside `ui_agent/` with `uv run adk api_server --port=8080 --allow_origins=http://localhost:8081` and the client with `python3 -m http.server 8081` in a second terminal, exactly per Step 3. `gemini-3.5-flash` returned a live `404 NOT_FOUND` ("Publisher model ... was not found") in the test GCP project/region, so per my evaluation instructions I substituted `gemini-2.5-flash` in my own working copy only (no course file was touched).
+
+I then drove the real, running `adk api_server` with actual HTTP requests reproducing exactly what the lab's frontend code does — first via `curl` (session creation, `/run_sse`, and negative tests), then by running the lab's actual submit-handler JavaScript logic verbatim in Node 22 (native `fetch`, `ReadableStream` reader, `TextDecoder`, SSE-line parsing) against the live server, serving `index.html` from the real `python3 -m http.server 8081`. Result: `ensureSession` → 200, `/run_sse` → 200 text/event-stream, and the streamed SSE payload parsed correctly into `"Paris is the capital of France."` for a test query — a genuine, unassisted end-to-end success using only lab.md's instructions. I never needed to consult `lab-solution.md` to get unstuck.
+
+Note on this worktree: it is checked out from `main` (solutions stripped), so `lab-solution.md` does not exist as a file here. I retrieved it read-only via `git show solution:training/module29-ui-integration-intro/lab-solution.md` without altering the worktree's branch, per Step 4 of the workflow.
+
+## 🚧 Friction Points & Bugs
+**No bugs found. All five previously-reported defects are verified fixed and now match live tool behavior:**
+1. **"CORS is automatic" claim (fixed):** Verified live — a request from a disallowed origin gets `403 Forbidden: origin not allowed`; a preflight `OPTIONS` from the allowed origin (`http://localhost:8081`) with `--allow_origins` set returns `200` with correct `access-control-allow-origin` headers. The lab's note ("the ADK API server does *not* allow cross-origin requests by default ... or the browser will reject every request with a 403") is now 100% accurate.
+2. **Missing required `user_id` field (fixed):** Verified live — calling `/run_sse` without `user_id` returns `422 Unprocessable Entity` (`"loc":["body","userId"],"msg":"Field required"`). The lab's inline comment flagging this as "required ... easy to forget" is accurate and the starter code correctly includes it.
+3. **Missing session-creation step (fixed):** Verified live — calling `/run_sse` against a `session_id` that was never created returns `404 Not Found: "Session not found: ..."`. The provided `ensureSession()` helper, which POSTs to `/apps/ui_agent/users/{userId}/sessions/{sessionId}` before the first message, is both present and necessary, and works correctly.
+4. **Corrupted ASCII diagram (fixed):** The "AG-UI Stack" diagram in README.md renders as a clean, correctly-aligned box diagram (Frontend → WebSocket/SSE → Backend). No corruption or misalignment.
+5. **Broken `api_server` command run from the wrong directory (fixed):** Verified live — re-passing `ui_agent` as a positional argument while already inside the `ui_agent` directory fails exactly as the lab warns: `Error: Invalid value for '[AGENTS_DIR]': Directory 'ui_agent' does not exist.` The lab's parenthetical warning against this exact mistake is accurate and well-placed.
+6. **Inaccurate `adk create` CLI description (fixed):** Lab.md now says only "will prompt you for a model ... and a backend," without over-specifying the exact prompt sequence — appropriately hedged, since I confirmed the actual CLI flow varies (choosing "Other models (fill later)" skips the backend prompt entirely and leaves `.env` empty; choosing a concrete model like `gemini-3.5-flash` does prompt for backend, then project ID and region if Vertex AI is chosen). Since the lab tells students to replace `agent.py`'s model anyway and to "set up your `.env` file" afterward, this variability doesn't block the lab.
+
+**Minor, non-blocking observations (not defects in the module):**
+* `adk create` in ADK 2.8.0 writes `GOOGLE_GENAI_USE_ENTERPRISE=1` to `.env` for the Vertex AI backend rather than the legacy `GOOGLE_GENAI_USE_VERTEXAI=1`. Both are read by the installed `google-genai` client and are functionally equivalent; this is CLI-generated, not authored by the student, and not something lab.md needs to address.
+* `gemini-3.5-flash` (used in both lab.md's starter code and lab-solution.md) was not available in the test GCP project/region, requiring the substitution to `gemini-2.5-flash` per my task instructions — an environment/quota issue, not a course content defect.
+
+## 🏁 Solution Review
+`lab-solution.md` (retrieved via `git show solution:training/module29-ui-integration-intro/lab-solution.md`, since this worktree's checkout has solutions stripped for the `main`-mirrored branch) is functionally equivalent to my independent attempt: same `ensureSession()` gate, same `fetch('/run_sse', ...)` body shape (`app_name`, `user_id`, `session_id`, `new_message`), same `reader.read()` loop, same `data: ` line-splitting/`JSON.parse` approach, same `assistantMessageDiv.textContent = fullResponse` incremental update pattern. Trivial differences only: the official solution reads `eventData.content.parts[0].text` (first part only) where I looped over all parts — both work correctly for the single-part text responses this lab produces. The self-reflection answers are accurate and thorough: SSE-vs-request/response latency argument is well-reasoned, the `localStorage`/cookie persistence fix for session IDs is concrete and correct, and the AG-UI/CopilotKit benefits list (reduced boilerplate, standardization, advanced tool-call UI, official support) matches README.md's Key Takeaways almost verbatim, showing good consistency between the theory and the answer key.
+
+## 💡 Suggestions for Improvement
+This module is in excellent, ship-ready shape — I found no remaining defects after a genuine blind attempt plus targeted live verification of every previously-reported bug. Two very minor, optional polish ideas:
+1. Since `adk create`'s prompt flow branches (backend/project/region prompts only appear for certain model choices), a one-clause example transcript (as a collapsed/aside note) showing one concrete path through the prompts could preempt any hesitation, though the current hedged wording ("any option is fine ... choose the one matching your environment") already handles this gracefully without needing it.
+2. Consider noting in Step 4 that Python's `http.server` serves `index.html` automatically at `http://localhost:8081/` (root path) — I confirmed this works, but a first-timer unfamiliar with static file servers might wonder whether they need `/index.html` in the URL.
+
+Everything else — the CORS note, the `user_id` reminder, the `ensureSession` scaffolding, the corrected diagram, and the directory-argument warning for `api_server` — held up perfectly against live testing.
+
+
+---
+# 🎓 Student Evaluation Report: Module 26 - Callbacks and Guardrails
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 3
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 3
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Setup was smooth: `uv init`, `uv add "google-adk>=2.1.0" python-dotenv`, then `uv run adk create content_moderator` scaffolded the project and wired up `.env` with Vertex AI credentials interactively (no manual env editing needed). The README's callback table and "return None vs return an object" framing made the six TODOs in `agent.py` straightforward to reason about in isolation — each docstring is self-contained and specific enough (arg names, exact behaviors, even the "guard against `text is None`" gotcha) that I wrote all six functions without needing the solution. `gemini-3.5-flash` (the model in the starter code and in `adk create`'s own menu) returned a 404 "not found" in the target Vertex project/region, so I substituted `gemini-2.5-flash` for my own run only.
+
+Testing went well until I followed the lab's own prescribed sequence in Step 3: normal prompt → blocked-word prompt → repeat normal prompt (cache hit) → different question. The different question, instead of getting "a fresh, correct response" as promised, was refused by the safety guardrail — even though it contained none of the blocked words. Isolated debugging (printing what `before_model_callback` actually sees) showed why: `llm_request.contents` is the *entire conversation history* sent to the model, and the word "unsafe" from the earlier blocked-word test was still sitting in that history. Once a blocked word appears anywhere in a session, every later turn is refused forever — not because of anything wrong with the caching fix, but because the guardrail isn't scoped to the current turn.
+
+I re-ran the exact same cache sequence (Q1, repeat Q1, "What is 2+2?", repeat Q1 again) *without* ever triggering the guardrail, and the caching fix worked perfectly: the different question got a fresh LLM call with its own cache key, and repeats of Q1 kept hitting the cache correctly. So the specific bug this module was supposed to fix (global cache key → per-question cache key) is genuinely fixed and verified working. The problem is that the lab's own recommended test order runs the guardrail test and the cache test in the same session, and the two interact badly.
+
+## 🚧 Friction Points & Bugs
+1. **(Confirmed, non-trivial) The Step 3 test sequence self-sabotages via a guardrail/history interaction bug.** `before_model_callback`'s TODO says "Concatenate the text of `llm_request.contents`" — this is the full multi-turn conversation history, not just the current user turn (unlike `_cache_key`, whose docstring explicitly says to use "the CURRENT turn's user input" via `get_invocation_context().user_content`). I checked `lab-solution.md` for Step 4 validation and confirmed this isn't just my interpretation: the official solution has the identical pattern (`user_text = "".join([p.text for c in llm_request.contents for p in c.parts if p.text])`) and scans the whole history too. Practical effect: after a student runs the "prompt containing a blocked word" test (which lab.md explicitly asks them to do, in the same session, right before the "ask a different question" cache-separation test), the blocked word remains in history forever, so the guardrail refuses every subsequent turn — including the "ask a different question" step that the third test was specifically added to validate. A student following the instructions exactly, in order, in one session, will see their unrelated follow-up question refused and very reasonably conclude the cache fix (or their own callback code) is broken, when actually the cache-keying logic is correct and the guardrail is the culprit. This is a real, reproducible defect (verified against both my own attempt and the shipped solution) that undercuts confidence in exactly the scenario the fix was meant to demonstrate.
+   - **Suggested fix:** either scope `before_model_callback`'s check to only the latest user turn (e.g., reuse `_current_user_text`-style logic pulling from `callback_context.get_invocation_context().user_content`, mirroring how `_cache_key` already does it), or have lab.md instruct testing the blocked-word guardrail path in a *separate* session from the caching test, or explicitly call out this interaction as an expected/acceptable behavior if it's actually intentional (persistent session-level guardrail). As written, the docstring for `before_model_callback` gives no hint that this cross-turn contamination is intentional, so it reads as an oversight rather than a deliberate design choice.
+2. **Minor:** `gemini-3.5-flash` (used in both `lab.md`'s starter code and the `adk create` model picker) 404'd against the assigned Qwiklabs Vertex AI project/region. Per the evaluation brief this is environment-specific and not counted against the module, but it's worth flagging that the very first model choice a student sees when scaffolding the project may be unavailable to them.
+3. **Minor:** `after_agent_callback`'s TODO (and the solution) index into `event.content.parts[0].text` without checking that `parts` is non-empty first — a latent `IndexError` risk if an event has content but an empty `parts` list. I added a truthiness check (`event.content.parts`) defensively; didn't hit the crash in practice, but it's a fragile pattern worth guarding against explicitly in the TODO text.
+4. I did **not** need to consult `lab-solution.md` to write my implementation — all six TODOs were completable from `lab.md` alone, so Clarity of Instructions is not penalized for that reason. The score of 3 instead reflects the guardrail/cache interaction bug above, which is a real ambiguity/defect in the instructions' test sequence, discovered purely through testing (not by looking at the solution).
+
+## 🏁 Solution Review
+`lab-solution.md` matches my implementation almost exactly in structure and passes correctness for five of the six callbacks with no notable differences (caching key derivation, tool validation, tool audit, and the overall agent wiring are essentially identical). Two points of difference worth noting:
+- The solution's `_cache_key` normalizes input with `.strip().lower()` before hashing; mine hashes the raw text. Both satisfy the lab's literal requirement and both pass the "repeat exact same prompt" test; the solution's version is slightly more forgiving of trivial whitespace/case variation between "identical" questions.
+- The solution's `after_model_callback` uses `llm_response.model_copy(update={...})` to build the redacted response, preserving any other fields on the original `LlmResponse` (e.g. usage metadata). My implementation constructs a bare new `LlmResponse(content=...)`, which is simpler but would silently drop other fields if they existed. The solution's approach is more robust; this is a good detail for the lab to model but the TODO text doesn't hint that `model_copy` should be preferred over constructing a new object.
+- As detailed above, the solution's `before_model_callback` has the exact same full-history-scan behavior as mine, confirming the guardrail/cache interaction issue is a property of the intended design, not a mistake unique to my attempt.
+
+The core bug this module was meant to fix — the cache being keyed globally instead of per-question — is genuinely and correctly fixed in both the lab's instructions and the reference solution. Verified directly: asking the same question twice hits the cache; asking a different question does not, and gets a fresh, independent LLM call and its own cache entry. That part of the remediation is solid.
+
+## 💡 Suggestions for Improvement
+1. **Fix the guardrail's scope, or fix the test sequence.** This is the main actionable item. Either (a) change `before_model_callback` to check only the current turn's user input (there's already a clean pattern for this in `_cache_key`'s docstring/implementation that could be reused/referenced), or (b) change lab.md's Step 3 instructions to run the "blocked word" guardrail test in a separate session from the three-step cache test, so the two mechanisms don't interfere. Without one of these, a student who follows the instructions literally, in order, in one session, will see the newly-added third cache-verification step fail for an unrelated reason and may lose confidence in (or spend time debugging) a fix that is actually correct.
+2. Consider adding a short note in the guardrail TODO clarifying whether the "check the whole request" behavior (persistent, session-wide blocking once triggered) is intentional defense-in-depth or an oversight — as written it reads ambiguously next to the cache-key TODO's explicit "current turn only" instruction, and the two callbacks' differing scopes aren't called out anywhere in the theory or lab text.
+3. Minor: guard `event.content.parts[0]` with an emptiness check in the `after_agent_callback` TODO text to avoid modeling a latent IndexError for students who copy the pattern elsewhere.
+
+
+---
+# 🎓 Student Evaluation Report: Module 27 — Introduction to MCP & Stateful Tools
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+As a mid-level Python dev new to ADK, the README's stateless-vs-stateful framing (the `add(a,b)` tool that "forgets everything" vs. a filesystem server that remembers) is a genuinely good hook, and the client/server diagram plus the three connection types (`Stdio`/`Sse`/`StreamableHTTP`) set clear expectations before touching code.
+
+I built the lab end-to-end using only `lab.md`: created `adk-training` (per the shared setup snippet), ran `uv run adk create mcp_agent` (Vertex AI backend, project `qwiklabs-asl-03-4e75c295d8e8`), `uv add "google-adk[mcp]"`, created `test_files/hello.txt`, and filled in all 6 TODOs in `agent.py` — imports, `TARGET_FOLDER_PATH`, the `Agent`, `command='npx'`, `args=[...]`, and `tool_filter`. The TODO comments were specific enough that I never had to guess at an API shape. `uv run adk web` started cleanly, listed `mcp_agent`, and I drove both the documented turns through the real Dev UI HTTP API (`/run`) and via a standalone `InMemoryRunner` script — in both cases the real `npx @modelcontextprotocol/server-filesystem` subprocess launched, `McpToolset` dynamically discovered `list_directory`/`read_file` (and correctly hid the server's other tools like `write_file`/`move_file` per `tool_filter`), and `read_file` on `hello.txt` returned "Hello from the MCP world!" exactly as promised. The mechanics of the lesson — the whole point of the module — work.
+
+**Model note:** `gemini-3.5-flash` (as hardcoded in both `lab.md` and `lab-solution.md`) returned `404 NOT_FOUND` on this Vertex AI project/region, so per my instructions I substituted `gemini-2.5-flash` for my own attempt only. This is an environment limitation, not scored against the module.
+
+## 🚧 Friction Points & Bugs
+1. **[New finding, moderate] Turn 1's exact wording is ambiguous enough to sometimes derail the "expected response."** Step 4 tells the student to type "What files are in my directory?" and expect the agent to just list `hello.txt`. In my testing (5 separate fresh-session attempts, both via the raw `InMemoryRunner` and the real Dev UI `/run` endpoint) the agent asked a clarifying question ("Which directory would you like me to look into?") instead of calling `list_directory` in 4 of 5 attempts, only calling the tool directly once. Root cause: `list_directory`'s discovered schema requires a `path` string with no hint that `.` means "the sandboxed root," and `tool_filter` deliberately excludes `list_allowed_directories` (the one tool that would let the model discover this), so the model has no ground truth for what "my directory" means to a general-purpose "local file system" assistant. The fix is trivial once you know it — replying "the current directory" (or asking a less ambiguous first question like "List the files in the directory you have access to") reliably unblocks it and the lab completes exactly as documented, including a nice moment where an errant `list_directory(path='/')` self-corrects because the MCP server's "Access denied" error message itself leaks the correct absolute allowed path. Since a first-time student following the transcript literally could easily land on the clarification branch and start second-guessing their `agent.py`, this is worth a one-line mitigation. **Caveat:** tested against `gemini-3.5-flash`'s stand-in (`gemini-2.5-flash`), not the documented model itself, since the latter is unavailable in this environment — I'm flagging this as an observed risk rather than a certain defect, and it did not make me consult `lab-solution.md`.
+2. **[Minor, cosmetic] Step 3.2's `touch __init__.py` is redundant.** `adk create` (Step 1.2) already scaffolds a correct `__init__.py` (`from . import agent`) inside `mcp_agent/`. Re-running `touch` is harmless (it doesn't erase content), but a careful student who checks first and finds the file already exists may wonder if they missed something upstream. Worth rewording to "confirm `__init__.py` exists" the way the `.env` instruction in Step 3.4 already reads.
+3. All previously-flagged issues from earlier evaluation passes are confirmed fixed in this version of `lab.md`: the `[mcp]` extra is now installed explicitly (Step 1.3), the npx cold-start/first-run MCP session timeout is now called out with a retry note (Step 4.1), and the Bonus section for `StreamableHTTPConnectionParams`/remote MCP servers is present and technically correct.
+
+## 🏁 Solution Review
+`lab-solution.md` is functionally identical to what following the TODOs produces — same `command='npx'`, same `args` list (it wraps `TARGET_FOLDER_PATH` in an extra, harmless `os.path.abspath()` since the path is already absolutized in its definition), same `tool_filter=['list_directory', 'read_file']`. No discrepancy, and I did not need it to get unstuck — I only read it for Step 4 (Solution Validation), as required. The Self-Reflection answers are accurate and match what I empirically observed (e.g., the security/sandboxing answer matches the real "Access denied - path outside allowed directories" behavior I triggered).
+
+**McpToolset rename verification:** `from google.adk.tools.mcp_tool.mcp_toolset import McpToolset` (as used in the lab) imports correctly against installed `google-adk==2.8.0` / `mcp==1.29.1`; no regression from the `MCPToolset`→`McpToolset` rename.
+
+**Remote MCP Bonus:** not executed live (would require a real GitHub PAT). Static check: `from google.adk.tools.mcp_tool import McpToolset` and `StreamableHTTPConnectionParams` both import cleanly, and the model's fields (`url`, `headers`, `timeout`, `sse_read_timeout`, `terminate_on_close`, `httpx_client_factory`) match the code sample's usage exactly. No issues found.
+
+## 💡 Suggestions for Improvement
+1. In Step 4, add one sentence noting that the filesystem tools operate relative to the sandboxed root, and that asking generically ("my directory") may prompt the agent to ask which directory you mean — if that happens, just reply "the current directory" (or rephrase the first question to "List the files in the directory you have access to," which resolved directly and reliably in my testing).
+2. Reword Step 3.2 from "Create the `__init__.py` file" to "Confirm the `__init__.py` file exists" (or note that `adk create` already generated it), for consistency with how Step 3.4 already treats the `.env` file.
+3. No changes needed to `README.md` or `lab-solution.md` — both are accurate and well-aligned with the current ADK 2.0/2.8.0 API surface.
+
+
+---
+# 🎓 Student Evaluation Report: Module 30 - Custom Streaming Client
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 3
+* **Solution Quality (lab-solution.md):** 3
+* **Overall Difficulty:** 4
+
+## 🧑‍💻 The Student Experience
+I approached this as a genuinely blind first attempt: read only README.md and lab.md, then built the project from scratch in an isolated `uv` environment with ADK 2.8.0 (matching the version this module was rewritten for).
+
+The theory in README.md is excellent -- it's the clearest, most precise explanation of the ADK Live streaming wire protocol I've seen in this course. The "Session not found" claim, the exact message shapes (`{"blob": {...}}`, `{"audio_stream_end": true}`), the 16kHz-in/24kHz-out asymmetry, and the native-audio-model-has-no-text-output caveat are all called out explicitly and -- I verified every one of them live -- are all **accurate** against a real ADK 2.8.0 `/run_live` server. I did not find the previously-reported false "Module 22" streaming claim; that appears to have already been removed from both README.md and lab.md.
+
+Setup went smoothly: `uv run adk create --type=config streaming_agent` (with one undocumented interactive prompt for model choice -- pre-existing `adk create` behavior, not specific to this module), configuring `.env` for Vertex AI, and writing `root_agent.yaml` all worked exactly as described. I implemented all five TODOs from lab.md's prose alone, without looking at lab-solution.md.
+
+I then did a full live test against the real `/run_live` WebSocket with `gemini-live-2.5-flash-native-audio` on Vertex AI:
+- Confirmed the connection is refused with **"Session not found"** (code 1002) when no session exists -- exactly as documented.
+- Confirmed `POST /apps/{app}/users/{user}/sessions/{session}` must precede the WebSocket handshake.
+- Synthesized real speech (macOS `say` -> 16-bit/16kHz mono PCM via `ffmpeg`) and streamed it in `{"blob": {...}}` chunks, then sent `{"audio_stream_end": true}`, replicating exactly what my `index.html` implementation does.
+- The agent responded with real spoken audio: `content.parts[].inlineData.mimeType` came back as `"audio/pcm"` (matches the README's `.startsWith("audio/")` guidance), input/output transcription events arrived as separate events with no `content.parts` (correctly ignored by the TODO 3 logic as written), and a final `turnComplete: true` event arrived.
+- One non-bug nuance I discovered along the way: my very first synthesized clip had no trailing silence, and the server-side VAD never detected end-of-speech -- sending `audio_stream_end` alone did **not** force a response within 90s. Padding with ~1s of silence fixed this immediately. This is inherent Gemini Live API VAD behavior (confirmed by reproducing it against the raw `google-genai` client with no ADK involved at all), not an ADK or lab defect -- real microphone audio naturally has trailing silence when a user releases a push-to-talk button, so this would not affect an actual student using a real microphone.
+
+## 🚧 Friction Points & Bugs
+
+**Critical, reproducible bug -- found only through live testing, present in both lab.md's instructions and lab-solution.md's reference code:**
+
+TODO 1 (`playAudioChunk`) instructs the student to "Decode the Base64 string into bytes (`atob` + a byte array)". I implemented this literally, and lab-solution.md's reference implementation does the exact same thing: `const binaryString = atob(base64Data);`.
+
+**This throws in every real browser.** I captured real `inlineData.data` strings from a live `/run_live` response and found that **every single audio chunk** contained `-` and/or `_` characters. This is because the ADK server serializes response events with `event.model_dump_json(..., by_alias=True)`, and Pydantic v2's JSON `bytes` serialization uses **base64url** (RFC 4648 URL-safe alphabet: `-`/`_` instead of `+`/`/`), not standard base64. I verified with Node's `atob()` (spec-identical to the browser API) on a real captured chunk:
+```
+atob() THREW: InvalidCharacterError - Invalid character
+```
+Translating the alphabet first (`data.replace(/-/g,'+').replace(/_/g,'/')`) before calling `atob()` fixes it -- I verified the translated chunk decodes to exactly the expected byte count (11114 bytes from a 14820-character base64 string, matching the 3/4 ratio).
+
+Practical impact: since virtually all response chunks contain url-safe characters, a student who implements TODO 1 exactly as instructed -- or simply copies lab-solution.md -- will get an uncaught `InvalidCharacterError` thrown inside `playAudioChunk` for nearly every chunk, on every real conversation turn. The lab's actual payoff ("you should hear the agent's spoken reply") will very likely **not occur** for most students, most of the time. Notably, lab-solution.md's own Troubleshooting section already has an entry for "You hear nothing after releasing the button" -> "Cause: Usually a silent failure in `playAudioChunk` (check the browser console for exceptions)" -- which strongly suggests this exact failure has been hit before but never correctly root-caused as the base64url encoding mismatch.
+
+This is not a Vertex-AI-only or model-only quirk -- it stems from ADK's/Pydantic's JSON bytes serialization and will reproduce for any inline audio/binary data returned over `/run_live`, on any live model.
+
+**Suggested fix** (both in lab.md's TODO 1 description and lab-solution.md's code):
+```javascript
+function playAudioChunk(base64Data) {
+    // ADK serializes bytes fields as base64url (RFC 4648 par 5): '-' and '_'
+    // instead of '+' and '/'. Browser atob() only accepts standard base64,
+    // so translate the alphabet first.
+    const standardBase64 = base64Data.replace(/-/g, '+').replace(/_/g, '/');
+    const binaryString = atob(standardBase64);
+    ...
+}
+```
+
+**Minor:**
+- `uv run adk create --type=config streaming_agent` prompts interactively for a model choice even though lab.md tells you to overwrite `root_agent.yaml` immediately afterward. Not specific to this module (this is `adk create`'s general behavior, presumably covered earlier in the course), but worth a one-line heads-up ("just pick either option, you'll overwrite the file next") since this is likely the first time a student runs `adk create --type=config` in a while.
+
+I did consult lab-solution.md (Step 3/4), but only after already fully implementing all 5 TODOs blind and after already reproducing the `atob()` bug live -- the solution's code is what let me confirm the bug is shared with the reference implementation rather than being a mistake unique to my own attempt. I'm penalizing Clarity/Completeness for the bug itself, not for consulting the solution.
+
+## 🏁 Solution Review
+Structurally, lab-solution.md matches my own blind implementation almost line-for-line for TODOs 2-5 (session creation via `fetch`, event parsing via `content?.parts`, blob sending, `audio_stream_end` signal) -- confirming lab.md's instructions for those four TODOs are clear, accurate, and sufficient on their own. The Troubleshooting section is well-written and covers the CORS, session-not-found, wrong-model, and mic-permission failure modes accurately (I verified the session-not-found and wrong-origin mechanics live).
+
+The one gap is TODO 1 / `playAudioChunk`, where the solution carries the same base64url decoding bug as the unaided student attempt would. This means a student who gets stuck and reads lab-solution.md **will not be unblocked** -- copying the reference code verbatim still fails to play audio reliably.
+
+## 💡 Suggestions for Improvement
+1.  **Fix the base64url bug** in both lab.md's TODO 1 description and lab-solution.md's `playAudioChunk`, using the `.replace(/-/g,'+').replace(/_/g,'/')` translation shown above before `atob()`. This is the single highest-value fix for this module -- without it, the lab's core deliverable (hearing the agent talk back) is unreliable.
+2.  Consider adding a line to the README's "Data Flow" section noting that binary fields in ADK's JSON event stream (like `inlineData.data`) are base64url-encoded, not standard base64 -- this is a genuinely non-obvious wire-protocol detail worth calling out alongside the other precise protocol details already documented there.
+3.  Optionally update the Troubleshooting entry "You hear nothing after releasing the button" to name the specific likely cause (`InvalidCharacterError` in `atob()` due to base64url characters) now that it's understood, rather than the current generic "check the browser console" guidance.
+4.  Minor: a one-line note near Step 1 that `adk create --type=config` will interactively ask for a model choice (pick either, since `root_agent.yaml` gets overwritten next) would remove a moment of "wait, is this part of the lab?" hesitation.
+
+
+---
+# 🎓 Student Evaluation Report: Module 31 — Production Deployment Strategies
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** N/A (explicitly a no-code, conceptual lab)
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+This module is a conceptual "apply the framework" exercise, and it reads that way from the start. The README lays out a tight, four-branch decision framework (Cloud Run / Agent Runtime / GKE / Custom Server on Cloud Run) each keyed to a distinctive trigger phrase ("Quick MVP," "Need Compliance," "Have Kubernetes," "Need Custom Authentication"), backed by a security-feature comparison table. Working through lab.md's four scenarios felt like pattern-matching each scenario's requirements bullets against the framework's trigger phrases — Scenario 1's "deployed by end of week / low cost / minimal DevOps" maps unmistakably onto the Cloud Run bullet, Scenario 2's "FedRAMP" is a literal keyword match to Agent Runtime, Scenario 3's "existing Kubernetes ecosystem / GPU nodes" points straight at GKE, and Scenario 4's "LDAP" is the exact trigger for the custom-server hybrid. I wrote out my reasoning for all four scenarios plus the three self-reflection questions using only the README, and never had to pause or guess.
+
+## 🚧 Friction Points & Bugs
+- **No blockers.** I did not need to consult lab-solution.md early — the framework and scenarios were self-consistent and unambiguous throughout.
+- **The self-reflection questions are pre-answered in the theory doc.** The three self-reflection questions in lab.md are answered almost verbatim in README.md's "Key Takeaways" section (the "Impact of Compliance Requirements," "Benefits of Platform-First Security," and "Cloud Run Limitations & Migration" bullets read like a direct answer key). This means the self-reflection section doesn't actually test independent synthesis — a student can simply locate and paraphrase the matching Key Takeaways bullet rather than reason it out. This is likely why my attempt matched the solution's self-reflection answers almost word-for-word; the exercise as structured rewards re-finding text over reasoning.
+- **The "Hidden Solution" block at the end of lab.md is an odd artifact.** It presents a base64-encoded path plus a near-invisible (`color: rgba(0,0,0,0.01)`, 1px font) HTML link to the solution page. This reads like leftover debug/QA scaffolding rather than an intentional pedagogical device — it's confusing to encounter as a student (why is the solution link disguised instead of just referenced normally, as the "Check the lab-solution.md" sentence just above it already does?). It doesn't block completion, but it's visual/structural noise that should probably be removed. I did not use it to find the solution.
+- **Minor theory/solution mismatch:** lab-solution.md's Scenario 2 justification adds "sandboxed execution" as a reason to pick Agent Runtime, but this feature is never mentioned in README.md's theory text or its security comparison table. A student reading only the theory has no way to know this is a relevant differentiator.
+
+## 🏁 Solution Review
+The solution is fully correct and matches the decision framework's stated logic exactly. All four scenario recommendations (Cloud Run, Agent Runtime, GKE, Custom Server on Cloud Run) and their justifications align precisely with what the README teaches, and my independently-derived answers matched on every scenario and every self-reflection question, with no meaningful differences in reasoning. The one gap is the unexplained "sandboxed execution" mention noted above, which slightly exceeds what the theory content actually supports.
+
+## 💡 Suggestions for Improvement
+1. **Strengthen the self-reflection questions so they aren't answerable by copy-paste from the Key Takeaways.** Either remove the pre-baked answers from README.md's Key Takeaways (moving that reasoning into lab-solution.md instead, where it belongs), or replace the self-reflection questions with genuinely novel scenarios not already spelled out in the theory doc.
+2. **Remove or replace the "Hidden Solution" base64/invisible-text block** at the end of lab.md. It's unusual UX for a training doc and reads as an accidental leftover; the plain-text sentence right above it ("Check the lab-solution.md...") already does the job clearly and normally.
+3. **Add "sandboxed execution" to the README's Agent Runtime description** (either in the bullet list or the security table) so the solution's Scenario 2 justification is fully supported by material the student actually saw.
+4. Otherwise, this module is a strong, low-friction reinforcement exercise — appropriate difficulty for a conceptual/no-code module, clear writing, and a solution that is technically accurate and consistent with the taught framework.
+
+
+---
+# 🎓 Student Evaluation Report: Module 36 — Gemini Enterprise (formerly AgentSpace)
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** N/A (no-code lab by design — see note below; scaffolding quality itself is 5/5)
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 2
+
+## 🧑‍💻 The Student Experience
+This is a purely conceptual, no-code lab, and it reads that way from the start — the "There is
+no coding in this lab" note up front correctly set my expectations. The README gave me a crisp,
+memorable mental model (ADK = development, Gemini Enterprise = operations) and a concrete feature
+list (Managed Hosting, Agent Governance, Data Connectors, Agent Gallery, Pre-built Agents, Agent
+Designer) that I could draw on directly during the exercise.
+
+The lab itself is a 4-step scenario (identify agents → plan connectors → design RBAC → plan
+monitoring/cost) for a retail company's Sales/Marketing/HR agent fleet. Each step gives one
+worked example before asking me to extend it, which is an effective scaffold: it primes the
+*shape* of a good answer without giving everything away. I completed all four steps using only
+README.md and lab.md — I never needed the Stuck Protocol. My independently-produced answers (a
+BigQuery-grounded Sales Forecasting Agent, a "% of qualified leads converting within 30 days"
+metric, an escalation-rate alert for the HR bot, tiered budget alerts for Marketing) converged
+closely in spirit with the official solution, which is a good sign the instructions steer students
+toward sound, realistic answers rather than leaving them guessing.
+
+## 🚧 Friction Points & Bugs
+No blocking issues or ambiguity — I did not need to consult `lab-solution.md` to finish the lab,
+so no Clarity penalty is warranted on that basis. Two smaller inconsistencies worth flagging:
+
+1. **Step 1's framing omits a category the solution uses.** lab.md Step 1 tells students to think
+   about "which ones you could build with the ADK, and which ones might be available as pre-built
+   Google agents" — only two categories. But `lab-solution.md` introduces a third
+   category in its example answers: a no-code "Proposal Writer Agent (Agent Designer)" for Sales.
+   The README does mention Agent Designer, so it's not unmoored from the theory, but a student
+   following lab.md's Step 1 instructions literally has no cue to consider the no-code path, then
+   sees the solution use it anyway. This reads as a minor mismatch between the instructions and
+   the "model answer," not a factual error.
+
+2. **A connector not documented anywhere is used in the solution.** README.md's Data Connectors
+   list is explicitly: Google Drive, SharePoint, Salesforce, and BigQuery. `lab-solution.md`'s
+   Step 2 example adds a "HubSpot Connector" for the Social Media Scheduler agent, which is never
+   mentioned in README.md or lab.md. It's a plausible real-world connector, but a careful student
+   comparing the solution against the theory section might wonder whether they missed a connector
+   in the reading, when in fact the solution simply extrapolated beyond the documented list.
+
+3. **Naming currency (per this session's spot-check request):** I verified via web search
+   (current date: September 2026) that Google's product naming for this space has moved on again
+   since this module's content was last confirmed accurate. Google renamed Agentspace to
+   "Gemini Enterprise" around October 2025, but at Google Cloud Next '26 (April 2026), Google
+   announced a further rebrand: Vertex AI and the Gemini Enterprise capabilities described here
+   were consolidated into the "Gemini Enterprise Agent Platform." As of today, that is the
+   current official name — "Gemini Enterprise" alone is now itself a superseded name, not just
+   "AgentSpace." This is the third rename in this product area in under two years, so this isn't
+   a criticism of the module's accuracy at time of writing — it's a heads-up that this specific
+   topic is on an unusually fast-moving naming treadmill and may need another pass soon. None of
+   the underlying concepts taught (managed hosting, RBAC/governance, data connectors, agent
+   gallery, deployment workflow) are affected — only the product/brand name itself.
+
+## 🏁 Solution Review
+The solution is technically sound and internally consistent with the README's theory — no errors
+in the RAG/hallucination-mitigation reasoning, the RBAC reasoning, or the monitoring/cost
+reasoning. It also adds genuine pedagogical value beyond what I produced independently:
+
+* It deliberately spans all three agent-creation paths (ADK-built, pre-built, Agent Designer)
+  across its six example agents, better illustrating the README's "Agent Designer" concept in
+  practice than lab.md's own Step 1 prompt does (see Friction Point 1).
+* Its RBAC answer for the Marketing/Salesforce question goes a step further than "no access" —
+  it proposes routing Marketing through the Lead Qualifier Agent for summarized, non-sensitive
+  data rather than direct connector access. That's a genuinely useful "agent-mediated data
+  abstraction" security pattern that isn't spelled out anywhere in the README, so the lab
+  succeeds at teaching something beyond a straight recap of the theory.
+* My own Step 4 answers (conversion-rate metric, failure/escalation-rate alert, tiered budget
+  caps) were conceptually near-identical to the solution's, which validates that the lab's given
+  examples calibrate students toward the right kind of answer without over-constraining them.
+
+## 💡 Suggestions for Improvement
+1. In lab.md Step 1, mention all three agent-creation paths (ADK-built, pre-built, and the
+   no-code **Agent Designer**) rather than just the first two, so the instructions set up the
+   breadth that `lab-solution.md` actually demonstrates.
+2. Either keep `lab-solution.md`'s connector examples within the four connectors README.md
+   documents (Drive, SharePoint, Salesforce, BigQuery), or add a short note in README.md/lab.md
+   that the connector list is illustrative/non-exhaustive, so the solution's "HubSpot Connector"
+   doesn't read as an undocumented surprise.
+3. Consider adding a brief "naming may have changed" callout near the top of README.md, given how
+   fast this specific product area has been renamed (Agentspace → Gemini Enterprise → Gemini
+   Enterprise Agent Platform in under two years per public sources as of Sept 2026). A pointer to
+   Google's current official docs would future-proof the module without requiring a content
+   rewrite every time Google renames the platform.
+4. Optional: call out explicitly in lab.md (not just implicitly via the RBAC step) the
+   "agent-mediated data abstraction" pattern the solution uses for Marketing/Salesforce — it's a
+   valuable, non-obvious security lesson that currently only surfaces if the student reads the
+   solution.
+
+
+---
+# 🎓 Student Evaluation Report: Module 32 - Deployment to Cloud Run
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+The theory in README.md is excellent: it clearly explains what deployment and containers are, why Cloud Run is a good fit for ADK agents, and walks through the six behind-the-scenes steps of `adk deploy cloud_run` in plain language. The "Key Takeaways" on scale-to-zero cost/latency trade-offs and on omitting `--with_ui` in production are genuinely useful and are correctly borne out by what I found in the real CLI (see below) — no "false claim" issues found here, and I confirmed the module no longer references building the system in an earlier module; it is explicitly built fresh in this lab ("We'll build a fresh multi-agent customer support system for this lab").
+
+Following lab.md as a student: I ran the `_setup-snippet.mdx`-driven `uv init adk-training --python 3.10 && uv add "google-adk>=2.1.0" python-dotenv` (this pulled ADK 2.8.0, the current latest). I then created `customer_support_cloud/support_agent` via `uv run adk create --type=config support_agent`. This command is interactive and prompted me for: (1) a model choice, (2) a backend (Google AI / Vertex AI / Login), and (3) a GCP project ID and region — none of which lab.md mentions or warns about. As a first-time student this is a small "wait, what?" moment, though it's harmless because the very next lab step tells you to overwrite `root_agent.yaml` and `.env` anyway, making the scaffolding step's prompted answers essentially throwaway. I answered "Vertex AI" and the given project ID, then created the three YAML files (`billing_agent.yaml`, `tech_support_agent.yaml`, `root_agent.yaml`) and the `.env` exactly as written in the lab.
+
+I could not complete the actual `gcloud`-backed deployment (Step 2 of the lab) because that requires real billed Cloud Run/Cloud Build/Artifact Registry infrastructure, which was out of scope for this evaluation. Instead I validated the parts that are safe and meaningful to test locally:
+1. **The multi-agent YAML config and its routing logic** — via `uv run adk run support_agent`, I sent "I have a question about my invoice." and it was correctly delegated to `billing_agent`; I sent "My app keeps crashing." and it was correctly delegated to `tech_support_agent`. This is exactly the routing behavior the lab and lab-solution.md describe.
+2. **`adk web`** — started cleanly on the `support_agent` config and correctly listed it via `/list-apps`, confirming the Dev UI experience described in Step 3 of the lab would work once deployed.
+3. **`adk deploy cloud_run --help`** — confirmed `--project`, `--region`, and `--with_ui` are real, current flags with behavior matching the lab's description. Notably the live help text for `--with_ui` says: *"WARNING: The web UI is for development and testing only — do not use in production,"* which independently corroborates the module's own "Omitting `--with_ui` in Production" takeaway almost verbatim.
+
+**One environment note (not a module defect):** `gemini-3.5-flash` (used in all three YAML files) returned a 404 `NOT_FOUND` against the `qwiklabs-asl-03-4e75c295d8e8` Vertex AI project/region — the model isn't available there. Per my instructions I substituted `gemini-2.5-flash` in my own local copies only for testing; I did not touch the course files. This is a project/quota issue, not a lab bug, but it's worth flagging since it would block real students in the same GCP environment from completing the *live* deploy step (the config itself is correct).
+
+**Another environment note:** ADK 2.8.0 has deprecated `GOOGLE_GENAI_USE_VERTEXAI` in favor of `GOOGLE_GENAI_USE_ENTERPRISE` (confirmed in `env_utils.py`: a `DeprecationWarning` is raised when the old variable is used, though it still functions correctly as a fallback). The lab's `.env` instructions use the deprecated name. This is a course-wide naming choice (also given explicitly in my task instructions), not specific to this module, so I'm not penalizing Clarity for it — but it will start producing visible deprecation warnings in `adk` output as the SDK moves further past 2.8.0.
+
+I did not need to consult `lab-solution.md` to get unstuck at any point — the lab.md instructions were sufficient to build and locally validate a working multi-agent config.
+
+## 🚧 Friction Points & Bugs
+1. **Undocumented interactive prompts in `adk create --type=config`.** The command prompts for model, backend, project, and region with no mention in the lab that this will happen or what to answer. It's low-stakes here (the files get overwritten immediately after), but it's a moment of unexplained friction for a first-time user, especially since `--type=config` is actually a `hidden=True`, "EXPERIMENTAL" click option in the installed ADK 2.8.0 CLI whose own help text says "'config' is not ready for use so it defaults to 'code'" — stale/misleading wording, since in practice it works correctly and does produce the YAML config as expected.
+2. **`gemini-3.5-flash` 404 in the qwiklabs training project/region** (see above) — would block a student's live deploy verification in this specific GCP environment, though not a fault of the lab content itself.
+3. **No mention that `adk deploy cloud_run` requires real billing/APIs enabled and can take several minutes** beyond the general prerequisites section — this is present but could be emphasized more given cost implications for students unfamiliar with Cloud Build costs.
+4. Minor: the lab's `.env` uses `GOOGLE_GENAI_USE_VERTEXAI`, which is deprecated (but still functional) in the currently installed ADK version (2.8.0). Flagged for awareness, not penalized.
+
+## 🏁 Solution Review
+`lab-solution.md` is structured correctly as a "procedural/verification" solution rather than a code diff, which fits this module well since all the actual code (the three YAML files) is already given inline in `lab.md` itself. Its "Expected Behavior" routing examples ("I have a question about my invoice." → billing_agent; "My app is not loading." → tech_support_agent) match exactly what I observed when I ran the equivalent prompts locally with `adk run`. The Troubleshooting section (IAM `PERMISSION_DENIED`, Cloud Build service account permissions, generic build failures via Cloud Build logs) is realistic and reflects genuine failure modes of `adk deploy cloud_run` on GCP. The Self-Reflection Answers are accurate and consistent with what the real `adk deploy cloud_run --help` output confirms (e.g., the `--with_ui` production/security rationale is corroborated almost word-for-word by the CLI's own warning text). I found no factual errors and no trace of the previously reported "built this in Module 15" false claim — the module correctly presents this as a fresh build.
+
+## 💡 Suggestions for Improvement
+1. Add a one-line note before the `adk create --type=config support_agent` command warning that it's interactive and will prompt for model/backend/project/region, and that the answers don't matter since the following steps overwrite the generated files. This removes a small but real "did I do something wrong?" moment for first-timers.
+2. Consider adding a short "if you hit a 404 NOT_FOUND for the model" troubleshooting bullet to lab-solution.md's Troubleshooting section, given that `gemini-3.5-flash` availability can vary by project/region/quota — this is likely to bite students in restricted training environments (as it did in this qwiklabs project).
+3. Course-wide (not just this module): consider migrating `.env` templates from `GOOGLE_GENAI_USE_VERTEXAI` to `GOOGLE_GENAI_USE_ENTERPRISE` before the old variable's deprecation warning becomes a removal, to keep the course's copy-pasted `.env` snippets warning-free on current ADK versions.
+4. Otherwise this module is in very good shape: the theory is clear, the YAML multi-agent config is correct and I verified its routing logic works end-to-end, and the CLI flags/commands described for `adk deploy cloud_run` are real, current, and accurately explained.
+
+## 🔬 Evaluation Method Note
+A full live `gcloud`-backed Cloud Run deployment was intentionally **not** executed (out of scope — requires real billed infrastructure: Cloud Build, Artifact Registry, and a public Cloud Run service). Instead, validation focused on: (a) building the multi-agent YAML config locally and confirming correct routing via `adk run`/`adk web`, and (b) verifying `adk deploy cloud_run --help` shows the exact flags (`--project`, `--region`, `--with_ui`) used in the lab, confirming the deploy command as documented is real and syntactically correct. This should be understood as a scoped validation, not a full deploy-to-Cloud-Run confirmation.
+
+
+---
+# 🎓 Student Evaluation Report: Module 35 - Deploying to Agent Runtime
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 4
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 3
+
+## 🧑‍💻 The Student Experience
+Working through this as a mid-level Python dev continuing from Modules 32/33, the README's "Two Paths" framing (Accelerated CLI vs. Standard SDK) set clear expectations before touching a terminal. For Part 1, I recreated `support_agent/` with the three YAML files exactly as given, then ran `uvx google-agents-cli scaffold enhance -d agent_runtime --agent-directory support_agent` from the parent directory. It resolved the CLI in seconds, connected to my ADC-configured GCP project, and printed exactly what the lab promised: `✅ Found support_agent/root_agent.yaml (YAML config agent)`, followed by generating `support_agent/agent.py` as a shim calling `config_agent_utils.from_config(...)`. That one-to-one match between the lab's narration and the actual CLI output was reassuring and confirmed I had the right project structure.
+
+For Part 2, the `agent.py` and `deploy.py` TODOs were genuinely solvable from lab.md alone — translating three YAML configs into `Agent(...)` objects with `sub_agents=[...]` is a small, well-scoped task, and the `deploy.py` skeleton left only the `agent_engines.create(...)` call to fill in, which is explicitly spelled out in prose right above the TODO. I did skip actually invoking `agent_engines.create()`/the real `uvx google-agents-cli deploy` (out of scope for this evaluation — real billed infra), but I did exercise the local `AdkApp` path end-to-end with live Gemini calls (using `gemini-2.5-flash` since `gemini-3.5-flash` 404'd in my test project/region, as expected). Both a billing question and a technical question routed correctly to `billing_agent` and `tech_support_agent` respectively — the multi-agent system behaves exactly as designed.
+
+One place I did deviate from a pure "blind" attempt: Step 3 ("Test Agent Locally") in lab.md provides no code of its own — it just instructs "add the local testing code from `lab-solution.md`." Since the lab itself directs the student there for this specific piece (it isn't a case of me getting stuck), I wrote my own local-test script first based on general ADK/Agent-Engine knowledge, using the older synchronous `app.stream_query(user_id=..., message=...)`. It worked, but Python emitted `DeprecationWarning: AdkApp.stream_query(...) is deprecated. Use AdkApp.async_stream_query(...) instead.` Only after checking `lab-solution.md` did I see the correct, current pattern: `async_create_session` + `async_stream_query`, with the important gotcha that `async_create_session` returns a plain `dict` (`session["id"]`, not `session.id`). That gotcha is explicitly and correctly called out in the solution.
+
+## 🚧 Friction Points & Bugs
+1. **Verified the previously-fixed scaffold bug is real and the fix is necessary.** I reproduced the exact failure mode lab.md warns about: running `uvx google-agents-cli scaffold enhance -d agent_runtime` *without* `--agent-directory support_agent` (in a throwaway copy) silently ignored my YAML agent entirely and instead generated an unrelated generic "weather/time" stub agent (`app/agent.py`, `root_agent = Agent(name="adk_training_bugcheck", ..., tools=[get_weather, get_current_time])`) with no error or warning. The `--agent-directory support_agent` flag on line 75 of lab.md is not optional polish — it is load-bearing, and the warning text accurately describes the failure it prevents.
+2. **Frontmatter and cross-references are clean.** No stray leftover frontmatter text in README.md/lab.md, and the cross-reference at the top of lab.md correctly reads "Modules 32 and 33" (no stale "Module 15" reference found anywhere in the module's three files).
+3. **Deprecated API trap in the "local testing" step.** As described above, a student who reasonably reaches for the synchronous `stream_query` (which still works, just noisily) rather than `async_stream_query` will hit a `DeprecationWarning` with no guidance in `lab.md` about which one to prefer. Since lab.md never shows any local-test code itself (it just points to the solution), there's no in-lab signal steering the student to the async, non-deprecated API before they see the solution.
+4. **Minor `pip` vs. `uv` inconsistency.** Step 1 of Part 2 says `pip install "google-cloud-aiplatform[adk,agent_engines]>=1.111"`, while the rest of the course (via `_setup-snippet.mdx` and every other module) standardizes on `uv add`/`uv run`. Not a blocker — `uv add` works fine as a substitute — but it's a small departure from the course's established tooling convention.
+5. **Non-interactive CLI defaults (environment artifact, not a lab bug).** Because I ran the scaffold command through a non-interactive shell, it silently picked a default region (`us-east1` in `vars/env.tfvars`) and `GOOGLE_CLOUD_LOCATION=global` in the generated `.env`, rather than prompting me to choose `us-central1` as lab.md's Step 4 describes ("Follow the Prompts... ensure you select a supported region"). This is a byproduct of my sandboxed test environment lacking a TTY, not something in the module's control, but it means students running scaffold in CI/scripted contexts should double check the generated `.tfvars`/`.env` region matches what they intended.
+6. Benign: local runs of `async_stream_query`/`stream_query` print a harmless `Fatal error on SSL transport ... RuntimeError: Event loop is closed` traceback after the script's real output completes — an asyncio/gRPC client cleanup artifact at interpreter shutdown, not a functional issue, but could confuse a student into thinking their script failed when it already printed the correct final answer.
+
+## 🏁 Solution Review
+`lab-solution.md`'s `support_agent/agent.py` and `deploy.py` matched what I independently derived from lab.md's skeletons almost verbatim (same `Agent` fields, same `sub_agents` wiring). The solution's `deploy.py` additionally passes `display_name` and pins the requirements version (`>=1.111`), both sensible additions over the bare skeleton. I especially appreciated the maintenance note: *"earlier versions of this lab passed `enable_tracing=True` to `AdkApp`. That parameter is now deprecated..."* — a good sign this solution is being kept current with the SDK.
+
+I ran the solution's `local_test.py` verbatim against my Python `support_agent/agent.py`: session creation, `async_stream_query`, and delegation to `tech_support_agent` for a "my app keeps crashing" query all worked correctly with live Gemini calls, and the final extracted response matched the documented `session["id"]` dict-access pattern exactly. `interact.py` was not exercised against a real deployed Agent Runtime instance (out of scope — real billed infra), but its structure (`agent_engines.get(AGENT_ENGINE_ID)` + `async_create_session` + `async_stream_query`) is consistent with, and reuses, the same API surface already validated locally.
+
+The Self-Reflection Answers are solid and specific to Agent Runtime/Agents CLI rather than generic cloud-deployment boilerplate.
+
+## 💡 Suggestions for Improvement
+1. Give `local_test.py` its own TODO skeleton in `lab.md` (mirroring `deploy.py`'s treatment), even though it's optional — right now it's the only step in the lab with zero starter code, breaking the pattern the rest of the lab establishes and making a peek at the solution the only path forward for that specific piece.
+2. Explicitly recommend `async_stream_query`/`async_create_session` over the (still-functional but deprecated) synchronous `stream_query` wherever local testing is discussed, so a student who writes test code independently doesn't land on the deprecated call and get a confusing runtime warning.
+3. Align Step 1 of Part 2 with the rest of the course's tooling convention: use `uv add "google-cloud-aiplatform[adk,agent_engines]>=1.111"` instead of `pip install ...`.
+4. Consider a one-line callout that the `Fatal error on SSL transport / RuntimeError: Event loop is closed` message some students may see after a successful local test run is a harmless asyncio/gRPC shutdown artifact, not a failure — to preempt confusion when the script's real output already printed successfully above it.
+5. The three module-level fixes previously applied (`--agent-directory support_agent` flag, removed stray frontmatter, "Module 15" → "Module 32" reference) all verified correct and necessary in this blind pass — no regressions found, no further action needed there.
+
+
+---
+# 🎓 Student Evaluation Report: Module 34 - Deploying an MCP Server to Cloud Run
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 4
+
+## 🧑‍💻 The Student Experience
+The README's framing of "stateless container, stateful protocol" (the MCP session lives in an HTTP header, not the process) is one of the clearest explanations of the serverless-state problem in the course so far. lab.md gives complete, copy-pasteable code for both `stateless_cart_server.py` and `agent.py` rather than TODO stubs — appropriate for a lab whose real difficulty is infra (Docker, Artifact Registry, Cloud Run, IAM), not Python logic.
+
+I built the exact project structure lab.md describes (`uv init` → `uv add "google-adk>=2.1.0"` per the course's standing Setup snippet, then `cloud_mcp_server/` with `stateless_cart_server.py`, `requirements.txt`, `Dockerfile`, `agent.py`, `__init__.py`). My sandbox's `gcloud` had real qwiklabs credentials, but the harness itself blocks any `gcloud services enable ...`-style command as a (mis-detected) worktree-safety violation, so I could not do the literal `gcloud builds submit` / `gcloud run deploy`. I substituted a rigorous local equivalent: ran `stateless_cart_server.py` directly with `uvicorn` (installing the exact `mcp<2` pin from requirements.txt, which resolved `mcp==1.29.1`), then `docker build` + `docker run` from the lab's own unmodified Dockerfile, and in both cases drove it with a real MCP client (`streamablehttp_client` + `ClientSession`) hitting `/mcp`. Add/add/view produced the correct session-scoped cart (`["apples","bread"]`), and inspecting `/tmp/carts/` confirmed one JSON file keyed by the real `Mcp-Session-Id`. I then loaded the lab's unmodified `agent.py` (URL pointed at my local server instead of a Cloud Run URL) and called `McpToolset.get_tools()` — it returned `['add_item_to_cart', 'view_cart']`, proving the client-side `StreamableHTTPConnectionParams` wiring is correct.
+
+## 🚧 Friction Points & Bugs
+1. **[Real, minor] Undocumented client-side dependency.** `agent.py`'s `from google.adk.tools.mcp_tool import McpToolset` only works if the `mcp` package is installed in the *client* (agent-running) environment — not just pinned in the server's `requirements.txt` for the Docker image. `google.adk.tools.mcp_tool/__init__.py` wraps this import in a bare `try/except ImportError` and only logs at DEBUG level, so a student missing this dependency gets a bare, misleading `ImportError: cannot import name 'McpToolset' from 'google.adk.tools.mcp_tool'` with zero hint that `mcp` is the missing piece. In practice this is a non-issue for a student following the course in sequence, since Module 28 already runs `uv add "google-adk[mcp]"` in the same persistent `adk-training` project — I confirmed that extra resolves `mcp==1.29.1`, matching the server's `mcp<2` pin exactly. Still, lab.md's Step 4 never re-states this dependency, so a reader who skipped/forgot Module 28's install step has no signal in this lab about why the import fails.
+2. **[False alarm] `gemini-3.5-flash`.** Initially flagged as a nonexistent model, but it's the course's consistent placeholder model name used identically across all ~40 modules — not a module-specific bug.
+3. **[Environment limitation, not a lab bug] Full `gcloud builds submit` / `gcloud run deploy` could not be executed** — my eval sandbox blocks gcloud commands that enable APIs, unrelated to the lab's own correctness. Docker build/run of the exact lab Dockerfile succeeded standing in for it.
+
+No Stuck Protocol was invoked — nothing in lab.md was broken or ambiguous enough to require early consultation of lab-solution.md.
+
+## 🏁 Solution Review
+`lab-solution.md` is byte-for-byte identical (aside from one trimmed comment) to the code already given inline in lab.md, and matches what I built and ran. The Self-Reflection answers are accurate and specific (correctly explain `/tmp` volatility, Memorystore advantages, and MCP client/server decoupling) and align with what I observed empirically (session-keyed files under `/tmp/carts`, tool schema fetched independent of server storage implementation).
+
+## 💡 Suggestions for Improvement
+1. Add a one-line reminder in Step 4 of lab.md: "This requires the `mcp` package in your *local* environment too — installed back in Module 28 via `uv add \"google-adk[mcp]\"`; run that again if you skipped ahead." This would preempt the confusing bare `ImportError` for anyone missing that dependency.
+2. Consider a short callout suggesting students validate the server locally with `uvicorn stateless_cart_server:app` (and/or `docker run -p 8080:8080`) before spending time on `gcloud builds submit`, to catch code issues cheaply before the slower cloud round-trip — this worked flawlessly when I tried it and would give students a fast feedback loop.
+
+
+---
+# 🎓 Student Evaluation Report: Module 39 — Advanced Recovery with Built-In Plugins
+
+## 📊 Summary Scores (1-5)
+* **Clarity of Theory (README.md):** 5
+* **Clarity of Instructions (lab.md):** 5
+* **Code Completeness:** 5
+* **Solution Quality (lab-solution.md):** 5
+* **Overall Difficulty:** 2 (conceptually simple once `ReflectAndRetryToolPlugin` is understood; the only "hard" part is three TODOs)
+
+## 🧑‍💻 The Student Experience
+Recon was smooth: the README clearly builds on Modules 25/25.5 (custom plugins) and frames `ReflectAndRetryToolPlugin` as a built-in evolution of the Observing/Intervening/Amending patterns already known. Simulation used a fresh `uv init --python 3.10` project, `uv add "google-adk>=2.1.0" python-dotenv` (resolved to `google-adk==2.8.0`, inside the course's 2.0–2.8.0 range), and `uv run adk create retry_agent`. The CLI prompts matched lab.md's description exactly (model choice, then backend choice, no separate "type" prompt) — a nice, verified accuracy detail given a sibling module (26) was previously flagged for describing a stale CLI prompt. I wrote Step 2's starter code, ran it to reproduce the crash (Step 3), then filled in the three TODOs myself (import, instantiate `ReflectAndRetryToolPlugin(max_retries=3)`, add to `App(plugins=[...])`) before ever opening the solution — no Stuck Protocol needed.
+
+## 🚧 Friction Points & Bugs
+- **[False alarm]** Live end-to-end run failed with `google.genai.errors.ClientError: 400 API_KEY_INVALID` — the test environment's API key is rejected by the Generative Language API. This is an infra limitation (consistent with essentially every prior module evaluation in this repo), not a course defect. I pivoted to static verification instead.
+- No other friction. Everything else about the lab's own claims held up.
+
+## 🏁 Solution Review
+`lab-solution.md` is complete, correct, and matches my independent attempt from the TODOs almost verbatim. I additionally verified the underlying mechanism directly against installed `google-adk==2.8.0` source rather than trusting the lab's narrative on faith:
+- `google/adk/flows/llm_flows/functions.py::_get_tool` raises exactly `ValueError(f"Tool '{tool_name}' not found.\nAvailable tools: {...}")` when the model calls an unregistered tool name — confirms Step 3's claimed stack trace verbatim.
+- That `ValueError` is caught in `execute_function_call` (functions.py ~L589-606) and routed into `plugin_manager.run_on_tool_error_callback(...)`, which `ReflectAndRetryToolPlugin.on_tool_error_callback` handles via `_handle_tool_error` → `_create_tool_reflection_response`, embedding the original error text back into a structured reflection message returned as the tool's response — this is precisely the "Plugin caught it and told the Agent" mechanism the lab narrates in Step 5.
+- Confirmed `max_retries=0` really does disable retries and re-raises immediately (`throw_exception_if_retry_exceeded=True` by default), matching the solution's Self-Reflection Answer #2.
+- `App` (pydantic model, fields: `name`, `root_agent`, `plugins`, ...) and `Runner`/`InMemoryRunner` wiring instantiate with zero errors offline.
+
+## 💡 Suggestions for Improvement
+No content changes needed — this module is technically sound and well-verified against the installed ADK version. Optional/nice-to-have only: a one-line callout near "Run the agent" noting that a valid `GOOGLE_API_KEY` is required for live execution (many other modules in this course already carry this caveat), since Step 3/5's crash-vs-success narrative depends entirely on the model call actually reaching the API.
+

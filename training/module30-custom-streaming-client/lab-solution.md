@@ -119,7 +119,15 @@ registerProcessor('audio-processor', AudioProcessor);
             if (!playbackAudioContext) {
                 playbackAudioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
             }
-            const binaryString = atob(base64Data);
+            // ADK's /run_live endpoint emits base64url (RFC 4648, using '-'
+            // and '_' instead of '+' and '/') for binary fields like
+            // inlineData.data — a side effect of how Pydantic v2 serializes
+            // `bytes` to JSON by default. atob() only understands standard
+            // base64 and throws InvalidCharacterError whenever a chunk
+            // happens to contain '-' or '_', so normalize back to the
+            // standard alphabet first.
+            const normalizedBase64 = base64Data.replace(/-/g, '+').replace(/_/g, '/');
+            const binaryString = atob(normalizedBase64);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {
                 bytes[i] = binaryString.charCodeAt(i);

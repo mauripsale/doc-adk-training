@@ -12,16 +12,12 @@ This file contains the complete code for the `agent.py` script in the Observabil
 ### `observability_agent/agent.py`
 
 ```python
-import os
 from google.adk import Agent
 from google.adk.apps import App
 from google.adk.plugins import BasePlugin
 from google.adk.events import Event
 from google.adk.telemetry.google_cloud import get_gcp_exporters
 from google.adk.telemetry.setup import maybe_set_otel_providers
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # A tool that can genuinely fail, so there's a real exception for the
 # plugin to observe -- not just a simulated one.

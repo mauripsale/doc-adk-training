@@ -68,7 +68,7 @@ def after_agent_callback(callback_context: CallbackContext) -> None:
     # Find the last model response in the session history
     events = callback_context.session.events
     for event in reversed(events):
-        if event.author != "user" and event.content:
+        if event.author != "user" and event.content and event.content.parts:
             response_text = event.content.parts[0].text
             key = _cache_key(callback_context)
             callback_context.state[key] = response_text
@@ -81,8 +81,12 @@ def before_model_callback(
     llm_request: LlmRequest
 ) -> Optional[LlmResponse]:
     """Prevents inappropriate prompts from reaching the LLM."""
-    user_text = "".join([p.text for c in llm_request.contents for p in c.parts if p.text])
-    
+    # Scope the check to the CURRENT turn only, mirroring _cache_key().
+    # Scanning llm_request.contents would inspect the ENTIRE conversation
+    # history, so a blocked word from any earlier turn would keep matching
+    # forever, refusing every later (and otherwise unrelated) turn too.
+    user_text = _current_user_text(callback_context)
+
     for word in BLOCKED_WORDS:
         if word in user_text.lower():
             print(f"🛑 [GUARDRAIL] Blocked prompt containing: {word}")

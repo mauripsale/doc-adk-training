@@ -56,11 +56,66 @@ In the next module, you will use this knowledge to set up your own local develop
 
 <hr/>
 
-### 🕵️ Hidden Solution 🕵️
+import SolutionVault from '@site/src/components/SolutionVault';
 
-Looking for the solution? Here's a hint (Base64 decode me):
-`L2RvYy1hZGstdHJhaW5pbmcvbW9kdWxlMDEtaW50cm8tdG8tYWktYWdlbnRzL2xhYi1zb2x1dGlvbg==`
+### 🔐 Reference Solution Vault
 
-<div style={{color: 'rgba(0,0,0,0.01)', userSelect: 'all', fontSize: '1px'}}>
-    The direct link is: <a href="/doc-adk-training/module01-intro-to-ai-agents/lab-solution" style={{color: 'inherit', textDecoration: 'none'}}>Lab Solution</a>
-</div>
+<SolutionVault 
+  moduleNumber="01"
+  questions={[
+    {
+      question: "What fundamentally distinguishes an autonomous AI Agent from a traditional stateless LLM completion?",
+      options: [
+        "Agents only generate raw text and cannot execute tools or maintain state",
+        "Agents combine LLM reasoning with state memory, tools, and iterative execution loops",
+        "Agents eliminate the need for system prompts and foundational models",
+        "Agents are strictly hardcoded deterministic script engines"
+      ],
+      correctIndex: 1,
+      hint: "Recall the Module 01 core concepts: agents observe, reason, act using tools, and evaluate observations in a loop."
+    },
+    {
+      question: "In Google ADK 2.0, what is the modern programmatic entry-point pattern to run an agent in Python?",
+      options: [
+        "A standalone main.py script with blocking input() calls",
+        "Wrapping the Agent in an InMemoryRunner and iterating events via runner.run_async()",
+        "An infinite while-loop calling raw model.generate_content()",
+        "A direct static method call to Agent.execute_batch()"
+      ],
+      correctIndex: 1,
+      hint: "Review the 'Running and Inspecting the Agent Programmatically' section in the official ADK Hello World sample."
+    },
+    {
+      question: "Where are the official Google ADK Python code samples, releases, and issue trackers hosted?",
+      options: [
+        "In private restricted intranet portals only",
+        "In the public open-source GitHub repository at github.com/google/adk-python",
+        "Exclusively inside PyPI package metadata comments",
+        "On third-party unverified community forums"
+      ],
+      correctIndex: 1,
+      hint: "Check Step 2 of Lab 1 regarding the official open-source GitHub repository and its samples/ directory."
+    }
+  ]}
+  cooldownSeconds={15}
+>
+
+#### 🎯 Official Lab 1 Reference Solution & Findings
+
+##### 1. Official Documentation Reference
+* **About the ADK:** [google.github.io/adk-docs/get-started/about](https://google.github.io/adk-docs/get-started/about)
+* **Quickstart Tutorial:** [google.github.io/adk-docs/get-started/quickstart](https://google.github.io/adk-docs/get-started/quickstart)
+* **Agent Deep Dive:** [google.github.io/adk-docs/agents/llm-agents](https://google.github.io/adk-docs/agents/llm-agents)
+* **Built-in Tools:** [google.github.io/adk-docs/tools/built-in-tools](https://google.github.io/adk-docs/tools/built-in-tools)
+
+##### 2. Scavenger Hunt Key Finding
+> The `contributing/samples/core/hello_world` sample does not use a traditional `main.py` entrypoint. In Google ADK 2.0, the programmatic entrypoint pattern wraps an `Agent` inside an `InMemoryRunner`, initializes the user session via `runner.session_service.create_session(...)`, and dispatches user queries asynchronously with `async for event in runner.run_async(user_id=..., session_id=..., new_message=...)`. The key programmatic method is **`runner.run_async()`**.
+
+##### 3. Code Repositories & Community Channels
+* **ADK Python Repository:** [https://github.com/google/adk-python](https://github.com/google/adk-python)
+* **Hello World Sample:** [https://github.com/google/adk-python/tree/main/contributing/samples/core/hello_world](https://github.com/google/adk-python/tree/main/contributing/samples/core/hello_world)
+* **GitHub Discussions & Issues:** Used for open-source issue tracking, community RFCs, and bug reports.
+
+</SolutionVault>
+
+

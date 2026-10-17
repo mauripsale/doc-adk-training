@@ -11,6 +11,7 @@ const PARTS = [
     title: 'Foundations',
     range: 'Modules 1–7',
     desc: 'The absolute basics of AI agents and the ADK — environment setup through your first multimodal agent.',
+    link: '/docs/module01-intro-to-ai-agents/',
   },
   {
     icon: '🛠️',
@@ -18,6 +19,7 @@ const PARTS = [
     title: 'Tools & Capabilities',
     range: 'Modules 8–14',
     desc: 'Custom function tools, OpenAPI, built-in grounding, and third-party integrations.',
+    link: '/docs/module08-intro-to-tools/',
   },
   {
     icon: '🤝',
@@ -25,6 +27,7 @@ const PARTS = [
     title: 'Multi-Agent Systems',
     range: 'Modules 15–21',
     desc: 'Static, structured, dynamic, and cyclic orchestration — up through distributed A2A graphs.',
+    link: '/docs/module15-intro-to-multi-agent-systems/',
   },
   {
     icon: '🏭',
@@ -32,6 +35,7 @@ const PARTS = [
     title: 'Production Readiness',
     range: 'Modules 22–26',
     desc: 'State, memory, artifacts, evaluation, observability, and callback-based guardrails.',
+    link: '/docs/module22-state-and-memory/',
   },
   {
     icon: '🔌',
@@ -39,6 +43,7 @@ const PARTS = [
     title: 'Advanced Integrations & UI',
     range: 'Modules 27–30',
     desc: 'MCP clients and servers, plus wiring a custom streaming front-end to your agents.',
+    link: '/docs/module27-intro-to-mcp/',
   },
   {
     icon: '☁️',
@@ -46,6 +51,7 @@ const PARTS = [
     title: 'Deployment & Enterprise',
     range: 'Modules 31–36',
     desc: 'Cloud Run, GKE, and enterprise-grade Gemini Enterprise Agent Platform deployment.',
+    link: '/docs/module31-production-deployment-strategies/',
   },
   {
     icon: '🏆',
@@ -53,6 +59,7 @@ const PARTS = [
     title: 'Capstone & Best Practices',
     range: 'Modules 37–40',
     desc: 'Plugins, agent skills, and a full enterprise incident-response capstone with AgentOps.',
+    link: '/docs/module37-advanced-personalized-shopping-agent/',
   },
 ];
 
@@ -231,7 +238,7 @@ export default function Home() {
 
             <div className={styles.map}>
               {PARTS.map((part) => (
-                <div className={styles.part} key={part.index}>
+                <Link to={part.link} className={styles.part} key={part.index}>
                   <div className={styles.partNode}>{part.icon}</div>
                   <div className={styles.partHead}>
                     <span className={styles.partIndex}>{part.index}</span>
@@ -239,7 +246,7 @@ export default function Home() {
                     <span className={styles.partRange}>{part.range}</span>
                   </div>
                   <p className={styles.partDesc}>{part.desc}</p>
-                </div>
+                </Link>
               ))}
             </div>
           </section>

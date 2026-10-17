@@ -56,49 +56,9 @@ In the next module, you will use this knowledge to set up your own local develop
 
 <hr/>
 
-import SolutionVault from '@site/src/components/SolutionVault';
-
 ### 🔐 Reference Solution Vault
 
-<SolutionVault 
-  moduleNumber="01"
-  questions={[
-    {
-      question: "What fundamentally distinguishes an autonomous AI Agent from a traditional stateless LLM completion?",
-      options: [
-        "Agents only generate raw text and cannot execute tools or maintain state",
-        "Agents combine LLM reasoning with state memory, tools, and iterative execution loops",
-        "Agents eliminate the need for system prompts and foundational models",
-        "Agents are strictly hardcoded deterministic script engines"
-      ],
-      correctIndex: 1,
-      hint: "Recall the Module 01 core concepts: agents observe, reason, act using tools, and evaluate observations in a loop."
-    },
-    {
-      question: "In Google ADK 2.0, what is the modern programmatic entry-point pattern to run an agent in Python?",
-      options: [
-        "A standalone main.py script with blocking input() calls",
-        "Wrapping the Agent in an InMemoryRunner and iterating events via runner.run_async()",
-        "An infinite while-loop calling raw model.generate_content()",
-        "A direct static method call to Agent.execute_batch()"
-      ],
-      correctIndex: 1,
-      hint: "Review the 'Running and Inspecting the Agent Programmatically' section in the official ADK Hello World sample."
-    },
-    {
-      question: "Where are the official Google ADK Python code samples, releases, and issue trackers hosted?",
-      options: [
-        "In private restricted intranet portals only",
-        "In the public open-source GitHub repository at github.com/google/adk-python",
-        "Exclusively inside PyPI package metadata comments",
-        "On third-party unverified community forums"
-      ],
-      correctIndex: 1,
-      hint: "Check Step 2 of Lab 1 regarding the official open-source GitHub repository and its samples/ directory."
-    }
-  ]}
-  cooldownSeconds={15}
->
+<SolutionVault moduleNumber="01">
 
 #### 🎯 Official Lab 1 Reference Solution & Findings
 

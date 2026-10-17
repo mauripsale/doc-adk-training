@@ -76,12 +76,39 @@ function sha256Hex(ascii) {
   return result;
 }
 
-const REFLECTION_TIPS = [
-  '💡 Review your node definitions, agent prompts, and tool configurations.',
-  '🔍 Verify that your runner receives the expected session context and state.',
-  '🧪 Have you tested running the agent locally with `adk web` or CLI?',
-  '⚙️ Reviewing callback guardrails often catches edge-case logic bugs.',
+const MINDFULNESS_TIPS_POOL = [
+  '🧠 Take a deep breath. Clear reasoning beats brute-force trial and error every single time.',
+  '⚡ "Any fool can write code that a computer can understand. Good programmers write code that humans can understand." — Martin Fowler',
+  '🤖 In multi-agent architectures, clear role boundaries prevent endless cyclic delegation loops.',
+  '🔍 Did you inspect the intermediate event stream or runner session state before reaching for the solution?',
+  '☕ Good code is like a good espresso: carefully extracted, properly filtered, and never rushed.',
+  '🛠️ Verify tool schemas carefully: 80% of LLM function calling bugs stem from ambiguous parameter docstrings.',
+  '🎯 "Debugging is twice as hard as writing the code in the first place." — Brian Kernighan',
+  '🛡️ Always design fallback guardrails in agent callbacks for unexpected API rate limits or token spikes.',
+  '🌊 Breathe in clarity, exhale syntax errors. The solution is almost ready to unlock.',
+  '✨ Struggling with a problem for 5 minutes cements neural pathways far better than passively reading answers.',
+  '🧩 Stateless agents forget their history; always verify whether your workflow requires session persistence.',
+  '📊 Check your token budget and temperature — small configuration knobs yield massive behavioral shifts.',
+  '💡 "Simplicity is prerequisite for reliability." — Edsger W. Dijkstra',
+  '🔬 Inspect the prompt payload sent to Gemini: are your instructions unambiguous and grounded?',
   '🚀 Decrypting the reference solution payload directly into the vault...',
+  '🧱 Modular agents with single responsibilities are 10x easier to test, trace, and evaluate.',
+  '⏱️ Great software engineering is a marathon of deliberate practice, not a sprint of copy-pasting.',
+  '🔭 Observe the agent trajectory step-by-step: where did its reasoning first diverge from your intent?',
+  '🌱 Every bug you diagnose yourself makes you a significantly sharper AI architect.',
+  '🔐 Security first: never hardcode API keys or service account credentials in agent prompt templates.',
+  '💬 "First, solve the problem. Then, write the code." — John Johnson',
+  '🎲 If your agent produces non-deterministic tool calls, consider lowering temperature or tightening schema constraints.',
+  '🔄 Cyclic workflows require explicit exit conditions to avoid infinite token consumption.',
+  '📡 In distributed agent graphs, asynchronous non-blocking event streams keep latency low.',
+  '🧪 Have you tested running your agent locally with `adk web` or CLI before inspecting the reference code?',
+  '🏗️ Artifacts allow agents to persist structured files across turns without polluting conversation history.',
+  '⚖️ When evaluating agents, combine programmatic trajectory checks with LLM-as-a-judge rubrics for high fidelity.',
+  '📦 "Make it work, make it right, make it fast." — Kent Beck',
+  '🎩 A well-crafted system instruction is 90% of the magic in autonomous task delegation.',
+  '🧘 Relax your shoulders, unclench your jaw. The reference architecture is decrypting right now.',
+  '📐 Always separate deterministic tool logic from probabilistic LLM reasoning.',
+  '🚦 Use Guardrail callbacks (`before_tool_callback`) to block unsafe shell or database commands.'
 ];
 
 export default function SolutionVault({
@@ -178,6 +205,17 @@ export default function SolutionVault({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [storageKey]);
 
+  // Select 5 varied tips for this module/cooldown session
+  const activeTips = useMemo(() => {
+    const pool = [...MINDFULNESS_TIPS_POOL];
+    let seed = 0;
+    for (let i = 0; i < normKey.length; i++) {
+      seed = (seed * 31 + normKey.charCodeAt(i)) % pool.length;
+    }
+    const reordered = [...pool.slice(seed), ...pool.slice(0, seed)];
+    return reordered.slice(0, 5);
+  }, [normKey]);
+
   // Cooldown countdown with 3-second tip rotation
   useEffect(() => {
     let timer;
@@ -187,7 +225,7 @@ export default function SolutionVault({
           setSecondsLeft((s) => {
             const nextSec = s - 1;
             const elapsed = cooldownSeconds - nextSec;
-            setTipIndex(Math.floor(elapsed / 3) % REFLECTION_TIPS.length);
+            setTipIndex(Math.floor(elapsed / 3) % activeTips.length);
             return nextSec;
           });
         }, 1000);
@@ -199,7 +237,7 @@ export default function SolutionVault({
       }
     }
     return () => clearTimeout(timer);
-  }, [status, secondsLeft, storageKey, cooldownSeconds]);
+  }, [status, secondsLeft, storageKey, cooldownSeconds, activeTips.length]);
 
   // Quiz Option Click
   const handleOptionSelect = (idx) => {
@@ -416,7 +454,7 @@ export default function SolutionVault({
               />
             </div>
             <div className={styles.mindfulTip}>
-              {REFLECTION_TIPS[tipIndex]}
+              {activeTips[tipIndex] || MINDFULNESS_TIPS_POOL[0]}
             </div>
           </div>
         )}

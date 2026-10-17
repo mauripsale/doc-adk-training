@@ -8,7 +8,7 @@ def validate():
         content = f.read()
 
     # Extract JSON object
-    match = re.search(r"export const VAULT_REGISTRY = (\{.*?\});\n\nexport default", content, re.DOTALL)
+    match = re.search(r"export const VAULT_REGISTRY = (\{.*\});", content, re.DOTALL)
     if not match:
         print("❌ Could not parse VAULT_REGISTRY from JS file")
         sys.exit(1)

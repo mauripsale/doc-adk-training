@@ -156,6 +156,14 @@ This client uses **push-to-talk**: hold the button to record and stream your voi
         // for your microphone input), this function should:
         //   a. Lazily create `playbackAudioContext` at sampleRate 24000.
         //   b. Decode the Base64 string into bytes (atob + a byte array).
+        //      IMPORTANT: ADK's /run_live endpoint serializes binary fields
+        //      like inlineData.data as base64url (RFC 4648 — using '-' and
+        //      '_' instead of '+' and '/'), a side effect of how Pydantic v2
+        //      serializes `bytes` to JSON by default. Browsers' atob() only
+        //      understands standard base64 and throws InvalidCharacterError
+        //      on '-'/'_', so normalize the string first:
+        //      base64Data.replace(/-/g, '+').replace(/_/g, '/')
+        //      before calling atob() on it.
         //   c. Convert those bytes, two at a time, from 16-bit little-endian
         //      signed integers into normalized Float32 samples (divide by
         //      32768). This is DIFFERENT from decoding an audio file format

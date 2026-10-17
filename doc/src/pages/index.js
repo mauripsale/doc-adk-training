@@ -59,7 +59,7 @@ const PARTS = [
 export default function Home() {
   const avatarSrc = useBaseUrl('/img/maurizio-avatar.jpg');
   const firstModuleUrl = useBaseUrl('/docs/module01-intro-to-ai-agents/');
-  const allModulesUrl = useBaseUrl('/docs/');
+  const allModulesUrl = useBaseUrl('/docs/module01-intro-to-ai-agents/');
 
   return (
     <Layout

@@ -37,7 +37,7 @@ const config = {
           title: 'Course',
           items: [
             {label: 'Start Module 01', to: '/docs/module01-intro-to-ai-agents/'},
-            {label: 'All Modules', to: '/docs/'},
+            {label: 'All Modules', to: '/docs/module01-intro-to-ai-agents/'},
           ],
         },
         {

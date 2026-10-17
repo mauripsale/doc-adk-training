@@ -19,9 +19,10 @@ const config = {
       },
       items: [
         {
-          to: '/docs/module01-intro-to-ai-agents/',
-          label: 'Modules',
+          type: 'docSidebar',
+          sidebarId: 'tutorialSidebar',
           position: 'left',
+          label: 'Modules',
         },
         {
           href: 'https://github.com/mauripsale/doc-adk-training',
@@ -60,6 +61,7 @@ const config = {
           path: '../training',
           routeBasePath: '/docs',
           include: ['**/*.md', '**/*.mdx'],
+          exclude: ['**/lab-solution.md', '**/lab-solution/**'],
           async sidebarItemsGenerator({defaultSidebarItemsGenerator, ...args}) {
             const sidebarItems = await defaultSidebarItemsGenerator(args);
 

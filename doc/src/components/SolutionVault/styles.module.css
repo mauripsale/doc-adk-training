@@ -1,0 +1,347 @@
+.vaultCard {
+  margin: 32px 0;
+  border-radius: 12px;
+  background: #0d121f;
+  border: 1px solid #1e293d;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  color: #e2e8f0;
+}
+
+[data-theme='light'] .vaultCard {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.terminalBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #090d16;
+  border-bottom: 1px solid #1e293d;
+}
+
+.terminalDots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dotRed { background: #ef4444; }
+.dotYellow { background: #f59e0b; }
+.dotGreen { background: #10b981; }
+
+.terminalTitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vaultBody {
+  padding: 24px;
+}
+
+.stepTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #8ab4f8;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Quiz Styles */
+.quizBox {
+  background: #050811;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 24px;
+}
+
+.questionText {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionBtn {
+  background: #0d121f;
+  border: 1px solid #1e293b;
+  color: #cbd5e1;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.optionBtn:hover:not(:disabled) {
+  border-color: #38bdf8;
+  background: #131b2e;
+  color: #ffffff;
+}
+
+.optionBtnSelected {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  color: #38bdf8;
+}
+
+.optionBtnCorrect {
+  border-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  font-weight: 600;
+}
+
+.optionBtnWrong {
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+}
+
+.quizHint {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.1);
+  border-left: 3px solid #f59e0b;
+  font-size: 0.84rem;
+  color: #fbbf24;
+}
+
+.quizSuccess {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.1);
+  border-left: 3px solid #10b981;
+  font-size: 0.84rem;
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Python Code Challenge */
+.codeBox {
+  position: relative;
+  background: #050811;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.84rem;
+  color: #38bdf8;
+  overflow-x: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.copyBtn {
+  background: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.copyBtn:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.inputRow {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.keyInput {
+  flex: 1;
+  background: #050811;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  color: #f8fafc;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.keyInput:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.unlockBtn {
+  background: linear-gradient(135deg, #1a73e8 0%, #4f46e5 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.unlockBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(26, 115, 232, 0.4);
+}
+
+.unlockBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.errorMsg {
+  color: #f87171;
+  font-size: 0.82rem;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Cooldown State */
+.cooldownBox {
+  text-align: center;
+  padding: 24px 10px;
+}
+
+.timerRing {
+  font-size: 2.4rem;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: #38bdf8;
+  margin-bottom: 8px;
+}
+
+.progressBarTrack {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 14px auto 18px;
+  max-width: 380px;
+}
+
+.progressBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  transition: width 1s linear;
+}
+
+.mindfulTip {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  font-style: italic;
+  max-width: 480px;
+  min-height: 48px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.45;
+  transition: opacity 0.4s ease-in-out;
+}
+
+/* Unlocked State */
+.unlockedBox {
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.unlockedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.unlockedTitle {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #34d399;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lockAgainBtn {
+  background: transparent;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lockAgainBtn:hover {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+.inlineSolution {
+  margin-top: 16px;
+  color: #e2e8f0;
+  line-height: 1.6;
+}
+
+.inlineSolution h3 {
+  color: #8ab4f8;
+  margin-top: 16px;
+}
+
+.inlineSolution h4 {
+  color: #cbd5e1;
+}
+
+.inlineSolution pre {
+  background: #050811;
+  border: 1px solid #1e293d;
+  border-radius: 8px;
+  padding: 14px;
+}

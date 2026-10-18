@@ -5,7 +5,7 @@ title: "Module 1: Introduction to AI Agents"
 
 # Module 1: Introduction to AI Agents
 
-![Introduction to AI Agents](img/module01-header.png)
+![Introduction to AI Agents & Google ADK](img/hero-agent-foundations.webp)
 
 # Module 1: Introduction to AI Agents & Google ADK
 
@@ -25,6 +25,9 @@ An AI Agent is a system that can:
 2.  **Reason and Plan:** It uses an LLM as its "brain" to break down a high-level goal into a sequence of smaller, actionable steps.
 3.  **Act using Tools:** It executes those steps by interacting with its environment. This could mean calling an API, searching a database, running a piece of code, or even using another agent.
 4.  **Observe the Outcome:** It analyzes the results of its actions and adjusts its plan accordingly until the goal is achieved.
+
+![The Autonomous AI Agent Loop: Perception, Reasoning, Tool Execution, and State Observation](img/agent-loop-infographic.webp)
+*Figure 1.1: The 4-stage autonomous agent execution loop in Google ADK — from natural language perception to reasoning, tool dispatching, and state memory updates.*
 
 Think of an agent as an autonomous worker that you can delegate complex tasks to, moving from just "chatting" with an AI to collaborating with it.
 

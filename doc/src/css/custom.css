@@ -129,7 +129,7 @@
 .markdown h2 {
   font-weight: 750;
   letter-spacing: -0.02em;
-  margin-top: 2rem;
+  margin-top: 2.2rem;
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--ifm-toc-border-color);
 }
@@ -137,6 +137,7 @@
 .markdown h3 {
   font-weight: 650;
   letter-spacing: -0.01em;
+  margin-top: 1.6rem;
 }
 
 /* Code Blocks & Inline Code */
@@ -160,9 +161,63 @@ code {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
+/* Editorial Hero Banner (Top of Theory) - 21:9 Aspect Ratio & Anti-Scroll Clamp */
+.markdown .hero-banner-img,
+.markdown p > img:first-child {
+  display: block;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  max-height: clamp(180px, 26vh, 250px);
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--ifm-toc-border-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  margin: 1rem auto 2rem auto;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-theme='dark'] .markdown .hero-banner-img,
+[data-theme='dark'] .markdown p > img:first-child {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* In-Article Editorial Figures & Technical Diagrams - 16:9 Aspect Ratio */
+.markdown .editorial-figure,
+.markdown img:not(.hero-banner-img):not(:first-child) {
+  display: block;
+  max-width: 820px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
+  object-fit: contain;
+  background: var(--ifm-background-surface-color);
+  border-radius: 12px;
+  border: 1px solid var(--ifm-toc-border-color);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  margin: 2rem auto;
+  padding: 4px;
+}
+
+[data-theme='dark'] .markdown .editorial-figure,
+[data-theme='dark'] .markdown img:not(.hero-banner-img):not(:first-child) {
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.markdown .editorial-caption {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-top: -1.2rem;
+  margin-bottom: 2rem;
+  font-style: italic;
+}
+
 /* Footer styling */
 .footer--dark {
   --ifm-footer-background-color: #0b0f19;
   border-top: 1px solid #1f293d;
 }
+
 

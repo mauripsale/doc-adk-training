@@ -5,6 +5,9 @@ title: "Module 13: Advanced Interactions: Actions & HITL"
 
 # Module 13: Advanced Interactions: Actions & HITL
 
+![Tool Context & Runtime State Synchronization (Light)](img/hero-tool-context-light.webp#gh-light-mode-only)
+![Tool Context & Runtime State Synchronization (Dark)](img/hero-tool-context-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 By now, you know how to build stateful tools using the `ToolContext`. But `ToolContext` is much more than just a window into the session state; it is your gateway to controlling the **ADK Runtime** itself.
@@ -12,6 +15,10 @@ By now, you know how to build stateful tools using the `ToolContext`. But `ToolC
 In this module, we will explore how to implement **Human-in-the-Loop (HITL)** safety and how tools can dynamically influence the agent's next steps.
 
 ### Accessing the Tool Context
+
+![Tool Context Dependency Injection & State Pipeline (Light)](img/arch-tool-context-light.webp#gh-light-mode-only)
+![Tool Context Dependency Injection & State Pipeline (Dark)](img/arch-tool-context-dark.webp#gh-dark-mode-only)
+*Figure: Runtime dependency injection with ToolContext — state manipulation, audit trail, and execution lifecycle.*
 
 To get access to the `ToolContext`, you simply add a special parameter to your tool function's signature: `tool_context: ToolContext`.
 

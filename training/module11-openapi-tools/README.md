@@ -5,6 +5,9 @@ title: "Module 11: Enterprise Integration with OpenAPI Tools"
 
 # Module 11: Enterprise Integration with OpenAPI Tools
 
+![OpenAPI Declarative REST Tools (Light)](img/hero-openapi-tools-light.webp#gh-light-mode-only)
+![OpenAPI Declarative REST Tools (Dark)](img/hero-openapi-tools-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Connecting to the Enterprise Ecosystem
@@ -12,6 +15,10 @@ title: "Module 11: Enterprise Integration with OpenAPI Tools"
 Modern enterprises run on RESTful APIs. Whether it's a CRM, an ERP, or a custom internal service, these systems often expose their functionality through **OpenAPI** specifications. To build truly useful AI agents, you must know how to connect them to these existing enterprise services.
 
 ### From Specification to Tools, Automatically
+
+![OpenAPI Tool Factory Architecture (Light)](img/arch-openapi-factory-light.webp#gh-light-mode-only)
+![OpenAPI Tool Factory Architecture (Dark)](img/arch-openapi-factory-dark.webp#gh-dark-mode-only)
+*Figure: Declarative OpenAPI synthesis — compiling REST endpoint specifications directly into callable Agent tools.*
 
 In ADK 2.0, you don't hand-write a wrapper function per endpoint. Instead, you hand the ADK an OpenAPI spec and it generates the tools for you: **`OpenAPIToolset`** parses the spec and creates one callable tool per operation, named after each operation's `operationId`.
 

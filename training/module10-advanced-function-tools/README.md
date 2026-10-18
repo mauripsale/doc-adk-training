@@ -5,6 +5,9 @@ title: "Module 10: Stateful Tools & ToolContext"
 
 # Module 10: Stateful Tools & ToolContext
 
+![Advanced Function Tools & Robust Execution (Light)](img/hero-advanced-tools-light.webp#gh-light-mode-only)
+![Advanced Function Tools & Robust Execution (Dark)](img/hero-advanced-tools-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Beyond Stateless Functions
@@ -39,6 +42,10 @@ This is the most powerful feature of the context. It gives your tool direct read
     ```
 
 ### The "Memory" Pattern
+
+![Tool Validation and Error Recovery Pipeline (Light)](img/arch-error-recovery-pipeline-light.webp#gh-light-mode-only)
+![Tool Validation and Error Recovery Pipeline (Dark)](img/arch-error-recovery-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: The tool validation, exception interceptor, and adaptive recovery pipeline for robust function execution.*
 
 The most common use case for stateful tools is a **Store and Recall** pair:
 1.  **Store Tool:** Takes user input and saves it to a specific key in `tool_context.state`.

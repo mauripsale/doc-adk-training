@@ -161,37 +161,39 @@ code {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-/* Editorial Hero Banner (Top of Theory) - 21:9 Aspect Ratio & Anti-Scroll Clamp */
+/* Editorial Hero Banner (Top of Theory) - High-end framing */
 .markdown .hero-banner-img,
 .markdown p > img:first-child {
   display: block;
   width: 100%;
-  aspect-ratio: 21 / 9;
-  max-height: clamp(180px, 26vh, 250px);
-  object-fit: cover;
+  max-width: 920px;
+  aspect-ratio: 16 / 9;
+  max-height: 440px;
+  object-fit: contain;
+  background: #0b0f19;
   border-radius: 12px;
   border: 1px solid var(--ifm-toc-border-color);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  margin: 1rem auto 2rem auto;
+  margin: 1.2rem auto 2.2rem auto;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 [data-theme='dark'] .markdown .hero-banner-img,
 [data-theme='dark'] .markdown p > img:first-child {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
-/* In-Article Editorial Figures & Technical Diagrams - 16:9 Aspect Ratio */
+/* In-Article Editorial Figures & Technical Diagrams */
 .markdown .editorial-figure,
 .markdown img:not(.hero-banner-img):not(:first-child) {
   display: block;
-  max-width: 820px;
+  max-width: 860px;
   width: 100%;
   aspect-ratio: 16 / 9;
-  max-height: 420px;
+  max-height: 440px;
   object-fit: contain;
-  background: var(--ifm-background-surface-color);
+  background: #0b0f19;
   border-radius: 12px;
   border: 1px solid var(--ifm-toc-border-color);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
@@ -201,7 +203,7 @@ code {
 
 [data-theme='dark'] .markdown .editorial-figure,
 [data-theme='dark'] .markdown img:not(.hero-banner-img):not(:first-child) {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.12);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 

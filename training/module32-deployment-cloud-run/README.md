@@ -7,6 +7,10 @@ title: "Module 32: Deployment to Cloud Run"
 
 ## Theory
 
+![Serverless Agent Deployment to Cloud Run (Light)](img/hero-light.webp#gh-light-mode-only)
+![Serverless Agent Deployment to Cloud Run (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Deploying production-grade serverless agent microservices to Google Cloud Run with instant scaling and secure HTTPS endpoints.*
+
 ### From Localhost to the World
 
 So far, you have been running your agents on your local machine using commands like `uv run adk web`. This is perfect for development and testing. However, to make your agent accessible to users or to integrate it with other applications, you need to **deploy** it to a publicly accessible, scalable, and reliable environment.
@@ -31,6 +35,10 @@ Google Cloud Run is a **fully managed, serverless platform** designed to run con
 Cloud Run is an ideal platform for deploying ADK agents because it's simple to use, scales automatically, and you only pay for the computing resources you actually use.
 
 ### The Deployment Process with `uv run adk deploy cloud_run`
+
+![Automated Cloud Run Deployment Pipeline (Light)](img/cloud-run-deployment-pipeline-light.webp#gh-light-mode-only)
+![Automated Cloud Run Deployment Pipeline (Dark)](img/cloud-run-deployment-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Automated 4-stage deployment pipeline: Code Packaging, Cloud Build container compilation, Artifact Registry storage, and Cloud Run service rollout.*
 
 While you can manually build a container, push it to a registry, and configure a Cloud Run service, the ADK provides a powerful command-line tool that automates this entire process for you: `uv run adk deploy cloud_run`.
 

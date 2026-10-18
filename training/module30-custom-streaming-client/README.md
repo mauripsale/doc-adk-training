@@ -7,6 +7,10 @@ title: "Module 30: Building a Custom Streaming Client"
 
 ## Theory
 
+![Real-time Bidirectional Voice Streaming Client (Light)](img/hero-light.webp#gh-light-mode-only)
+![Real-time Bidirectional Voice Streaming Client (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Building real-time bidirectional voice streaming clients communicating over WebSockets with the Gemini Live API.*
+
 ### Beyond the Dev UI
 
 The ADK Developer UI (`uv run adk web`) has a microphone button built in, giving you bidirectional voice streaming with your agent for free, with no client code of your own. It's a great way to demo an agent, but the Dev UI is a tool for development, not a production-ready application.
@@ -37,6 +41,10 @@ Standard HTTP is a request-response protocol. The client sends a request, and th
 This is the technology that enables the continuous, low-latency flow of audio data required for a natural voice conversation.
 
 ### The Data Flow
+
+![Full-Duplex Audio Streaming Pipeline (Light)](img/full-duplex-audio-pipeline-light.webp#gh-light-mode-only)
+![Full-Duplex Audio Streaming Pipeline (Dark)](img/full-duplex-audio-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: The 5-stage bidirectional streaming loop: microphone capture, WebSocket framing, ADK event dispatch, Gemini Live synthesis, and browser audio playback.*
 
 The interaction between a custom client and the ADK server follows a specific flow:
 

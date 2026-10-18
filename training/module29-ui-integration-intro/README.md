@@ -7,6 +7,10 @@ title: "Module 29: Introduction to UI Integration"
 
 ## Theory
 
+![Multi-Platform Agent UI Integration (Light)](img/hero-light.webp#gh-light-mode-only)
+![Multi-Platform Agent UI Integration (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Integrating AI agents into modern multi-platform frontends (React, WebSockets, Streamlit, and conversational UI).*
+
 ### Why UI Integration Matters
 
 While agents can be run from the command line or via an API, their full potential is unlocked when they are integrated into a user interface. A UI makes your agent accessible to non-technical users and enables rich, interactive experiences.
@@ -28,19 +32,10 @@ The ADK is flexible and supports several approaches for UI integration, each sui
 **AG-UI (Agent-Generative UI)** is an open protocol for agent-user interaction, developed through an **official partnership between the Google ADK and CopilotKit teams**. It provides a standardized, event-based way for AI agents to communicate with web UIs.
 
 **The Stack:**
-```text
-+---------------------------------+
-|   Frontend (React/Next.js)      |
-| - @copilotkit/react-core (SDK)  |
-| - <CopilotChat> (UI Component)  |
-+---------------------------------+
-                | (WebSocket/SSE)
-+---------------------------------+
-|   Backend (Python/FastAPI)      |
-| - ag_ui_adk (Protocol Adapter)  |
-| - Your ADK Agent                |
-+---------------------------------+
-```
+
+![AG-UI Fullstack Architecture (Light)](img/ag-ui-fullstack-architecture-light.webp#gh-light-mode-only)
+![AG-UI Fullstack Architecture (Dark)](img/ag-ui-fullstack-architecture-dark.webp#gh-dark-mode-only)
+*Figure: Fullstack AG-UI architecture bridging frontend React/Next.js components with backend ADK FastAPI agents via bidirectional streaming.*
 
 By using the AG-UI protocol and the associated libraries, you can quickly build a production-ready chat interface with minimal front-end code, as the pre-built components handle the complexities of state management and streaming.
 

@@ -7,6 +7,10 @@ title: "Module 33: Deployment to Google Kubernetes Engine (GKE)"
 
 ## Theory
 
+![Enterprise Container Orchestration on GKE (Light)](img/hero-light.webp#gh-light-mode-only)
+![Enterprise Container Orchestration on GKE (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Enterprise agent container orchestration on Google Kubernetes Engine (GKE) with private VPC networking and multi-pod replica management.*
+
 ### When You Need More Control
 
 In the previous module, you learned how to deploy your agent to Google Cloud Run, a serverless platform that is incredibly simple and cost-effective. For many use cases, Cloud Run is the perfect deployment target.
@@ -42,6 +46,10 @@ Running and managing a Kubernetes cluster yourself can be incredibly complex. **
 In essence, Cloud Run prioritizes simplicity and ease of use, while GKE prioritizes flexibility and control.
 
 ### The Deployment Process to GKE
+
+![GKE Enterprise Agent Cluster Topology (Light)](img/gke-cluster-topology-light.webp#gh-light-mode-only)
+![GKE Enterprise Agent Cluster Topology (Dark)](img/gke-cluster-topology-dark.webp#gh-dark-mode-only)
+*Figure: Multi-tier GKE cluster topology showing Cloud Ingress load balancer, replica Agent Pods, private VPC services, and GPU acceleration nodes.*
 
 Deploying to GKE is a more involved process than deploying to Cloud Run, as it requires you to define your application's components using Kubernetes' own configuration language (which also uses YAML).
 

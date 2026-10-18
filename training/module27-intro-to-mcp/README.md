@@ -7,6 +7,10 @@ title: "Module 27: Introduction to MCP & Stateful Tools"
 
 ## Theory
 
+![Model Context Protocol Architecture (Light)](img/hero-light.webp#gh-light-mode-only)
+![Model Context Protocol Architecture (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: The Model Context Protocol (MCP) bridging autonomous agents with external stateful tools and servers.*
+
 ### The Limits of Stateless Tools
 
 Welcome to **Part 5: Advanced Integrations & UI**. Your agents from Part 4 are production-ready -- they remember, they're evaluated, they're observed, they're guarded by callbacks. Now it's time to give them richer capabilities and connect them to the outside world, starting with how they talk to tools.
@@ -33,12 +37,9 @@ MCP works on a client-server model:
 1.  **The MCP Server:** A standalone application that exposes a set of stateful tools (e.g., a server that manages a filesystem).
 2.  **The MCP Client:** The application that wants to use the tools. In our case, the **ADK agent acts as the MCP client**.
 
-```text
-+-----------------+      +----------------------+      +--------------------+
-|   Agent Node    |----->|    McpToolset        |----->|     MCP Server     |
-|  (MCP Client)   |      | (ADK Wrapper/Client) |      | (e.g., Filesystem) |
-+-----------------+      +----------------------+      +--------------------+
-```
+![MCP 3-Tier Client-Server Architecture (Light)](img/mcp-3tier-architecture-light.webp#gh-light-mode-only)
+![MCP 3-Tier Client-Server Architecture (Dark)](img/mcp-3tier-architecture-dark.webp#gh-dark-mode-only)
+*Figure: 3-Tier MCP Integration topology showing Agent Node, McpToolset adapter, and external MCP servers.*
 
 The `McpToolset` is the bridge. It connects to an MCP server, discovers the tools it offers, and makes them available to your agent node. When your agent decides to use one of these tools, the `McpToolset` proxies the call to the server, which executes the logic and maintains the state.
 

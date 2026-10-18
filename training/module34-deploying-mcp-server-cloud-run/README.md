@@ -7,6 +7,10 @@ title: "Module 34: Deploying an MCP Server to Cloud Run"
 
 ## Theory
 
+![Cloud-Native Stateless MCP Server Architecture (Light)](img/hero-light.webp#gh-light-mode-only)
+![Cloud-Native Stateless MCP Server Architecture (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Deploying stateless serverless MCP servers on Cloud Run backed by externalized distributed cache and database stores.*
+
 ### The Challenge of State in a Serverless World
 
 In Module 28, you built a stateful MCP server. Its state—the contents of the shopping cart—was a single global Python list: `CART = []`. That worked fine because the server ran over stdio, talking to exactly one client (your local agent) at a time — there was no notion of "whose cart is this" because there was only ever one.
@@ -29,6 +33,10 @@ This is a fundamental pattern in cloud-native application design. The applicatio
 *   **Databases:** Services like **Firestore**, **DynamoDB**, or a traditional SQL database like **Cloud SQL**. These are better for data that needs to be stored permanently and queried in more complex ways.
 
 ### The New Architecture
+
+![Stateless Serverless MCP Architecture (Light)](img/stateless-serverless-mcp-light.webp#gh-light-mode-only)
+![Stateless Serverless MCP Architecture (Dark)](img/stateless-serverless-mcp-dark.webp#gh-dark-mode-only)
+*Figure: Request lifecycle showing Agent HTTP request, Cloud Run auto-routing, Redis/Firestore state sync, and stateless response dispatch.*
 
 With externalized state, the interaction flow for our MCP server on Cloud Run looks like this:
 

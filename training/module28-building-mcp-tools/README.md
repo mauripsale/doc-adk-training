@@ -7,6 +7,10 @@ title: "Module 28: Building a Custom MCP Tool"
 
 ## Theory
 
+![Building Custom MCP Tool Providers (Light)](img/hero-light.webp#gh-light-mode-only)
+![Building Custom MCP Tool Providers (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Developing custom MCP tool providers to expose stateful backend capabilities to the AI ecosystem.*
+
 ### Becoming a Tool Provider
 
 In the previous module, you acted as a **consumer** of an MCP tool. Your ADK agent was the client connecting to a pre-built server. Now, we flip the roles. You will become a **provider** by building your own simple, standalone MCP server from scratch.
@@ -16,6 +20,10 @@ By exposing your application's capabilities via the Model Context Protocol, you 
 ### The Anatomy of an MCP Server
 
 An MCP server is an application that listens for connections from clients and responds to requests according to the protocol. A server must implement handlers for two fundamental methods:
+
+![MCP Protocol Lifecycle (Light)](img/mcp-protocol-lifecycle-light.webp#gh-light-mode-only)
+![MCP Protocol Lifecycle (Dark)](img/mcp-protocol-lifecycle-dark.webp#gh-dark-mode-only)
+*Figure: The 2-phase Model Context Protocol lifecycle: Tool Discovery schema negotiation followed by stateful Tool Execution.*
 
 #### 1. `list_tools()`
 When a client first connects, it calls `list_tools()`. The server's job is to respond with a "menu" of all the tools it provides. For each tool, it must provide a detailed schema, including:

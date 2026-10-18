@@ -5,6 +5,9 @@ title: "Module 40: Advanced Capstone - Aegis Incident Response & AgentOps"
 
 # Module 40: Advanced Capstone - Aegis Incident Response & AgentOps
 
+![Aegis Incident Response & AgentOps Capstone Banner (Light)](img/hero-light.webp#gh-light-mode-only)
+![Aegis Incident Response & AgentOps Capstone Banner (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory & Architecture
 
 ### 1. The Scenario: Enterprise Security Operations & Threat Remediation
@@ -12,6 +15,10 @@ In a modern enterprise security operations center (SOC), analysts are overwhelme
 
 ### 2. The Solution: Aegis Incident Response System (AIRS)
 To solve this, you will implement an advanced, distributed multi-agent system called **Aegis Incident Response System (AIRS)**. This is a secure, automated threat hunting and patching coordinator built with **ADK 2.0**, using a real Model Context Protocol (MCP) server and the Agent-to-Agent (A2A) protocol.
+
+![Aegis Multi-Agent SecOps Topology Architecture (Light)](img/aegis-secops-architecture-light.webp#gh-light-mode-only)
+![Aegis Multi-Agent SecOps Topology Architecture (Dark)](img/aegis-secops-architecture-dark.webp#gh-dark-mode-only)
+*Figure: Distributed SecOps multi-agent architecture with Aegis orchestrator, Threat Intel, Mitigation agent, and MCP tooling.*
 
 **A note on scope:** this capstone runs entirely on your local machine — no GCP project or billing required. Model Armor, Vertex AI Search (RAG), the GCS upload, and the AgentOps telemetry export are represented with **simplified, simulated implementations**, clearly marked as such in the code. What's real and fully functional is the part this capstone is actually testing: three independent ADK agents cooperating correctly over A2A, backed by a real MCP server and real AgentOps callback hooks. The diagram below shows the target production architecture this design is modeled on; see "Going Further" at the end for how to wire the simulated pieces up to the real services.
 

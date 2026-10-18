@@ -5,6 +5,8 @@ title: "Module 35: Deploying to Agent Runtime"
 
 # Module 35: Deploying to Agent Runtime
 
+![Deploying to Agent Runtime Banner (Light)](img/hero-light.webp#gh-light-mode-only)
+![Deploying to Agent Runtime Banner (Dark)](img/hero-dark.webp#gh-dark-mode-only)
 
 ## Theory
 
@@ -26,6 +28,10 @@ Deploying an agent involves packaging its code and running it on a scalable, rel
 This module's lab will guide you through both methods.
 
 ### The Accelerated Deployment Workflow
+
+![Agent Runtime Architecture & Authorization Lifecycle (Light)](img/agent-runtime-auth-lifecycle-light.webp#gh-light-mode-only)
+![Agent Runtime Architecture & Authorization Lifecycle (Dark)](img/agent-runtime-auth-lifecycle-dark.webp#gh-dark-mode-only)
+*Figure: Managed execution, OAuth2 authentication, and deployment lifecycle in Vertex AI Agent Runtime.*
 
 The Agents CLI streamlines the path to production into a few simple commands:
 

@@ -5,6 +5,9 @@ title: "Module 39.5: Agent Skills"
 
 # Module 39.5: Enhancing Agents with Skills
 
+![Autonomous Agent Skills & Dynamic On-Demand Capabilities Banner (Light)](img/hero-light.webp#gh-light-mode-only)
+![Autonomous Agent Skills & Dynamic On-Demand Capabilities Banner (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### What is a Skill?
@@ -23,6 +26,10 @@ A **Skill** is a self-contained package that provides an agent with specialized 
 If you put the instructions, schemas, and logic for every possible task directly into your agent's system prompt, you will quickly exhaust the LLM's context window. This makes the agent slow, expensive, and easily confused.
 
 ### The Solution: Progressive Disclosure
+
+![Agent Skill Resolution & Execution Pipeline Architecture (Light)](img/agent-skill-resolution-pipeline-light.webp#gh-light-mode-only)
+![Agent Skill Resolution & Execution Pipeline Architecture (Dark)](img/agent-skill-resolution-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Progressive disclosure pipeline: skill discovery, sandboxed execution, and memory synthesis.*
 
 Skills solve this through **Progressive Disclosure**:
 1.  The agent is only given the name and a short description of the Skill.

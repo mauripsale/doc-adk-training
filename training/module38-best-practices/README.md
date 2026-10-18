@@ -5,11 +5,18 @@ title: "Module 38: Best Practices & Production Patterns (ADK 2.0)"
 
 # Module 38: Best Practices & Production Patterns
 
+![Production Agent Engineering Best Practices Banner (Light)](img/hero-light.webp#gh-light-mode-only)
+![Production Agent Engineering Best Practices Banner (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### From Prototype to Production
 
 Building a working agent is the first step. Building a **production-ready** agent requires a focus on architecture, performance, security, and reliability. This module summarizes the essential best practices for taking your agent from a prototype to a robust, scalable, and maintainable application, aligned with the **ADK 2.0 Workflow Runtime**.
+
+![Production Reliability & Defense-in-Depth Matrix (Light)](img/defense-in-depth-matrix-light.webp#gh-light-mode-only)
+![Production Reliability & Defense-in-Depth Matrix (Dark)](img/defense-in-depth-matrix-dark.webp#gh-dark-mode-only)
+*Figure: Defense-in-depth architecture covering input validation, execution resilience, state integrity, and observability.*
 
 ### 1. Architectural Best Practices: Thinking in Graphs
 

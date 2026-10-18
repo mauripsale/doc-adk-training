@@ -5,11 +5,18 @@ title: "Module 39: ADK Plugins"
 
 # Module 39: Advanced Recovery with Built-In Plugins
 
+![Modular Agent Plugins & Dynamic Hook Architecture Banner (Light)](img/hero-light.webp#gh-light-mode-only)
+![Modular Agent Plugins & Dynamic Hook Architecture Banner (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Building on Custom Plugins
 
 Having previously built custom plugins for **Observability (Module 25)** and **Responsible AI Guardrails (Module 25.5)**, you are already familiar with how the ADK's plugin architecture cleanly separates cross-cutting infrastructure concerns from your core agent prompt logic. 
+
+![Plugin Lifecycle & Hook Execution Architecture (Light)](img/plugin-lifecycle-architecture-light.webp#gh-light-mode-only)
+![Plugin Lifecycle & Hook Execution Architecture (Dark)](img/plugin-lifecycle-architecture-dark.webp#gh-dark-mode-only)
+*Figure: Plugin registration, hook interception pipeline, and reflect-and-retry error recovery flow.*
 
 As a reminder, **Plugins** inherit from `BasePlugin` and register on the **App** (or Runner) to globally intercept and inspect events. They operate using three primary patterns:
 

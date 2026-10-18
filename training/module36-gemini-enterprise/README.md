@@ -5,6 +5,9 @@ title: "Module 36: Gemini Enterprise (formerly AgentSpace)"
 
 # Module 36: Gemini Enterprise (formerly AgentSpace)
 
+![Gemini Enterprise Agent Ecosystem Banner (Light)](img/hero-light.webp#gh-light-mode-only)
+![Gemini Enterprise Agent Ecosystem Banner (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### From Development to Enterprise Operations
@@ -30,13 +33,9 @@ Gemini Enterprise is a fully managed platform that provides the infrastructure a
 
 The typical workflow is to build and test your agent locally using the ADK, and then deploy it to Gemini Enterprise for production use.
 
-```text
-+---------------------+      +----------------------+      +-----------------------+
-|  1. Build & Test    |----->|  2. Deploy via ADK    |----->|  3. Manage & Monitor  |
-|   Agent Locally     |      |  or Cloud Console     |      |   in Gemini Enterprise|
-|     (using ADK)     |      +----------------------+      +-----------------------+
-+---------------------+
-```
+![Gemini Enterprise Integration Hub & Deployment Lifecycle (Light)](img/gemini-enterprise-hub-light.webp#gh-light-mode-only)
+![Gemini Enterprise Integration Hub & Deployment Lifecycle (Dark)](img/gemini-enterprise-hub-dark.webp#gh-dark-mode-only)
+*Figure: Enterprise data grounding, RBAC governance, and agent extension architecture in Gemini Enterprise.*
 
 By providing a clear separation between development (ADK) and operations (Gemini Enterprise), this model allows developers to focus on building great agent logic, while platform administrators can focus on ensuring security, compliance, and efficient operation at scale.
 

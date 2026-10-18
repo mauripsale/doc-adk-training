@@ -3,9 +3,8 @@
  * Clean, modern typography and Google AI palette.
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
 :root {
+  color-scheme: light;
   /* Google AI / Gemini Palette */
   --adk-blue: #1a73e8;
   --adk-blue-hover: #1557b0;
@@ -46,9 +45,11 @@
   --ifm-menu-color-active: var(--ifm-color-primary);
   --ifm-menu-color-background-active: rgba(26, 115, 232, 0.08);
   --ifm-global-border-radius: 8px;
+  accent-color: var(--adk-blue);
 }
 
 [data-theme='dark'] {
+  color-scheme: dark;
   --ifm-color-primary: #8ab4f8;
   --ifm-color-primary-dark: #6ba0f6;
   --ifm-color-primary-darker: #5b96f5;
@@ -65,6 +66,7 @@
 
   --ifm-toc-border-color: #1f293d;
   --ifm-menu-color-background-active: rgba(138, 180, 248, 0.12);
+  accent-color: var(--ifm-color-primary);
 }
 
 /* Navbar Enhancements */
@@ -120,6 +122,18 @@
 }
 
 /* Headings & Document Typography */
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  text-wrap: balance;
+}
+
+.markdown p,
+.markdown li {
+  text-wrap: pretty;
+}
+
 .markdown h1:first-child {
   font-weight: 800;
   letter-spacing: -0.03em;

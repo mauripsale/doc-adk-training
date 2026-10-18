@@ -5,6 +5,9 @@ title: "Module 6: Programmatic Execution: Apps and Runners"
 
 # Module 6: Programmatic Execution: Apps and Runners
 
+![Module 6: Programmatic Execution: Apps and Runners (Light)](img/hero-programmatic-light.webp#gh-light-mode-only)
+![Module 6: Programmatic Execution: Apps and Runners (Dark)](img/hero-programmatic-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 Until now, you've used the ADK CLI (`uv run adk web`, `uv run adk run`) to interact with your agents. While great for testing, real-world applications (like a Discord bot or a web backend) need to trigger agents programmatically from within Python code.
@@ -58,6 +61,10 @@ async for event in runner.run_async(
 The Runner uses these IDs to look up the correct conversation history. This ensures that Alice's conversation never leaks into Bob's, even though they are both being processed by the same Runner instance.
 
 ### Minimal Programmatic Setup
+
+![Figure 6.1: InMemoryRunner Lifecycle & Event Streaming Pipeline (Light)](img/runner-pipeline-light.webp#gh-light-mode-only)
+![Figure 6.1: InMemoryRunner Lifecycle & Event Streaming Pipeline (Dark)](img/runner-pipeline-dark.webp#gh-dark-mode-only)
+*Figure 6.1: End-to-end dataflow pipeline of programmatic execution using ADK App, Runner, and Event streams.*
 
 To run an agent from Python, your `main.py` typically follows this flow:
 

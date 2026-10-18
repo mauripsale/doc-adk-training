@@ -5,6 +5,9 @@ title: "Module 4.5: Professional Model Configuration, Resiliency & Portability"
 
 # Module 4.5: Professional Model Configuration, Resiliency & Portability
 
+![Module 4.5: Multi-Model & Resilient Configurations (Light)](img/hero-multi-model-light.webp#gh-light-mode-only)
+![Module 4.5: Multi-Model & Resilient Configurations (Dark)](img/hero-multi-model-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 Until now, we've passed models to our agents using simple strings (e.g., `model="gemini-3.5-flash"`). While this is great for prototyping, building **production-grade** agents requires a more robust approach to handle network flakiness, rate limits, and regional deployments.
@@ -73,6 +76,10 @@ agent = Agent(model=ProductionGemini(model="gemini-3.5-flash"), ...)
 
 ### When to use LiteLLM?
 While the `Gemini` class offers the best performance and deepest integration with Google services, you should use the **`LiteLlm`** class (from `google.adk.models.lite_llm`) when your primary goal is **Model Agnosticism**. 
+
+![Figure 4.5.1: Model Provider Architecture & Resiliency Routing (Light)](img/litellm-arch-light.webp#gh-light-mode-only)
+![Figure 4.5.1: Model Provider Architecture & Resiliency Routing (Dark)](img/litellm-arch-dark.webp#gh-dark-mode-only)
+*Figure 4.5.1: Unified ADK model abstraction and multi-provider proxy routing architecture.*
 
 Use `LiteLlm` if you need to:
 1.  Run **local models** (via Ollama) during development to save costs.

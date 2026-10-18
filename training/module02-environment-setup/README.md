@@ -5,6 +5,9 @@ title: "Module 2: Setting Up Your Development Environment (ADK 2.0)"
 
 # Module 2: Setting Up Your Development Environment
 
+![Setting Up Your Development Environment (Light)](img/hero-env-setup-light.webp#gh-light-mode-only)
+![Setting Up Your Development Environment (Dark)](img/hero-env-setup-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### The Importance of a Clean Environment
@@ -114,6 +117,10 @@ gcloud config set project YOUR_PROJECT_ID
 ```
 
 The ADK automatically detects these credentials.
+
+![Development Environment & Authentication Architecture (Light)](img/env-setup-arch-light.webp#gh-light-mode-only)
+![Development Environment & Authentication Architecture (Dark)](img/env-setup-arch-dark.webp#gh-dark-mode-only)
+*Figure 2.1: Modern ADK 2.0 developer environment architecture — from high-speed dependency resolution with `uv` to credential injection and cloud validation with Gemini 3.5 Flash.*
 
 ### Troubleshooting Common Errors
 

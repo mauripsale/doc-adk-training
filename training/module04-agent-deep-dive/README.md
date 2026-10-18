@@ -5,6 +5,9 @@ title: "Module 4: Core Agent Concepts: Agent Deep Dive"
 
 # Module 4: Core Agent Concepts: Agent Deep Dive
 
+![Module 4: Agent Deep Dive (Light)](img/hero-agent-deep-dive-light.webp#gh-light-mode-only)
+![Module 4: Agent Deep Dive (Dark)](img/hero-agent-deep-dive-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### The "Brain" of the Operation
@@ -40,6 +43,10 @@ A well-crafted instruction tells the agent:
     *   *Example:* `"First, ask the user for their location. Second, find the weather for that location. Third, report the weather to the user."`
 *   **Its Output Format:** How should it format its responses?
     *   *Example:* `"Always present your final answer as a JSON object with a 'result' key."`
+
+![Figure 4.1: System Instruction Anatomy & Schema Pipeline (Light)](img/instruction-anatomy-light.webp#gh-light-mode-only)
+![Figure 4.1: System Instruction Anatomy & Schema Pipeline (Dark)](img/instruction-anatomy-dark.webp#gh-dark-mode-only)
+*Figure 4.1: Anatomy of a structured ADK System Instruction and schema calibration pipeline.*
 
 ### Tips for Effective Instructions (Prompt Engineering)
 

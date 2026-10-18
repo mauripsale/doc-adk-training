@@ -47,14 +47,51 @@ This is the most powerful feature of the context. It gives your tool direct read
 ![Tool Validation and Error Recovery Pipeline (Dark)](img/arch-error-recovery-pipeline-dark.webp#gh-dark-mode-only)
 *Figure: The tool validation, exception interceptor, and adaptive recovery pipeline for robust function execution.*
 
-The most common use case for stateful tools is a **Store and Recall** pair:
-1.  **Store Tool:** Takes user input and saves it to a specific key in `tool_context.state`.
-2.  **Recall Tool:** Reads that key from the state and returns it to the agent.
+### 3. Human-in-the-Loop: Tool Confirmation
 
-This allows the agent to maintain a "structured memory" that is more reliable than just relying on the raw chat history.
+In production systems, some tool actions are **irreversible or sensitive** (e.g., deleting a database table, transferring money, rebooting a server). ADK 2.0 provides native **Human-in-the-Loop (HITL)** support via the `require_confirmation` parameter in `FunctionTool`.
+
+#### Static vs. Conditional Confirmation
+
+You can enforce confirmation either statically (always require approval) or dynamically using a predicate function:
+
+```python
+from google.adk.tools import FunctionTool
+
+def delete_user_record(user_id: str) -> dict:
+    """Permanently deletes a user record."""
+    # DB deletion logic...
+    return {"status": "deleted", "user_id": user_id}
+
+# 1. Static Confirmation (Always prompt the user for approval)
+delete_tool = FunctionTool(
+    func=delete_user_record,
+    require_confirmation=True,
+)
+
+def transfer_funds(account_id: str, amount: float) -> dict:
+    """Transfers funds to a target account."""
+    # Transfer logic...
+    return {"status": "transferred", "amount": amount}
+
+# 2. Dynamic / Conditional Confirmation (Prompt only when amount > $1,000)
+def needs_transfer_approval(amount: float, **kwargs) -> bool:
+    return amount > 1000.0
+
+transfer_tool = FunctionTool(
+    func=transfer_funds,
+    require_confirmation=needs_transfer_approval,
+)
+```
+
+When a tool requires confirmation:
+1. The ADK execution engine halts before invoking the Python function and emits an event requesting user confirmation.
+2. The UI or client application prompts the human operator with the tool name and proposed arguments.
+3. Upon receiving approval, execution resumes seamlessly; if rejected, the agent receives an explanation to pivot its plan.
 
 ### Key Takeaways
 - Use **`ToolContext`** to securely access the ADK runtime.
 - **`tool_context.state`** allows tools to persist data across turns.
 - Stateful tools enable agents to have a structured, programmable memory.
+- **`require_confirmation`** in `FunctionTool` provides native Human-in-the-Loop governance for high-risk actions.
 - **Rule:** Never describe `tool_context` in your docstring; it's for the framework, not the LLM.

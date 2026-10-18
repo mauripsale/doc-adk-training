@@ -59,19 +59,74 @@ If `state['current_topic']` is "space exploration", the LLM sees: "...theme: spa
 
 Avoid modifying the `session.state` directly on a Session object retrieved via `session_service.get_session()` outside of a managed flow, as this bypasses the event system and may lead to data loss or race conditions.
 
-### Session Rewind (New!)
+### Session Rewind
 
-The ADK supports **rewinding** a session to a previous point. This is useful for undoing mistakes or exploring alternative conversation paths.
+The ADK supports **rewinding** a session to a previous point. This is useful for undoing mistakes, handling user cancellations, or exploring alternative conversation branches during interactive debugging.
 
-*   **How it works:** You specify an `invocation_id` to rewind *before*. The system restores the session state and artifacts to that moment.
-*   **What is restored:** Session-level state and artifacts.
-*   **What is NOT restored:** Global resources like `app:` or `user:` state, and external side effects (like API calls already made).
+*   **How it works:** You specify an `invocation_id` to rewind *before*. The system restores the session-level state dictionary and artifacts to that exact moment.
+*   **What is restored:** Session-level state and session artifacts.
+*   **What is NOT restored:** Persistent scopes like `app:` or `user:` state, and external side-effects (like external database rows already modified).
 
-> **Going Further:** this module's lab doesn't exercise Session Rewind hands-on — it's a niche enough feature that a dedicated exercise wasn't worth the extra lab time. If you want to try it, add a small script that calls `session_service.get_session()`, notes an `invocation_id` partway through a multi-turn conversation, makes a few more turns, then rewinds to that point and confirms the state matches.
+```python
+from google.adk.runners import InMemoryRunner
+
+runner = InMemoryRunner(agent=root_agent, app_name="my_app")
+
+# Rewind session state and artifacts to before a specific turn
+await runner.rewind_async(
+    user_id="user_123",
+    session_id=session.id,
+    rewind_before_invocation_id=target_invocation_id,
+)
+```
+
+### Context Caching (`ContextCacheConfig`)
+
+In applications where agents use extensive system instructions, large few-shot prompt libraries, or fixed reference documents, sending those tokens on every turn increases latency and costs. 
+
+ADK 2.0 provides **Context Caching** configured directly at the `App` or `Agent` level:
+
+```python
+from google.adk.apps.app import App
+from google.adk.agents.context_cache_config import ContextCacheConfig
+
+app = App(
+    name="enterprise_analyst",
+    root_agent=root_agent,
+    context_cache_config=ContextCacheConfig(
+        min_tokens=2048,     # Cache only if system context exceeds 2,048 tokens
+        ttl_seconds=1800,    # Cache Time-To-Live in seconds (e.g. 30 minutes)
+        cache_intervals=10,  # Refresh cache every N invocations
+    ),
+)
+```
+*Result:* Gemini caches the immutable token prefix in memory on Google Cloud, reducing time-to-first-token (TTFT) and input token costs by up to 80%.
+
+### Context Compaction (`EventsCompactionConfig`)
+
+For long-running, multi-turn customer support or coding workflows, conversation history eventually exceeds model context limits or slows down response times. 
+
+**Context Compaction** automatically applies sliding-window LLM summarization over older events:
+
+```python
+from google.adk.apps.app import App, EventsCompactionConfig
+from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
+from google.adk.models import Gemini
+
+app = App(
+    name="long_running_assistant",
+    root_agent=root_agent,
+    events_compaction_config=EventsCompactionConfig(
+        compaction_interval=20,  # Trigger summarization every 20 events
+        overlap_size=3,          # Keep last 3 events uncompressed for seamless continuity
+        summarizer=LlmEventSummarizer(llm=Gemini(model="gemini-3.5-flash")),
+    ),
+)
+```
 
 ### Memory Service
 
-The Memory Service provides **long-term, searchable memory** for your agent, like an archive of past conversations.
+The Memory Service provides **long-term, searchable memory** for your agent, like an archive of past conversations across sessions.
 
 **Implementations**:
 
@@ -88,5 +143,7 @@ The Memory Service provides **long-term, searchable memory** for your agent, lik
 - **Session State** manages short-term context with scoped prefixes (`user:`, `app:`, `temp:`).
 - **Inject State** directly into instructions using `{key}` syntax for dynamic behavior.
 - **Update State** via `tool_context` or `callback_context` to ensure safety and persistence.
-- **Session Rewind** allows reverting a conversation to a previous state (with limitations).
-- **Memory Service** provides long-term recall, with `VertexAiMemoryBankService` offering advanced semantic capabilities.
+- **Session Rewind** (`runner.rewind_async`) allows reverting a conversation to a previous turn.
+- **Context Caching** (`ContextCacheConfig`) cuts cost and latency on large static prompts.
+- **Context Compaction** (`EventsCompactionConfig`) compresses long histories via sliding-window summarization.
+- **Memory Service** provides cross-session long-term recall (`VertexAiMemoryBankService`).

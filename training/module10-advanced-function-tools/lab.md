@@ -15,14 +15,22 @@ In this lab, you will build an agent that can remember a user's name across mult
 
 <Setup/>
 
-```bash
-uv run adk create memory_agent
-cd memory_agent
-```
+1.  **Create the agent project:**
+    ```bash
+    uv run adk create memory_agent
+    cd memory_agent
+    ```
+
+2.  **Create the tools package:**
+    ```bash
+    mkdir tools
+    touch tools/__init__.py
+    touch tools/memory.py
+    ```
 
 ### Step 2: Implement Stateful & Sensitive Tools
 
-**Exercise:** Create `tools/memory.py` and implement these three functions:
+**Exercise:** Open `tools/memory.py` and implement these three functions:
 
 ```python
 # In tools/memory.py
@@ -61,16 +69,17 @@ def clear_memory(tool_context: ToolContext) -> str:
 
 ```python
 # In agent.py
-from google.adk import Agent
+from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from .tools.memory import store_name, recall_name, clear_memory
 
 # TODO: Wrap clear_memory using FunctionTool with require_confirmation=True
-guarded_clear_tool = ...
+guarded_clear_tool = ... # FunctionTool(func=clear_memory, require_confirmation=True)
 
 root_agent = Agent(
     name="memory_agent",
     model="gemini-3.5-flash",
+    description="An agent node that remembers users with guarded memory controls.",
     instruction="""
     You are a friendly assistant. 
     Use 'store_name' if the user introduces themselves.
@@ -151,9 +160,15 @@ def clear_memory(tool_context: ToolContext) -> str:
 ### `memory_agent/agent.py`
 
 ```python
-from google.adk import Agent
+from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from .tools.memory import store_name, recall_name, clear_memory
+
+# Wrap destructive tool with Human-in-the-Loop confirmation
+guarded_clear_tool = FunctionTool(
+    func=clear_memory,
+    require_confirmation=True
+)
 
 root_agent = Agent(
     name="memory_agent",
@@ -168,7 +183,7 @@ root_agent = Agent(
     tools=[
         store_name,
         recall_name,
-        FunctionTool(func=clear_memory, require_confirmation=True),
+        guarded_clear_tool
     ]
 )
 ```

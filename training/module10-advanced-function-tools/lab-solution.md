@@ -7,7 +7,7 @@ title: "Lab Solution"
 
 ## Goal
 
-This file contains the complete code for the `agent.py` and `tools/memory.py` files using ADK 2.0 standards for stateful tools.
+This file contains the complete code for the `agent.py` and `tools/memory.py` files using ADK 2.0 standards for stateful tools and Human-in-the-Loop confirmation.
 
 ### `memory_agent/tools/memory.py`
 
@@ -44,9 +44,15 @@ def clear_memory(tool_context: ToolContext) -> str:
 ### `memory_agent/agent.py`
 
 ```python
-from google.adk import Agent
+from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from .tools.memory import store_name, recall_name, clear_memory
+
+# Wrap destructive tool with Human-in-the-Loop confirmation
+guarded_clear_tool = FunctionTool(
+    func=clear_memory,
+    require_confirmation=True
+)
 
 root_agent = Agent(
     name="memory_agent",
@@ -61,7 +67,7 @@ root_agent = Agent(
     tools=[
         store_name,
         recall_name,
-        FunctionTool(func=clear_memory, require_confirmation=True),
+        guarded_clear_tool
     ]
 )
 ```

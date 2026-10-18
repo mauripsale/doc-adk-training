@@ -5,6 +5,9 @@ title: "Module 14: Integrating Third-Party Tools"
 
 # Module 14: Integrating Third-Party Tools
 
+![Third-Party Tools & Multi-Framework Ecosystem (Light)](img/hero-third-party-tools-light.webp#gh-light-mode-only)
+![Third-Party Tools & Multi-Framework Ecosystem (Dark)](img/hero-third-party-tools-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Standing on the Shoulders of Giants
@@ -16,6 +19,10 @@ Frameworks like **LangChain** have a rich ecosystem of "toolkits" and "agents" t
 The Google ADK is designed with **interoperability** in mind. It allows you to tap into this vast ecosystem by providing simple wrappers that make it possible to use tools from other popular frameworks directly within your ADK agent. This lets you leverage the best of both worlds: the robust, scalable architecture of the ADK and the extensive tool library of the broader community.
 
 ### The Wrapper Pattern
+
+![Third-Party Tool Adapter & Interoperability Pipeline (Light)](img/arch-third-party-adapter-light.webp#gh-light-mode-only)
+![Third-Party Tool Adapter & Interoperability Pipeline (Dark)](img/arch-third-party-adapter-dark.webp#gh-dark-mode-only)
+*Figure: The ADK third-party wrapper pipeline — adapting external framework tools (LangChain, CrewAI) into native ADK CallableTool contracts.*
 
 The key to this integration is the **Wrapper Pattern**. The ADK provides special wrapper classes, like `LangchainTool`, that act as adapters.
 

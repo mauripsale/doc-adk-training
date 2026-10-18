@@ -5,6 +5,9 @@ title: "Module 13.5: Extending ADK - Custom Persistence with Firestore"
 
 # Module 13.5: Extending ADK - Custom Persistence with Firestore
 
+![Firestore Cloud Persistence & Session Storage (Light)](img/hero-firestore-persistence-light.webp#gh-light-mode-only)
+![Firestore Cloud Persistence & Session Storage (Dark)](img/hero-firestore-persistence-dark.webp#gh-dark-mode-only)
+
 *This module sits in Part 2 (Tools & Capabilities) rather than in the Part 4 state/memory modules on purpose: writing a custom `BaseSessionService` is itself an act of extending the ADK's toolkit with your own infrastructure, not a production-operations concern like the topics in Part 4. Think of it as "building a new kind of tool," just one that stores state instead of taking action.*
 
 ## Theory
@@ -16,6 +19,10 @@ One of the key strengths of ADK 2.0 is its **pluggable architecture**. While the
 Instead of being locked into a fixed set of database providers, you can **extend the ADK** by implementing your own services.
 
 ### The `BaseSessionService` Interface
+
+![Firestore Session Store & State Sync Architecture (Light)](img/arch-firestore-session-light.webp#gh-light-mode-only)
+![Firestore Session Store & State Sync Architecture (Dark)](img/arch-firestore-session-dark.webp#gh-dark-mode-only)
+*Figure: Cloud-native session synchronization — event persistence, state delta loading, and atomic cloud commits with Google Cloud Firestore.*
 
 In the ADK, all session persistence is governed by a single abstract class: **`BaseSessionService`**. 
 

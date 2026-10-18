@@ -5,6 +5,9 @@ title: "Module 12: Built-in Tools and Grounding"
 
 # Module 12: Built-in Tools and Grounding
 
+![Google Search Grounding & Real-Time Retrieval (Light)](img/hero-search-grounding-light.webp#gh-light-mode-only)
+![Google Search Grounding & Real-Time Retrieval (Dark)](img/hero-search-grounding-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Why Built-in Tools Matter
@@ -20,6 +23,10 @@ Traditional AI models have a knowledge cutoff date—they don't know about recen
 **Important:** Built-in tools are a feature of Gemini 2.0 and newer models and will raise errors with older versions.
 
 ### `google_search`: Web Grounding
+
+![Google Search Grounding Pipeline (Light)](img/arch-search-grounding-light.webp#gh-light-mode-only)
+![Google Search Grounding Pipeline (Dark)](img/arch-search-grounding-dark.webp#gh-dark-mode-only)
+*Figure: The Google Search Grounding flow — query formation, real-time web retrieval, and citation-backed synthesis.*
 
 The `google_search` tool is a built-in capability that allows a Gemini 2.0+ model to search the web to find information. When you add this tool to your agent, the model can autonomously decide to use it when a user's query requires current information.
 

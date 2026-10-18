@@ -5,6 +5,9 @@ title: "Module 8: Introduction to Tools"
 
 # Module 8: Introduction to Tools
 
+![Introduction to Tools & Function Calling (Light)](img/hero-tools-light.webp#gh-light-mode-only)
+![Introduction to Tools & Function Calling (Dark)](img/hero-tools-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Beyond Conversation
@@ -28,6 +31,10 @@ Think of the **`Agent`** node as the "brain" and the tools as its "hands." The b
 ### How Do Agents Use Tools?
 
 The process of an agent using a tool is a fascinating dance between the LLM's reasoning and the structured execution of code. This is often called **Function Calling**.
+
+![Function Calling Lifecycle Flow (Light)](img/arch-function-calling-light.webp#gh-light-mode-only)
+![Function Calling Lifecycle Flow (Dark)](img/arch-function-calling-dark.webp#gh-dark-mode-only)
+*Figure: The 5-stage Function Calling lifecycle — from intent extraction and tool execution to final grounded synthesis.*
 
 1.  **User Request:** The user gives the agent a prompt (e.g., "What's the weather in Paris?").
 2.  **Reasoning and Selection:** The agent's LLM analyzes the request and its own `instruction`. It looks at the list of available tools it has been given and sees one called `get_weather` that takes a `city` as an argument. It concludes that this is the right tool for the job.

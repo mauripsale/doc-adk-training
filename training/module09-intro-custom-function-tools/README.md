@@ -5,6 +5,9 @@ title: "Module 9: Creating Custom Function Tools"
 
 # Module 9: Creating Custom Function Tools
 
+![Custom Function Tools & Schema Reflection (Light)](img/hero-custom-tools-light.webp#gh-light-mode-only)
+![Custom Function Tools & Schema Reflection (Dark)](img/hero-custom-tools-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Unlocking Unlimited Capabilities
@@ -17,6 +20,10 @@ A custom function tool is, at its core, a regular Python function that you write
 
 When you add one of your Python functions to an agent's `tools` list, the ADK framework performs a clever transformation behind the scenes. It inspects your function's **signature**
 —its name, parameters, type hints, and docstring—and automatically generates a detailed description, or **schema**.
+
+![Python Signature to Tool Schema Reflection Pipeline (Light)](img/arch-reflection-pipeline-light.webp#gh-light-mode-only)
+![Python Signature to Tool Schema Reflection Pipeline (Dark)](img/arch-reflection-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: The ADK Python reflection pipeline — transforming function signatures, docstrings, and type hints into runtime Gemini tool schemas.*
 
 This schema is what's provided to the Large Language Model. The LLM doesn't see your Python code. It only sees this schema, which tells it:
 1.  The tool's name (from your function name).

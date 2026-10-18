@@ -5,6 +5,9 @@ title: "Module 23: Handling Files with Artifacts"
 
 # Module 23: Handling Files with Artifacts
 
+![Agent Artifacts & Versioned File Storage (Light)](img/hero-light.webp#gh-light-mode-only)
+![Agent Artifacts & Versioned File Storage (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Why Artifacts Matter
@@ -23,24 +26,10 @@ Artifacts provide structured file storage with powerful features that are critic
 
 An **artifact** is a versioned file stored by the agent system. Each `save` operation creates a new, immutable version, and all previous versions are retained.
 
-**Artifact Structure:**
-```text
-+--------------------------------------------------+
-|                 ARTIFACT SERVICE                 |
-+--------------------------------------------------+
-|                                                  |
-|  +------------------+     +--------------------+ |
-|  |   Filename       |     |  Version History   | |
-|  |  "report.txt"    |---->|   v0, v1, v2, ...  | |
-|  +------------------+     +--------------------+ |
-|           |                        |             |
-|           v                        v             |
-|  +------------------+     +--------------------+ |
-|  |   Content        |     |      Metadata      | |
-|  |  (types.Part)    |     | (Author, Timestamp)| |
-|  +------------------+     +--------------------+ |
-+--------------------------------------------------+
-```
+![Artifact Versioning Lifecycle & Storage Pipeline (Light)](img/artifact-versioning-lifecycle-light.webp#gh-light-mode-only)
+![Artifact Versioning Lifecycle & Storage Pipeline (Dark)](img/artifact-versioning-lifecycle-dark.webp#gh-dark-mode-only)
+*Figure: Artifact versioning lifecycle and immutable storage pipeline across session boundaries.*
+
 **Important:** Artifact versions are **0-indexed**. The first save of a file creates version 0.
 
 ### Configuring Artifact Storage

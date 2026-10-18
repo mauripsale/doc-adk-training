@@ -5,11 +5,18 @@ title: "Module 25.5: Responsible AI (RAI) & Safety Plugins"
 
 # Module 25.5: Responsible AI (RAI) & Safety Plugins
 
+![Responsible AI Safety Gateway & Guardrails (Light)](img/hero-light.webp#gh-light-mode-only)
+![Responsible AI Safety Gateway & Guardrails (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 Observability (Module 25) lets you see what your agent is doing. **Safety Plugins** let you *control* what your agent is allowed to say. In an enterprise environment, you cannot rely solely on the model's internal safety filters; you need a programmatic "Kill Switch" that enforces your company's specific policies.
 
 ### The "Fail-Closed" Pattern
+
+![Fail-Closed Safety Interception Pipeline (Light)](img/fail-closed-safety-pipeline-light.webp#gh-light-mode-only)
+![Fail-Closed Safety Interception Pipeline (Dark)](img/fail-closed-safety-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Real-time fail-closed safety interception pipeline intercepting violations before response delivery.*
 
 The gold standard for AI safety is the **Fail-Closed** architecture. In this model, every response from an agent must pass through a mandatory safety check *before* it reaches the end user.
 

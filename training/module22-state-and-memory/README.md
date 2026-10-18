@@ -5,6 +5,9 @@ title: "Module 22: State and Memory - Persistent Agent Context"
 
 # Module 22: State and Memory - Persistent Agent Context
 
+![Persistent Agent State & Memory Architecture (Light)](img/hero-light.webp#gh-light-mode-only)
+![Persistent Agent State & Memory Architecture (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Giving Agents Memory
@@ -30,6 +33,10 @@ The agent's **scratchpad**—a key-value dictionary for conversation-level data.
 | `temp:` | Current invocation only | **Never persisted**      | `state['temp:quiz_score'] = 85` - Temporary calculations     |
 
 > **Note on `temp:` State Visibility:** Although `temp:` state is never persisted beyond the current invocation, it is fully visible within the Event Stream and the Dev UI's Trace View during the agent's execution. This makes it a valuable tool for debugging intermediate calculations or temporary data flow within a single turn.
+
+![Session State Scoped Persistence Pipeline (Light)](img/session-state-pipeline-light.webp#gh-light-mode-only)
+![Session State Scoped Persistence Pipeline (Dark)](img/session-state-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Scoped session state lifecycle and persistence pipeline from ephemeral turn scratchpad to long-term storage backend.*
 
 ### Accessing State in Instructions
 

@@ -5,6 +5,9 @@ title: "Module 24: Evaluating Agent Performance"
 
 # Module 24: Evaluating Agent Performance
 
+![Agent Evaluation & Golden Trajectory Testing (Light)](img/hero-light.webp#gh-light-mode-only)
+![Agent Evaluation & Golden Trajectory Testing (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Why Traditional Tests Aren't Enough
@@ -22,6 +25,10 @@ A simple string comparison would fail for the second answer, even though it's pe
 ### The Principles of Agent Evaluation
 
 Agent evaluation is less about "pass/fail" and more about measuring **quality** and **correctness**. The ADK's evaluation framework is built on comparing an agent's actual behavior against a "golden" or "reference" example that you provide.
+
+![Golden Dataset Trajectory & LLM-as-Judge Scoring Matrix (Light)](img/trajectory-eval-pipeline-light.webp#gh-light-mode-only)
+![Golden Dataset Trajectory & LLM-as-Judge Scoring Matrix (Dark)](img/trajectory-eval-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Golden dataset evaluation pipeline and LLM-as-a-judge trajectory benchmarking matrix.*
 
 This evaluation can be broken down into two key areas:
 

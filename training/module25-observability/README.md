@@ -5,6 +5,9 @@ title: "Module 25: Advanced Observability with Plugins"
 
 # Module 25: Advanced Observability with Plugins
 
+![Enterprise Observability & OpenTelemetry (Light)](img/hero-light.webp#gh-light-mode-only)
+![Enterprise Observability & OpenTelemetry (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Why Advanced Observability Matters
@@ -22,31 +25,13 @@ A comprehensive observability strategy is built on four pillars, all of which ca
 *   **Logs**: Record detailed, structured information about specific events.
 *   **Events**: Represent the discrete state changes and actions within the agent.
 
+![Four Pillars of Agent Telemetry (Light)](img/four-pillars-telemetry-light.webp#gh-light-mode-only)
+![Four Pillars of Agent Telemetry (Dark)](img/four-pillars-telemetry-dark.webp#gh-dark-mode-only)
+*Figure: The four pillars of agent telemetry—Traces, Metrics, Logs, and Events—unified across distributed agent execution graphs.*
+
 ### The ADK Plugin System
 
 **Plugins** are modular, reusable classes that intercept and observe the events flowing through an agent's execution without modifying the agent's core logic. They provide a clean separation of concerns, allowing you to add logging, metrics, and other observability features without cluttering your agent's business logic.
-
-**Plugin System Architecture:**
-```text
-+--------------+      +-----------------+      +----------------+
-| User Request |----->|   ADK Runner    |----->|  Agent Core    |
-|              |      | (with plugins)  |      | (Business Logic) |
-+--------------+      +-------+---------+      +-------+--------+
-                              |                        |
-                              v                        v
-                      +-----------------+      +----------------+
-                      |  Plugin System  |      |  Model & Tools |
-                      | - MetricsPlugin |      +----------------+
-                      | - AlertingPlugin|
-                      | - ProfilingPlugin|
-                      +-------+---------+
-                              |
-                              v
-                      +-----------------+
-                      | Event Processing|
-                      |  (Intercepted)  |
-                      +-----------------+
-```
 
 ### Enterprise Telemetry in ADK 2.0
 

@@ -5,6 +5,9 @@ title: "Module 26: Callbacks and Guardrails - Agent Safety and Monitoring"
 
 # Module 26: Callbacks and Guardrails - Agent Safety and Monitoring
 
+![Agent Execution Callbacks & Runtime Guardrails (Light)](img/hero-light.webp#gh-light-mode-only)
+![Agent Execution Callbacks & Runtime Guardrails (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Beyond Standard Execution: The Need for Control
@@ -12,6 +15,10 @@ title: "Module 26: Callbacks and Guardrails - Agent Safety and Monitoring"
 Production-grade agents require more than just a simple request-response loop. They need safety checks, monitoring, and the ability to dynamically control their own behavior. **Callbacks** are the ADK's primary mechanism for injecting this custom logic into the agent's execution lifecycle.
 
 ### The Callback Lifecycle in ADK 2.0
+
+![Six-Stage Callback Lifecycle Hooks Matrix (Light)](img/callback-lifecycle-hooks-matrix-light.webp#gh-light-mode-only)
+![Six-Stage Callback Lifecycle Hooks Matrix (Dark)](img/callback-lifecycle-hooks-matrix-dark.webp#gh-dark-mode-only)
+*Figure: Six-stage callback lifecycle hooks matrix intercepting agent nodes, model calls, and tool executions.*
 
 Callbacks are registered directly on an `Agent` node. They allow you to intercept specific stages of that node's execution.
 

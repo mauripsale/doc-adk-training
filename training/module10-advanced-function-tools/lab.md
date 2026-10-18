@@ -65,7 +65,7 @@ def clear_memory(tool_context: ToolContext) -> str:
 
 ### Step 3: Configure the Agent with Tool Confirmation
 
-**Exercise:** Configure `agent.py`. Because `clear_memory` is a destructive action, wrap it inside `FunctionTool` with **`require_confirmation=True`** as learned in the Theory section.
+**Exercise:** Configure `agent.py`. Because `clear_memory` is a destructive action, wrap it inside `FunctionTool` with Human-in-the-Loop confirmation as covered in the Theory section.
 
 ```python
 # In agent.py
@@ -73,8 +73,8 @@ from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from .tools.memory import store_name, recall_name, clear_memory
 
-# TODO: Wrap clear_memory using FunctionTool with require_confirmation=True
-guarded_clear_tool = ... # FunctionTool(func=clear_memory, require_confirmation=True)
+# TODO: Wrap clear_memory using FunctionTool to enforce human confirmation
+guarded_clear_tool = ... # Configure FunctionTool with confirmation parameter
 
 root_agent = Agent(
     name="memory_agent",

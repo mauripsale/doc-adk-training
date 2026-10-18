@@ -20,9 +20,9 @@ uv run adk create memory_agent
 cd memory_agent
 ```
 
-### Step 2: Implement Stateful Tools
+### Step 2: Implement Stateful & Sensitive Tools
 
-**Exercise:** Create `tools/memory.py` and implement these two functions.
+**Exercise:** Create `tools/memory.py` and implement these three functions:
 
 ```python
 # In tools/memory.py
@@ -44,16 +44,29 @@ def recall_name(tool_context: ToolContext) -> str:
     # TODO: Get "user_name" from tool_context.state.
     # Return the name, or "Stranger" if not found.
     pass
+
+def clear_memory(tool_context: ToolContext) -> str:
+    """
+    Permanently erases the user's stored name and session memory.
+    Use this tool when the user asks to forget them or reset memory.
+    """
+    # TODO: Remove "user_name" from tool_context.state if present.
+    # Return a confirmation string.
+    pass
 ```
 
-### Step 3: Configure the Agent
+### Step 3: Configure the Agent with Tool Confirmation
 
-**Exercise:** Configure `agent.py` to use these tools.
+**Exercise:** Configure `agent.py`. Because `clear_memory` is a destructive action, wrap it inside `FunctionTool` with **`require_confirmation=True`** as learned in the Theory section.
 
 ```python
 # In agent.py
 from google.adk import Agent
-from .tools.memory import store_name, recall_name
+from google.adk.tools import FunctionTool
+from .tools.memory import store_name, recall_name, clear_memory
+
+# TODO: Wrap clear_memory using FunctionTool with require_confirmation=True
+guarded_clear_tool = ...
 
 root_agent = Agent(
     name="memory_agent",
@@ -62,30 +75,34 @@ root_agent = Agent(
     You are a friendly assistant. 
     Use 'store_name' if the user introduces themselves.
     Use 'recall_name' if they ask for their name.
+    Use 'clear_memory' if they ask you to forget them or erase their data.
     """,
-    tools=[store_name, recall_name]
+    tools=[store_name, recall_name, guarded_clear_tool]
 )
 ```
 
-### Step 4: Test the Memory
+### Step 4: Test Memory and Tool Confirmation
 
-1.  **Run:** `uv run adk run .` (run this from inside the `memory_agent` agent directory created in Step 1; `adk run` expects an agent directory, not a file)
-2.  **Test:**
+1.  **Run:** `uv run adk run .` (run this from inside the `memory_agent` agent directory created in Step 1)
+2.  **Test Memory:**
     - "Hi, I'm Mario." -> Should call `store_name`.
     - "What is my name?" -> Should call `recall_name` and respond "Mario".
-3.  **Inspect:** Open the Dev UI (`uv run adk web`) and check the **State** tab to see the JSON data.
+3.  **Test Human-in-the-Loop Confirmation:**
+    - "Please forget my name." -> Should trigger `clear_memory` and request explicit confirmation before executing.
+4.  **Inspect:** Open the Dev UI (`uv run adk web`) and check the **State** tab to observe state mutations.
 
 ### Lab Summary
 
-You have successfully built an agent with programmable memory! You have learned:
+You have successfully built an agent with programmable memory and safety governance! You have learned:
 *   How to use **`ToolContext`** to access the ADK's session management.
 *   How to read and write to **`tool_context.state`**.
 *   How to create a **Store and Recall** pattern to maintain context across multiple turns.
+*   How to enforce **`require_confirmation`** on sensitive actions with `FunctionTool`.
 
 ### Self-Reflection Questions
 - Why is it more reliable to store data in the session state rather than just relying on the LLM's chat history?
 - What would happen if you used the same key (e.g., "user_name") for two different users? (Hint: The ADK isolates sessions automatically).
-- How could you extend this agent to remember other things, like a user's birthday or their favorite color?
+- When should you use `require_confirmation=True` vs a conditional predicate function?
 
 <hr/>
 
@@ -97,7 +114,7 @@ You have successfully built an agent with programmable memory! You have learned:
 
 ## Goal
 
-This file contains the complete code for the `agent.py` and `tools/memory.py` files using ADK 2.0 standards for stateful tools.
+This file contains the complete code for the `agent.py` and `tools/memory.py` files using ADK 2.0 standards for stateful tools and Human-in-the-Loop confirmation.
 
 ### `memory_agent/tools/memory.py`
 
@@ -121,36 +138,50 @@ def recall_name(tool_context: ToolContext) -> str:
     # Read from session state
     name = tool_context.state.get("user_name", "Stranger")
     return f"Your name is {name}."
+
+def clear_memory(tool_context: ToolContext) -> str:
+    """
+    Permanently erases the user's stored name and session memory.
+    Use this tool when the user asks to forget them or reset memory.
+    """
+    tool_context.state.pop("user_name", None)
+    return "Your name and session memory have been completely erased."
 ```
 
 ### `memory_agent/agent.py`
 
 ```python
 from google.adk import Agent
-from .tools.memory import store_name, recall_name
+from google.adk.tools import FunctionTool
+from .tools.memory import store_name, recall_name, clear_memory
 
 root_agent = Agent(
     name="memory_agent",
     model="gemini-3.5-flash",
-    description="An agent node that remembers users.",
+    description="An agent node that remembers users with guarded memory controls.",
     instruction="""
     You are a friendly assistant. 
     Use 'store_name' if the user introduces themselves.
     Use 'recall_name' if they ask for their name.
+    Use 'clear_memory' if they ask you to forget them or erase their data.
     """,
-    tools=[store_name, recall_name]
+    tools=[
+        store_name,
+        recall_name,
+        FunctionTool(func=clear_memory, require_confirmation=True),
+    ]
 )
 ```
 
 ### Self-Reflection Answers
 
 1.  **Why is it more reliable to store data in the session state rather than just relying on the LLM's chat history?**
-    *   **Answer:** Chat history is "noisy" and has a limited context window. As a conversation gets longer, older messages (like an introduction) might be pushed out. Session state is **structured and persistent**; it acts as a reliable "database" for key facts that the agent can access deterministically.
+    *   **Answer:** Chat history is "noisy" and has a limited context window. As a conversation gets longer, older messages might be pushed out. Session state is **structured and persistent**; it acts as a reliable "database" for key facts that the agent can access deterministically.
 
 2.  **What would happen if you used the same key (e.g., "user_name") for two different users?**
     *   **Answer:** Nothing bad! The ADK's `Runner` automatically isolates sessions based on the `user_id`. Each user has their own independent `state` dictionary, so Alice's "user_name" will never overwrite Bob's "user_name."
 
-3.  **How could you extend this agent to remember other things?**
-    *   **Answer:** You can create more tools that follow the same pattern (e.g., `store_preference(key, value)`, `recall_preference(key)`). Because `tool_context.state` is just a Python dictionary, you can store any JSON-serializable data there.
+3.  **When should you use `require_confirmation=True` vs a conditional predicate function?**
+    *   **Answer:** Use `require_confirmation=True` for unconditionally destructive operations (e.g. `clear_memory`, `delete_database`). Use a conditional predicate when operations are safe below a certain threshold (e.g., refunds < \$50 are automatic, while refunds > \$50 require manager approval).
 
 </SolutionVault>

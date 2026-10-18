@@ -31,24 +31,38 @@ def recall_name(tool_context: ToolContext) -> str:
     # Read from session state
     name = tool_context.state.get("user_name", "Stranger")
     return f"Your name is {name}."
+
+def clear_memory(tool_context: ToolContext) -> str:
+    """
+    Permanently erases the user's stored name and session memory.
+    Use this tool when the user asks to forget them or reset memory.
+    """
+    tool_context.state.pop("user_name", None)
+    return "Your name and session memory have been completely erased."
 ```
 
 ### `memory_agent/agent.py`
 
 ```python
 from google.adk import Agent
-from .tools.memory import store_name, recall_name
+from google.adk.tools import FunctionTool
+from .tools.memory import store_name, recall_name, clear_memory
 
 root_agent = Agent(
     name="memory_agent",
     model="gemini-3.5-flash",
-    description="An agent node that remembers users.",
+    description="An agent node that remembers users with guarded memory controls.",
     instruction="""
     You are a friendly assistant. 
     Use 'store_name' if the user introduces themselves.
     Use 'recall_name' if they ask for their name.
+    Use 'clear_memory' if they ask you to forget them or erase their data.
     """,
-    tools=[store_name, recall_name]
+    tools=[
+        store_name,
+        recall_name,
+        FunctionTool(func=clear_memory, require_confirmation=True),
+    ]
 )
 ```
 
@@ -60,5 +74,5 @@ root_agent = Agent(
 2.  **What would happen if you used the same key (e.g., "user_name") for two different users?**
     *   **Answer:** Nothing bad! The ADK's `Runner` automatically isolates sessions based on the `user_id`. Each user has their own independent `state` dictionary, so Alice's "user_name" will never overwrite Bob's "user_name."
 
-3.  **How could you extend this agent to remember other things?**
-    *   **Answer:** You can create more tools that follow the same pattern (e.g., `store_preference(key, value)`, `recall_preference(key)`). Because `tool_context.state` is just a Python dictionary, you can store any JSON-serializable data there.
+3.  **When should you use `require_confirmation=True` vs a conditional predicate function?**
+    *   **Answer:** Use `require_confirmation=True` for unconditionally destructive operations (e.g. `clear_memory`, `delete_database`). Use a conditional predicate when operations are safe below a certain threshold (e.g., refunds < \$50 are automatic, while refunds > \$50 require manager approval).

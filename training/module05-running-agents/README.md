@@ -5,6 +5,9 @@ title: "Module 5: Running and Interacting with Agents"
 
 # Module 5: Running and Interacting with Agents
 
+![Module 5: Running and Interacting with Agents (Light)](img/hero-running-agents-light.webp#gh-light-mode-only)
+![Module 5: Running and Interacting with Agents (Dark)](img/hero-running-agents-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Bringing Your Agent to Life
@@ -53,6 +56,10 @@ This mode is essential for moving your agent from a local development tool to a 
 In the lab for this module, you will get hands-on experience with all three of these commands, giving you a complete toolkit for running and interacting with your agents.
 
 ### The ADK 2.0 CLI Engine
+
+![Figure 5.1: ADK CLI Running Modes & Execution Taxonomy (Light)](img/execution-taxonomy-light.webp#gh-light-mode-only)
+![Figure 5.1: ADK CLI Running Modes & Execution Taxonomy (Dark)](img/execution-taxonomy-dark.webp#gh-dark-mode-only)
+*Figure 5.1: Comparison and architectural taxonomy of ADK CLI execution modes (`adk web`, `adk run`, `adk api_server`).*
 
 While these commands feel like magic, they are powered by the **App** and **Runner** architecture you learned about in earlier modules. 
 

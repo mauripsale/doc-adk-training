@@ -5,6 +5,9 @@ title: "Module 3: Your First Agent: The \"Echo\" Agent"
 
 # Module 3: Your First Agent: The "Echo" Agent
 
+![Your First Agent: The Echo Agent (Light)](img/hero-first-agent-light.webp#gh-light-mode-only)
+![Your First Agent: The Echo Agent (Dark)](img/hero-first-agent-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### The Core of an ADK Agent
@@ -67,6 +70,10 @@ In ADK 2.0, defining the agent is only the first step. To actually run it, the f
 2.  **Runner:** The engine that executes the `App`. It handles the session state, manages the connection to the LLM, and provides helper methods like `run_debug()`.
 
 When you use the CLI command `uv run adk web`, the ADK automatically creates an **App** and an **InMemoryRunner** for you behind the scenes!
+
+![Agent Architecture: Blueprint to Runtime Execution (Light)](img/blueprint-runner-light.webp#gh-light-mode-only)
+![Agent Architecture: Blueprint to Runtime Execution (Dark)](img/blueprint-runner-dark.webp#gh-dark-mode-only)
+*Figure 3.1: The 3-layer ADK architecture hierarchy — comparing Declarative YAML vs. Programmatic Python blueprint definitions, encapsulated in the App container and executed by the InMemoryRunner.*
 
 ### Scaffolding Your Project with `uv run adk create`
 ...

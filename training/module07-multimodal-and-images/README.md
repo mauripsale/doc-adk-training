@@ -5,6 +5,9 @@ title: "Module 7: Multimodal and Image Processing"
 
 # Module 7: Multimodal and Image Processing
 
+![Module 7: Multimodal and Image Processing (Light)](img/hero-multimodal-light.webp#gh-light-mode-only)
+![Module 7: Multimodal and Image Processing (Dark)](img/hero-multimodal-dark.webp#gh-dark-mode-only)
+
 ## Theory
 
 ### Why Multimodal Matters
@@ -27,6 +30,10 @@ A `Part` can contain:
 *   **Image Data:** `types.Part(inline_data=types.Blob(data=image_bytes, mime_type='image/png'))`
 
 When you send a list of these parts to a vision-capable model like `gemini-3.5-flash`, the model can reason about the text and the image(s) together.
+
+![Figure 7.1: Multimodal Ingestion Pipeline & Part Serializer (Light)](img/multimodal-pipeline-light.webp#gh-light-mode-only)
+![Figure 7.1: Multimodal Ingestion Pipeline & Part Serializer (Dark)](img/multimodal-pipeline-dark.webp#gh-dark-mode-only)
+*Figure 7.1: End-to-end multimodal ingestion pipeline from raw media streams to ADK Part objects and Gemini cross-attention reasoning.*
 
 #### Example: Building a Vision Agent
 To send an image to an agent programmatically, you package it into a list and run it via an `App`:

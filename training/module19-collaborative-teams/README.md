@@ -5,6 +5,11 @@ title: "Module 19: Collaborative Teams - Using Modes and Hand-offs"
 
 # Module 19: Collaborative Teams - Using Modes and Hand-offs
 
+![Collaborative Teams Hero (Light)](img/collaborative-teams-hero-light.webp#gh-light-mode-only)
+![Collaborative Teams Hero (Dark)](img/collaborative-teams-hero-dark.webp#gh-dark-mode-only)
+*Figure: Native conversational hand-offs and collaboration modes between primary triage agents and specialized domain experts.*
+
+
 ## Theory
 
 So far, you have learned how to define a graph structure from the outside. But what if the nodes themselves could decide how to collaborate? 
@@ -45,7 +50,12 @@ root_agent = Agent(
 
 ### 3. Agent Transfer (The "Hand-off")
 
+![Collaboration Native Hand-Off Pipeline (Light)](img/collaborative-teams-pipeline-light.webp#gh-light-mode-only)
+![Collaboration Native Hand-Off Pipeline (Dark)](img/collaborative-teams-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Seamless control transfer pipeline preserving session memory, context serialization, and telemetry.*
+
 Even without modes, an agent can decide to hand over the entire conversation to another node in the graph. This is the **Agent Transfer** pattern. 
+
 
 The framework automatically injects tools like `request_task_<agent_name>` into the parent's toolkit based on the `sub_agents` list. The LLM then "calls" these tools to perform the hand-off.
 

@@ -5,6 +5,11 @@ title: "Module 17: Structured Routing - Edges and Dictionaries"
 
 # Module 17: Structured Routing - Edges and Dictionaries
 
+![Structured Routing Hero (Light)](img/structured-routing-hero-light.webp#gh-light-mode-only)
+![Structured Routing Hero (Dark)](img/structured-routing-hero-dark.webp#gh-dark-mode-only)
+*Figure: High-speed intent routing through structured decision dictionaries and deterministic edge resolvers.*
+
+
 ## Theory
 
 In Module 16, you learned how to define static paths. But what if you want your graph to branch based on a specific decision? 
@@ -18,6 +23,11 @@ While you can use **Dynamic Workflows** (Module 18) for total control, ADK 2.0 p
 3.  **Reliability:** You eliminate the "hallucination" risk of an LLM choosing a non-existent path.
 
 ### Anatomy of a Workflow Graph
+
+![Dictionary-Based Intent Routing Architecture (Light)](img/structured-routing-architecture-light.webp#gh-light-mode-only)
+![Dictionary-Based Intent Routing Architecture (Dark)](img/structured-routing-architecture-dark.webp#gh-dark-mode-only)
+*Figure: 4-stage pipeline showing query classification, route key emission, edge dictionary mapping, and specialist execution.*
+
 
 A Workflow in ADK 2.0 is defined by two things:
 1.  **Nodes:** The individual components (Agents, FunctionTools, or `@node` functions).

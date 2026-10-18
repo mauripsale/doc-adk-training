@@ -5,6 +5,11 @@ title: "Module 16: Static Orchestration - Linear and Parallel Edges"
 
 # Module 16: Static Orchestration - Linear and Parallel Edges
 
+![Static Workflow Orchestration Hero (Light)](img/static-orchestration-hero-light.webp#gh-light-mode-only)
+![Static Workflow Orchestration Hero (Dark)](img/static-orchestration-hero-dark.webp#gh-dark-mode-only)
+*Figure: Deterministic graph orchestration utilizing linear execution, concurrent fan-out, and join synchronization.*
+
+
 ## Theory
 
 In ADK 2.0, orchestration is no longer about choosing between a "Sequential" or a "Parallel" agent. Instead, you design the **geometry of your graph** using **Edges**.
@@ -45,6 +50,11 @@ parallel_run = Workflow(
 ```
 
 ### 3. Synchronization (The `JoinNode`)
+
+![Linear and Parallel Graph Edges Pipeline (Light)](img/static-orchestration-pipeline-light.webp#gh-light-mode-only)
+![Linear and Parallel Graph Edges Pipeline (Dark)](img/static-orchestration-pipeline-dark.webp#gh-dark-mode-only)
+*Figure: Multi-stage workflow topology demonstrating concurrent branch execution converging into a barrier join node.*
+
 
 When you have parallel branches, you often need to "wait" for all of them to finish before moving to a final step. This is called **Fan-In**, and it is handled by the **`JoinNode`**.
 

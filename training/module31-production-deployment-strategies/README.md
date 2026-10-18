@@ -7,11 +7,19 @@ title: "Module 31: Production Deployment Strategies"
 
 ## Theory
 
+![Enterprise Production Deployment Framework (Light)](img/hero-light.webp#gh-light-mode-only)
+![Enterprise Production Deployment Framework (Dark)](img/hero-dark.webp#gh-dark-mode-only)
+*Figure: Enterprise deployment framework evaluating speed, compliance, cost, and architectural control.*
+
 ### Choosing Your Deployment Platform
 
 Deploying an agent to production involves more than just running a command; it requires choosing the right platform based on your specific needs for speed, cost, security, and control. The ADK is designed to be flexible, supporting several deployment targets.
 
 ### The Decision Framework
+
+![Production Deployment Decision Matrix (Light)](img/deployment-decision-matrix-light.webp#gh-light-mode-only)
+![Production Deployment Decision Matrix (Dark)](img/deployment-decision-matrix-dark.webp#gh-dark-mode-only)
+*Figure: Architecture comparison matrix across Google Cloud Run (Serverless), Vertex AI Agent Runtime (Managed Compliance), and Google Kubernetes Engine (Orchestration & Hardware Control).*
 
 Here's a quick framework to help you choose the best platform for your situation:
 

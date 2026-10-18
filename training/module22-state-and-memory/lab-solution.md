@@ -237,6 +237,61 @@ root_agent = Agent(
 )
 ```
 
+### `personal_tutor/test_memory_advanced.py`
+
+```python
+"""
+Advanced Memory Test: Context Compaction and Session Rewind
+"""
+import asyncio
+from google.adk.apps import App
+from google.adk.runners import InMemoryRunner
+from google.adk.events import EventsCompactionConfig, LlmEventSummarizer
+from google.genai import types
+from agent import root_agent
+
+async def test_advanced_memory():
+    # 1. Configure Automatic Event Compaction
+    compaction_config = EventsCompactionConfig(
+        summarizer=LlmEventSummarizer(model="gemini-3.5-flash"),
+        compaction_interval=6,
+        overlap_size=1
+    )
+
+    app = App(
+        name="advanced_tutor_app",
+        root_agent=root_agent,
+        events_compaction_config=compaction_config
+    )
+    runner = InMemoryRunner(app=app)
+    
+    user_id = "student_42"
+    session_id = "session_math_1"
+    session = await runner.session_service.create_session(app_name=app.name, user_id=user_id, session_id=session_id)
+    
+    print("--- 1. Set preferences ---")
+    async for event in runner.run_async(
+        user_id=user_id,
+        session_id=session_id,
+        new_message=types.Content(role="user", parts=[types.Part.from_text(text="I want to learn Python in Spanish at beginner level.")])
+    ):
+        if event.is_final_response():
+            print(f"Agent: {event.content.parts[0].text}")
+
+    # 2. Demonstrate Session Rewind to revert a mistaken action
+    print("\n--- 2. Demonstrating Session Rewind ---")
+    target_events = await runner.session_service.get_session(app_name=app.name, user_id=user_id, session_id=session_id)
+    print(f"Total events recorded before rewind: {len(target_events.events)}")
+    
+    # Rewind to initial state before turn
+    if target_events.events:
+        await runner.rewind_async(user_id=user_id, session_id=session_id, event_id=target_events.events[0].id)
+        print("Session successfully rewound to initial event!")
+
+if __name__ == "__main__":
+    asyncio.run(test_advanced_memory())
+```
+
 ### Self-Reflection Answers
 
 1.  **The `InMemorySessionService` loses `user:` and `app:` state on restart. What are the advantages and disadvantages of using a persistent `SessionService` (like one backed by a database) in a production environment?**
@@ -256,3 +311,7 @@ root_agent = Agent(
         *   "Remind me about the security implications of that code review we did." (Even if the exact phrase 'security implications' wasn't used).
         *   "I'm confused about asynchronous programming; what did you teach me about Python coroutines?"
         This allows for a more natural, intuitive, and flexible interaction with the agent's long-term knowledge.
+
+4.  **How does `EventsCompactionConfig` prevent token context window exhaustion without losing critical user background?**
+    *   **Answer:** It uses an LLM summarizer (`LlmEventSummarizer`) at defined turn intervals (`compaction_interval`) to compress older turn event logs into concise structured summaries while preserving an `overlap_size` of recent turns and all persistent state keys. This keeps active context lean without erasing what happened in prior lessons.
+

@@ -5,6 +5,11 @@ title: "Module 18: Dynamic Orchestration - Programmable Graphs with @node"
 
 # Module 18: Dynamic Orchestration - Programmable Graphs with @node
 
+![Dynamic Orchestration Hero (Light)](img/dynamic-orchestration-hero-light.webp#gh-light-mode-only)
+![Dynamic Orchestration Hero (Dark)](img/dynamic-orchestration-hero-dark.webp#gh-dark-mode-only)
+*Figure: Fully programmable multi-agent workflows executing dynamic routing and state evaluation with the `@node` decorator.*
+
+
 ## Theory
 
 In Modules 16 and 17, you learned how to orchestrate nodes using static edges and dictionary-based routing. While these methods are excellent for predictability, real-world complexity often requires more flexibility.
@@ -12,6 +17,11 @@ In Modules 16 and 17, you learned how to orchestrate nodes using static edges an
 **ADK 2.0** provides **Dynamic Workflows**, which give you the full power of Python to define your own routing logic on the fly.
 
 ### Dynamic Workflows with `@node`
+
+![Dynamic Node Execution Engine (Light)](img/dynamic-orchestration-engine-light.webp#gh-light-mode-only)
+![Dynamic Node Execution Engine (Dark)](img/dynamic-orchestration-engine-dark.webp#gh-dark-mode-only)
+*Figure: Programmatic node invocation lifecycle with context state inspection, adaptive node dispatch, and result aggregation.*
+
 
 A Dynamic Workflow is a special type of node that can execute other nodes programmatically. You define it using the **`@node`** decorator and the **`Context`** object.
 

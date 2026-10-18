@@ -5,6 +5,11 @@ title: "Module 21: Distributed Graphs - A2A and External Nodes"
 
 # Module 21: Distributed Graphs - A2A and External Nodes
 
+![Distributed Graphs Hero (Light)](img/distributed-graphs-hero-light.webp#gh-light-mode-only)
+![Distributed Graphs Hero (Dark)](img/distributed-graphs-hero-dark.webp#gh-dark-mode-only)
+*Figure: Distributed cross-service multi-agent federation communicating via standard Agent-to-Agent (A2A) protocol.*
+
+
 ## Theory
 
 ### A2A in ADK 2.0: Distributed Graphs
@@ -14,6 +19,11 @@ Multi-agent systems don't have to live in a single process. With the **Agent-to-
 Think of A2A as the bridge that connects multiple independent graphs into a single "**Graph of Graphs**."
 
 ### The A2A Workflow Components
+
+![A2A Distributed Graph Architecture (Light)](img/distributed-graphs-architecture-light.webp#gh-light-mode-only)
+![A2A Distributed Graph Architecture (Dark)](img/distributed-graphs-architecture-dark.webp#gh-dark-mode-only)
+*Figure: Network proxy architecture connecting local workflow runners to remote isolated A2A agent services.*
+
 
 1.  **Exposing a Node (`to_a2a`)**: You can turn any `Agent` or `Workflow` into a remote service using the `to_a2a()` utility. This wraps your node in a web server (typically running on `uvicorn`) that automatically handles the A2A protocol and security.
 2.  **The Agent Card**: Every A2A service exposes a "business card" at `/.well-known/agent-card.json`. This card describes the node's capabilities, description, and API endpoint so other graphs can discover it.

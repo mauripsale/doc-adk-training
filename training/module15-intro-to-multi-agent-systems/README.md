@@ -5,6 +5,11 @@ title: "Module 15: Introduction to Multi-Agent Systems"
 
 # Module 15: Introduction to Multi-Agent Systems
 
+![Multi-Agent Systems Hero (Light)](img/multi-agent-systems-hero-light.webp#gh-light-mode-only)
+![Multi-Agent Systems Hero (Dark)](img/multi-agent-systems-hero-dark.webp#gh-dark-mode-only)
+*Figure: Architectural transition from monolithic agent bottlenecks to distributed, specialized Multi-Agent Systems.*
+
+
 ## Theory
 
 ### Beyond a Single Agent
@@ -16,6 +21,11 @@ As applications grow, trying to pack all the logic, tools, and instructions into
 A much better approach is to break down the problem.
 
 ### The Power of Specialization and Collaboration
+
+![Monolithic vs Multi-Agent Architecture (Light)](img/monolithic-vs-multi-agent-light.webp#gh-light-mode-only)
+![Monolithic vs Multi-Agent Architecture (Dark)](img/monolithic-vs-multi-agent-dark.webp#gh-dark-mode-only)
+*Figure: Structural breakdown of a single monolithic agent versus a decomposed multi-agent team with clean cognitive boundaries.*
+
 
 A multi-agent system is an application where different, specialized agents collaborate to achieve a larger goal. Instead of one agent that does everything, you create a team of experts:
 

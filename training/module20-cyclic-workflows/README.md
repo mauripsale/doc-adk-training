@@ -5,6 +5,11 @@ title: "Module 20: Cyclic Workflows - Iteration and Self-Correction"
 
 # Module 20: Cyclic Workflows - Iteration and Self-Correction
 
+![Cyclic Workflows Hero (Light)](img/cyclic-workflows-hero-light.webp#gh-light-mode-only)
+![Cyclic Workflows Hero (Dark)](img/cyclic-workflows-hero-dark.webp#gh-dark-mode-only)
+*Figure: Iterative critique, evaluation, and self-correction loops with strict iteration guardrails.*
+
+
 ## Theory
 
 ### Iterative Refinement in ADK 2.0
@@ -14,6 +19,11 @@ In ADK 2.0, the legacy `LoopAgent` is superseded by **Dynamic Workflows** using 
 This approach is more flexible because you have full control over the termination logic, and you can easily implement safety features like `max_iterations`.
 
 ### The Dynamic Loop Pattern
+
+![Evaluator-Optimizer Iteration Loop (Light)](img/cyclic-workflows-loop-light.webp#gh-light-mode-only)
+![Evaluator-Optimizer Iteration Loop (Dark)](img/cyclic-workflows-loop-dark.webp#gh-dark-mode-only)
+*Figure: Generator-Evaluator feedback architecture showing draft critique, rubric scoring thresholding, and iteration limits.*
+
 
 The most common pattern for iteration is the **Critic -> Refiner** loop. Instead of a dedicated class, you define it as a function:
 

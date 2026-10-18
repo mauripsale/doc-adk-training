@@ -5,6 +5,11 @@ title: "Module 21.5: MAS Knowledge Milestone - Architecture Choice"
 
 # Module 21.5: MAS Knowledge Milestone - Architecture Choice
 
+![MAS Milestone Taxonomy Hero (Light)](img/mas-milestone-hero-light.webp#gh-light-mode-only)
+![MAS Milestone Taxonomy Hero (Dark)](img/mas-milestone-hero-dark.webp#gh-dark-mode-only)
+*Figure: Comprehensive Multi-Agent System architecture taxonomy and master design framework.*
+
+
 ## Theory
 
 Congratulations! You have completed the core Multi-Agent Systems (MAS) section of the course. You have moved from thinking about single agents to designing complex networks of specialized nodes.
@@ -12,6 +17,11 @@ Congratulations! You have completed the core Multi-Agent Systems (MAS) section o
 Before we move on to operational concerns like State, Evaluation, and Observability, let's recap the different architectural patterns you've mastered. Choosing the **right geometry** for your graph is the most important decision an AI Architect makes.
 
 ### MAS Architecture Recap
+
+![MAS Architecture Selection Matrix (Light)](img/mas-milestone-matrix-light.webp#gh-light-mode-only)
+![MAS Architecture Selection Matrix (Dark)](img/mas-milestone-matrix-dark.webp#gh-dark-mode-only)
+*Figure: 6-archetype architectural decision grid comparing linear, parallel, routed, dynamic, cyclic, and distributed MAS topologies.*
+
 
 | Pattern | Module | Key ADK Primitives | Best For... |
 | :--- | :--- | :--- | :--- |

@@ -35,36 +35,59 @@ One of the most common issues with LLM agents is **hallucination** or **misuse o
 
 Normally, these errors would cause your agent to crash or stop.
 
-### The Solution: Reflect and Retry
+### The Solution: Built-In Framework Plugins
 
-The **`ReflectAndRetryToolPlugin`** is a powerful built-in plugin designed to solve this exact problem using the *Intervening* and *Amending* patterns. It acts as a safety net globally across all your tools.
+ADK 2.0 provides a suite of pre-packaged, production-grade plugins ready to be attached to your `App` definition.
 
-**How it works:**
-1.  **Intercept:** When any Agent calls a tool, the plugin watches the execution.
-2.  **Detect Failure:** If the tool raises an Exception (or a specific error), the plugin catches it.
-3.  **Reflect:** The plugin intercepts the error and amends the conversation history, sending the error message *back* to the LLM as an observation (e.g., *"Error: Tool 'calc' not found. Available tools: 'calculator'"*).
-4.  **Retry:** The LLM, seeing this error, "reflects" on its mistake and generates a *new* tool call with the corrected name or arguments.
-5.  **Loop:** This process repeats up to a configured `max_retries` limit.
+#### 1. `ReflectAndRetryToolPlugin` (Self-Healing Tool Execution)
 
-### Using Plugins in ADK 2.0
+Acts as a safety net globally across all your tools when the LLM makes a formatting error or hallucination:
+*   **Intercept & Detect:** Catches tool execution exceptions and argument mismatches.
+*   **Reflect:** Amends the trajectory, feeding the error back to the LLM (e.g., *"Error: Tool 'calc' not found. Available tools: 'calculator'"*).
+*   **Retry:** The LLM re-evaluates and issues a corrected tool call within `max_retries`.
 
-To use a plugin, you instantiate it and add it to your `App` configuration.
+#### 2. `BigQueryAgentAnalyticsPlugin` (Enterprise Telemetry)
+
+Automatically streams invocation telemetry, token utilization, latency metrics, and execution paths directly into Google BigQuery for enterprise compliance, cost attribution, and quality audits without custom logging code.
+
+#### 3. `GlobalInstructionPlugin` (Universal Governance)
+
+Appends mandatory system instructions (e.g., brand guidelines, safety rules, regulatory compliance) across **all** agents managed by the application root orchestrator.
+
+#### 4. `ContextFilterPlugin` (Token Budgeting)
+
+Applies intelligent filtering and pruning rules to incoming prompt history, discarding irrelevant intermediate turns to preserve token budget.
+
+### Using Built-In Plugins in ADK 2.0
+
+To use plugins, instantiate them and add them to your `App` configuration:
 
 ```python
 from google.adk.apps.app import App
 from google.adk.runners import Runner
-from google.adk.plugins import ReflectAndRetryToolPlugin
-
-# Configure the plugin
-retry_plugin = ReflectAndRetryToolPlugin(
-    max_retries=3  # Give agents 3 chances to fix their mistakes
+from google.adk.plugins import (
+    ReflectAndRetryToolPlugin,
+    BigQueryAgentAnalyticsPlugin,
+    GlobalInstructionPlugin,
 )
 
-# In ADK 2.0, plugins are registered globally on the App object
+# 1. Instantiate the desired built-in plugins
+retry_plugin = ReflectAndRetryToolPlugin(max_retries=3)
+
+analytics_plugin = BigQueryAgentAnalyticsPlugin(
+    project_id="my-enterprise-gcp-project",
+    dataset_id="agent_telemetry",
+)
+
+governance_plugin = GlobalInstructionPlugin(
+    global_instruction="Always maintain strict corporate compliance and never disclose internal API endpoints."
+)
+
+# 2. Register plugins globally on the App object
 app = App(
-    name="my_robust_app",
+    name="enterprise_agent_app",
     root_agent=my_agent,
-    plugins=[retry_plugin] # <--- Registered globally here
+    plugins=[retry_plugin, analytics_plugin, governance_plugin],
 )
 
 runner = Runner(app=app, session_service=...)
@@ -74,4 +97,4 @@ runner = Runner(app=app, session_service=...)
 - **Plugins** provide global, cross-cutting functionality (logging, retries, security) across your entire application.
 - They inherit from `BasePlugin` and use three patterns: **Observing**, **Intervening**, and **Amending**.
 - Plugins are registered globally on the `App` object, running before any agent-level callbacks.
-- The **`ReflectAndRetryToolPlugin`** makes agents robust by automatically catching tool errors, feeding them back to the model, and allowing it to self-correct without crashing.
+- **Built-in Plugins** like `ReflectAndRetryToolPlugin`, `BigQueryAgentAnalyticsPlugin`, and `GlobalInstructionPlugin` provide production-grade reliability out of the box.

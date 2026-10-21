@@ -141,10 +141,61 @@ Now, let's fix this using the Plugin *instead* of fixing the prompt.
         5. Agent called `secret_calculator`.
         6. Success!
 
+### Step 6: Bonus Challenge — Enterprise Multi-Plugin Chaining (`GlobalInstructionPlugin`)
+
+In enterprise architectures, plugins are composed together into a defense-in-depth pipeline. 
+
+**Exercise:** Create a script `enterprise_plugins.py` that demonstrates combining `ReflectAndRetryToolPlugin` with `GlobalInstructionPlugin` to inject enterprise compliance guardrails across all agent invocations:
+
+```python
+# enterprise_plugins.py (Starter Code)
+from google.adk.agents import Agent
+from google.adk.tools import FunctionTool
+from google.adk.runners import InMemoryRunner
+from google.adk.apps.app import App
+from google.adk.plugins import ReflectAndRetryToolPlugin
+# TODO: 1. Import GlobalInstructionPlugin from google.adk.plugins
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
+
+def system_status() -> str:
+    """Returns the internal cluster health status."""
+    return "Cluster operational: 100% healthy."
+
+root_agent = Agent(
+    name="ops_agent",
+    model="gemini-3.5-flash",
+    instruction="You are an IT Ops assistant. Check system status when asked.",
+    tools=[FunctionTool(system_status)]
+)
+
+async def main():
+    # TODO: 2. Instantiate ReflectAndRetryToolPlugin
+    retry_plugin = None
+    
+    # TODO: 3. Instantiate GlobalInstructionPlugin to prepend global compliance rules:
+    # "All outputs must be strictly professional and tagged with [CONFIDENTIAL]."
+    compliance_plugin = None
+    
+    # TODO: 4. Register both plugins in App(plugins=[...])
+    app = App(
+        name="enterprise_ops_app",
+        root_agent=root_agent,
+        plugins=[] # Add your plugins here
+    )
+    # Run test...
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 ### Self-Reflection Questions
 - Why is it better to handle this with a Plugin rather than just fixing the prompt in this specific scenario? (Think about dynamic/unknown errors).
 - What would happen if we set `max_retries=0`?
 - How does this plugin help with "transient" errors, like a temporary network glitch in a tool?
+- How does `GlobalInstructionPlugin` ensure enterprise governance across large multi-agent fleets without modifying individual agent instructions?
 
 <hr/>
 
@@ -239,6 +290,66 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+### `retry_agent/enterprise_plugins.py`
+
+```python
+"""
+Enterprise Multi-Plugin Chaining: Global Instruction & Self-Healing Retries
+"""
+from google.adk.agents import Agent
+from google.adk.tools import FunctionTool
+from google.adk.runners import InMemoryRunner
+from google.adk.apps.app import App
+from google.adk.plugins import ReflectAndRetryToolPlugin, GlobalInstructionPlugin
+from google.genai import types
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
+
+def system_status() -> str:
+    """Returns the internal cluster health status."""
+    return "Cluster operational: 100% healthy."
+
+root_agent = Agent(
+    name="ops_agent",
+    model="gemini-3.5-flash",
+    instruction="You are an IT Ops assistant. Check system status when asked.",
+    tools=[FunctionTool(system_status)]
+)
+
+async def main():
+    # 1. Self-healing tool retry plugin
+    retry_plugin = ReflectAndRetryToolPlugin(max_retries=2)
+    
+    # 2. Enterprise-wide governance header injection
+    compliance_plugin = GlobalInstructionPlugin(
+        instruction="[ENTERPRISE COMPLIANCE AUDITED: Keep all answers concise, secure, and professional.]"
+    )
+    
+    # 3. Register plugins on the App container
+    app = App(
+        name="enterprise_ops_app",
+        root_agent=root_agent,
+        plugins=[retry_plugin, compliance_plugin]
+    )
+
+    runner = InMemoryRunner(app=app)
+    await runner.session_service.create_session(app_name=app.name, user_id="ops_user", session_id="session_1")
+
+    print("User: Check system status.")
+    async for event in runner.run_async(
+        user_id="ops_user", 
+        session_id="session_1", 
+        new_message=types.Content(role="user", parts=[types.Part.from_text(text="Check system status.")])
+    ):
+        if event.is_final_response():
+            print(f"Agent: {event.content.parts[0].text}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 ### Self-Reflection Answers
 
 1.  **Why is it better to handle this with a Plugin rather than just fixing the prompt in this specific scenario?**
@@ -249,5 +360,8 @@ if __name__ == "__main__":
 
 3.  **How does this plugin help with "transient" errors, like a temporary network glitch in a tool?**
     *   **Answer:** If a tool fails due to a network glitch (e.g., raising a `ConnectionError`), the plugin catches it. It feeds the error ("Connection failed") back to the agent. The agent, seeing this, will likely decide to "try again" (retry the same tool call). If the glitch was temporary, the second attempt might succeed. This adds automatic resilience to your tools.
+
+4.  **How does `GlobalInstructionPlugin` ensure enterprise governance across large multi-agent fleets without modifying individual agent instructions?**
+    *   **Answer:** It intercepts the prompt generation lifecycle at the `App` runtime layer and automatically prepends or appends global compliance, safety, and brand voice rules to all participating sub-agents in the hierarchy. This prevents individual developers from accidentally omitting required legal or security guardrails.
 
 </SolutionVault>

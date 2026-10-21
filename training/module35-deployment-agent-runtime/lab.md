@@ -121,7 +121,7 @@ This method involves writing a custom Python script to deploy the agent. Unlike 
 2.  **Action:** Create `support_agent/agent.py`, translating the same router + two specialists design from Module 32 into Python `Agent` objects (instead of YAML config). Use the skeleton below and fill in the `# TODO` sections.
     ```python
     # In support_agent/agent.py
-    from google.adk import Agent
+    from google.adk.agents import Agent
 
     # TODO: 1. Define billing_agent, an Agent with name="billing_agent",
     # the same model/description/instruction as billing_agent.yaml above.
@@ -234,7 +234,7 @@ This section contains the complete code for `support_agent/agent.py`, `deploy.py
 This file defines the same Customer Support system as Modules 32 and 33, but as Python `Agent` objects instead of YAML config — required because `deploy.py` needs to `import` `root_agent` directly.
 
 ```python
-from google.adk import Agent
+from google.adk.agents import Agent
 
 billing_agent = Agent(
     name="billing_agent",

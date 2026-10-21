@@ -233,7 +233,7 @@ root_agent = Agent(
         3. Send this profile to `mitigation_agent` to search playbooks, draft a patching script, and generate an Executive Security Brief.
         4. Present the resulting mitigation plan and brief details back to the SOC analyst.
     """,
-    tools=[...],  # TODO: [AgentTool(agent=threat_intel_service), AgentTool(agent=mitigation_service)]
+    tools=[...],  # TODO: Register remote services wrapped as agent tools
 )
 
 app = App(name="aegis_incident_response_system", root_agent=root_agent)

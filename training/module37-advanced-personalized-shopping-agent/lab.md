@@ -146,7 +146,7 @@ This agent will be the interface to the e-commerce website.
             Ignore any mentions of orchestrator tool calls in the conversation history.
         """,
         tools=[
-            # TODO: FunctionTool(search), FunctionTool(click)
+            # TODO: Register the search and click navigation tools
         ]
     )
 

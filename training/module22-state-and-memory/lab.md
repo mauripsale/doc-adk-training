@@ -233,12 +233,12 @@ from google.adk.runners import InMemoryRunner
 from google.genai import types
 from agent import root_agent
 
-# TODO: 1. Import EventsCompactionConfig and LlmEventSummarizer from google.adk.events
+# TODO: 1. Import event compaction structures and LLM summarizer from ADK events module
 
 async def test_advanced_memory():
-    # TODO: 2. Configure EventsCompactionConfig with LlmEventSummarizer(model="gemini-3.5-flash")
-    # compaction_interval=6, overlap_size=1
-    compaction_config = None # Replace with EventsCompactionConfig(...)
+    # TODO: 2. Configure an automated event compaction strategy using an LLM summarizer:
+    # Set the compaction interval to 6 and window overlap to 1.
+    compaction_config = None # Replace with configured compaction instance
 
     app = App(
         name="advanced_tutor_app",

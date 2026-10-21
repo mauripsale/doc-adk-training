@@ -31,7 +31,7 @@ This section contains the complete code for `support_agent/agent.py`, `deploy.py
 This file defines the same Customer Support system as Modules 32 and 33, but as Python `Agent` objects instead of YAML config — required because `deploy.py` needs to `import` `root_agent` directly.
 
 ```python
-from google.adk import Agent
+from google.adk.agents import Agent
 
 billing_agent = Agent(
     name="billing_agent",

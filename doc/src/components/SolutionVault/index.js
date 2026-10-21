@@ -460,22 +460,23 @@ export default function SolutionVault({
         )}
 
         {/* Step 4: Unlocked Inline Solution */}
-        {status === 'unlocked' && (
-          <div className={styles.unlockedBox}>
-            <div className={styles.unlockedHeader}>
-              <div className={styles.unlockedTitle}>
-                <span>✨ [ACCESS GRANTED] Solution Vault Decrypted</span>
-              </div>
-            </div>
-            <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: '#cbd5e1' }}>
-              Congratulations on completing all checks and the terminal challenge! Here is the official reference walkthrough and architecture review:
-            </p>
-
-            <div className={styles.inlineSolution}>
-              {children}
+        <div
+          className={styles.unlockedBox}
+          style={{ display: status === 'unlocked' ? 'block' : 'none' }}
+        >
+          <div className={styles.unlockedHeader}>
+            <div className={styles.unlockedTitle}>
+              <span>✨ [ACCESS GRANTED] Solution Vault Decrypted</span>
             </div>
           </div>
-        )}
+          <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: '#cbd5e1' }}>
+            Congratulations on completing all checks and the terminal challenge! Here is the official reference walkthrough and architecture review:
+          </p>
+
+          <div className={styles.inlineSolution}>
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

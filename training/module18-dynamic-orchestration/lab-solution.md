@@ -14,8 +14,8 @@ This file contains the complete code for the `agent.py` script in the Smart Supp
 ```python
 from __future__ import annotations
 from pydantic import BaseModel
-from google.adk import Agent, Workflow, Context, Event
-from google.adk.workflow import node
+from google.adk.agents import Agent
+from google.adk.events import Event
 from typing import AsyncGenerator, Literal
 
 # ===== 1. Specialist Agent Nodes =====

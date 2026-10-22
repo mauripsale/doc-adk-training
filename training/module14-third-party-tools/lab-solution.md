@@ -12,8 +12,8 @@ This file contains the complete code for the `agent.py` file in the Fact-finder 
 ### `fact_finder_agent/agent.py`
 
 ```python
-from google.adk import Agent
-from google.adk.integrations.langchain import LangchainTool
+from google.adk.agents import Agent
+from google.adk.tools.langchain_tool import LangchainTool
 import wikipedia
 from langchain_community.tools import WikipediaQueryRun
 from langchain_community.utilities import WikipediaAPIWrapper

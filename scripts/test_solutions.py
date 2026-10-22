@@ -98,7 +98,8 @@ def verify_imports(imports: List[Tuple[str, List[str]]], ignore_missing_optional
     LOCAL_LAB_MODULES = {
         "tools", "custom_tools", "agent_setup", "my_module", "app", "agent",
         "webshop_data", "support_agent", "support_agent.agent", "threat_intel_agent",
-        "mitigation_agent", "forensic_agent", "aegis_master", "common", "config"
+        "mitigation_agent", "forensic_agent", "aegis_master", "common", "config",
+        "firestore_provider", "user_simulator", "eval_helpers"
     }
 
     errors = []
@@ -114,17 +115,35 @@ def verify_imports(imports: List[Tuple[str, List[str]]], ignore_missing_optional
                 if sym == "*":
                     continue
                 if not hasattr(mod, sym):
-                    errors.append(f"Symbol '{sym}' not found in module '{mod_name}'")
+                    # Check if 'sym' is a submodule of 'mod_name' (e.g. from google.cloud import firestore, from vertexai import agent_engines)
+                    try:
+                        importlib.import_module(f"{mod_name}.{sym}")
+                    except (ImportError, ModuleNotFoundError):
+                        if not (ignore_missing_optional and any(p in f"{mod_name}.{sym}" for p in ["Workflow", "Context", "skills", "workflow"])):
+                            errors.append(f"Symbol or submodule '{sym}' not found in module '{mod_name}'")
         except ImportError as e:
             err_str = str(e)
-            # Check if this is an optional subsystem missing in local dev
+            # Check if this is an optional subsystem missing in local dev / specialized environment
             is_optional_extension = any(
                 opt in err_str for opt in [
                     "No module named 'mcp'",
                     "No module named 'a2a'",
                     "No module named 'litellm'",
                     "No module named 'langchain_core'",
+                    "No module named 'langchain_community'",
+                    "No module named 'wikipedia'",
+                    "No module named 'locust'",
                     "LiteLLM support requires",
+                    "requires Python 3.10",
+                    "google.adk.skills",
+                    "google.adk.tools.skill_toolset",
+                    "google.adk.workflow",
+                ]
+            ) or any(
+                opt in mod_name for opt in [
+                    "google.adk.skills",
+                    "google.adk.tools.skill_toolset",
+                    "google.adk.workflow",
                 ]
             )
             if is_optional_extension and ignore_missing_optional:

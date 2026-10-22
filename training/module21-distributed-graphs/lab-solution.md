@@ -41,7 +41,7 @@ a2a_app = to_a2a(root_agent, port=8001)
 ### `a2a_orchestrator/agent.py` (The Main Workflow)
 
 ```python
-from google.adk import Agent, Workflow
+from google.adk.agents import Agent, SequentialAgent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from dotenv import load_dotenv
 load_dotenv()
@@ -63,11 +63,11 @@ coordinator = Agent(
     sub_agents=[remote_researcher]
 )
 
-# 3. Build the Root Workflow
-# This orchestrates both local and remote nodes in a single graph.
-root_agent = Workflow(
+# 3. Build the Root Orchestration
+# This orchestrates both local and remote nodes in a unified multi-agent system.
+root_agent = SequentialAgent(
     name="DistributedSupportSystem",
-    edges=[("START", coordinator)]
+    sub_agents=[coordinator]
 )
 ```
 

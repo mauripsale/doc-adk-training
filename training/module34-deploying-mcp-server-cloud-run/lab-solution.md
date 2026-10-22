@@ -73,7 +73,7 @@ app = mcp.streamable_http_app()
 ```python
 # Filename: agent.py
 from google.adk import Agent
-from google.adk.tools.mcp_tool import McpToolset
+from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
 
 # The URL of your deployed MCP server, including the /mcp path FastMCP mounts at.

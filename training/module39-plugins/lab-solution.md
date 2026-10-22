@@ -100,7 +100,8 @@ from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from google.adk.runners import InMemoryRunner
 from google.adk.apps.app import App
-from google.adk.plugins import ReflectAndRetryToolPlugin, GlobalInstructionPlugin
+from google.adk.plugins.reflect_retry_tool_plugin import ReflectAndRetryToolPlugin
+from google.adk.plugins.global_instruction_plugin import GlobalInstructionPlugin
 from google.genai import types
 from dotenv import load_dotenv
 import asyncio

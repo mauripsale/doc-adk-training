@@ -246,7 +246,8 @@ Advanced Memory Test: Context Compaction and Session Rewind
 import asyncio
 from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
-from google.adk.events import EventsCompactionConfig, LlmEventSummarizer
+from google.adk.apps.app import EventsCompactionConfig
+from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
 from google.genai import types
 from agent import root_agent
 

@@ -92,12 +92,20 @@ def extract_imports(tree: ast.AST) -> List[Tuple[str, List[str]]]:
 def verify_imports(imports: List[Tuple[str, List[str]]], ignore_missing_optional: bool = False) -> List[str]:
     """
     Layer 2: Verifies that imported modules and symbols can be resolved.
-    Skips local relative imports.
+    Skips local relative imports and lab-local companion files.
     """
+    # Lab-specific local companion files created in multi-file capstone projects
+    LOCAL_LAB_MODULES = {
+        "tools", "custom_tools", "agent_setup", "my_module", "app", "agent",
+        "webshop_data", "support_agent", "support_agent.agent", "threat_intel_agent",
+        "mitigation_agent", "forensic_agent", "aegis_master", "common", "config"
+    }
+
     errors = []
     for mod_name, symbols in imports:
-        # Skip empty module names or relative imports (e.g. from . import ...)
-        if not mod_name or mod_name.startswith((".", "tools", "custom_tools", "agent_setup", "my_module", "app.", "agent")):
+        # Skip empty module names or relative imports / lab-local companion files
+        root_pkg = mod_name.split(".")[0] if mod_name else ""
+        if not mod_name or mod_name.startswith(".") or root_pkg in LOCAL_LAB_MODULES or mod_name in LOCAL_LAB_MODULES:
             continue
             
         try:

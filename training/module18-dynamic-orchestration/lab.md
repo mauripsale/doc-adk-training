@@ -71,9 +71,8 @@ classifier = ...
 # 2. Accept 'ctx: Context' and 'node_input: str' as arguments.
 @node(rerun_on_resume=True)
 async def support_router_workflow(ctx: Context, node_input: str):
-    # Step 2a: Run the classifier node.
-    # Hint: result = await ctx.run_node(classifier, node_input)
-    # Even though the classifier's output_schema is the SentimentClassification
+    # Step 2a: Run the classifier node asynchronously using ctx.run_node().
+    # Note: Even though the classifier's output_schema is the SentimentClassification
     # Pydantic model, run_node() returns it as a plain dict at runtime --
     # access fields with result["sentiment"], not result.sentiment.
     classification = None 
@@ -84,8 +83,7 @@ async def support_router_workflow(ctx: Context, node_input: str):
     # Otherwise, choose ai_support.
     chosen_agent = None 
     
-    # Step 2c: Execute the chosen agent and return the result.
-    # Hint: return await ctx.run_node(chosen_agent, node_input)
+    # Step 2c: Execute the chosen target node via ctx.run_node() and return its result.
     return None
 
 # ===== 3. Register the System =====

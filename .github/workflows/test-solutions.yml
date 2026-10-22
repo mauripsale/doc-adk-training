@@ -1,0 +1,40 @@
+name: Test Curriculum Lab Solutions
+
+on:
+  push:
+    branches:
+      - solution
+  pull_request:
+    branches:
+      - solution
+
+permissions:
+  contents: read
+
+jobs:
+  test-solutions:
+    name: Verify Python Code Quality in Lab Solutions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "google-adk[extensions,a2a]" "mcp<2" litellm langchain-core langchain-community wikipedia google-cloud-firestore google-cloud-aiplatform uvicorn fastapi pydantic pytest python-dotenv
+
+      - name: Run Solution Code Quality Suite
+        env:
+          GOOGLE_API_KEY: "mock-ci-api-key-for-testing"
+          GOOGLE_GENAI_USE_VERTEXAI: "0"
+          VERTEX_AI_PROJECT_ID: "mock-ci-project"
+          VERTEX_AI_LOCATION: "us-central1"
+        run: |
+          python scripts/test_solutions.py --ignore-missing-optional

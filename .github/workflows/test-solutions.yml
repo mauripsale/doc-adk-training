@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "google-adk[extensions,a2a]" "mcp<2" litellm langchain-core langchain-community wikipedia locust google-cloud-firestore google-cloud-aiplatform uvicorn fastapi pydantic pytest python-dotenv
+          pip install "google-adk[extensions,a2a]" "mcp<2" litellm langchain-core langchain-community wikipedia google-cloud-firestore google-cloud-aiplatform uvicorn fastapi pydantic pytest python-dotenv
 
       - name: Run Solution Code Quality Suite
         env:

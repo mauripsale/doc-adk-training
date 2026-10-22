@@ -121,7 +121,7 @@ def verify_imports(imports: List[Tuple[str, List[str]]], ignore_missing_optional
                     except (ImportError, ModuleNotFoundError):
                         if not (ignore_missing_optional and any(p in f"{mod_name}.{sym}" for p in ["Workflow", "Context", "skills", "workflow"])):
                             errors.append(f"Symbol or submodule '{sym}' not found in module '{mod_name}'")
-        except ImportError as e:
+        except (ImportError, Exception) as e:
             err_str = str(e)
             # Check if this is an optional subsystem missing in local dev / specialized environment
             is_optional_extension = any(

@@ -30,6 +30,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install "google-adk[extensions,a2a]" "mcp<2" litellm langchain-core langchain-community wikipedia google-cloud-firestore google-cloud-aiplatform uvicorn fastapi pydantic pytest python-dotenv
 
+      - name: Run Student Lab Grader Suite across Curriculum
+        env:
+          GOOGLE_API_KEY: "mock-ci-api-key-for-testing"
+          GOOGLE_GENAI_USE_VERTEXAI: "0"
+          VERTEX_AI_PROJECT_ID: "mock-ci-project"
+          VERTEX_AI_LOCATION: "us-central1"
+        run: |
+          python scripts/grade_lab.py --all
+
       - name: Run Solution Code Quality Suite
         env:
           GOOGLE_API_KEY: "mock-ci-api-key-for-testing"

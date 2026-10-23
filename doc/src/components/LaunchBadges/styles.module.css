@@ -3,19 +3,23 @@
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin: 4px 0;
+  margin: 6px 0;
   vertical-align: middle;
 }
 
 .launchButton {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 6px 14px;
-  font-family: var(--adk-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
-  font-size: 13px;
+  height: 32px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  font-family: 'Google Sans', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12.5px;
   font-weight: 600;
-  line-height: 1.4;
+  letter-spacing: 0.1px;
+  line-height: 1;
   text-decoration: none !important;
   border-radius: 6px;
   cursor: pointer;
@@ -25,12 +29,12 @@
 }
 
 .launchButton svg {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   flex-shrink: 0;
 }
 
-/* Codespaces Button */
+/* Codespaces Button (Dark slate / GitHub Style) */
 .btnCodespaces {
   background: #24292f;
   color: #ffffff !important;
@@ -43,10 +47,15 @@
   color: #ffffff !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 
-/* Cloud Shell Button */
+.btnCodespaces:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Cloud Shell Button (Google Blue Style) */
 .btnCloudShell {
   background: #1a73e8;
   color: #ffffff !important;
@@ -62,6 +71,11 @@
   border-color: #1a73e8;
 }
 
+.btnCloudShell:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(26, 115, 232, 0.15);
+}
+
 /* Dark Theme Refinements */
 [data-theme='dark'] .btnCodespaces {
   background: #161b22;
@@ -71,7 +85,7 @@
 
 [data-theme='dark'] .btnCodespaces:hover {
   background: #21262d;
-  border-color: rgba(240, 246, 252, 0.25);
+  border-color: rgba(240, 246, 252, 0.28);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 

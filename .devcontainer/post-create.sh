@@ -10,10 +10,15 @@ if ! command -v uv &> /dev/null; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# 2. Persist PATH to shell profiles
+# 2. Persist PATH and aliases to shell profiles
 for profile in "$HOME/.bashrc" "$HOME/.zshrc"; do
-    if [ -f "$profile" ] && ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$profile"; then
-        echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$profile"
+    if [ -f "$profile" ]; then
+        if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$profile"; then
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$profile"
+        fi
+        if ! grep -q 'alias grade=' "$profile"; then
+            echo 'alias grade="python3 /workspace/scripts/grade_lab.py"' >> "$profile"
+        fi
     fi
 done
 
@@ -42,7 +47,9 @@ echo "🔑 Next Step - Configure your credentials in .env:"
 echo "   - Option 1 (AI Studio): Add your GOOGLE_API_KEY to .env"
 echo "   - Option 2 (Vertex AI): Run 'gcloud auth application-default login'"
 echo ""
-echo "🧪 Test your setup:"
+echo "🧪 Test and Grade your progress:"
+echo "   grade                          # Grade current module lab"
+echo "   grade --all                    # Run full curriculum test suite"
 echo "   python scripts/test_solutions.py --ignore-missing-optional"
 echo "================================================================================"
 echo ""

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 16
 title: "Module 16: Static Orchestration - Linear and Parallel Edges"
+pagination_label: "Module 16: Static Orchestration (Linear & Parallel) — 📖 Theory & Overview"
 ---
 
 # Module 16: Static Orchestration - Linear and Parallel Edges

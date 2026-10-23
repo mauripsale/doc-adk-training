@@ -1,6 +1,7 @@
 ---
 sidebar_position: 39
 title: "Module 39: ADK Plugins"
+pagination_label: "Module 39: ADK Plugins Deep Dive — 📖 Theory & Overview"
 ---
 
 # Module 39: Advanced Recovery with Built-In Plugins

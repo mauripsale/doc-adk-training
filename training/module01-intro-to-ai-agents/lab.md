@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 01: Introduction to AI Agents — 🧪 Challenge Lab"
 ---
 
 # Lab 1 Challenge: Your First Interaction

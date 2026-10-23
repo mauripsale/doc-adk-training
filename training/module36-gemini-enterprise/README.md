@@ -1,6 +1,7 @@
 ---
 sidebar_position: 36
 title: "Module 36: Gemini Enterprise (formerly AgentSpace)"
+pagination_label: "Module 36: Gemini Enterprise Publishing — 📖 Theory & Overview"
 ---
 
 # Module 36: Gemini Enterprise (formerly AgentSpace)

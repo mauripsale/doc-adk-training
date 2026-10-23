@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 35: Deploying to Agent Runtime — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

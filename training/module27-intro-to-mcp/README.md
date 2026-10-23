@@ -1,6 +1,7 @@
 ---
 sidebar_position: 27
 title: "Module 27: Introduction to MCP & Stateful Tools"
+pagination_label: "Module 27: Introduction to MCP & Stateful Tools — 📖 Theory & Overview"
 ---
 
 # Module 27: Introduction to MCP & Stateful Tools

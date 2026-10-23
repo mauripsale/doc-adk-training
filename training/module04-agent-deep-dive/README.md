@@ -1,6 +1,7 @@
 ---
 sidebar_position: 4
 title: "Module 4: Core Agent Concepts: Agent Deep Dive"
+pagination_label: "Module 04: Core Agent Concepts & Deep Dive — 📖 Theory & Overview"
 ---
 
 # Module 4: Core Agent Concepts: Agent Deep Dive

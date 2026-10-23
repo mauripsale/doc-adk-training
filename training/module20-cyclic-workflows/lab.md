@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 20: Cyclic Workflows (Iteration & Self-Correction) — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

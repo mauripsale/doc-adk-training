@@ -1,6 +1,7 @@
 ---
 sidebar_position: 25.5
 title: "Module 25.5: Responsible AI (RAI) & Safety Plugins"
+pagination_label: "Module 25.5: Responsible AI (RAI) & Safety Plugins — 📖 Theory & Overview"
 ---
 
 # Module 25.5: Responsible AI (RAI) & Safety Plugins

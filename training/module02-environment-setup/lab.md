@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 02: Setting Up Your Environment (ADK 2.0) — 🧪 Challenge Lab"
 ---
 
 # Lab 2: Environment Setup Challenge

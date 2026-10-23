@@ -1,6 +1,7 @@
 ---
 sidebar_position: 40
 title: "Module 40: Advanced Capstone - Aegis Incident Response & AgentOps"
+pagination_label: "Module 40: Aegis Incident Response Capstone — 📖 Theory & Overview"
 ---
 
 # Module 40: Advanced Capstone - Aegis Incident Response & AgentOps

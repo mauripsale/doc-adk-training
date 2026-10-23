@@ -1,6 +1,7 @@
 ---
 sidebar_position: 30
 title: "Module 30: Building a Custom Streaming Client"
+pagination_label: "Module 30: Building Custom Streaming Clients — 📖 Theory & Overview"
 ---
 
 # Module 30: Building a Custom Streaming Client

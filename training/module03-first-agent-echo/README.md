@@ -1,6 +1,7 @@
 ---
 sidebar_position: 3
 title: "Module 3: Your First Agent: The \"Echo\" Agent"
+pagination_label: "Module 03: Your First Agent: Echo Agent — 📖 Theory & Overview"
 ---
 
 # Module 3: Your First Agent: The "Echo" Agent

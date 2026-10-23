@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 11: Enterprise Integration with OpenAPI — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 15
 title: "Module 15: Introduction to Multi-Agent Systems"
+pagination_label: "Module 15: Introduction to MAS — 📖 Theory & Overview"
 ---
 
 # Module 15: Introduction to Multi-Agent Systems

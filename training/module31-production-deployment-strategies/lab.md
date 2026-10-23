@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 31: Production Deployment Strategies — 🧪 Challenge Lab"
 ---
 
 # Lab 31: Choosing the Right Deployment Strategy Challenge

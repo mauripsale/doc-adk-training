@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 29: Introduction to UI Integration — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

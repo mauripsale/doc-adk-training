@@ -1,6 +1,7 @@
 ---
 sidebar_position: 7
 title: "Module 7: Multimodal and Image Processing"
+pagination_label: "Module 07: Multimodal & Image Processing — 📖 Theory & Overview"
 ---
 
 # Module 7: Multimodal and Image Processing

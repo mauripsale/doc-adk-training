@@ -1,6 +1,7 @@
 ---
 sidebar_position: 1
 title: "Module 1: Introduction to AI Agents"
+pagination_label: "Module 01: Introduction to AI Agents — 📖 Theory & Overview"
 ---
 
 # Module 1: Introduction to AI Agents

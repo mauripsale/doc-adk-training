@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 07: Multimodal & Image Processing — 🧪 Challenge Lab"
 ---
 
 # Lab 7: Building a Visual Product Catalog Analyzer

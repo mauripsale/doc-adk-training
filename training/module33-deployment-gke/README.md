@@ -1,6 +1,7 @@
 ---
 sidebar_position: 33
 title: "Module 33: Deployment to Google Kubernetes Engine (GKE)"
+pagination_label: "Module 33: Deployment to GKE — 📖 Theory & Overview"
 ---
 
 # Module 33: Deployment to Google Kubernetes Engine (GKE)

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 39.5: Agent Skills — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

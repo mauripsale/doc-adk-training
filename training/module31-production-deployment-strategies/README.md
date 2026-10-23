@@ -1,6 +1,7 @@
 ---
 sidebar_position: 31
 title: "Module 31: Production Deployment Strategies"
+pagination_label: "Module 31: Production Deployment Strategies — 📖 Theory & Overview"
 ---
 
 # Module 31: Production Deployment Strategies

@@ -1,5 +1,8 @@
 # 🎓 Google ADK Training: From Zero to Hero 🚀
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mauripsale/doc-adk-training?quickstart=1)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/mauripsale/doc-adk-training.git)
+
 Welcome! This repository contains a comprehensive, multi-module training course for the **Google Agent Development Kit (ADK)**. Through a series of hands-on modules, you will learn the core and advanced concepts of the ADK to build, test, deploy, and observe your own AI agents.
 
 ## 🎯 Our Philosophy: From Zero to Hero
@@ -151,6 +154,16 @@ While this repository contains the full, comprehensive "From Zero to Hero" track
 
 ## ▶️ Getting Started
 
+### ⚡ 1-Click Cloud Workspace (Zero Setup)
+Get started immediately without installing Python, Docker, or Google Cloud SDK on your machine:
+* [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mauripsale/doc-adk-training?quickstart=1) — *Launches a full cloud VS Code environment with Python 3.11, `uv`, `gcloud`, and all dependencies pre-installed.*
+* [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/mauripsale/doc-adk-training.git) — *Clones and opens the project directly in Google Cloud Shell.*
+
+### 🐳 VS Code DevContainer (Local Docker)
+1. Open the repository in [VS Code](https://code.visualstudio.com/) with Docker Desktop running.
+2. Click **"Reopen in Container"** when prompted.
+
+### 💻 Standard Local Setup (`uv`)
 Before you begin, please ensure you have the following prerequisites installed:
 *   Git
 *   Python 3.11+

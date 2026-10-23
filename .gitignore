@@ -194,4 +194,6 @@ docs/site
 
 # Bash files
 ***/*.sh
+!.devcontainer/*.sh
+!scripts/*.sh
 nanobanana-output/

@@ -105,6 +105,11 @@ export default function Home() {
               </Link>
               <Link
                 className={`${styles.btn} ${styles.btnSecondary}`}
+                to="https://codespaces.new/mauripsale/doc-adk-training?quickstart=1">
+                Open in Codespaces 🚀
+              </Link>
+              <Link
+                className={`${styles.btn} ${styles.btnSecondary}`}
                 to="https://github.com/mauripsale/doc-adk-training">
                 View on GitHub
               </Link>

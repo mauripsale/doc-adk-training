@@ -13,7 +13,9 @@ Before you begin, ensure you have the following tools ready:
     *   [Project IDX](https://idx.dev/) (Cloud-based)
     *   [Google Cloud Shell Editor](https://shell.cloud.google.com/) (Cloud-based)
 *   **Environment Choice (Pick one - see README for full step-by-step guides):**
-    *   **Option A — GitHub Codespaces (1-Click in Browser):** Open repo on GitHub → Click **`<> Code`** → **Codespaces** → **"Create codespace"**. Ready in under 1 minute without installing anything locally!
+    *   **Option A — 1-Click Cloud Workspace (Zero Setup):**
+        *   [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mauripsale/doc-adk-training?quickstart=1)
+        *   [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/mauripsale/doc-adk-training.git)
     *   **Option B — VS Code Dev Containers (Local Docker):** Open the repo in VS Code with Docker Desktop running and click **"Reopen in Container"**.
     *   **Option C — Standard Local Setup (`uv` on Host OS):** Install `uv` via terminal:
         *   macOS/Linux: `curl -LsSf https://astral.sh/uv/install.sh | sh`

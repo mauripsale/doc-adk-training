@@ -1,5 +1,6 @@
 ---
 title: "Challenge Lab"
+pagination_label: "Module 22: State & Memory Management — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

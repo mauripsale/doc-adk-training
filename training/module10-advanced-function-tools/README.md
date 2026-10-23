@@ -1,6 +1,7 @@
 ---
 sidebar_position: 10
 title: "Module 10: Stateful Tools & ToolContext"
+pagination_label: "Module 10: Stateful Tools & ToolContext — 📖 Theory & Overview"
 ---
 
 # Module 10: Stateful Tools & ToolContext

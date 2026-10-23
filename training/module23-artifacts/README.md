@@ -1,6 +1,7 @@
 ---
 sidebar_position: 23
 title: "Module 23: Handling Files with Artifacts"
+pagination_label: "Module 23: Handling Files with Artifacts — 📖 Theory & Overview"
 ---
 
 # Module 23: Handling Files with Artifacts

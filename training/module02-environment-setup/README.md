@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Module 2: Setting Up Your Development Environment (ADK 2.0)"
+pagination_label: "Module 02: Setting Up Your Environment (ADK 2.0) — 📖 Theory & Overview"
 ---
 
 # Module 2: Setting Up Your Development Environment

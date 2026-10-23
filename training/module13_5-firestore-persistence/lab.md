@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 13.5: Custom Persistence with Firestore — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

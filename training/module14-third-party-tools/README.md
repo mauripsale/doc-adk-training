@@ -1,6 +1,7 @@
 ---
 sidebar_position: 14
 title: "Module 14: Integrating Third-Party Tools"
+pagination_label: "Module 14: Integrating Third-Party Tools — 📖 Theory & Overview"
 ---
 
 # Module 14: Integrating Third-Party Tools

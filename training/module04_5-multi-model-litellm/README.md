@@ -1,6 +1,7 @@
 ---
 sidebar_position: 4.5
 title: "Module 4.5: Professional Model Configuration, Resiliency & Portability"
+pagination_label: "Module 04.5: Model Configuration & LiteLLM — 📖 Theory & Overview"
 ---
 
 # Module 4.5: Professional Model Configuration, Resiliency & Portability

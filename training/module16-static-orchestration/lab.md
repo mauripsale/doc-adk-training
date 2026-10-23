@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 16: Static Orchestration (Linear & Parallel) — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

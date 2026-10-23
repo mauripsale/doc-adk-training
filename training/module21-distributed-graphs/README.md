@@ -1,6 +1,7 @@
 ---
 sidebar_position: 21
 title: "Module 21: Distributed Graphs - A2A and External Nodes"
+pagination_label: "Module 21: Distributed Graphs (A2A & External Nodes) — 📖 Theory & Overview"
 ---
 
 # Module 21: Distributed Graphs - A2A and External Nodes

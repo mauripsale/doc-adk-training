@@ -1,6 +1,7 @@
 ---
 sidebar_position: 9
 title: "Module 9: Creating Custom Function Tools"
+pagination_label: "Module 09: Custom Function Tools — 📖 Theory & Overview"
 ---
 
 # Module 9: Creating Custom Function Tools

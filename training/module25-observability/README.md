@@ -1,6 +1,7 @@
 ---
 sidebar_position: 25
 title: "Module 25: Advanced Observability with Plugins"
+pagination_label: "Module 25: Observability & Tracing Plugins — 📖 Theory & Overview"
 ---
 
 # Module 25: Advanced Observability with Plugins

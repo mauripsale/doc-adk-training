@@ -1,6 +1,7 @@
 ---
 sidebar_position: 32
 title: "Module 32: Deployment to Cloud Run"
+pagination_label: "Module 32: Deployment to Cloud Run — 📖 Theory & Overview"
 ---
 
 # Module 32: Deployment to Cloud Run

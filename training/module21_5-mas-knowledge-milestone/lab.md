@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Milestone Challenge"
+pagination_label: "Module 21.5: MAS Architecture Milestone — 🧪 Challenge Lab"
 ---
 
 # Lab 21.5: MAS Architecture Design Challenge

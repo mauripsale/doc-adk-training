@@ -1,6 +1,7 @@
 ---
 sidebar_position: 13.5
 title: "Module 13.5: Extending ADK - Custom Persistence with Firestore"
+pagination_label: "Module 13.5: Custom Persistence with Firestore — 📖 Theory & Overview"
 ---
 
 # Module 13.5: Extending ADK - Custom Persistence with Firestore

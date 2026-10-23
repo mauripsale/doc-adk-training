@@ -1,6 +1,7 @@
 ---
 sidebar_position: 24
 title: "Module 24: Evaluating Agent Performance"
+pagination_label: "Module 24: Evaluating Agent Performance — 📖 Theory & Overview"
 ---
 
 # Module 24: Evaluating Agent Performance

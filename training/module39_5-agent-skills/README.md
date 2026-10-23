@@ -1,6 +1,7 @@
 ---
 sidebar_position: 39.5
 title: "Module 39.5: Agent Skills"
+pagination_label: "Module 39.5: Agent Skills — 📖 Theory & Overview"
 ---
 
 # Module 39.5: Enhancing Agents with Skills

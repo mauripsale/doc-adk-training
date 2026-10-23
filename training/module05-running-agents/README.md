@@ -1,6 +1,7 @@
 ---
 sidebar_position: 5
 title: "Module 5: Running and Interacting with Agents"
+pagination_label: "Module 05: Running & Interacting with Agents — 📖 Theory & Overview"
 ---
 
 # Module 5: Running and Interacting with Agents

@@ -55,13 +55,10 @@ You can complete this training course using any of the following approaches depe
 
 If you don't want to install Docker, Python, or tools on your computer, launch a ready-to-code workspace directly in your browser:
 
-* **Launch via GitHub Codespaces:**  
-  [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mauripsale/doc-adk-training?quickstart=1)  
-  *Launches a full VS Code browser IDE pre-configured with Python 3.11, `uv`, `gcloud`, and all course dependencies.*
+<LaunchBadges />
 
-* **Launch via Google Cloud Shell:**  
-  [![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/mauripsale/doc-adk-training.git)  
-  *Clones the repository directly into your Google Cloud web shell and opens Cloud Shell Editor.*
+* **GitHub Codespaces:** Launches a full VS Code browser IDE pre-configured with Python 3.11, `uv`, `gcloud`, and all course dependencies.
+* **Google Cloud Shell:** Clones the repository directly into your Google Cloud web shell and opens Cloud Shell Editor with pre-authenticated Google Cloud tooling.
 
 ---
 

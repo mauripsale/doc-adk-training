@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 14: Integrating Third-Party Tools — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

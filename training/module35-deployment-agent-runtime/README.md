@@ -1,6 +1,7 @@
 ---
 sidebar_position: 35
 title: "Module 35: Deploying to Agent Runtime"
+pagination_label: "Module 35: Deploying to Agent Runtime — 📖 Theory & Overview"
 ---
 
 # Module 35: Deploying to Agent Runtime

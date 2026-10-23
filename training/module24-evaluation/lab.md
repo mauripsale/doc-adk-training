@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 24: Evaluating Agent Performance — 🧪 Challenge Lab"
 ---
 
 import { ChainSetup } from '../_chain-setup-snippet.mdx';

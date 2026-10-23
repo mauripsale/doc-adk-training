@@ -1,6 +1,7 @@
 ---
 sidebar_position: 29
 title: "Module 29: Introduction to UI Integration"
+pagination_label: "Module 29: Introduction to UI Integration — 📖 Theory & Overview"
 ---
 
 # Module 29: Introduction to UI Integration

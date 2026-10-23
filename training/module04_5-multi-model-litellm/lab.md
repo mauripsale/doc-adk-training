@@ -1,6 +1,7 @@
 ---
 sidebar_position: 6
 title: "Challenge Lab"
+pagination_label: "Module 04.5: Model Configuration & LiteLLM — 🧪 Challenge Lab"
 ---
 
 import { ChainSetup } from '../_chain-setup-snippet.mdx';

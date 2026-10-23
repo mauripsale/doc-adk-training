@@ -1,6 +1,7 @@
 ---
 sidebar_position: 8
 title: "Module 8: Introduction to Tools"
+pagination_label: "Module 08: Introduction to Tools — 📖 Theory & Overview"
 ---
 
 # Module 8: Introduction to Tools

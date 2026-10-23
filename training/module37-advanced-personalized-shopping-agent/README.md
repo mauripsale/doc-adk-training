@@ -1,6 +1,7 @@
 ---
 sidebar_position: 37
 title: "Module 37: Advanced - Building a Personalized Shopping Agent"
+pagination_label: "Module 37: Advanced Shopping Agent — 📖 Theory & Overview"
 ---
 
 # Module 37: Advanced - Building a Personalized Shopping Agent

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 12
 title: "Module 12: Built-in Tools and Grounding"
+pagination_label: "Module 12: Built-in Tools & Grounding — 📖 Theory & Overview"
 ---
 
 # Module 12: Built-in Tools and Grounding

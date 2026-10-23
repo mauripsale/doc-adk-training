@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 15: Introduction to MAS — 🧪 Challenge Lab"
 ---
 
 # Lab 15: Designing a Multi-Agent System Challenge

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 38
 title: "Module 38: Best Practices & Production Patterns (ADK 2.0)"
+pagination_label: "Module 38: Production Best Practices & Patterns — 📖 Theory & Overview"
 ---
 
 # Module 38: Best Practices & Production Patterns

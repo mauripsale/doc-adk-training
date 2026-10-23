@@ -1,6 +1,7 @@
 ---
 sidebar_position: 17
 title: "Module 17: Structured Routing - Edges and Dictionaries"
+pagination_label: "Module 17: Structured Routing (Edges & Dicts) — 📖 Theory & Overview"
 ---
 
 # Module 17: Structured Routing - Edges and Dictionaries

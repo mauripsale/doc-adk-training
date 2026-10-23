@@ -1,6 +1,7 @@
 ---
 sidebar_position: 20
 title: "Module 20: Cyclic Workflows - Iteration and Self-Correction"
+pagination_label: "Module 20: Cyclic Workflows (Iteration & Self-Correction) — 📖 Theory & Overview"
 ---
 
 # Module 20: Cyclic Workflows - Iteration and Self-Correction

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 21: Distributed Graphs (A2A & External Nodes) — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

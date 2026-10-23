@@ -1,6 +1,7 @@
 ---
 sidebar_position: 21.5
 title: "Module 21.5: MAS Knowledge Milestone - Architecture Choice"
+pagination_label: "Module 21.5: MAS Architecture Milestone — 📖 Theory & Overview"
 ---
 
 # Module 21.5: MAS Knowledge Milestone - Architecture Choice

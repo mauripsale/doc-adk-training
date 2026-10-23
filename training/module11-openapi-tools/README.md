@@ -1,6 +1,7 @@
 ---
 sidebar_position: 11
 title: "Module 11: Enterprise Integration with OpenAPI Tools"
+pagination_label: "Module 11: Enterprise Integration with OpenAPI — 📖 Theory & Overview"
 ---
 
 # Module 11: Enterprise Integration with OpenAPI Tools

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 36: Gemini Enterprise Publishing — 🧪 Challenge Lab"
 ---
 
 # Lab 36: Designing an Enterprise Agent Strategy Challenge

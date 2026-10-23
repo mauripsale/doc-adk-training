@@ -1,6 +1,7 @@
 ---
 sidebar_position: 34
 title: "Module 34: Deploying an MCP Server to Cloud Run"
+pagination_label: "Module 34: Deploying MCP Server to Cloud Run — 📖 Theory & Overview"
 ---
 
 # Module 34: Deploying an MCP Server to Cloud Run

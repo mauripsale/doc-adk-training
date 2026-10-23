@@ -1,6 +1,7 @@
 ---
 sidebar_position: 19
 title: "Module 19: Collaborative Teams - Using Modes and Hand-offs"
+pagination_label: "Module 19: Collaborative Teams (Modes & Handoffs) — 📖 Theory & Overview"
 ---
 
 # Module 19: Collaborative Teams - Using Modes and Hand-offs

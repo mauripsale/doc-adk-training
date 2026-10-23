@@ -1,6 +1,7 @@
 ---
 sidebar_position: 13
 title: "Module 13: Advanced Interactions: Actions & HITL"
+pagination_label: "Module 13: Actions & Human-in-the-Loop (HITL) — 📖 Theory & Overview"
 ---
 
 # Module 13: Advanced Interactions: Actions & HITL

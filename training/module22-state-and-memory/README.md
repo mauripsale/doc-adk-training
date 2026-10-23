@@ -1,6 +1,7 @@
 ---
 sidebar_position: 22
 title: "Module 22: State and Memory - Persistent Agent Context"
+pagination_label: "Module 22: State & Memory Management — 📖 Theory & Overview"
 ---
 
 # Module 22: State and Memory - Persistent Agent Context

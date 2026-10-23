@@ -1,6 +1,7 @@
 ---
 sidebar_position: 6
 title: "Module 6: Programmatic Execution: Apps and Runners"
+pagination_label: "Module 06: Programmatic Execution: Apps & Runners — 📖 Theory & Overview"
 ---
 
 # Module 6: Programmatic Execution: Apps and Runners

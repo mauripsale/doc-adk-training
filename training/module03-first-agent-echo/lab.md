@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
+pagination_label: "Module 03: Your First Agent: Echo Agent — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';

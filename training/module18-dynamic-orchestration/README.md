@@ -1,6 +1,7 @@
 ---
 sidebar_position: 18
 title: "Module 18: Dynamic Orchestration - Programmable Graphs with @node"
+pagination_label: "Module 18: Dynamic Orchestration (@node) — 📖 Theory & Overview"
 ---
 
 # Module 18: Dynamic Orchestration - Programmable Graphs with @node

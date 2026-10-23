@@ -49,6 +49,10 @@ const config = {
           label: 'Modules',
         },
         {
+          type: 'search',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/mauripsale/doc-adk-training',
           label: 'GitHub',
           position: 'right',
@@ -114,6 +118,23 @@ const config = {
           customCss: './src/css/custom.css',
         },
       },
+    ],
+  ],
+  themes: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      /** @type {import("@easyops-cn/docusaurus-search-local").PluginOptions} */
+      ({
+        hashed: true,
+        language: ['en'],
+        docsDir: '../training',
+        docsRouteBasePath: '/docs',
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: true,
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      }),
     ],
   ],
   plugins: [

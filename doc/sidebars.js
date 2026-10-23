@@ -5,10 +5,6 @@ function moduleCategory(dir, label) {
     type: 'category',
     label,
     collapsed: true,
-    link: {
-      type: 'doc',
-      id: `${dir}/README`,
-    },
     items: [
       {
         type: 'doc',

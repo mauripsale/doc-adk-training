@@ -1,21 +1,25 @@
 {
   "name": "Google ADK Training (From Zero to Hero)",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/google-cloud-sdk:0": {}
+  },
   "customizations": {
     "vscode": {
       "settings": {
-        "python.defaultInterpreterPath": "/workspaces/doc-adk-training/.venv/bin/python",
+        "python.defaultInterpreterPath": "${containerWorkspaceFolder}/.venv/bin/python",
         "python.terminal.activateEnvironment": true
       },
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
         "charliermarsh.ruff",
+        "ms-toolsai.jupyter",
         "tamasfe.even-better-toml",
         "bierner.markdown-preview-github-styles"
       ]
     }
   },
-  "forwardPorts": [8000, 8080],
-  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && echo 'export PATH=\"$HOME/.local/bin:$PATH\"' >> ~/.bashrc && export PATH=\"$HOME/.local/bin:$PATH\" && uv venv && uv pip install \"google-adk>=2.1.0\" python-dotenv"
+  "forwardPorts": [8000, 8080, 3000],
+  "postCreateCommand": "bash .devcontainer/post-create.sh"
 }

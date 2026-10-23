@@ -1,0 +1,26 @@
+# ==============================================================================
+# Google ADK Training: Core & Dev Dependencies
+# ==============================================================================
+
+# Core ADK & Google Gen AI
+google-adk[extensions,a2a]>=2.1.0
+google-genai>=1.0.0
+litellm>=1.40.0
+
+# Tools & Integrations
+mcp<2
+langchain-core
+langchain-community
+wikipedia
+google-cloud-firestore
+google-cloud-aiplatform
+
+# Web & API Frameworks
+uvicorn
+fastapi
+pydantic>=2.0.0
+python-dotenv
+
+# Testing & Code Quality
+pytest
+ruff

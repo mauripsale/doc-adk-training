@@ -278,11 +278,35 @@ You have successfully built a sophisticated agent that leverages all four state 
 *   How to execute **Session Rewind** (`runner.rewind_async`) to rollback conversation state.
 *   **Bonus:** How to inject state directly into instructions.
 
-### Self-Reflection Questions
-- The `InMemorySessionService` loses `user:` and `app:` state on restart. What are the advantages and disadvantages of using a persistent `SessionService` (like one backed by a database) in a production environment?
-- The `temp:` state is automatically discarded after each turn. Why is this a useful feature? What kind of problems could arise if this temporary data was accidentally persisted?
-- Our `search_past_lessons` tool simulates a memory search. In a real application using `VertexAiMemoryBankService`, the search would be semantic (based on meaning) rather than keyword-based. How does this change the kinds of queries the user could make?
-- How does `EventsCompactionConfig` prevent token context window exhaustion without losing critical user background?
+### Self-Reflection & Interactive Knowledge Checks
+
+<KnowledgeCheck
+  id="m22-temp-state-scope"
+  question="Why is `temp:` state prefix automatically discarded at the end of each invocation turn?"
+  options={[
+    "To save disk space on the client machine.",
+    "To prevent ephemeral calculations or transient intermediate values from polluting persistent session context across turns.",
+    "Because the LLM refuses to read keys containing colons.",
+    "To automatically trigger memory compaction."
+  ]}
+  correctIndex={1}
+  hint="Consider what happens when you store a single-turn scratch variable (like a raw calculation) in long-term session memory."
+  explanation="`temp:` state is strictly scoped to the current turn invocation. This prevents intermediate scratchpad calculations or one-off tokens from polluting long-term session memory or consuming LLM prompt context in future turns."
+/>
+
+<KnowledgeCheck
+  id="m22-context-compaction"
+  question="How does `EventsCompactionConfig` with an LLM summarizer maintain conversational context in long-running agent sessions?"
+  options={[
+    "It deletes all prior events after 5 messages.",
+    "It condenses older dialogue history into a structured semantic summary while preserving recent raw events and critical state keys.",
+    "It lowers the Gemini model temperature to zero.",
+    "It converts all audio and video inputs into plain text."
+  ]}
+  correctIndex={1}
+  hint="How can an agent remember what was discussed hours ago without blowing past token limits?"
+  explanation="`EventsCompactionConfig` automatically triggers an LLM summarizer once historical events reach a threshold, replacing bulky past conversation turns with a concise summary while retaining recent turns and persistent state intact."
+/>
 
 <hr/>
 

@@ -100,10 +100,35 @@ You have built a production-ready secure agent! You learned:
 *   How to **reroute the conversation** dynamically using `tool_context.actions.transfer_to_agent`.
 *   How to combine manual safety (HITL) with automated business rules (Escalation).
 
-### Self-Reflection Questions
-- Why is it important to use `require_confirmation` for sensitive actions rather than just relying on the LLM's instructions?
-- In the dynamic transfer example, why did we need to add the `supervisor` agent to the `sub_agents` list of the `finance_agent`?
-- How does `tool_context.actions` allow you to implement business rules that the LLM cannot override?
+### Self-Reflection & Interactive Knowledge Checks
+
+<KnowledgeCheck
+  id="m13-hitl-guarantee"
+  question="Why is `require_confirmation=True` on a FunctionTool safer than relying purely on LLM system prompt instructions?"
+  options={[
+    "It makes the LLM inference faster by bypassing token generation.",
+    "Instructions can be bypassed by adversarial prompt injection, whereas `require_confirmation` is hardcoded in the Python runtime.",
+    "It encrypts the payload using AES-256 before sending to Gemini.",
+    "It converts synchronous function calls into background tasks."
+  ]}
+  correctIndex={1}
+  hint="Consider whether prompt instructions are strict code contracts or soft guidance that could be tricked."
+  explanation="Instructions are advice to the LLM and vulnerable to prompt injection or model confusion. In contrast, `require_confirmation=True` is an architectural guarantee enforced by the ADK Python runtime: the tool function is never called until explicit user approval is registered in the UI."
+/>
+
+<KnowledgeCheck
+  id="m13-sub-agents-discovery"
+  question="In ADK 2.0 dynamic routing, why must the target agent (e.g. `supervisor`) be listed in the calling agent's `sub_agents`?"
+  options={[
+    "To share the exact same LLM temperature parameter.",
+    "To register the target node in the local graph so `tool_context.actions.transfer_to_agent` can discover it.",
+    "To force both agents to run in parallel on every turn.",
+    "To disable memory persistence for the target agent."
+  ]}
+  correctIndex={1}
+  hint="How does the Workflow engine locate nodes when routing a hand-off?"
+  explanation="In ADK 2.0, an agent can only transfer to nodes it is aware of. Adding an agent to `sub_agents` registers it as a reachable destination in the workflow graph, enabling `transfer_to_agent` to resolve the destination node."
+/>
 
 <hr/>
 

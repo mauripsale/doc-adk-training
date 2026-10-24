@@ -128,6 +128,20 @@ For this, the ADK provides **User Simulation**.
 
 This allows you to "stress test" your agent against hundreds of diverse, generated conversations to find edge cases you might have missed manually. Note that for dynamic scenarios, you typically use reference-free metrics like `safety_v1` and `hallucinations_v1` since there is no single "expected" response.
 
+<KnowledgeCheck
+  id="m24-eval-trajectory-matching"
+  question="Why is tool_trajectory_avg_score evaluation often prioritized over simple string response matching when regression testing complex ADK agents in CI/CD?"
+  options={[
+    "Because validating the exact sequence of reasoning and tool invocations proves the agent followed the deterministic business workflow, regardless of semantic phrasing changes in the final text",
+    "Because LLMs cannot output string responses in headless CI environments",
+    "Because evaluating tool trajectories uses 0 API tokens",
+    "Because tool calls cannot be recorded in evaluation datasets"
+  ]}
+  correctIndex={0}
+  hint="Think about verifying the agent's intermediate reasoning steps vs surface phrasing."
+  explanation="Validating tool trajectory ensures the agent called the correct tools with proper parameters in the right order (reasoning path), which is much more robust against benign natural language variations in the final LLM response."
+/>
+
 ### Key Takeaways
 - `Agent`s are non-deterministic, so traditional pass/fail tests are insufficient.
 - The ADK evaluation framework measures quality by comparing an agent's behavior against a recorded "golden path" or **Evaluation Case**.

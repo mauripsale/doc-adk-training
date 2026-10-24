@@ -126,6 +126,19 @@ export function ProgressProvider({ children }) {
     return Boolean(completedDocs[docKey]);
   };
 
+  const markDocComplete = (docKey, completed = true) => {
+    const current = Boolean(completedDocs[docKey]);
+    if (current === completed) return; // No-op if already in desired state
+
+    const newDocs = { ...completedDocs };
+    if (completed) {
+      newDocs[docKey] = true;
+    } else {
+      delete newDocs[docKey];
+    }
+    saveProgress(newDocs);
+  };
+
   const toggleDocComplete = (docKey) => {
     const nextState = !isDocCompleted(docKey);
     const newDocs = { ...completedDocs, [docKey]: nextState };
@@ -206,6 +219,7 @@ export function ProgressProvider({ children }) {
     isLoaded,
     completedDocs,
     isDocCompleted,
+    markDocComplete,
     toggleDocComplete,
     resetProgress,
     exportProgress,
@@ -236,6 +250,7 @@ export function useStudentProgress() {
       isLoaded: false,
       completedDocs: {},
       isDocCompleted: () => false,
+      markDocComplete: () => {},
       toggleDocComplete: () => {},
       resetProgress: () => {},
       exportProgress: () => '',

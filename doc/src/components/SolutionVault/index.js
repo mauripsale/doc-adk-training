@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from './styles.module.css';
 import { VAULT_REGISTRY } from '@site/src/data/vaultRegistry';
+import { useStudentProgress, CURRICULUM_MODULES } from '@site/src/context/ProgressContext';
 
 // Pure JS SHA-256 for browser-compatible deterministic token calculation
 function sha256Hex(ascii) {
@@ -151,6 +152,19 @@ export default function SolutionVault({
     command: `python3 -c "import hashlib; print(hashlib.sha256(b'adk-v3-mod${normKey}-verified').hexdigest()[:8])"`,
     expectedToken: expectedToken,
   };
+
+  const { isLoaded, isDocCompleted, markDocComplete } = useStudentProgress();
+
+  const docKey = useMemo(() => {
+    const cleanNorm = normKey.replace('.', '_');
+    const matched = CURRICULUM_MODULES.find((m) => {
+      const numPart = m.id.split('-')[0].replace('module', '');
+      return numPart === cleanNorm || numPart === cleanNorm.padStart(2, '0');
+    });
+    return matched ? `${matched.id}/lab` : null;
+  }, [normKey]);
+
+  const isLabCompleted = Boolean(docKey && isLoaded && isDocCompleted(docKey));
 
   const storageKey = `adk_vault_v3_mod_${normKey}`;
 
@@ -472,6 +486,42 @@ export default function SolutionVault({
           <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: '#cbd5e1' }}>
             Congratulations on completing all checks and the terminal challenge! Here is the official reference walkthrough and architecture review:
           </p>
+
+          {docKey && (
+            <div className={styles.completionBanner}>
+              <div className={styles.completionBannerLeft}>
+                <span className={styles.completionIcon}>
+                  {isLabCompleted ? '🏆' : '🎉'}
+                </span>
+                <div>
+                  <div className={styles.completionTitle}>
+                    {isLabCompleted
+                      ? 'Laboratorio Completato!'
+                      : 'Sfida del Laboratorio Superata!'}
+                  </div>
+                  <div className={styles.completionSubtext}>
+                    {isLabCompleted
+                      ? 'Questo modulo è registrato come completato nel tuo Learning Portfolio.'
+                      : 'Vuoi registrare questo laboratorio nel tuo piano di studi?'}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  isLabCompleted
+                    ? markDocComplete(docKey, false)
+                    : markDocComplete(docKey, true)
+                }
+                className={
+                  isLabCompleted ? styles.completedBtn : styles.markCompleteBtn
+                }
+                aria-label="Registra progresso laboratorio"
+              >
+                {isLabCompleted ? '✓ Completato (Annulla)' : '✓ Segna come Completato'}
+              </button>
+            </div>
+          )}
 
           <div className={styles.inlineSolution}>
             {children}

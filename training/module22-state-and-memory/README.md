@@ -140,6 +140,20 @@ The Memory Service provides **long-term, searchable memory** for your agent, lik
 2.  **Recall:** In a future session, use a tool to call `memory_service.search_memory(query)`.
 3.  **Act:** The agent uses the retrieved context to answer questions like "What did we discuss last week?".
 
+<KnowledgeCheck
+  id="m22-state-scoping-prefixes"
+  question="In ADK 2.0 State Management, which state prefix ensures a stored value is isolated to the current user across all their sessions rather than being restricted to a single ephemeral turn?"
+  options={[
+    "user: (e.g. session.state['user:preference'])",
+    "temp: (e.g. session.state['temp:query'])",
+    "global: (e.g. session.state['global:setting'])",
+    "app: (e.g. session.state['app:config'])"
+  ]}
+  correctIndex={0}
+  hint="Review the state scoping prefixes: session vs user vs app vs temp."
+  explanation="In ADK 2.0, state keys prefixed with 'user:' persist across distinct sessions for the identified user, whereas standard unprefixed keys belong to the active session, and 'temp:' keys are discarded after the turn."
+/>
+
 ### Key Takeaways
 - **Session State** manages short-term context with scoped prefixes (`user:`, `app:`, `temp:`).
 - **Inject State** directly into instructions using `{key}` syntax for dynamic behavior.

@@ -1,0 +1,420 @@
+/* Certificate Modal & Print Styles */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalCard {
+  background: var(--ifm-background-surface-color, #ffffff);
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  border-radius: 20px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+}
+
+:global([data-theme='dark']) .modalCard {
+  background: #111827;
+  border-color: #374151;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+}
+
+:global([data-theme='dark']) .modalHeader {
+  border-color: #374151;
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--ifm-color-emphasis-600, #64748b);
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: var(--ifm-color-emphasis-200, #f1f5f9);
+  color: var(--ifm-color-emphasis-900, #0f172a);
+}
+
+.modalBody {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Name Edit Input Bar */
+.nameInputBar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--ifm-color-emphasis-100, #f8fafc);
+  border: 1px solid var(--ifm-color-emphasis-200, #e2e8f0);
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+}
+
+:global([data-theme='dark']) .nameInputBar {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.nameInputLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.nameInput {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--ifm-color-emphasis-300, #cbd5e1);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: inherit;
+}
+
+:global([data-theme='dark']) .nameInput {
+  border-color: #4b5563;
+}
+
+/* Certificate Canvas */
+.certificateCanvas {
+  background: #ffffff;
+  color: #0f172a;
+  border: 12px solid #1e293b;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  box-shadow: inset 0 0 0 2px #e2e8f0, 0 10px 25px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+:global([data-theme='dark']) .certificateCanvas {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #1e3a8a;
+  box-shadow: inset 0 0 0 2px #3b82f6, 0 10px 25px rgba(0, 0, 0, 0.4);
+  background-image: radial-gradient(#1e293b 1px, transparent 1px);
+}
+
+.certBadgeLogo {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.certSuperTitle {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #2563eb;
+  margin-bottom: 0.25rem;
+}
+
+:global([data-theme='dark']) .certSuperTitle {
+  color: #60a5fa;
+}
+
+.certMainTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0.25rem 0 0.75rem 0;
+  background: linear-gradient(135deg, #1e3a8a, #2563eb, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:global([data-theme='dark']) .certMainTitle {
+  background: linear-gradient(135deg, #60a5fa, #93c5fd, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.certRecipientIntro {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0.5rem 0 0.25rem 0;
+}
+
+:global([data-theme='dark']) .certRecipientIntro {
+  color: #94a3b8;
+}
+
+.certStudentName {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.25rem 0 0.75rem 0;
+  color: #0f172a;
+  text-decoration: underline;
+  text-decoration-color: #2563eb;
+  text-underline-offset: 6px;
+}
+
+:global([data-theme='dark']) .certStudentName {
+  color: #f8fafc;
+  text-decoration-color: #60a5fa;
+}
+
+.certRankPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+:global([data-theme='dark']) .certRankPill {
+  background: #1e293b;
+  border-color: #334155;
+  color: #e2e8f0;
+}
+
+.certDescription {
+  max-width: 650px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #475569;
+  margin-bottom: 1.5rem;
+}
+
+:global([data-theme='dark']) .certDescription {
+  color: #cbd5e1;
+}
+
+.certMetricsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 650px;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+:global([data-theme='dark']) .certMetricsGrid {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.certMetricBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.certMetricVal {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2563eb;
+}
+
+:global([data-theme='dark']) .certMetricVal {
+  color: #60a5fa;
+}
+
+.certMetricLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+:global([data-theme='dark']) .certMetricLabel {
+  color: #94a3b8;
+}
+
+.certFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 650px;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 1rem;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+:global([data-theme='dark']) .certFooter {
+  border-color: #475569;
+  color: #94a3b8;
+}
+
+.certStamp {
+  font-family: monospace;
+  font-size: 0.75rem;
+  background: #e2e8f0;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+}
+
+:global([data-theme='dark']) .certStamp {
+  background: #334155;
+  color: #e2e8f0;
+}
+
+/* Action Buttons Toolbar */
+.actionToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.btnPrimary {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btnPrimary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btnSecondary {
+  background: var(--ifm-color-emphasis-100, #f1f5f9);
+  color: var(--ifm-color-emphasis-800, #1e293b);
+  border: 1px solid var(--ifm-color-emphasis-300, #cbd5e1);
+  border-radius: 10px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btnSecondary:hover {
+  background: var(--ifm-color-emphasis-200, #e2e8f0);
+}
+
+:global([data-theme='dark']) .btnSecondary {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f3f4f6;
+}
+
+:global([data-theme='dark']) .btnSecondary:hover {
+  background: #374151;
+}
+
+/* Print CSS rules */
+@media print {
+  /* Hide all Docusaurus page shell elements */
+  :global(nav),
+  :global(footer),
+  :global(.navbar),
+  :global(.footer),
+  :global(.pagination-nav),
+  :global(.theme-doc-sidebar-container),
+  :global(.theme-doc-toc-desktop),
+  :global(.theme-doc-toc-mobile),
+  .modalBackdrop,
+  .modalHeader,
+  .nameInputBar,
+  .actionToolbar,
+  .closeButton {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .modalCard {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .certificateCanvas {
+    display: flex !important;
+    border: 8px solid #1e293b !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    margin: 1cm auto !important;
+    padding: 2.5rem !important;
+  }
+}

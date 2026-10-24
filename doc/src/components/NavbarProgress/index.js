@@ -2,11 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from '@docusaurus/Link';
 import { useLocation } from '@docusaurus/router';
 import { useStudentProgress } from '@site/src/context/ProgressContext';
+import CertificateModal from '@site/src/components/CertificateModal';
 import styles from './styles.module.css';
 
 export default function NavbarProgress() {
   const { isLoaded, stats, resetProgress, exportProgress, importProgress } = useStudentProgress();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCertOpen, setIsCertOpen] = useState(false);
   const dropdownRef = useRef(null);
   const fileInputRef = useRef(null);
   const location = useLocation();
@@ -133,6 +135,17 @@ export default function NavbarProgress() {
                 ▶ Resume: {nextModule.title.split(':')[0]} ({nextModule.title.split(':')[1]?.trim() || nextModule.title})
               </Link>
             )}
+
+            <button
+              type="button"
+              className={styles.certTriggerButton}
+              onClick={() => {
+                setIsOpen(false);
+                setIsCertOpen(true);
+              }}
+            >
+              🏆 View Certificate & Portfolio
+            </button>
           </div>
 
           <p className={styles.partsSectionTitle}>Curriculum Breakdown</p>
@@ -193,6 +206,8 @@ export default function NavbarProgress() {
           </div>
         </div>
       )}
+
+      <CertificateModal isOpen={isCertOpen} onClose={() => setIsCertOpen(false)} />
     </div>
   );
 }

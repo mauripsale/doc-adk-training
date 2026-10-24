@@ -187,7 +187,8 @@ export default function SolutionVault({
     try {
       if (typeof window !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('instructor') === '1') {
+        if (urlParams.get('instructor') === '1' || sessionStorage.getItem('adk_instructor_mode') === 'true') {
+          sessionStorage.setItem('adk_instructor_mode', 'true');
           setStatus('unlocked');
           setQuizPassed(true);
           return;
@@ -204,6 +205,21 @@ export default function SolutionVault({
     }
   }, [storageKey]);
 
+  // Dispatch vault status updates to keep DocCompletionCard synchronized in real time
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('adk-vault-updated', {
+          detail: {
+            moduleNumber: normKey,
+            status,
+            isUnlocked: status === 'unlocked',
+          },
+        })
+      );
+    }
+  }, [status, normKey]);
+
   // Keyboard shortcut for Instructor Fast-Track (Ctrl+Alt+U)
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -212,6 +228,7 @@ export default function SolutionVault({
         setQuizPassed(true);
         try {
           localStorage.setItem(storageKey, 'unlocked');
+          sessionStorage.setItem('adk_instructor_mode', 'true');
         } catch (err) {}
       }
     };
@@ -327,7 +344,11 @@ export default function SolutionVault({
   const currentQ = resolvedQuestions[currentQuizIndex] || resolvedQuestions[0];
 
   return (
-    <div className={styles.vaultContainer}>
+    <div
+      className={styles.vaultContainer}
+      data-solution-vault-id={normKey}
+      data-solution-vault-status={status}
+    >
       {/* Header Banner */}
       <div className={styles.header}>
         <div className={styles.headerTitle}>

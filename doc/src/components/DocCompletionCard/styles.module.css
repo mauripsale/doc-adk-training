@@ -82,6 +82,34 @@
   font-family: var(--adk-mono);
 }
 
+.instructorBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+[data-theme='dark'] .instructorBadge {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.buttonWrapper {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
 .actionButton {
   display: inline-flex;
   align-items: center;
@@ -117,6 +145,108 @@
   background: #2d9248;
   border-color: #2d9248;
   box-shadow: 0 4px 12px rgba(52, 168, 83, 0.35);
+}
+
+.actionButtonLocked {
+  background: var(--ifm-color-emphasis-100);
+  border-color: var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-700) !important;
+  cursor: pointer;
+  box-shadow: none;
+  opacity: 0.9;
+}
+
+[data-theme='dark'] .actionButtonLocked {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #94a3b8 !important;
+}
+
+.actionButtonLocked:hover {
+  background: var(--ifm-color-emphasis-200);
+  border-color: var(--ifm-color-emphasis-400);
+  transform: translateY(-1px);
+}
+
+[data-theme='dark'] .actionButtonLocked:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.shakeAnimation {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+.gateTooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: #1e293b;
+  color: #f8fafc;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+  pointer-events: none;
+  animation: fadeIn 0.2s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='dark'] .gateTooltip {
+  background: #0f172a;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.gateHelperBanner {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px dashed rgba(245, 158, 11, 0.35);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.825rem;
+  color: var(--ifm-font-color-base);
+}
+
+[data-theme='dark'] .gateHelperBanner {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #cbd5e1;
+}
+
+.gateHelperIcon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+.gateHelperText {
+  line-height: 1.4;
+}
+
+.gateHelperText strong {
+  color: #d97706;
+}
+
+[data-theme='dark'] .gateHelperText strong {
+  color: #fbbf24;
 }
 
 .cardFooter {
@@ -186,6 +316,10 @@
   .cardHeader, .cardFooter {
     flex-direction: column;
     align-items: flex-start;
+  }
+  .buttonWrapper {
+    width: 100%;
+    align-items: stretch;
   }
   .actionButton {
     width: 100%;

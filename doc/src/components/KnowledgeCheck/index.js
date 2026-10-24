@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 import styles from './styles.module.css';
 
@@ -22,37 +22,6 @@ export default function KnowledgeCheck({
 
   const quizId = id || (typeof question === 'string' ? question.slice(0, 32).replace(/\s+/g, '_') : 'quiz');
 
-  // Load persistence from localStorage
-  useEffect(() => {
-    if (!ExecutionEnvironment.canUseDOM) return;
-    try {
-      const stored = localStorage.getItem(STORAGE_QUIZ_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && parsed[quizId]) {
-          const entry = parsed[quizId];
-          setSelectedOption(entry.selectedOption);
-          setIsEvaluated(entry.isEvaluated);
-          setIsRevealed(entry.isRevealed || false);
-        }
-      }
-    } catch (_) {}
-    setIsLoaded(true);
-  }, [quizId]);
-
-  const saveState = (newState) => {
-    if (!ExecutionEnvironment.canUseDOM) return;
-    try {
-      const stored = localStorage.getItem(STORAGE_QUIZ_KEY);
-      const data = stored ? JSON.parse(stored) : {};
-      data[quizId] = {
-        ...newState,
-        updatedAt: Date.now(),
-      };
-      localStorage.setItem(STORAGE_QUIZ_KEY, JSON.stringify(data));
-    } catch (_) {}
-  };
-
   // Format options
   const normalizedOptions = options.map((opt, idx) => {
     if (typeof opt === 'string') {
@@ -70,6 +39,83 @@ export default function KnowledgeCheck({
 
   const isCurrentSelectionCorrect =
     selectedOption !== null && normalizedOptions[selectedOption]?.isCorrect;
+  const isSolved = isEvaluated && isCurrentSelectionCorrect;
+
+  const notifyUpdate = useCallback((solved) => {
+    if (!ExecutionEnvironment.canUseDOM) return;
+    window.dispatchEvent(
+      new CustomEvent('adk-quiz-updated', {
+        detail: {
+          quizId,
+          isSolved: solved,
+          isEvaluated,
+          isCorrect: solved,
+        },
+      })
+    );
+  }, [quizId, isEvaluated]);
+
+  // Load persistence from localStorage
+  useEffect(() => {
+    if (!ExecutionEnvironment.canUseDOM) return;
+    let loadedSolved = false;
+    try {
+      const stored = localStorage.getItem(STORAGE_QUIZ_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed[quizId]) {
+          const entry = parsed[quizId];
+          setSelectedOption(entry.selectedOption);
+          setIsEvaluated(entry.isEvaluated);
+          setIsRevealed(entry.isRevealed || false);
+          loadedSolved = Boolean(entry.isEvaluated && entry.isCorrect);
+        }
+      }
+    } catch (_) {}
+    setIsLoaded(true);
+
+    // Initial event dispatch so parent/page knows about this quiz
+    notifyUpdate(loadedSolved);
+
+    const handleStorage = (e) => {
+      if (e.key === STORAGE_QUIZ_KEY) {
+        try {
+          if (!e.newValue) {
+            setSelectedOption(null);
+            setIsEvaluated(false);
+            setIsRevealed(false);
+            notifyUpdate(false);
+            return;
+          }
+          const parsed = JSON.parse(e.newValue);
+          if (parsed && parsed[quizId]) {
+            const entry = parsed[quizId];
+            setSelectedOption(entry.selectedOption);
+            setIsEvaluated(entry.isEvaluated);
+            setIsRevealed(entry.isRevealed || false);
+            notifyUpdate(Boolean(entry.isEvaluated && entry.isCorrect));
+          }
+        } catch (_) {}
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [quizId, notifyUpdate]);
+
+  const saveState = (newState) => {
+    if (!ExecutionEnvironment.canUseDOM) return;
+    try {
+      const stored = localStorage.getItem(STORAGE_QUIZ_KEY);
+      const data = stored ? JSON.parse(stored) : {};
+      data[quizId] = {
+        ...newState,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem(STORAGE_QUIZ_KEY, JSON.stringify(data));
+      notifyUpdate(Boolean(newState.isCorrect));
+    } catch (_) {}
+  };
 
   const handleSelectOption = (index) => {
     if (isEvaluated && isCurrentSelectionCorrect) return; // Locked once correctly solved
@@ -80,7 +126,7 @@ export default function KnowledgeCheck({
   const handleCheckAnswer = () => {
     if (selectedOption === null) return;
     setIsEvaluated(true);
-    const correct = normalizedOptions[selectedOption]?.isCorrect;
+    const correct = Boolean(normalizedOptions[selectedOption]?.isCorrect);
     if (!correct && hint) {
       setShowHint(true);
     }
@@ -107,14 +153,18 @@ export default function KnowledgeCheck({
     setIsRevealed(nextRevealed);
     saveState({
       isRevealed: nextRevealed,
+      isCorrect: true, // Reflections are considered satisfied upon review
     });
   };
 
-  const isSolved = isEvaluated && isCurrentSelectionCorrect;
-
   if (type === 'reveal') {
     return (
-      <div className={`${styles.container} ${isRevealed ? styles.containerCorrect : ''}`}>
+      <div
+        className={`${styles.container} ${isRevealed ? styles.containerCorrect : ''}`}
+        data-knowledge-check-id={quizId}
+        data-knowledge-check-type="reveal"
+        data-knowledge-check-solved={isRevealed ? 'true' : 'false'}
+      >
         <div className={styles.header}>
           <span className={`${styles.badge} ${isRevealed ? styles.badgeCorrect : ''}`}>
             💡 Concept Check & Reflection
@@ -157,6 +207,9 @@ export default function KnowledgeCheck({
       className={`${styles.container} ${
         isSolved ? styles.containerCorrect : ''
       }`}
+      data-knowledge-check-id={quizId}
+      data-knowledge-check-type="multiple-choice"
+      data-knowledge-check-solved={isSolved ? 'true' : 'false'}
     >
       <div className={styles.header}>
         <span
@@ -229,13 +282,13 @@ export default function KnowledgeCheck({
           {isSolved && (
             <span
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                color: '#34a853',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-              }}
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              color: '#34a853',
+              fontWeight: 700,
+              fontSize: '0.9rem',
+            }}
             >
               <span>🎉</span> Correct! Excellent comprehension.
             </span>

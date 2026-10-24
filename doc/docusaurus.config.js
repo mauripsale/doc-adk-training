@@ -49,6 +49,10 @@ const config = {
           label: 'Modules',
         },
         {
+          type: 'custom-navbarProgress',
+          position: 'right',
+        },
+        {
           type: 'search',
           position: 'right',
         },

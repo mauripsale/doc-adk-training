@@ -1,0 +1,197 @@
+.completionCard {
+  margin: 2.5rem 0 1.5rem 0;
+  padding: 1.5rem 1.75rem;
+  border-radius: 12px;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease-in-out;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme='dark'] .completionCard {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+}
+
+.completionCardCompleted {
+  border-color: #34a853;
+  background: linear-gradient(135deg, rgba(52, 168, 83, 0.05) 0%, rgba(66, 133, 244, 0.04) 100%);
+}
+
+[data-theme='dark'] .completionCardCompleted {
+  border-color: rgba(52, 168, 83, 0.4);
+  background: linear-gradient(135deg, rgba(52, 168, 83, 0.12) 0%, rgba(66, 133, 244, 0.08) 100%);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.iconBadge {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background: rgba(26, 115, 232, 0.1);
+  color: var(--adk-blue);
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.completionCardCompleted .iconBadge {
+  background: rgba(52, 168, 83, 0.15);
+  color: #34a853;
+  transform: scale(1.05);
+}
+
+.cardTitles {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ifm-font-color-base);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cardSubtitle {
+  font-size: 0.825rem;
+  color: var(--ifm-color-emphasis-600);
+  margin: 0.15rem 0 0 0;
+  font-family: var(--adk-mono);
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--adk-blue);
+  background: var(--adk-blue);
+  color: #ffffff !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(26, 115, 232, 0.25);
+  user-select: none;
+}
+
+.actionButton:hover {
+  background: var(--adk-blue-hover);
+  border-color: var(--adk-blue-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35);
+}
+
+.actionButtonCompleted {
+  background: #34a853;
+  border-color: #34a853;
+  box-shadow: 0 2px 6px rgba(52, 168, 83, 0.25);
+}
+
+.actionButtonCompleted:hover {
+  background: #2d9248;
+  border-color: #2d9248;
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.35);
+}
+
+.cardFooter {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ifm-toc-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.overallProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.825rem;
+  color: var(--ifm-color-emphasis-700);
+}
+
+.progressBarContainer {
+  width: 120px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--ifm-color-emphasis-200);
+  overflow: hidden;
+  position: relative;
+}
+
+[data-theme='dark'] .progressBarContainer {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.progressBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #1a73e8, #34a853);
+  transition: width 0.4s ease;
+}
+
+.nextStepLink {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--adk-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.nextStepLink:hover {
+  color: var(--adk-blue-hover);
+  text-decoration: underline;
+  transform: translateX(2px);
+}
+
+[data-theme='dark'] .nextStepLink {
+  color: var(--ifm-color-primary);
+}
+
+@media (max-width: 640px) {
+  .completionCard {
+    padding: 1.25rem 1rem;
+  }
+  .cardHeader, .cardFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actionButton {
+    width: 100%;
+    justify-content: center;
+  }
+  .progressBarContainer {
+    width: 100px;
+  }
+}

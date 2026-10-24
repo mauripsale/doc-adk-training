@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from '@docusaurus/Link';
+import { useLocation } from '@docusaurus/router';
 import { useStudentProgress } from '@site/src/context/ProgressContext';
 import styles from './styles.module.css';
 
@@ -8,6 +9,12 @@ export default function NavbarProgress() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
   const fileInputRef = useRef(null);
+  const location = useLocation();
+
+  // Auto-close dropdown when route changes
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location.pathname]);
 
   // Close dropdown on outside click or escape
   useEffect(() => {

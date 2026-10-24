@@ -88,10 +88,14 @@ export function ProgressProvider({ children }) {
     setIsLoaded(true);
 
     const handleStorageChange = (e) => {
-      if (e.key === STORAGE_KEY && e.newValue) {
+      if (e.key === STORAGE_KEY) {
+        if (!e.newValue) {
+          setCompletedDocs({});
+          return;
+        }
         try {
           const parsed = JSON.parse(e.newValue);
-          if (parsed && parsed.completedDocs) {
+          if (parsed && typeof parsed.completedDocs === 'object') {
             setCompletedDocs(parsed.completedDocs);
           }
         } catch (_) {}

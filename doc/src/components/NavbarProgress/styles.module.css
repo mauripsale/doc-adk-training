@@ -43,6 +43,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 38px;
   padding: 0.1rem 0.45rem;
   border-radius: 9999px;
   background: var(--adk-blue);
@@ -50,6 +51,7 @@
   font-size: 0.75rem;
   font-family: var(--adk-mono);
   font-weight: 700;
+  text-align: center;
 }
 
 [data-theme='dark'] .miniPill {
@@ -292,4 +294,18 @@
   border-color: #ea4335;
   color: #ea4335;
   background: rgba(234, 67, 53, 0.08);
+}
+
+@media (max-width: 996px) {
+  .progressDropdown {
+    position: fixed;
+    top: 64px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 92vw;
+    max-width: 400px;
+    max-height: 85vh;
+    z-index: 1000;
+  }
 }

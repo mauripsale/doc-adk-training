@@ -55,6 +55,20 @@ The ADK provides a rich and flexible ecosystem for tools, which can be categoriz
 
 In the following modules, you will get hands-on experience with these different types of tools, starting with the powerful and easy-to-use `google_search` tool.
 
+<KnowledgeCheck
+  id="m08-function-calling-lifecycle"
+  question="During the ADK Function Calling lifecycle, what is the role of the LLM vs the ADK Framework?"
+  options={[
+    "The LLM executes Python functions directly inside its neural network weights",
+    "The LLM generates structured invocation intent and arguments; the ADK framework executes the real Python code and feeds observations back to the LLM",
+    "The ADK framework replaces the LLM's reasoning engine entirely",
+    "The LLM only compiles tools into WebAssembly"
+  ]}
+  correctIndex={1}
+  hint="Remember that the LLM is a reasoning engine ('the brain') that outputs structured function calls, while the runtime ('the hands') runs the actual code."
+  explanation="In ADK 2.0 Function Calling, the LLM analyzes tool schemas and outputs structured arguments. The ADK execution environment runs the actual Python function securely and returns the result (observation) back into the prompt context for the LLM's final response."
+/>
+
 ### Key Takeaways
 - Tools give agents the ability to interact with the outside world, overcoming the limitations of the LLM's static knowledge.
 - The process of an agent deciding to use a tool is called Function Calling.

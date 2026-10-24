@@ -67,6 +67,20 @@ While these commands feel like magic, they are powered by the **App** and **Runn
 *   `uv run adk web` and `uv run adk run` instantiate an **InMemoryRunner** for fast, local development.
 *   `uv run adk api_server` provides a production-style environment where sessions and state are managed by the framework (and can be backed by Firestore, as you will see in Module 13.5).
 
+<KnowledgeCheck
+  id="m05-cli-execution-modes"
+  question="Which ADK CLI command is primarily designed for running an agent as a containerized microservice exposing streaming HTTP REST/SSE endpoints?"
+  options={[
+    "uv run adk web",
+    "uv run adk create",
+    "uv run adk api_server",
+    "uv run adk test"
+  ]}
+  correctIndex={2}
+  hint="Think about production deployments on Cloud Run or GKE that expose `/run_sse`."
+  explanation="`uv run adk api_server` spins up a production-ready HTTP server exposing endpoints like `/run_sse` for Server-Sent Events streaming, making it ideal for containerization and Cloud Run/GKE deployment."
+/>
+
 ### Key Takeaways
 - `uv run adk web`: The primary tool for interactive development and debugging, featuring a chat UI and a detailed Trace View.
 - `uv run adk run`: A headless, command-line interface for quick tests and automated scripting.

@@ -86,6 +86,20 @@ Use `LiteLlm` if you need to:
 1.  Run **local models** (via Ollama) during development to save costs.
 2.  Switch between different cloud providers (OpenAI, Anthropic) without changing your code structure.
 
+<KnowledgeCheck
+  id="m04_5-retry-jitter"
+  question="Why is `jitter` (e.g. `jitter=0.5`) added to `HttpRetryOptions` when configuring resilient enterprise agents?"
+  options={[
+    "It compresses prompts before sending them across the wire",
+    "It introduces randomized delay variations to prevent thundering-herd API hammering during outages",
+    "It converts synchronous function calls into multithreaded workers",
+    "It forces all model outputs to be formatted as markdown tables"
+  ]}
+  correctIndex={1}
+  hint="Think about what happens if 1,000 concurrent agents all retry at the exact same exponential interval after a brief network hiccup."
+  explanation="In enterprise distributed systems, Jitter injects randomness into retry delays so that multiple concurrent agent instances don't retry simultaneously ('thundering herd problem') and overwhelm rate-limited endpoints."
+/>
+
 ### Key Takeaways
 - **Resiliency is mandatory:** Never deploy an agent without a retry policy.
 - **The `Gemini` class** is the key to configuring retries, locations, and custom project settings.

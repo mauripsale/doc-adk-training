@@ -141,6 +141,20 @@ Your user or service account does not have the "Agent Platform User" role.
 This happens if you are not running the command inside the virtual environment.
 **The Fix:** Always prefix your commands with `uv run` (e.g., `uv run adk web .`).
 
+<KnowledgeCheck
+  id="m02-auth-routing"
+  question="When configuring an enterprise ADK 2.0 agent with Google Cloud Application Default Credentials (ADC), which environment variable routes calls to Vertex AI instead of Google AI Studio?"
+  options={[
+    "USE_GEMINI_ENTERPRISE='true'",
+    "GOOGLE_GENAI_USE_VERTEXAI='1'",
+    "DISABLE_STUDIO_API_KEY='1'",
+    "VERTEX_FORCE_OAUTH='true'"
+  ]}
+  correctIndex={1}
+  hint="Remember how ADK switches from lightweight API keys to Google Cloud ADC / IAM authentication."
+  explanation="Setting GOOGLE_GENAI_USE_VERTEXAI='1' signals the underlying Google GenAI SDK and ADK runtime to use Vertex AI / Agent Platform authentication and Application Default Credentials (ADC) rather than standalone AI Studio API keys."
+/>
+
 ### Key Takeaways
 - **Python 3.10+** and **google.adk >= 2.1.0** are strictly required.
 - **`uv`** is the recommended tool for managing Python projects and environments.

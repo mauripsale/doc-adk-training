@@ -76,6 +76,20 @@ When you use the CLI command `uv run adk web`, the ADK automatically creates an 
 ![Agent Architecture: Blueprint to Runtime Execution (Dark)](img/blueprint-runner-dark.webp#gh-dark-mode-only)
 *Figure 3.1: The 3-layer ADK architecture hierarchy — comparing Declarative YAML vs. Programmatic Python blueprint definitions, encapsulated in the App container and executed by the InMemoryRunner.*
 
+<KnowledgeCheck
+  id="m03-blueprint-runtime"
+  question="In the ADK 2.0 architecture, what is the specific role of the `Runner` (such as `InMemoryRunner`)?"
+  options={[
+    "It only compiles Python scripts into C++ binaries before execution",
+    "It acts as the execution engine that manages session state, LLM communications, and event iteration for an App",
+    "It replaces the need for Gemini foundational models",
+    "It is strictly a command-line parser for YAML configuration files"
+  ]}
+  correctIndex={1}
+  hint="Recall the 3-layer hierarchy: Agent blueprint -> App container -> Runner execution engine."
+  explanation="In ADK 2.0, while the `Agent` and `App` define the blueprint and application container, the `Runner` is the active engine that manages session memory, dispatches calls to LLMs, and yields real-time event streams."
+/>
+
 ### Scaffolding Your Project with `uv run adk create`
 ...
 The ADK command-line tool helps you quickly set up the necessary file structure for a new agent.

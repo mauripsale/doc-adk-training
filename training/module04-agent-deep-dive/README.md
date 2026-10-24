@@ -138,6 +138,20 @@ agent = Agent(
 ```
 This is essential for building multi-agent systems where one agent's output is needed as another agent's input.
 
+<KnowledgeCheck
+  id="m04-output-schema-state"
+  question="In ADK 2.0, how does `output_schema` behave when an agent also has tools configured?"
+  options={[
+    "Setting output_schema disables all function tools immediately",
+    "The agent can still execute tools during its reasoning loop; schema enforcement applies strictly to the final response",
+    "Tools must return Pydantic models with the exact same schema as output_schema",
+    "output_schema only works if the agent has no model defined"
+  ]}
+  correctIndex={1}
+  hint="Consider the agent thought loop: reasoning and tool usage happen first, before formatting the final deliverable."
+  explanation="In ADK 2.0, `output_schema` and `tools` work seamlessly together: the agent can freely invoke tools during intermediate reasoning steps, and the Pydantic schema is enforced only on the final output generated for the user."
+/>
+
 ### Key Takeaways
 - The **`Agent`** class is the "brain" of an ADK 2.0 application.
 - The `instruction` parameter is the most powerful tool for controlling behavior.

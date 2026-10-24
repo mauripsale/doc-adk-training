@@ -1,0 +1,295 @@
+.navProgressWrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.5rem;
+}
+
+.navBadgeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  background: rgba(26, 115, 232, 0.08);
+  border: 1px solid rgba(26, 115, 232, 0.2);
+  color: var(--adk-blue);
+  font-size: 0.825rem;
+  font-weight: 600;
+  font-family: var(--adk-sans);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+[data-theme='dark'] .navBadgeButton {
+  background: rgba(138, 180, 248, 0.12);
+  border-color: rgba(138, 180, 248, 0.25);
+  color: var(--ifm-color-primary);
+}
+
+.navBadgeButton:hover {
+  background: rgba(26, 115, 232, 0.15);
+  border-color: var(--adk-blue);
+  transform: translateY(-1px);
+}
+
+[data-theme='dark'] .navBadgeButton:hover {
+  background: rgba(138, 180, 248, 0.2);
+  border-color: var(--ifm-color-primary);
+}
+
+.miniPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  background: var(--adk-blue);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-family: var(--adk-mono);
+  font-weight: 700;
+}
+
+[data-theme='dark'] .miniPill {
+  background: var(--ifm-color-primary);
+  color: #0b0f19;
+}
+
+/* Floating Dropdown / Drawer */
+.dropdownOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+
+.progressDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 380px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  padding: 1.25rem;
+  animation: fadeInDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme='dark'] .progressDropdown {
+  background: #111827;
+  border-color: #1f293d;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+.dropdownTitle {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ifm-font-color-base);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--ifm-color-emphasis-500);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.closeButton:hover {
+  color: var(--ifm-font-color-base);
+  background: var(--ifm-color-emphasis-100);
+}
+
+/* Overall Progress Card */
+.overallCard {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.overallCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.overallPercent {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--adk-blue);
+  font-family: var(--adk-mono);
+}
+
+[data-theme='dark'] .overallPercent {
+  color: var(--ifm-color-primary);
+}
+
+.overallCounts {
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-600);
+  font-family: var(--adk-mono);
+}
+
+.resumeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.75rem;
+  border-radius: 8px;
+  background: var(--adk-gradient);
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none !important;
+  text-align: center;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.resumeButton:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+/* Part List */
+.partsSectionTitle {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--ifm-color-emphasis-500);
+  margin: 0 0 0.5rem 0;
+}
+
+.partList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.partRow {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.partRowTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+  font-weight: 600;
+}
+
+.partPercentText {
+  font-size: 0.75rem;
+  font-family: var(--adk-mono);
+  color: var(--ifm-color-emphasis-600);
+}
+
+.partBarContainer {
+  width: 100%;
+  height: 5px;
+  border-radius: 9999px;
+  background: var(--ifm-color-emphasis-200);
+  overflow: hidden;
+}
+
+[data-theme='dark'] .partBarContainer {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.partBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: var(--adk-blue);
+  transition: width 0.3s ease;
+}
+
+[data-theme='dark'] .partBarFill {
+  background: var(--ifm-color-primary);
+}
+
+.partCompleted .partBarFill {
+  background: #34a853;
+}
+
+/* Dropdown Footer Actions */
+.dropdownFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--ifm-toc-border-color);
+  font-size: 0.75rem;
+  gap: 0.5rem;
+}
+
+.footerBtn {
+  background: transparent;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-700);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.footerBtn:hover {
+  background: var(--ifm-color-emphasis-100);
+  color: var(--ifm-font-color-base);
+}
+
+.resetBtn:hover {
+  border-color: #ea4335;
+  color: #ea4335;
+  background: rgba(234, 67, 53, 0.08);
+}

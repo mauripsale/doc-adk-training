@@ -61,3 +61,19 @@ In this course, you will learn to think in **Graphs and Nodes**, mastering ADK 2
 - AI Agents are autonomous systems that perceive, reason, and act using tools.
 - **ADK 2.0** uses a **Graph Architecture** where Agents and Tools are **Nodes** connected by **Edges**.
 - The **Workflow Runtime** is the engine that orchestrates complex multi-agent interactions on the **Gemini Enterprise Agent Platform**.
+
+### 🧠 Knowledge Check
+
+<KnowledgeCheck
+  id="m01-graph-architecture"
+  question="In ADK 2.0 Graph Architecture, what constitutes the fundamental unit of work (Node)?"
+  options={[
+    "Only an LLM prompt template",
+    "A discrete unit of work such as an Agent, a Function Tool, or a nested Workflow",
+    "Only a cloud storage database connection",
+    "A raw HTTP socket listener"
+  ]}
+  correctIndex={1}
+  hint="Think about what can be connected together using Edges in an ADK Workflow graph."
+  explanation="In ADK 2.0, Nodes are modular building blocks that can represent an Agent (powered by Gemini), a FunctionTool (pure Python code), or even an entire nested Workflow orchestrated by Edges."
+/>

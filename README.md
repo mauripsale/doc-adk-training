@@ -15,41 +15,29 @@ This course was created and is maintained by [**Maurizio Ipsale**](https://www.l
 
 ## 🚧 Project Status 🚧
 
-**Current Version:** `v1.0.3`
+**Current Version:** `v2.0.0` 🎉
 
-This training course is complete and production-ready, covering the full ADK 2.0 curriculum across 40 modules — from your first agent to distributed, enterprise-grade multi-agent systems with full AgentOps observability.
+This repository is now a **fully interactive, gamified Learning Management Platform & Training Course** for the Google Agent Development Kit (ADK), covering the complete ADK 2.0 curriculum across 45 modules — from your first agent to distributed, enterprise-grade multi-agent systems with full AgentOps observability.
 
 We continue to refine and expand the material as the ADK evolves. Your feedback and contributions are highly encouraged! If you find an issue or have a suggestion, please [open an issue on GitHub](https://github.com/mauripsale/doc-adk-training/issues).
 
-**What's new in `v1.0.3`:** ADK 2.4-2.6 coverage completed, plus a full empirical re-validation pass (every change below was actually run, not just reasoned about) that surfaced several pre-existing bugs unrelated to prior updates —
+### 🚀 What's New in `v2.0.0` (Major Platform Release):
+*   🧠 **Interactive In-Doc Knowledge Checks (`KnowledgeCheck`):** Embedded concept quizzes with Socratic feedback, misconception breakdowns, guided hints, dynamic option shuffling (Fisher-Yates), and reflection cooldowns to prevent brute-forcing.
+*   🏆 **Student Progress Tracker & Gated Completion:** Real-time completion tracking with interactive checklist drawer in the navbar, multi-tab sync, and atomic progress reset engine.
+*   📜 **Official Student Completion Certificate:** In-app verification modal and instant vector/canvas PDF export with custom learner name, date, verification ID, and credential checklist.
+*   🔒 **Interactive Solution Vault (`SolutionVault`):** Collapsible encrypted solution reveals with fast completion prompt, instant instructor mode (`Ctrl+Alt+U` / `?instructor=1`), and WCAG AAA high-contrast light mode styling.
+*   🔍 **Instant Offline Local Search:** Integrated full-text offline search bar across all 45 modules powered by `@easyops-cn/docusaurus-search-local`.
+*   🤖 **Automated Student Grader (`adk-student-evaluator`):** Zero-cost empirical verification framework that simulates student lab executions and audits code syntax against real ADK runtimes.
+*   ⚡ **Zero-Setup Cloud Onboarding:** 1-click cloud launch buttons for **GitHub Codespaces**, **Google Cloud Shell**, and **VS Code DevContainers** with pre-configured Python 3.11, `uv`, and GCP tooling.
+*   ⚡ **Full ADK 2.0 API Alignment:** Comprehensive coverage of Human-in-the-Loop (HITL), Context Caching & Compaction, Session Rewind, Callbacks, and Custom Plugins with zero inline code spoilers in student lab challenges.
 
-*Coverage:*
-*   **Module 18:** a "Going Further" section on using a `@node` directly as an `Agent` tool, paired with `RequestInput`/`ResumabilityConfig` for human-in-the-loop pause-and-resume.
-*   **Module 26:** noted `BasePlugin`'s notification-only `on_agent_error_callback`/`on_run_error_callback`, and added an explicit run/test step.
-*   **Module 28:** noted `to_mcp_server` as the agent-level counterpart to Module 27's tool-level MCP server.
-*   **Module 39.5:** pointed to `GkeCodeExecutor`/`AgentEngineSandboxCodeExecutor` as production-safe alternatives to `UnsafeLocalCodeExecutor`.
+---
 
-*Bugs found and fixed via empirical re-validation (student simulations that actually run the code):*
-*   **Module 9 & 12:** fixed `adk run agent.py` (needs a directory, not a file) in both modules.
-*   **Module 21:** fixed a nonexistent tool (`GoogleSearchAgentTool` → `google_search`), a missing dependency, and a wrong agent-card URL that silently blocked the entire A2A lab.
-*   **Module 24:** fixed `adk eval`'s missing `__init__.py`/`PYTHONPATH` requirement and corrected both bonus sections' JSON formats and CLI commands.
-*   **Module 27:** fixed a missing `mcp` install (the extra is required, not optional).
-*   **Module 28:** fixed a CWD-dependent path and a directory-naming mismatch that broke the lab when run as documented.
-*   **Module 33:** fixed a broken YAML indentation that caused `kubectl` to silently discard the Deployment's `spec`.
-*   Removed a handful of stale `adk create` CLI prompts referenced across several modules.
-
-**What's new in `v1.0.2`:** a second pass, this time against ADK 2.6.0 —
-*   **Module 12:** noted `ManagedAgent`'s new `instruction` parameter.
-*   **Module 24:** added hands-on "Custom Metric" and "Dynamic User Simulation" bonus sections, closing a gap where the theory mentioned both but the lab never demonstrated them.
-*   **Module 26:** introduced `ReflectAndRetryModelPlugin` and `ReflectAndRetryToolPlugin` as concrete, production-ready examples of the plugin pattern.
-
-**What's new in `v1.0.1`:** a pass against the latest official ADK documentation, keeping the course current as the framework evolves —
-*   **Module 12:** a "Looking Ahead" note on the new (Preview) `ManagedAgent`.
-*   **Module 21:** fixed the A2A lab to opt into ADK's reliability-fixed executor (`use_legacy=False`), avoiding known streaming-mode message-duplication bugs.
-*   **Module 27:** a new bonus section connecting to a *remote* MCP server (`StreamableHTTPConnectionParams`) via the public GitHub MCP server, in addition to the existing local/Stdio example.
-*   **Module 28:** aligned MCP naming (`McpToolset`) with the current official SDK.
-*   **Module 33:** a bonus callout showing the automated `adk deploy gke` shortcut alongside the manual walkthrough.
-*   **Module 39.5:** noted the Skills feature's experimental status and added a "Going Further" section on the (Preview) Skill Registry.
+### Previous Releases:
+*   **`v1.0.3`:** ADK 2.4-2.6 coverage, full empirical re-validation pass, module bug fixes (M9, M12, M21, M24, M27, M28, M33).
+*   **`v1.0.2`:** ADK 2.6.0 updates (`ManagedAgent`, custom eval metrics, retry plugins).
+*   **`v1.0.1`:** Initial documentation alignment pass against modern ADK standards.
+*   **`v1.0.0`:** First complete 40-module training curriculum release.
 
 ## ⏱️ Time Estimation
 

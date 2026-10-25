@@ -1,7 +1,7 @@
 {
   "name": "doc-adk-training-site",
   "private": true,
-  "version": "0.0.1",
+  "version": "2.0.0",
   "scripts": {
     "start": "docusaurus start",
     "build": "docusaurus build",

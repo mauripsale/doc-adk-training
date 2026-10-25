@@ -286,11 +286,26 @@ export default function SolutionVault({
       checkInstructorAndSaved();
     };
 
+    const handleProgressReset = () => {
+      setStatus('quiz');
+      setQuizPassed(false);
+      setQuizAnswered(false);
+      setSelectedOptionId(null);
+      setCurrentQuizIndex(0);
+      setInputToken('');
+      setTokenError('');
+      setFailedAttempts(0);
+      setCooldownRemaining(0);
+      setSecondsLeft(cooldownSeconds);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('adk-instructor-updated', handleInstructorEvent);
+    window.addEventListener('adk-progress-reset', handleProgressReset);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('adk-instructor-updated', handleInstructorEvent);
+      window.removeEventListener('adk-progress-reset', handleProgressReset);
     };
   }, [storageKey, checkInstructorAndSaved]);
 

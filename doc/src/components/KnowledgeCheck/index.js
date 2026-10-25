@@ -83,7 +83,7 @@ export default function KnowledgeCheck({
     );
   }, [quizId, isEvaluated]);
 
-  // Load persistence from localStorage
+  // Load persistence from localStorage and listen to reset events
   useEffect(() => {
     if (!ExecutionEnvironment.canUseDOM) return;
     let loadedSolved = false;
@@ -109,16 +109,23 @@ export default function KnowledgeCheck({
 
     notifyUpdate(loadedSolved);
 
+    const handleResetAction = () => {
+      setSelectedOptionId(null);
+      setIsEvaluated(false);
+      setIsRevealed(false);
+      setFailedAttempts(0);
+      setCooldownRemaining(0);
+      setDisplayOptions(baseOptions);
+      notifyUpdate(false);
+    };
+
     const handleStorage = (e) => {
       if (e.key === STORAGE_QUIZ_KEY) {
+        if (!e.newValue) {
+          handleResetAction();
+          return;
+        }
         try {
-          if (!e.newValue) {
-            setSelectedOptionId(null);
-            setIsEvaluated(false);
-            setIsRevealed(false);
-            notifyUpdate(false);
-            return;
-          }
           const parsed = JSON.parse(e.newValue);
           if (parsed && parsed[quizId]) {
             const entry = parsed[quizId];
@@ -128,13 +135,27 @@ export default function KnowledgeCheck({
             setIsEvaluated(Boolean(entry.isEvaluated));
             setIsRevealed(Boolean(entry.isRevealed));
             notifyUpdate(Boolean(entry.isEvaluated && entry.isCorrect));
+          } else {
+            handleResetAction();
           }
         } catch (_) {}
       }
     };
 
+    const handleQuizEvent = (e) => {
+      if (e.detail?.isReset) {
+        handleResetAction();
+      }
+    };
+
     window.addEventListener('storage', handleStorage);
-    return () => window.removeEventListener('storage', handleStorage);
+    window.addEventListener('adk-progress-reset', handleResetAction);
+    window.addEventListener('adk-quiz-updated', handleQuizEvent);
+    return () => {
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('adk-progress-reset', handleResetAction);
+      window.removeEventListener('adk-quiz-updated', handleQuizEvent);
+    };
   }, [quizId, baseOptions, notifyUpdate]);
 
   // Cooldown countdown timer
@@ -182,8 +203,6 @@ export default function KnowledgeCheck({
     } else {
       const nextFailures = failedAttempts + 1;
       setFailedAttempts(nextFailures);
-      // Progressive reflection cooldown on consecutive failures:
-      // 1st fail: 0s, 2nd fail: 3s, 3rd+ fail: 5s
       const cooldownSecs = nextFailures === 1 ? 0 : nextFailures === 2 ? 3 : 5;
       if (cooldownSecs > 0) {
         setCooldownRemaining(cooldownSecs);

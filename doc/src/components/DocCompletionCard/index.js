@@ -195,6 +195,7 @@ export default function DocCompletionCard() {
     window.addEventListener('adk-quiz-updated', handleQuizUpdated);
     window.addEventListener('adk-vault-updated', handleVaultUpdated);
     window.addEventListener('adk-instructor-updated', handleInstructorUpdated);
+    window.addEventListener('adk-progress-reset', evaluateGate);
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('storage', handleStorage);
 
@@ -203,6 +204,7 @@ export default function DocCompletionCard() {
       window.removeEventListener('adk-quiz-updated', handleQuizUpdated);
       window.removeEventListener('adk-vault-updated', handleVaultUpdated);
       window.removeEventListener('adk-instructor-updated', handleInstructorUpdated);
+      window.removeEventListener('adk-progress-reset', evaluateGate);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('storage', handleStorage);
     };

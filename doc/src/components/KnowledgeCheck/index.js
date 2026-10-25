@@ -1,8 +1,18 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 import styles from './styles.module.css';
 
 const STORAGE_QUIZ_KEY = 'adk_quiz_mastery_v1';
+
+// Fisher-Yates array shuffle
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export default function KnowledgeCheck({
   id,
@@ -14,31 +24,49 @@ export default function KnowledgeCheck({
   type = 'multiple-choice',
   children,
 }) {
-  const [selectedOption, setSelectedOption] = useState(null);
+  const quizId = id || (typeof question === 'string' ? question.slice(0, 32).replace(/\s+/g, '_') : 'quiz');
+
+  // Base normalized options with unique stable IDs
+  const baseOptions = useMemo(() => {
+    return options.map((opt, idx) => {
+      if (typeof opt === 'string') {
+        return {
+          id: `opt-${idx}`,
+          originalIndex: idx,
+          text: opt,
+          isCorrect: idx === correctIndex,
+          explanation: null,
+        };
+      }
+      return {
+        id: `opt-${idx}`,
+        originalIndex: idx,
+        text: opt.text || '',
+        isCorrect: opt.isCorrect !== undefined ? opt.isCorrect : idx === correctIndex,
+        explanation: opt.explanation || null,
+      };
+    });
+  }, [options, correctIndex]);
+
+  const [displayOptions, setDisplayOptions] = useState(baseOptions);
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [isEvaluated, setIsEvaluated] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [isRevealed, setIsRevealed] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const quizId = id || (typeof question === 'string' ? question.slice(0, 32).replace(/\s+/g, '_') : 'quiz');
+  // Sync display options when baseOptions changes
+  useEffect(() => {
+    setDisplayOptions(baseOptions);
+  }, [baseOptions]);
 
-  // Format options
-  const normalizedOptions = options.map((opt, idx) => {
-    if (typeof opt === 'string') {
-      return {
-        text: opt,
-        isCorrect: idx === correctIndex,
-      };
-    }
-    return {
-      text: opt.text || '',
-      isCorrect: opt.isCorrect !== undefined ? opt.isCorrect : idx === correctIndex,
-      explanation: opt.explanation,
-    };
-  });
+  const selectedOptionObj = useMemo(() => {
+    return displayOptions.find((opt) => opt.id === selectedOptionId) || null;
+  }, [displayOptions, selectedOptionId]);
 
-  const isCurrentSelectionCorrect =
-    selectedOption !== null && normalizedOptions[selectedOption]?.isCorrect;
+  const isCurrentSelectionCorrect = Boolean(selectedOptionObj?.isCorrect);
   const isSolved = isEvaluated && isCurrentSelectionCorrect;
 
   const notifyUpdate = useCallback((solved) => {
@@ -65,23 +93,27 @@ export default function KnowledgeCheck({
         const parsed = JSON.parse(stored);
         if (parsed && parsed[quizId]) {
           const entry = parsed[quizId];
-          setSelectedOption(entry.selectedOption);
-          setIsEvaluated(entry.isEvaluated);
-          setIsRevealed(entry.isRevealed || false);
+          if (entry.selectedOptionId) {
+            setSelectedOptionId(entry.selectedOptionId);
+          } else if (typeof entry.selectedOption === 'number') {
+            const found = baseOptions[entry.selectedOption];
+            if (found) setSelectedOptionId(found.id);
+          }
+          setIsEvaluated(Boolean(entry.isEvaluated));
+          setIsRevealed(Boolean(entry.isRevealed));
           loadedSolved = Boolean(entry.isEvaluated && entry.isCorrect);
         }
       }
     } catch (_) {}
     setIsLoaded(true);
 
-    // Initial event dispatch so parent/page knows about this quiz
     notifyUpdate(loadedSolved);
 
     const handleStorage = (e) => {
       if (e.key === STORAGE_QUIZ_KEY) {
         try {
           if (!e.newValue) {
-            setSelectedOption(null);
+            setSelectedOptionId(null);
             setIsEvaluated(false);
             setIsRevealed(false);
             notifyUpdate(false);
@@ -90,9 +122,11 @@ export default function KnowledgeCheck({
           const parsed = JSON.parse(e.newValue);
           if (parsed && parsed[quizId]) {
             const entry = parsed[quizId];
-            setSelectedOption(entry.selectedOption);
-            setIsEvaluated(entry.isEvaluated);
-            setIsRevealed(entry.isRevealed || false);
+            if (entry.selectedOptionId) {
+              setSelectedOptionId(entry.selectedOptionId);
+            }
+            setIsEvaluated(Boolean(entry.isEvaluated));
+            setIsRevealed(Boolean(entry.isRevealed));
             notifyUpdate(Boolean(entry.isEvaluated && entry.isCorrect));
           }
         } catch (_) {}
@@ -101,7 +135,18 @@ export default function KnowledgeCheck({
 
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, [quizId, notifyUpdate]);
+  }, [quizId, baseOptions, notifyUpdate]);
+
+  // Cooldown countdown timer
+  useEffect(() => {
+    let timer;
+    if (cooldownRemaining > 0) {
+      timer = setTimeout(() => {
+        setCooldownRemaining((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldownRemaining]);
 
   const saveState = (newState) => {
     if (!ExecutionEnvironment.canUseDOM) return;
@@ -117,32 +162,51 @@ export default function KnowledgeCheck({
     } catch (_) {}
   };
 
-  const handleSelectOption = (index) => {
-    if (isEvaluated && isCurrentSelectionCorrect) return; // Locked once correctly solved
-    setSelectedOption(index);
+  const handleSelectOption = (optId) => {
+    if (isSolved) return; // Locked once correctly solved
+    setSelectedOptionId(optId);
     setIsEvaluated(false);
   };
 
   const handleCheckAnswer = () => {
-    if (selectedOption === null) return;
+    if (!selectedOptionObj) return;
     setIsEvaluated(true);
-    const correct = Boolean(normalizedOptions[selectedOption]?.isCorrect);
-    if (!correct && hint) {
-      setShowHint(true);
+    const correct = Boolean(selectedOptionObj.isCorrect);
+
+    if (correct) {
+      saveState({
+        selectedOptionId: selectedOptionObj.id,
+        isEvaluated: true,
+        isCorrect: true,
+      });
+    } else {
+      const nextFailures = failedAttempts + 1;
+      setFailedAttempts(nextFailures);
+      // Progressive reflection cooldown on consecutive failures:
+      // 1st fail: 0s, 2nd fail: 3s, 3rd+ fail: 5s
+      const cooldownSecs = nextFailures === 1 ? 0 : nextFailures === 2 ? 3 : 5;
+      if (cooldownSecs > 0) {
+        setCooldownRemaining(cooldownSecs);
+      }
+      if (hint) {
+        setShowHint(true);
+      }
+      saveState({
+        selectedOptionId: selectedOptionObj.id,
+        isEvaluated: true,
+        isCorrect: false,
+      });
     }
-    saveState({
-      selectedOption,
-      isEvaluated: true,
-      isCorrect: correct,
-    });
   };
 
   const handleReset = () => {
-    setSelectedOption(null);
+    if (cooldownRemaining > 0) return;
+    // Anti-Cheating: Shuffle options so sequential guessing (A,B,C,D) is disrupted
+    setDisplayOptions(shuffle(baseOptions));
+    setSelectedOptionId(null);
     setIsEvaluated(false);
-    setShowHint(false);
     saveState({
-      selectedOption: null,
+      selectedOptionId: null,
       isEvaluated: false,
       isCorrect: false,
     });
@@ -153,7 +217,7 @@ export default function KnowledgeCheck({
     setIsRevealed(nextRevealed);
     saveState({
       isRevealed: nextRevealed,
-      isCorrect: true, // Reflections are considered satisfied upon review
+      isCorrect: true,
     });
   };
 
@@ -223,7 +287,7 @@ export default function KnowledgeCheck({
           {isSolved
             ? '100% Mastery'
             : isEvaluated
-            ? 'Review Selection'
+            ? 'Socratic Analysis'
             : 'Select Best Answer'}
         </span>
       </div>
@@ -231,32 +295,30 @@ export default function KnowledgeCheck({
       <p className={styles.questionText}>{question}</p>
 
       <div className={styles.optionsList}>
-        {normalizedOptions.map((opt, idx) => {
-          const isSelected = selectedOption === idx;
+        {displayOptions.map((opt, idx) => {
+          const isSelected = selectedOptionId === opt.id;
           let btnClass = styles.optionButton;
 
           if (isSelected) {
             btnClass += ` ${styles.optionSelected}`;
           }
 
-          if (isEvaluated) {
-            if (isSelected) {
-              btnClass += opt.isCorrect
-                ? ` ${styles.optionCorrect}`
-                : ` ${styles.optionIncorrect}`;
-            } else if (opt.isCorrect && !isCurrentSelectionCorrect) {
-              // Highlight the correct answer gently if failed
+          if (isEvaluated && isSelected) {
+            if (opt.isCorrect) {
               btnClass += ` ${styles.optionCorrect}`;
+            } else {
+              // NO SPOILER: only mark the chosen wrong answer in red, never show the correct answer green!
+              btnClass += ` ${styles.optionIncorrect}`;
             }
           }
 
           return (
             <button
-              key={idx}
+              key={opt.id}
               type="button"
               className={btnClass}
-              onClick={() => handleSelectOption(idx)}
-              disabled={isSolved}
+              onClick={() => handleSelectOption(opt.id)}
+              disabled={isSolved || (isEvaluated && !isSolved)}
               aria-label={`Option ${alphabet[idx]}: ${opt.text}`}
             >
               <span className={styles.optionLetter}>{alphabet[idx]}</span>
@@ -268,12 +330,12 @@ export default function KnowledgeCheck({
 
       <div className={styles.footerControls}>
         <div>
-          {!isSolved && (
+          {!isSolved && !isEvaluated && (
             <button
               type="button"
               className={styles.actionBtn}
               onClick={handleCheckAnswer}
-              disabled={selectedOption === null}
+              disabled={!selectedOptionId}
             >
               Check Answer
             </button>
@@ -282,20 +344,20 @@ export default function KnowledgeCheck({
           {isSolved && (
             <span
               style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              color: '#34a853',
-              fontWeight: 700,
-              fontSize: '0.9rem',
-            }}
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                color: '#34a853',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+              }}
             >
-              <span>🎉</span> Correct! Excellent comprehension.
+              <span>🎉</span> Correct! Excellent architectural comprehension.
             </span>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           {hint && !isSolved && (
             <button
               type="button"
@@ -309,16 +371,47 @@ export default function KnowledgeCheck({
           {isEvaluated && !isSolved && (
             <button
               type="button"
-              className={styles.secondaryBtn}
+              className={`${styles.actionBtn} ${styles.retryBtn}`}
               onClick={handleReset}
+              disabled={cooldownRemaining > 0}
             >
-              ↺ Try Again
+              {cooldownRemaining > 0
+                ? `⏳ Reflect (${cooldownRemaining}s)...`
+                : '↺ Try Another Answer (Shuffled)'}
             </button>
           )}
         </div>
       </div>
 
-      {showHint && hint && !isSolved && (
+      {/* Socratic Feedback on Wrong Answer (Zero Spoiler) */}
+      {isEvaluated && !isSolved && (
+        <div className={styles.socraticBox}>
+          <p className={styles.socraticTitle}>
+            <span>🤔</span> Socratic Guidance: Why this choice doesn't work
+          </p>
+          <div className={styles.socraticText}>
+            {selectedOptionObj?.explanation ? (
+              <p>{selectedOptionObj.explanation}</p>
+            ) : (
+              <p>
+                Option <strong>{alphabet[displayOptions.findIndex((o) => o.id === selectedOptionId)]}</strong> is not the intended approach for this ADK pattern.
+              </p>
+            )}
+            {hint && (
+              <div className={styles.socraticHintLine}>
+                <strong>Architectural Cue:</strong> {hint}
+              </div>
+            )}
+            {failedAttempts >= 2 && (
+              <div className={styles.reflectionNote}>
+                💡 <em>Notice:</em> Options have been re-randomized to encourage deliberate reasoning over trial and error.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showHint && hint && !isSolved && !isEvaluated && (
         <div className={styles.hintBox}>
           <strong>Hint:</strong> {hint}
         </div>

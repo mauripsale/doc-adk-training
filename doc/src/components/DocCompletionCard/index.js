@@ -161,7 +161,7 @@ export default function DocCompletionCard() {
     }
   }, [matchedModule, isLab, normKey]);
 
-  // Synchronize on mount, route change, and custom events
+  // Synchronize on mount, route change, keyboard shortcuts, and custom events
   useEffect(() => {
     if (!ExecutionEnvironment.canUseDOM) return;
 
@@ -172,6 +172,16 @@ export default function DocCompletionCard() {
 
     const handleQuizUpdated = () => evaluateGate();
     const handleVaultUpdated = () => evaluateGate();
+    const handleInstructorUpdated = () => evaluateGate();
+
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.altKey && (e.key === 'u' || e.key === 'U')) {
+        sessionStorage.setItem('adk_instructor_mode', 'true');
+        window.dispatchEvent(new CustomEvent('adk-instructor-updated'));
+        evaluateGate();
+      }
+    };
+
     const handleStorage = (e) => {
       if (
         e.key === QUIZ_STORAGE_KEY ||
@@ -184,12 +194,16 @@ export default function DocCompletionCard() {
 
     window.addEventListener('adk-quiz-updated', handleQuizUpdated);
     window.addEventListener('adk-vault-updated', handleVaultUpdated);
+    window.addEventListener('adk-instructor-updated', handleInstructorUpdated);
+    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('storage', handleStorage);
 
     return () => {
       clearTimeout(timer);
       window.removeEventListener('adk-quiz-updated', handleQuizUpdated);
       window.removeEventListener('adk-vault-updated', handleVaultUpdated);
+      window.removeEventListener('adk-instructor-updated', handleInstructorUpdated);
+      window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('storage', handleStorage);
     };
   }, [evaluateGate, pathname]);
@@ -275,7 +289,7 @@ export default function DocCompletionCard() {
                 </span>
               </h4>
               {gateStatus.isInstructor && (
-                <span className={styles.instructorBadge}>🎓 Instructor Mode</span>
+                <span className={styles.instructorBadge}>🎓 Instructor Mode Active</span>
               )}
             </div>
             <p className={styles.cardSubtitle}>

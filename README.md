@@ -25,7 +25,7 @@ We continue to refine and expand the material as the ADK evolves. Your feedback 
 *   🧠 **Interactive In-Doc Knowledge Checks (`KnowledgeCheck`):** Embedded concept quizzes with Socratic feedback, misconception breakdowns, guided hints, dynamic option shuffling (Fisher-Yates), and reflection cooldowns to prevent brute-forcing.
 *   🏆 **Student Progress Tracker & Gated Completion:** Real-time completion tracking with interactive checklist drawer in the navbar, multi-tab sync, and atomic progress reset engine.
 *   📜 **Official Student Completion Certificate:** In-app verification modal and instant vector/canvas PDF export with custom learner name, date, verification ID, and credential checklist.
-*   🔒 **Interactive Solution Vault (`SolutionVault`):** Collapsible encrypted solution reveals with fast completion prompt, instant instructor mode (`Ctrl+Alt+U` / `?instructor=1`), and WCAG AAA high-contrast light mode styling.
+*   🔒 **Interactive Solution Vault (`SolutionVault`):** Collapsible encrypted solution reveals with fast completion prompt, dedicated workshop facilitator support, and WCAG AAA high-contrast light mode styling.
 *   🔍 **Instant Offline Local Search:** Integrated full-text offline search bar across all 45 modules powered by `@easyops-cn/docusaurus-search-local`.
 *   🤖 **Automated Student Grader (`adk-student-evaluator`):** Zero-cost empirical verification framework that simulates student lab executions and audits code syntax against real ADK runtimes.
 *   ⚡ **Zero-Setup Cloud Onboarding:** 1-click cloud launch buttons for **GitHub Codespaces**, **Google Cloud Shell**, and **VS Code DevContainers** with pre-configured Python 3.11, `uv`, and GCP tooling.

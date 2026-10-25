@@ -130,7 +130,7 @@
   border-color: #34a853 !important;
   background: rgba(52, 168, 83, 0.12) !important;
   color: #1e7e34 !important;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 [data-theme='dark'] .optionCorrect {
@@ -142,7 +142,7 @@
   border-color: #ea4335 !important;
   background: rgba(234, 67, 53, 0.1) !important;
   color: #c5221f !important;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 [data-theme='dark'] .optionIncorrect {
@@ -224,6 +224,15 @@
   cursor: not-allowed;
 }
 
+.retryBtn {
+  background: #ea4335;
+}
+
+.retryBtn:hover:not(:disabled) {
+  background: #d93025;
+  box-shadow: 0 4px 10px rgba(234, 67, 53, 0.25);
+}
+
 .secondaryBtn {
   background: transparent;
   border: 1px solid var(--ifm-toc-border-color);
@@ -244,11 +253,68 @@
   margin-top: 1rem;
   padding: 0.85rem 1rem;
   border-radius: 8px;
-  background: rgba(251, 188, 4, 0.1);
+  background: rgba(251, 188, 4, 0.12);
   border-left: 4px solid #fbbc04;
   font-size: 0.875rem;
   color: var(--ifm-font-color-base);
   animation: fadeIn 0.2s ease;
+}
+
+.socraticBox {
+  margin-top: 1.25rem;
+  padding: 1.1rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(234, 67, 53, 0.08);
+  border-left: 4px solid #ea4335;
+  border: 1px solid rgba(234, 67, 53, 0.2);
+  border-left-width: 4px;
+  animation: fadeIn 0.25s ease;
+}
+
+[data-theme='dark'] .socraticBox {
+  background: rgba(234, 67, 53, 0.12);
+  border-color: rgba(234, 67, 53, 0.35);
+}
+
+.socraticTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #c5221f;
+  margin: 0 0 0.4rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+[data-theme='dark'] .socraticTitle {
+  color: #f28b82;
+}
+
+.socraticText {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+  color: var(--ifm-font-color-base);
+}
+
+.socraticText p {
+  margin: 0 0 0.4rem 0;
+}
+
+.socraticHintLine {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(251, 188, 4, 0.12);
+  border-radius: 6px;
+  border-left: 3px solid #fbbc04;
+  font-size: 0.85rem;
+  color: var(--ifm-font-color-base);
+}
+
+.reflectionNote {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  opacity: 0.85;
 }
 
 .explanationBox {

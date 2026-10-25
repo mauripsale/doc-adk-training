@@ -79,6 +79,20 @@ In the lab, you will build a "Visual Product Catalog Analyzer" that uses a singl
 
 > **Going Further:** the lab below only covers *understanding* images (analysis), not *generating* them -- actually calling an image-generation model is a separate integration (a custom tool wrapping the Imagen API) and is out of scope here. If you want to try it hands-on, the shape is the same pattern as any other custom tool from Module 9: a function that calls the generation API and returns image bytes as a `types.Part` (the same `Part` type you're about to use for analysis, just produced instead of consumed).
 
+<KnowledgeCheck
+  id="m07-multimodal-part-payload"
+  question="In ADK 2.0 with the Google GenAI SDK, which method is used to construct a multimodal image payload from raw binary bytes for Gemini vision analysis?"
+  options={[
+    "Part.from_bytes(data=image_bytes, mime_type='image/png')",
+    "ImagePart.load_raw(image_bytes)",
+    "Content.create_blob(bytes=image_bytes, encoding='base64')",
+    "types.BinaryPayload(image_bytes, type='image/png')"
+  ]}
+  correctIndex={0}
+  hint="Think about the standard Part factory method from google.genai.types."
+  explanation="In the modern Google GenAI SDK and ADK 2.0, binary image data is packaged using Part.from_bytes(data=image_bytes, mime_type='image/png') or Part.from_uri() for Cloud Storage references."
+/>
+
 ### Key Takeaways
 - Multimodal models like Gemini can process text and images together, enabling vision-enabled agents.
 - The `google.genai.types.Part` object is the building block for multimodal content, allowing you to combine text and image data in a single prompt.

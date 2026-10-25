@@ -97,6 +97,20 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+<KnowledgeCheck
+  id="m06-async-runner-final-response"
+  question="When iterating over the Event stream returned by an ADK 2.0 Runner, which method correctly identifies the final response generated for the user?"
+  options={[
+    "event.is_final_response()",
+    "event.candidates[0].is_finished",
+    "event.get_status() == 'COMPLETED'",
+    "event.is_last_chunk()"
+  ]}
+  correctIndex={0}
+  hint="Remember the simplified ADK 2.0 Event API patterns."
+  explanation="In ADK 2.0, the Event object provides the event.is_final_response() method to identify the terminal assistant message in an execution turn, abstracting away internal token streaming and intermediate tool call chunks."
+/>
+
 ### Key Takeaways
 - **Agent**: Defines the persona and logic.
 - **App**: A container for the agent and global configurations (Plugins, Caching).

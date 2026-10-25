@@ -71,6 +71,20 @@ Note these operate one level below the `RetryConfig` you'll see in Module 38, wh
 
 These two plugins *recover* from errors. If you only need to be *notified* of an unrecoverable one — e.g. to page on-call before the app crashes — `BasePlugin` also exposes `on_agent_error_callback` and `on_run_error_callback`, notification-only hooks that always re-raise the original exception.
 
+<KnowledgeCheck
+  id="m26-lifecycle-callback-overrides"
+  question="In ADK 2.0, what happens when a before_tool_callback returns a dictionary with an error payload instead of None?"
+  options={[
+    "The underlying tool execution is intercepted and blocked; the returned dictionary is provided to the agent as the tool result",
+    "The entire Python process crashes with an unhandled CallbackException",
+    "The agent resets its session state to turn 0",
+    "The tool runs anyway in the background and ignores the callback return"
+  ]}
+  correctIndex={0}
+  hint="Recall how 'before' callbacks can override or short-circuit execution."
+  explanation="Returning a non-None value from a before_tool_callback short-circuits the actual tool execution. ADK treats the returned object as the tool's result, effectively acting as an active security guardrail or interceptor."
+/>
+
 ### Key Takeaways
 - **Callbacks** provide programmatic "hooks" into an agent's execution lifecycle.
 - **Node-level scope:** Callbacks are registered on the `Agent` object.

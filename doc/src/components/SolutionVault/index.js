@@ -1,6 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import styles from './styles.module.css';
 import { VAULT_REGISTRY } from '@site/src/data/vaultRegistry';
+import { useStudentProgress, CURRICULUM_MODULES } from '@site/src/context/ProgressContext';
+
+// Fisher-Yates array shuffle
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 // Pure JS SHA-256 for browser-compatible deterministic token calculation
 function sha256Hex(ascii) {
@@ -121,25 +132,50 @@ export default function SolutionVault({
   // Normalize module ID key (e.g. "01", "21_5", "04_5")
   const normKey = String(moduleNumber).replace(/^module/, '');
 
-  // Resolve questions from registry or prop fallback
+  // Resolve raw questions from registry or prop fallback
   const resolvedQuestions = useMemo(() => {
-    if (propQuestions && propQuestions.length > 0) return propQuestions;
-    if (VAULT_REGISTRY && VAULT_REGISTRY[normKey]?.questions) {
-      return VAULT_REGISTRY[normKey].questions;
+    let raw = [];
+    if (propQuestions && propQuestions.length > 0) {
+      raw = propQuestions;
+    } else if (VAULT_REGISTRY && VAULT_REGISTRY[normKey]?.questions) {
+      raw = VAULT_REGISTRY[normKey].questions;
+    } else {
+      raw = [
+        {
+          question: `Module ${normKey} Comprehension Check: Did you complete the exercise steps locally?`,
+          options: [
+            'Yes, I verified the implementation with my local environment setup',
+            'No, I skipped the exercise steps',
+            'I am only browsing without executing code',
+            'None of the above',
+          ],
+          correctIndex: 0,
+          hint: 'Complete the lab steps locally before inspecting the reference solution.',
+        },
+      ];
     }
-    return [
-      {
-        question: `Module ${normKey} Comprehension Check: Did you complete the exercise steps locally?`,
-        options: [
-          'Yes, I verified the implementation with my local environment setup',
-          'No, I skipped the exercise steps',
-          'I am only browsing without executing code',
-          'None of the above',
-        ],
-        correctIndex: 0,
-        hint: 'Complete the lab steps locally before inspecting the reference solution.',
-      },
-    ];
+
+    return raw.map((q, qIdx) => {
+      const opts = (q.options || []).map((opt, oIdx) => {
+        if (typeof opt === 'string') {
+          return {
+            id: `q${qIdx}-opt${oIdx}`,
+            text: opt,
+            isCorrect: oIdx === (q.correctIndex || 0),
+          };
+        }
+        return {
+          id: `q${qIdx}-opt${oIdx}`,
+          text: opt.text || '',
+          isCorrect: opt.isCorrect !== undefined ? opt.isCorrect : oIdx === (q.correctIndex || 0),
+          explanation: opt.explanation,
+        };
+      });
+      return {
+        ...q,
+        normalizedOptions: opts,
+      };
+    });
   }, [propQuestions, normKey]);
 
   // Compute deterministic challenge token
@@ -152,14 +188,29 @@ export default function SolutionVault({
     expectedToken: expectedToken,
   };
 
+  const { isLoaded, isDocCompleted, markDocComplete } = useStudentProgress();
+
+  const docKey = useMemo(() => {
+    const cleanNorm = normKey.replace('.', '_');
+    const matched = CURRICULUM_MODULES.find((m) => {
+      const numPart = m.id.split('-')[0].replace('module', '');
+      return numPart === cleanNorm || numPart === cleanNorm.padStart(2, '0');
+    });
+    return matched ? `${matched.id}/lab` : null;
+  }, [normKey]);
+
+  const isLabCompleted = Boolean(docKey && isLoaded && isDocCompleted(docKey));
   const storageKey = `adk_vault_v3_mod_${normKey}`;
 
   // State
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [currentDisplayOptions, setCurrentDisplayOptions] = useState([]);
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
   const [quizAnswered, setQuizAnswered] = useState(false);
   const [isQuizCorrect, setIsQuizCorrect] = useState(false);
   const [quizPassed, setQuizPassed] = useState(false);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [cooldownRemaining, setCooldownRemaining] = useState(0);
 
   const [inputToken, setInputToken] = useState('');
   const [status, setStatus] = useState('quiz'); // 'quiz' | 'python_gate' | 'cooldown' | 'unlocked'
@@ -168,29 +219,56 @@ export default function SolutionVault({
   const [tokenError, setTokenError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Load persistence & instructor fast-track
+  // Sync display options when current question changes
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('instructor') === '1') {
-          setStatus('unlocked');
-          setQuizPassed(true);
-          return;
-        }
-
-        const saved = localStorage.getItem(storageKey);
-        if (saved === 'unlocked') {
-          setStatus('unlocked');
-          setQuizPassed(true);
-        }
-      }
-    } catch (e) {
-      // Ignore localStorage error
+    if (resolvedQuestions[currentQuizIndex]) {
+      setCurrentDisplayOptions(resolvedQuestions[currentQuizIndex].normalizedOptions);
     }
+  }, [currentQuizIndex, resolvedQuestions]);
+
+  // Check instructor mode and persistence
+  const checkInstructorAndSaved = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (
+        urlParams.get('instructor') === '1' ||
+        sessionStorage.getItem('adk_instructor_mode') === 'true'
+      ) {
+        sessionStorage.setItem('adk_instructor_mode', 'true');
+        setStatus('unlocked');
+        setQuizPassed(true);
+        return;
+      }
+
+      const saved = localStorage.getItem(storageKey);
+      if (saved === 'unlocked') {
+        setStatus('unlocked');
+        setQuizPassed(true);
+      }
+    } catch (_) {}
   }, [storageKey]);
 
-  // Keyboard shortcut for Instructor Fast-Track (Ctrl+Alt+U)
+  useEffect(() => {
+    checkInstructorAndSaved();
+  }, [checkInstructorAndSaved]);
+
+  // Dispatch vault status updates to keep DocCompletionCard synchronized in real time
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('adk-vault-updated', {
+          detail: {
+            moduleNumber: normKey,
+            status,
+            isUnlocked: status === 'unlocked',
+          },
+        })
+      );
+    }
+  }, [status, normKey]);
+
+  // Keyboard shortcut for Instructor Fast-Track (Ctrl+Alt+U) & global custom event
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'u' || e.key === 'U')) {
@@ -198,12 +276,49 @@ export default function SolutionVault({
         setQuizPassed(true);
         try {
           localStorage.setItem(storageKey, 'unlocked');
-        } catch (err) {}
+          sessionStorage.setItem('adk_instructor_mode', 'true');
+          window.dispatchEvent(new CustomEvent('adk-instructor-updated'));
+        } catch (_) {}
       }
     };
+
+    const handleInstructorEvent = () => {
+      checkInstructorAndSaved();
+    };
+
+    const handleProgressReset = () => {
+      setStatus('quiz');
+      setQuizPassed(false);
+      setQuizAnswered(false);
+      setSelectedOptionId(null);
+      setCurrentQuizIndex(0);
+      setInputToken('');
+      setTokenError('');
+      setFailedAttempts(0);
+      setCooldownRemaining(0);
+      setSecondsLeft(cooldownSeconds);
+    };
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [storageKey]);
+    window.addEventListener('adk-instructor-updated', handleInstructorEvent);
+    window.addEventListener('adk-progress-reset', handleProgressReset);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('adk-instructor-updated', handleInstructorEvent);
+      window.removeEventListener('adk-progress-reset', handleProgressReset);
+    };
+  }, [storageKey, checkInstructorAndSaved]);
+
+  // Cooldown timer for quiz retry
+  useEffect(() => {
+    let timer;
+    if (cooldownRemaining > 0) {
+      timer = setTimeout(() => {
+        setCooldownRemaining((c) => c - 1);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldownRemaining]);
 
   // Select 5 varied tips for this module/cooldown session
   const activeTips = useMemo(() => {
@@ -216,7 +331,7 @@ export default function SolutionVault({
     return reordered.slice(0, 5);
   }, [normKey]);
 
-  // Cooldown countdown with 3-second tip rotation
+  // Cooldown countdown with 3-second tip rotation for Python gate unlock
   useEffect(() => {
     let timer;
     if (status === 'cooldown') {
@@ -233,36 +348,56 @@ export default function SolutionVault({
         setStatus('unlocked');
         try {
           localStorage.setItem(storageKey, 'unlocked');
-        } catch (e) {}
+        } catch (_) {}
       }
     }
     return () => clearTimeout(timer);
   }, [status, secondsLeft, storageKey, cooldownSeconds, activeTips.length]);
 
   // Quiz Option Click
-  const handleOptionSelect = (idx) => {
+  const handleOptionSelect = (optId) => {
     if (quizAnswered && isQuizCorrect) return;
 
-    setSelectedOption(idx);
+    setSelectedOptionId(optId);
     setQuizAnswered(true);
 
-    const q = resolvedQuestions[currentQuizIndex];
-    if (idx === q.correctIndex) {
+    const chosen = currentDisplayOptions.find((o) => o.id === optId);
+    if (chosen && chosen.isCorrect) {
       setIsQuizCorrect(true);
       setTimeout(() => {
         if (currentQuizIndex + 1 < resolvedQuestions.length) {
           setCurrentQuizIndex((prev) => prev + 1);
-          setSelectedOption(null);
+          setSelectedOptionId(null);
           setQuizAnswered(false);
           setIsQuizCorrect(false);
+          setFailedAttempts(0);
         } else {
           setQuizPassed(true);
           setStatus('python_gate');
         }
-      }, 1000);
+      }, 1200);
     } else {
       setIsQuizCorrect(false);
+      const nextFailures = failedAttempts + 1;
+      setFailedAttempts(nextFailures);
+      // Cooldown: 1st fail 0s, 2nd fail 2s, 3rd+ fail 4s
+      const cd = nextFailures === 1 ? 0 : nextFailures === 2 ? 2 : 4;
+      if (cd > 0) {
+        setCooldownRemaining(cd);
+      }
     }
+  };
+
+  const handleRetryQuestion = () => {
+    if (cooldownRemaining > 0) return;
+    // Anti-Cheating: Shuffle question options on retry so sequential brute forcing fails
+    const currentQ = resolvedQuestions[currentQuizIndex];
+    if (currentQ) {
+      setCurrentDisplayOptions(shuffle(currentQ.normalizedOptions));
+    }
+    setSelectedOptionId(null);
+    setQuizAnswered(false);
+    setIsQuizCorrect(false);
   };
 
   const handleCopy = () => {
@@ -294,15 +429,16 @@ export default function SolutionVault({
   const handleRelock = () => {
     try {
       localStorage.removeItem(storageKey);
-    } catch (e) {}
+    } catch (_) {}
     setStatus('quiz');
     setQuizPassed(false);
     setQuizAnswered(false);
-    setSelectedOption(null);
+    setSelectedOptionId(null);
     setCurrentQuizIndex(0);
     setInputToken('');
     setTokenError('');
     setSecondsLeft(cooldownSeconds);
+    setFailedAttempts(0);
   };
 
   const progressPercent = Math.max(
@@ -311,9 +447,14 @@ export default function SolutionVault({
   );
 
   const currentQ = resolvedQuestions[currentQuizIndex] || resolvedQuestions[0];
+  const alphabet = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <div className={styles.vaultContainer}>
+    <div
+      className={styles.vaultContainer}
+      data-solution-vault-id={normKey}
+      data-solution-vault-status={status}
+    >
       {/* Header Banner */}
       <div className={styles.header}>
         <div className={styles.headerTitle}>
@@ -360,40 +501,67 @@ export default function SolutionVault({
             <h4 className={styles.questionText}>{currentQ.question}</h4>
 
             <div className={styles.optionsList}>
-              {currentQ.options.map((opt, idx) => {
+              {currentDisplayOptions.map((opt, idx) => {
+                const isSelected = selectedOptionId === opt.id;
                 let btnClass = styles.optionBtn;
-                if (selectedOption === idx) {
+
+                if (isSelected) {
                   btnClass += isQuizCorrect
                     ? ` ${styles.correct}`
                     : ` ${styles.incorrect}`;
                 }
+
                 return (
                   <button
-                    key={idx}
+                    key={opt.id}
                     className={btnClass}
-                    onClick={() => handleOptionSelect(idx)}
-                    disabled={quizAnswered && isQuizCorrect}
+                    onClick={() => handleOptionSelect(opt.id)}
+                    disabled={(quizAnswered && isQuizCorrect) || (quizAnswered && !isQuizCorrect)}
+                    aria-label={`Option ${alphabet[idx]}: ${opt.text}`}
                   >
                     <span className={styles.optionLetter}>
-                      {String.fromCharCode(65 + idx)}
+                      {alphabet[idx]}
                     </span>
-                    <span className={styles.optionContent}>{opt}</span>
+                    <span className={styles.optionContent}>{opt.text}</span>
                   </button>
                 );
               })}
             </div>
 
+            {/* Socratic Feedback on Wrong Answer (Zero Spoiler) */}
             {quizAnswered && !isQuizCorrect && (
-              <div className={styles.hintBox}>
-                <span className={styles.hintIcon}>💡</span>
-                <div>
-                  <strong>Hint:</strong> {currentQ.hint}
+              <div className={styles.socraticBox}>
+                <p className={styles.socraticTitle}>
+                  <span>🤔</span> Socratic Feedback
+                </p>
+                <div className={styles.socraticText}>
+                  <p>
+                    That option is not quite right. Review the architectural rationale:
+                  </p>
+                  {currentQ.hint && (
+                    <div className={styles.socraticHintLine}>
+                      <strong>Architectural Hint:</strong> {currentQ.hint}
+                    </div>
+                  )}
+                </div>
+                <div style={{ marginTop: '0.85rem' }}>
+                  <button
+                    type="button"
+                    onClick={handleRetryQuestion}
+                    disabled={cooldownRemaining > 0}
+                    className={styles.retryBtn}
+                  >
+                    {cooldownRemaining > 0
+                      ? `⏳ Reflect (${cooldownRemaining}s)...`
+                      : '↺ Try Another Answer (Shuffled)'}
+                  </button>
                 </div>
               </div>
             )}
+
             {quizAnswered && isQuizCorrect && (
               <div className={styles.correctBanner}>
-                ✅ Excellent! Advancing to the next step...
+                ✅ Excellent comprehension! Advancing to the next step...
               </div>
             )}
           </div>
@@ -444,7 +612,7 @@ export default function SolutionVault({
         {status === 'cooldown' && (
           <div className={styles.cooldownBox}>
             <div className={styles.timerRing}>{secondsLeft}s</div>
-            <div style={{ fontWeight: 700, fontSize: '1.05rem', color: '#f8fafc' }}>
+            <div className={styles.cooldownHeading}>
               ⏳ Intentional Mindfulness Cooldown Active
             </div>
             <div className={styles.progressBarTrack}>
@@ -469,9 +637,45 @@ export default function SolutionVault({
               <span>✨ [ACCESS GRANTED] Solution Vault Decrypted</span>
             </div>
           </div>
-          <p style={{ margin: '0 0 16px', fontSize: '0.9rem', color: '#cbd5e1' }}>
+          <p className={styles.unlockedSubtext}>
             Congratulations on completing all checks and the terminal challenge! Here is the official reference walkthrough and architecture review:
           </p>
+
+          {docKey && (
+            <div className={styles.completionBanner}>
+              <div className={styles.completionBannerLeft}>
+                <span className={styles.completionIcon}>
+                  {isLabCompleted ? '🏆' : '🎉'}
+                </span>
+                <div>
+                  <div className={styles.completionTitle}>
+                    {isLabCompleted
+                      ? 'Laboratorio Completato!'
+                      : 'Sfida del Laboratorio Superata!'}
+                  </div>
+                  <div className={styles.completionSubtext}>
+                    {isLabCompleted
+                      ? 'Questo modulo è registrato come completato nel tuo Learning Portfolio.'
+                      : 'Vuoi registrare questo laboratorio nel tuo piano di studi?'}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  isLabCompleted
+                    ? markDocComplete(docKey, false)
+                    : markDocComplete(docKey, true)
+                }
+                className={
+                  isLabCompleted ? styles.completedBtn : styles.markCompleteBtn
+                }
+                aria-label="Registra progresso laboratorio"
+              >
+                {isLabCompleted ? '✓ Completato (Annulla)' : '✓ Segna come Completato'}
+              </button>
+            </div>
+          )}
 
           <div className={styles.inlineSolution}>
             {children}

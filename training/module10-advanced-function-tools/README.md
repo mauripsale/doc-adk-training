@@ -90,6 +90,20 @@ When a tool requires confirmation:
 2. The UI or client application prompts the human operator with the tool name and proposed arguments.
 3. Upon receiving approval, execution resumes seamlessly; if rejected, the agent receives an explanation to pivot its plan.
 
+<KnowledgeCheck
+  id="m10-hitl-dynamic-confirmation"
+  question="When configuring Human-in-the-Loop (HITL) safety in ADK 2.0 with FunctionTool, what type of value can be passed to require_confirmation to evaluate risk dynamically based on input arguments?"
+  options={[
+    "A callable predicate function that receives argument kwargs and returns a boolean",
+    "A JSON Schema string with regex security constraints",
+    "An async gRPC interceptor channel",
+    "A static integer representing the risk level (1-5)"
+  ]}
+  correctIndex={0}
+  hint="Look at how require_confirmation supports conditional checks for high amounts or dangerous operations."
+  explanation="In ADK 2.0, require_confirmation accepts either a static boolean (True/False) or a callable predicate function (e.g., lambda amount, **kwargs: amount > 1000) to conditionally gate high-risk actions based on runtime arguments."
+/>
+
 ### Key Takeaways
 - Use **`ToolContext`** to securely access the ADK runtime.
 - **`tool_context.state`** allows tools to persist data across turns.

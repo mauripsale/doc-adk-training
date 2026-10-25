@@ -42,6 +42,20 @@ The Agents CLI streamlines the path to production into a few simple commands:
     *   **Provision:** It runs a Cloud Build pipeline that uses Terraform to create all the necessary cloud infrastructure for your agent (Artifact Registry, Agent Runtime service, service accounts, etc.).
     *   **Upload & Execute:** It packages your agent code, uploads it to Agent Runtime, and starts the agent.
 
+<KnowledgeCheck
+  id="m35-agent-runtime-accelerated-deployment"
+  question="When deploying an ADK agent to Vertex AI Agent Runtime using google-agents-cli, which command generates the Infrastructure as Code (Terraform) and Cloud Build CI/CD pipeline assets?"
+  options={[
+    "uvx google-agents-cli scaffold enhance",
+    "uv run adk build --docker-only",
+    "gcloud compute instances create-with-container",
+    "terraform init -backend=agent-platform"
+  ]}
+  correctIndex={0}
+  hint="Think about the CLI command that adds deployment and CI/CD templates to an existing agent codebase."
+  explanation="The 'google-agents-cli scaffold enhance' command inspects your existing agent code and automatically adds production-ready deployment configurations, including Terraform IaC files and Cloud Build CI/CD pipelines for Agent Runtime."
+/>
+
 ### Key Takeaways
 - **Google Cloud's Agent Runtime** is a fully managed service in the Gemini Enterprise Agent Platform for deploying, scaling, and securing ADK agents.
 - The **Accelerated Deployment** method, using the **Agents CLI**, is the recommended best practice for new projects, providing a pre-configured CI/CD pipeline and Infrastructure as Code.

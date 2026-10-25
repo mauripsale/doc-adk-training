@@ -122,6 +122,20 @@ root_agent = Agent(
 
 In the lab for this module, you will put all these principles into practice by building a set of calculator functions and integrating them into a new "Calculator" agent.
 
+<KnowledgeCheck
+  id="m09-custom-tool-schema-generation"
+  question="How does ADK 2.0 automatically generate the OpenAPI / JSON Schema definition used by Gemini to decide when and how to call a custom Python function tool?"
+  options={[
+    "From Python type annotations and docstrings (Google/Sphinx style)",
+    "By compiling an explicit JSON schema file named tool.json",
+    "Through LLM runtime introspection during the first prompt execution",
+    "By requiring explicit decorators like @tool(schema=...)"
+  ]}
+  correctIndex={0}
+  hint="Consider how standard Python function signatures and docstrings are parsed by ADK."
+  explanation="ADK 2.0 automatically parses Python type annotations (e.g., a: float, b: float -> float) and the docstring arguments block to construct the exact FunctionDeclaration schema sent to the Gemini API."
+/>
+
 ### Key Takeaways
 - **Custom Function Tools** connect your agent node to any Python capability.
 - **Auto-Schema:** ADK 2.0 generates the tool schema from your function's signature and docstring.

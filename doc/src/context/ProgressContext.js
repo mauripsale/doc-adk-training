@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 
 const STORAGE_KEY = 'adk_student_progress_v1';
+const QUIZ_STORAGE_KEY = 'adk_quiz_mastery_v1';
 
 export const CURRICULUM_MODULES = [
   // Part 1: Foundations (Modules 1–7)
@@ -126,6 +127,19 @@ export function ProgressProvider({ children }) {
     return Boolean(completedDocs[docKey]);
   };
 
+  const markDocComplete = (docKey, completed = true) => {
+    const current = Boolean(completedDocs[docKey]);
+    if (current === completed) return; // No-op if already in desired state
+
+    const newDocs = { ...completedDocs };
+    if (completed) {
+      newDocs[docKey] = true;
+    } else {
+      delete newDocs[docKey];
+    }
+    saveProgress(newDocs);
+  };
+
   const toggleDocComplete = (docKey) => {
     const nextState = !isDocCompleted(docKey);
     const newDocs = { ...completedDocs, [docKey]: nextState };
@@ -137,7 +151,34 @@ export function ProgressProvider({ children }) {
   };
 
   const resetProgress = () => {
+    // 1. Reset doc completion
     saveProgress({});
+
+    // 2. Clear Quiz Mastery and Vault persistence from localStorage & sessionStorage
+    if (ExecutionEnvironment.canUseDOM) {
+      try {
+        localStorage.removeItem(QUIZ_STORAGE_KEY);
+        sessionStorage.removeItem('adk_instructor_mode');
+
+        // Remove all vault keys
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('adk_vault_') || key.startsWith('adk_quiz_'))) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((k) => localStorage.removeItem(k));
+
+        // Dispatch comprehensive reset events
+        window.dispatchEvent(new CustomEvent('adk-progress-reset'));
+        window.dispatchEvent(new CustomEvent('adk-quiz-updated', { detail: { isReset: true } }));
+        window.dispatchEvent(new CustomEvent('adk-vault-updated', { detail: { isReset: true } }));
+        window.dispatchEvent(new CustomEvent('adk-instructor-updated', { detail: { isInstructor: false } }));
+      } catch (e) {
+        console.warn('Error during full reset:', e);
+      }
+    }
   };
 
   const exportProgress = () => {
@@ -206,6 +247,7 @@ export function ProgressProvider({ children }) {
     isLoaded,
     completedDocs,
     isDocCompleted,
+    markDocComplete,
     toggleDocComplete,
     resetProgress,
     exportProgress,
@@ -236,6 +278,7 @@ export function useStudentProgress() {
       isLoaded: false,
       completedDocs: {},
       isDocCompleted: () => false,
+      markDocComplete: () => {},
       toggleDocComplete: () => {},
       resetProgress: () => {},
       exportProgress: () => '',

@@ -82,6 +82,20 @@ root_agent = Workflow(
 )
 ```
 
+<KnowledgeCheck
+  id="m15-mas-orchestration-specialists"
+  question="In an ADK 2.0 multi-agent architecture using the Specialist/Orchestrator pattern, what is the primary purpose of passing specialist agents to the router's sub_agents list?"
+  options={[
+    "To register the nodes for discovery, routing schema generation, and telemetry within the Workflow graph",
+    "To force all specialist agents to execute in parallel synchronously on every turn",
+    "To merge all specialist tools into a single shared prompt template",
+    "To disable session state isolation between specialist nodes"
+  ]}
+  correctIndex={0}
+  hint="Think about how the router agent discovers available specialist targets and how the ADK runtime instruments them."
+  explanation="In ADK 2.0, passing specialist agents to sub_agents registers them with the orchestrator, enabling automatic tool/transfer schema generation for Gemini and graph telemetry in the Workflow runtime."
+/>
+
 ### Key Takeaways
 - **Think in Graphs:** Multi-agent systems are collections of nodes orchestrated by a Workflow.
 - **Specialization is Key:** Each node should have a narrow, well-defined purpose.

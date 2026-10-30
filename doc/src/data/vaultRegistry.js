@@ -559,6 +559,43 @@ export const VAULT_REGISTRY = {
       }
     ]
   },
+  "25_5": {
+    "questions": [
+      {
+        "question": "What is the primary architectural difference between a 'Fail-Closed' guardrail and a 'Fail-Open' guardrail in Enterprise AI?",
+        "options": [
+          "A Fail-Closed guardrail intercepts and blocks/withholds responses or inputs immediately upon detecting a violation or error, whereas Fail-Open allows traffic to proceed if a check fails",
+          "Fail-Closed only runs on closed-source models, while Fail-Open runs on open-source weights",
+          "Fail-Closed disables network encryption, while Fail-Open enforces TLS 1.3",
+          "There is no difference; they are interchangeable terms"
+        ],
+        "correctIndex": 0,
+        "hint": "Fail-Closed prioritizes security and compliance by withholding potentially non-compliant or hazardous outputs."
+      },
+      {
+        "question": "Which ADK 2.0 lifecycle callback is used by safety plugins to inspect and sanitize or block outbound responses before they reach the user?",
+        "options": [
+          "`on_event_callback` (checking `event.is_final_response()`)",
+          "`on_app_startup`",
+          "`before_tool_compilation`",
+          "`on_socket_disconnect`"
+        ],
+        "correctIndex": 0,
+        "hint": "`on_event_callback` intercepts all emitted events, allowing the plugin to inspect and mutate `event.content.parts[0].text` before delivery."
+      },
+      {
+        "question": "Why should enterprise safety guardrails (like PII masking and prompt injection defense) be implemented as ADK Plugins rather than relying solely on system prompt instructions?",
+        "options": [
+          "Plugins execute deterministic, out-of-band programmatic code that cannot be bypassed by LLM prompt injection or adversarial jailbreak reasoning",
+          "Plugins run 100x faster than foundational models and eliminate the need for an LLM",
+          "System prompts cannot contain more than 10 words",
+          "Plugins automatically encrypt the developer's laptop hard drive"
+        ],
+        "correctIndex": 0,
+        "hint": "Deterministic programmatic code provides robust compliance guarantees that stochastic model instructions cannot guarantee."
+      }
+    ]
+  },
   "32": {
     "questions": [
       {
@@ -1185,43 +1222,6 @@ export const VAULT_REGISTRY = {
         ],
         "correctIndex": 0,
         "hint": "Follow the verification guidelines and zero-trust evaluation approach taught in Module 23."
-      }
-    ]
-  },
-  "25_5": {
-    "questions": [
-      {
-        "question": "In Module 25_5 (RAI Safety Plugins), what is the primary role of safety plugins and content filtering in ADK architectures?",
-        "options": [
-          "It enables robust, scalable implementation of safety plugins and content filtering to streamline agent behavior and data flow",
-          "It replaces the Python runtime with a custom kernel driver",
-          "It disables network connectivity for security reasons",
-          "It forces the agent to only respond in binary code"
-        ],
-        "correctIndex": 0,
-        "hint": "Review the core theory section of Module 25_5 regarding Responsible AI and safety guardrails."
-      },
-      {
-        "question": "When implementing Responsible AI and safety guardrails, why is policy enforcement critical for production reliability?",
-        "options": [
-          "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
-          "It compresses all database records into base64 strings",
-          "It eliminates the need for unit testing",
-          "It bypasses all cloud security authentication policies"
-        ],
-        "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 25_5 for robust policy enforcement."
-      },
-      {
-        "question": "What is the recommended best practice for verifying and testing RAI Safety Plugins in Google ADK?",
-        "options": [
-          "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
-          "Deploying directly to production without testing",
-          "Removing all error handling code to maximize performance",
-          "Using hardcoded API keys directly in client-side code"
-        ],
-        "correctIndex": 0,
-        "hint": "Follow the verification guidelines and zero-trust evaluation approach taught in Module 25_5."
       }
     ]
   },

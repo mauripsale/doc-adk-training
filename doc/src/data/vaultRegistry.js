@@ -522,6 +522,43 @@ export const VAULT_REGISTRY = {
       }
     ]
   },
+  "25": {
+    "questions": [
+      {
+        "question": "What are the Four Core Pillars of Enterprise AgentOps for autonomous agent fleets?",
+        "options": [
+          "Evaluation & Quality Flywheel, Distributed Tracing & Session Lineage, Cost & Token Optimization, and Failure & Anomaly Detection",
+          "HTML Templating, CSS Styling, SQL Indexing, and Disk Formatting",
+          "Single-turn Chat, Stateless Scripts, Hardcoded RegEx, and Manual Logging",
+          "CPU Overclocking, Liquid Cooling, GPU Flashing, and Power Grid Monitoring"
+        ],
+        "correctIndex": 0,
+        "hint": "Module 25 outlines the 4 pillars: Quality evaluation, Tracing/Lineage, Cost/Tokens, and Anomaly detection."
+      },
+      {
+        "question": "What is the main architectural difference between native OpenTelemetry exporters and custom ADK BasePlugins?",
+        "options": [
+          "OpenTelemetry provides standardized distributed spans to Cloud Trace / Cloud Monitoring, while BasePlugins execute custom in-process interception, alerting, and local metric collection",
+          "OpenTelemetry only runs on Windows, while BasePlugins only run on Linux",
+          "BasePlugins disable all asynchronous Python operations",
+          "OpenTelemetry requires replacing the Gemini model with a local rule engine"
+        ],
+        "correctIndex": 0,
+        "hint": "OTel standardizes export to cloud observability backends, while BasePlugins intercept events and tool errors in-process."
+      },
+      {
+        "question": "How does ADK 2.0's `node_info` attribute in event metadata enhance distributed tracing in complex multi-agent graphs?",
+        "options": [
+          "It attaches the originating graph node identifier to each event, enabling hierarchical, per-agent span reconstruction in Cloud Trace and Looker Studio",
+          "It encrypts the agent's Python source code into a zip archive",
+          "It automatically bills the end-user per keystroke",
+          "It forces all subagents to run sequentially on a single thread"
+        ],
+        "correctIndex": 0,
+        "hint": "`node_info` allows distributed tracing backends to visualize exactly which node in a graph executed each turn."
+      }
+    ]
+  },
   "32": {
     "questions": [
       {
@@ -1148,43 +1185,6 @@ export const VAULT_REGISTRY = {
         ],
         "correctIndex": 0,
         "hint": "Follow the verification guidelines and zero-trust evaluation approach taught in Module 23."
-      }
-    ]
-  },
-  "25": {
-    "questions": [
-      {
-        "question": "In Module 25 (Observability), what is the primary role of prompt-response tracing in ADK architectures?",
-        "options": [
-          "It enables robust, scalable implementation of prompt-response tracing to streamline agent behavior and data flow",
-          "It replaces the Python runtime with a custom kernel driver",
-          "It disables network connectivity for security reasons",
-          "It forces the agent to only respond in binary code"
-        ],
-        "correctIndex": 0,
-        "hint": "Review the core theory section of Module 25 regarding Cloud Trace and OpenTelemetry logging."
-      },
-      {
-        "question": "When implementing Cloud Trace and OpenTelemetry logging, why is latency and token analytics critical for production reliability?",
-        "options": [
-          "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
-          "It compresses all database records into base64 strings",
-          "It eliminates the need for unit testing",
-          "It bypasses all cloud security authentication policies"
-        ],
-        "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 25 for robust latency and token analytics."
-      },
-      {
-        "question": "What is the recommended best practice for verifying and testing Observability in Google ADK?",
-        "options": [
-          "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
-          "Deploying directly to production without testing",
-          "Removing all error handling code to maximize performance",
-          "Using hardcoded API keys directly in client-side code"
-        ],
-        "correctIndex": 0,
-        "hint": "Follow the verification guidelines and zero-trust evaluation approach taught in Module 25."
       }
     ]
   },

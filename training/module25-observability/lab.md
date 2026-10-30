@@ -29,7 +29,7 @@ In this lab, you will build a comprehensive observability system for an agent us
 
 ### Step 2: Implement a Business Logic Plugin
 
-**Exercise:** Open `agent.py`. We will start by creating an **Alerting Plugin** that detects consecutive errors.
+**Exercise:** Open `agent.py`. We will start by creating an **AgentOps Alerting & Metrics Plugin** that detects consecutive errors and tracks telemetry events locally.
 
 ```python
 # In agent.py (Starter Code)
@@ -43,35 +43,38 @@ from google.adk.events import Event
 def risky_operation(should_fail: bool) -> dict:
     """Performs an operation that can be made to fail, for testing error handling."""
     if should_fail:
-        raise ValueError("Simulated failure!")
-    return {"status": "success"}
+        raise ValueError("Simulated failure in risky_operation!")
+    return {"status": "success", "result": "Operation completed without errors."}
 
-class AlertingPlugin(BasePlugin):
-    """A plugin that prints an alert after 3 consecutive request errors."""
-    def __init__(self, name: str = 'alerting_plugin'):
+class AgentOpsMetricsPlugin(BasePlugin):
+    """An AgentOps observability plugin that tracks errors, tool calls, and turn health."""
+    def __init__(self, name: str = 'agentops_metrics_plugin', threshold: int = 3):
         super().__init__(name)
-        self.error_count = 0
+        self.error_threshold = threshold
+        self.consecutive_errors = 0
+        self.total_tool_calls = 0
         self._had_error_this_turn = False
+        self.telemetry_events = []
 
     async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
-        # TODO: Implement alerting logic here.
+        # TODO: Implement AgentOps alerting and tracking logic here.
         # 1. Mark that this turn had an error (self._had_error_this_turn = True).
-        # 2. Increment self.error_count and print an alert, escalating to a
-        #    critical alert once you hit the threshold.
-        # 3. Return a dict (e.g. {"status": "error", "message": str(error)})
-        #    so the agent recovers gracefully instead of crashing the run --
-        #    returning None here would let the exception propagate.
+        # 2. Increment self.consecutive_errors and self.total_tool_calls.
+        # 3. Log a record to self.telemetry_events.
+        # 4. Print an alert, escalating to a critical alert once you hit the threshold.
+        # 5. Return a dict (e.g. {"status": "error", "message": str(error)})
+        #    so the agent recovers gracefully instead of crashing the run.
         pass
 
     async def on_event_callback(self, *, event: Event, **kwargs):
         # TODO: When event.is_final_response() is True, if this turn had NO
-        # error, reset self.error_count to 0 -- a clean turn means we've
-        # recovered. Don't forget to reset self._had_error_this_turn too.
+        # error, reset self.consecutive_errors to 0 -- a clean turn means we've
+        # recovered. Record the turn outcome in self.telemetry_events and reset self._had_error_this_turn.
         pass
 
 # --- Create a simple Agent ---
 agent = Agent(
-    name="monitored_agent",
+    name="agentops_monitored_agent",
     model="gemini-3.8-flash",
     instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
     tools=[risky_operation],
@@ -79,9 +82,9 @@ agent = Agent(
 
 # --- Register Plugin with App ---
 app = App(
-    name="observability_demo",
+    name="agentops_observability_demo",
     root_agent=agent,
-    plugins=[AlertingPlugin()]
+    plugins=[AgentOpsMetricsPlugin()]
 )
 ```
 
@@ -159,42 +162,59 @@ from google.adk.telemetry.setup import maybe_set_otel_providers
 def risky_operation(should_fail: bool) -> dict:
     """Performs an operation that can be made to fail, for testing error handling."""
     if should_fail:
-        raise ValueError("Simulated failure!")
-    return {"status": "success"}
+        raise ValueError("Simulated failure in risky_operation!")
+    return {"status": "success", "result": "Operation completed without errors."}
 
-# --- 1. Custom Business Logic Plugin ---
+# --- 1. Custom AgentOps Telemetry & Alerting Plugin ---
 
-class AlertingPlugin(BasePlugin):
-    """Alerts after 3 consecutive request errors."""
-    def __init__(self, name: str = 'alerting_plugin', threshold: int = 3):
+class AgentOpsMetricsPlugin(BasePlugin):
+    """An AgentOps observability plugin that tracks errors, tool calls, and turn health."""
+    def __init__(self, name: str = 'agentops_metrics_plugin', threshold: int = 3):
         super().__init__(name)
         self.error_threshold = threshold
         self.consecutive_errors = 0
+        self.total_tool_calls = 0
         self._had_error_this_turn = False
+        self.telemetry_events = []
 
     async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
-        # Catching the exception here (instead of letting it crash the run)
-        # is what lets the plugin observe it AND lets the agent recover.
         self._had_error_this_turn = True
         self.consecutive_errors += 1
-        print(f"⚠️ [ALERT] Request Error ({self.consecutive_errors}/{self.error_threshold}): {error}")
+        self.total_tool_calls += 1
+        
+        event_record = {
+            "type": "TOOL_ERROR",
+            "tool": getattr(tool, "__name__", str(tool)),
+            "args": tool_args,
+            "error": str(error),
+            "consecutive_errors": self.consecutive_errors
+        }
+        self.telemetry_events.append(event_record)
+        print(f"⚠️ [AgentOps Log] Tool Error ({self.consecutive_errors}/{self.error_threshold}): {error}")
 
         if self.consecutive_errors >= self.error_threshold:
-            print("🔥 [CRITICAL ALERT] Persistent errors detected!")
+            print("🔥 [AgentOps ALERT] Critical: Persistent error threshold reached!")
 
         # Returning a dict recovers gracefully; returning None would
         # propagate the original exception and crash the run.
-        return {"status": "error", "message": f"The operation failed: {error}"}
+        return {"status": "error", "message": f"Operation failed: {error}"}
 
     async def on_event_callback(self, *, event: Event, **kwargs):
         if event.is_final_response():
             if not self._had_error_this_turn:
                 self.consecutive_errors = 0
+            
+            turn_record = {
+                "type": "TURN_COMPLETED",
+                "had_error": self._had_error_this_turn,
+                "current_consecutive_errors": self.consecutive_errors
+            }
+            self.telemetry_events.append(turn_record)
             self._had_error_this_turn = False
 
-# --- 2. Enterprise Telemetry Configuration ---
+# --- 2. Enterprise Telemetry Configuration (Cloud Trace / Monitoring) ---
 
-# Enable Cloud Trace and Monitoring
+# Enable Cloud Trace and Monitoring exporters
 otel_hooks = get_gcp_exporters(
     enable_cloud_tracing=True,
     enable_cloud_metrics=True
@@ -206,16 +226,16 @@ maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
 # --- 3. App Definition ---
 
 root_agent = Agent(
-    name="monitored_agent",
+    name="agentops_monitored_agent",
     model="gemini-3.8-flash",
-    instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
+    instruction="You are a monitored assistant. Call risky_operation with should_fail=True if asked to fail, else False.",
     tools=[risky_operation],
 )
 
 app = App(
-    name="observability_demo",
+    name="agentops_observability_demo",
     root_agent=root_agent,
-    plugins=[AlertingPlugin()]
+    plugins=[AgentOpsMetricsPlugin()]
 )
 ```
 

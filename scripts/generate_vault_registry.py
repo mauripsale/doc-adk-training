@@ -521,6 +521,43 @@ VAULT_DATA = {
             }
         ]
     },
+    "25": {
+        "questions": [
+            {
+                "question": "What are the Four Core Pillars of Enterprise AgentOps for autonomous agent fleets?",
+                "options": [
+                    "Evaluation & Quality Flywheel, Distributed Tracing & Session Lineage, Cost & Token Optimization, and Failure & Anomaly Detection",
+                    "HTML Templating, CSS Styling, SQL Indexing, and Disk Formatting",
+                    "Single-turn Chat, Stateless Scripts, Hardcoded RegEx, and Manual Logging",
+                    "CPU Overclocking, Liquid Cooling, GPU Flashing, and Power Grid Monitoring"
+                ],
+                "correctIndex": 0,
+                "hint": "Module 25 outlines the 4 pillars: Quality evaluation, Tracing/Lineage, Cost/Tokens, and Anomaly detection."
+            },
+            {
+                "question": "What is the main architectural difference between native OpenTelemetry exporters and custom ADK BasePlugins?",
+                "options": [
+                    "OpenTelemetry provides standardized distributed spans to Cloud Trace / Cloud Monitoring, while BasePlugins execute custom in-process interception, alerting, and local metric collection",
+                    "OpenTelemetry only runs on Windows, while BasePlugins only run on Linux",
+                    "BasePlugins disable all asynchronous Python operations",
+                    "OpenTelemetry requires replacing the Gemini model with a local rule engine"
+                ],
+                "correctIndex": 0,
+                "hint": "OTel standardizes export to cloud observability backends, while BasePlugins intercept events and tool errors in-process."
+            },
+            {
+                "question": "How does ADK 2.0's `node_info` attribute in event metadata enhance distributed tracing in complex multi-agent graphs?",
+                "options": [
+                    "It attaches the originating graph node identifier to each event, enabling hierarchical, per-agent span reconstruction in Cloud Trace and Looker Studio",
+                    "It encrypts the agent's Python source code into a zip archive",
+                    "It automatically bills the end-user per keystroke",
+                    "It forces all subagents to run sequentially on a single thread"
+                ],
+                "correctIndex": 0,
+                "hint": "`node_info` allows distributed tracing backends to visualize exactly which node in a graph executed each turn."
+            }
+        ]
+    },
     "32": {
         "questions": [
             {

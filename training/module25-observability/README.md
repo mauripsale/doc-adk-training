@@ -1,74 +1,122 @@
 ---
 sidebar_position: 25
-title: "Module 25: Advanced Observability with Plugins"
-pagination_label: "Module 25: Observability & Tracing Plugins — 📖 Theory & Overview"
+title: "Module 25: Observability & AgentOps"
+pagination_label: "Module 25: Observability & AgentOps — 📖 Theory & Overview"
 ---
 
-# Module 25: Advanced Observability with Plugins
+# Module 25: Advanced Observability & Enterprise AgentOps
 
 ![Enterprise Observability & OpenTelemetry (Light)](img/hero-light.webp#gh-light-mode-only)
 ![Enterprise Observability & OpenTelemetry (Dark)](img/hero-dark.webp#gh-dark-mode-only)
 
 ## Theory
 
-### Why Advanced Observability Matters
+### Why AgentOps & Advanced Observability Matter
 
-Production agents require deep visibility into their behavior, performance, and failures for debugging and optimization. While manual event logging is a good start, a more scalable and modular approach is needed for enterprise-grade monitoring.
+In production, agents are non-deterministic, distributed software systems. They execute multi-step reasoning, query external tools, spawn sub-agents, and mutate conversational state across asynchronous sessions. 
 
-The ADK provides a powerful **Plugin System** for this purpose.
+Without robust **AgentOps telemetry**, diagnosing why an agent failed, tracking token usage spikes, measuring tool latencies, or detecting cascading exceptions becomes nearly impossible.
 
-### The Observability Pillars
+The Google ADK provides a multi-tiered observability architecture:
+1. **Local-First In-Process Plugins (`BasePlugin`):** Lightweight, zero-dependency interceptors for local debugging, alerting, and metrics collection.
+2. **Native OpenTelemetry (OTel):** Standardized distributed tracing that exports performance data and spans directly to **Google Cloud Trace** and **Cloud Monitoring**.
+3. **Long-Term Analytics (BigQuery + Looker Studio):** Event streaming to BigQuery for historical analytics, cost governance, and business KPI visualization.
 
-A comprehensive observability strategy is built on four pillars, all of which can be implemented via plugins:
+---
 
-*   **Traces**: Follow a request's entire journey through a distributed system.
-*   **Metrics**: Collect quantitative data (e.g., latency, error rates, token counts).
-*   **Logs**: Record detailed, structured information about specific events.
-*   **Events**: Represent the discrete state changes and actions within the agent.
+### The Four Pillars of Agent Telemetry
+
+A production-grade AgentOps strategy is built on four core pillars:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                      FOUR PILLARS OF AGENT TELEMETRY                   │
+├─────────────────┬──────────────────┬─────────────────┬─────────────────┤
+│ 1. TRACES       │ 2. METRICS       │ 3. LOGS         │ 4. EVENTS       │
+│ • End-to-end    │ • Token Counts   │ • Structured    │ • State deltas  │
+│   request span  │ • Tool Latency   │   JSON payload  │ • Tool inputs/  │
+│ • Node lineage  │ • Error rates    │ • Turn context  │   outputs       │
+└─────────────────┴──────────────────┴─────────────────┴─────────────────┘
+```
 
 ![Four Pillars of Agent Telemetry (Light)](img/four-pillars-telemetry-light.webp#gh-light-mode-only)
 ![Four Pillars of Agent Telemetry (Dark)](img/four-pillars-telemetry-dark.webp#gh-dark-mode-only)
 *Figure: The four pillars of agent telemetry—Traces, Metrics, Logs, and Events—unified across distributed agent execution graphs.*
 
-### The ADK Plugin System
+---
 
-**Plugins** are modular, reusable classes that intercept and observe the events flowing through an agent's execution without modifying the agent's core logic. They provide a clean separation of concerns, allowing you to add logging, metrics, and other observability features without cluttering your agent's business logic.
+### The ADK Plugin Architecture
 
-### Enterprise Telemetry in ADK 2.0
+**Plugins** (`google.adk.plugins.BasePlugin`) are modular, reusable classes that intercept and observe events flowing through an agent's lifecycle without altering business logic or prompt instructions.
 
-While custom plugins are great for specific logic, ADK 2.0 introduces native support for **OpenTelemetry (OTel)**. This allows you to export performance data and traces to industry-standard backends like **Google Cloud Trace** and **Cloud Monitoring**.
+```python
+from google.adk.plugins import BasePlugin
+from google.adk.events import Event
 
-#### 1. The "Graph-Aware" Trace
-In a complex ADK 2.0 Workflow, every event now carries a **`node_info`** field. When using OTel, these details are automatically attached to the spans, allowing you to see:
-*   Which node in the graph is currently executing.
-*   The exact input and output of that node.
-*   How long each node took to process (latency profiling).
+class TurnMetricsPlugin(BasePlugin):
+    """Observes tool errors and turn lifecycles."""
+    
+    async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
+        print(f"⚠️ [AgentOps Alert] Tool {tool.__name__} failed: {error}")
+        # Recover gracefully without crashing the turn
+        return {"status": "error", "message": str(error)}
 
-#### 2. Configuring Cloud Trace
-To enable enterprise telemetry, you use the `google.adk.telemetry` module. You define which exporters you want and pass them to the framework setup.
+    async def on_event_callback(self, *, event: Event, **kwargs):
+        if event.is_final_response():
+            print(f" Turn completed successfully for agent: {event.author}")
+```
 
+---
+
+### Enterprise Cloud Architecture: OpenTelemetry to Looker Studio
+
+In enterprise Google Cloud environments, ADK integrates natively with OpenTelemetry to pipe telemetry through the entire Google Cloud data stack:
+
+```mermaid
+flowchart LR
+    A["ADK Agent\n(App Runtime)"] -->|"OTel Spans"| B["Google Cloud Trace"]
+    A -->|"Structured Logs"| C["Google Cloud Logging"]
+    C -->|"Log Sink Export"| D[("BigQuery\nAnalytics Warehouse")]
+    D -->|"Live BI Cruscotto"| E["Looker Studio\nExecutive Dashboard"]
+```
+
+#### Configuring Cloud Trace in Code:
 ```python
 from google.adk.telemetry.google_cloud import get_gcp_exporters
 from google.adk.telemetry.setup import maybe_set_otel_providers
 
-# 1. Configure the GCP Exporters
-# Requires: pip install "google-adk[gcp]>=2.1.0"
+# 1. Configure GCP Exporters (Requires google-adk[gcp])
 otel_hooks = get_gcp_exporters(
     enable_cloud_tracing=True,
     enable_cloud_metrics=True
 )
 
-# 2. Initialize the OTel Providers
+# 2. Register OpenTelemetry providers
 maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
-
-# 3. Your App now automatically sends telemetry!
-app = App(name="production_agent", root_agent=my_agent)
 ```
 
+---
+
 ### Key Takeaways
-- **Standardized Pillars**: Use OTel for Traces, Metrics, and Logs.
-- **Graph Visibility**: The `node_info` field in ADK 2.0 events provides deep insights into Workflow execution.
-- **Custom vs. Native**:
-    *   Use **Plugins** for business-specific logic (e.g., custom alerting, session-level metrics).
-    *   Use **Native Telemetry** for infrastructure monitoring and performance profiling.
-- **Separation of Concerns**: Infrastructure code stays outside your agent's core logic, ensuring maintainability.
+- **Separation of Concerns:** Business logic stays in `Agent(instruction=...)` and tools; operational monitoring stays in `BasePlugin` and OpenTelemetry hooks.
+- **Local-First Debugging:** You can build and verify complete alerting and error recovery plugins locally in seconds without cloud credentials.
+- **Enterprise Ready:** Flipping on `get_gcp_exporters` instantly hooks your agent into Google Cloud Trace and BigQuery logging.
+
+---
+
+### 🧠 Socratic Knowledge Check
+
+<details>
+<summary><b>1. What happens if a tool raises an unhandled exception and no plugin handles <code>on_tool_error_callback</code>?</b></summary>
+The exception propagates up the call stack, halting the agent runner and failing the user's turn. Returning a recovery dictionary from <code>on_tool_error_callback</code> allows the agent to inform the LLM of the error and attempt recovery.
+</details>
+
+<details>
+<summary><b>2. Why is <code>event.is_final_response()</code> crucial for tracking turn completion?</b></summary>
+An agent may emit multiple intermediate events (e.g. tool calls, thinking steps, thoughts). <code>is_final_response()</code> indicates that the model has finished its entire turn and delivered the final response to the user.
+</details>
+
+<details>
+<summary><b>3. What is the key advantage of streaming agent logs to BigQuery for Looker Studio?</b></summary>
+It allows business leaders and SRE teams to analyze long-term agent trends: token consumption, cost per user, tool success rates, and user drop-off over thousands of historical sessions.
+</details>

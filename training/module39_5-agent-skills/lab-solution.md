@@ -41,7 +41,7 @@ my_skill_toolset = SkillToolset(
 # as a greeting; the model won't reliably call load_skill() without being
 # told exactly when to.
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="skill_user_agent",
     description="An agent that can use specialized skills.",
     instruction=(

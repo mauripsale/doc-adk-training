@@ -142,13 +142,13 @@ export const VAULT_REGISTRY = {
       {
         "question": "What model should always be used as the default for training labs and standard ADK agents?",
         "options": [
-          "gemini-3.5-flash",
+          "gemini-3.8-flash",
           "gpt-3.5-turbo",
           "text-davinci-003",
           "claude-v1"
         ],
         "correctIndex": 0,
-        "hint": "The standardized default model across all labs and solutions in this curriculum is gemini-3.5-flash."
+        "hint": "The standardized default model across all labs and solutions in this curriculum is gemini-3.8-flash."
       }
     ]
   },
@@ -279,13 +279,13 @@ export const VAULT_REGISTRY = {
       {
         "question": "Which Gemini model family is optimized for multimodal vision, OCR, and visual document reasoning?",
         "options": [
-          "gemini-3.5-flash / gemini-2.5-flash",
+          "gemini-3.8-flash / gemini-2.5-flash",
           "text-bison-001",
           "bert-base-uncased",
           "gpt-2"
         ],
         "correctIndex": 0,
-        "hint": "Gemini 3.5 Flash and Gemini 2.5 Flash offer state-of-the-art native multimodal vision reasoning."
+        "hint": "Gemini 3.8 Flash and Gemini 2.5 Flash offer state-of-the-art native multimodal vision reasoning."
       },
       {
         "question": "When processing high-resolution visual inputs, why is structured prompt grounding critical?",

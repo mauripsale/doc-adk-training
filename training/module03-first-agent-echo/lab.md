@@ -46,7 +46,7 @@ from google.adk import Agent
 # You will need to provide a name, a model, and the instruction for the agent.
 root_agent = Agent(
     name=...,  # TODO: Give your agent a name (e.g., "echo_agent")
-    model=..., # TODO: Specify the model to use (e.g., "gemini-3.5-flash")
+    model=..., # TODO: Specify the model to use (e.g., "gemini-3.8-flash")
     description=...,  # TODO: Provide a short description of what the agent does.
     instruction=...,  # TODO: Provide the instruction for the echo agent.
 )
@@ -63,7 +63,7 @@ If you prefer a simpler, config-based agent, you can define your agent in a YAML
 # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
 
 name: ... # Give your agent a name (e.g., "echo_agent")
-model: ... # Specify the model to use (e.g., "gemini-3.5-flash")
+model: ... # Specify the model to use (e.g., "gemini-3.8-flash")
 instruction: ... # Provide the instruction for the echo agent.
 ```
 > **Note:** If both `agent.py` and `root_agent.yaml` exist in the same directory, the ADK will use `agent.py` -- the generated `__init__.py` hard-imports it, regardless of a sibling YAML file. Avoid keeping both in the same directory.
@@ -149,7 +149,7 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
     # to be named exactly `root_agent`.
     root_agent = Agent(
         name="echo_agent",
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         description="A parrot agent that only repeats user input.",
         instruction="You are a parrot. Your ONLY job is to repeat the user's input back to them exactly as they wrote it. DO NOT answer questions. DO NOT provide help. DO NOT add extra words. If the user asks a question, repeat the question back to them."
     )
@@ -173,7 +173,7 @@ Instead of Python, you can define your agent in a YAML file. This is simpler for
     # auto-completion and validation in compatible code editors.
     # yaml-language-server: $schema=https://raw.githubusercontent.com/google/adk-python/refs/heads/main/src/google/adk/agents/config_schemas/AgentConfig.json
     name: echo_agent
-    model: gemini-3.5-flash
+    model: gemini-3.8-flash
     description: An agent that repeats the user's input.
     instruction: You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it. Do not add any extra words or explanations.
     ```

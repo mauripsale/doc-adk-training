@@ -50,7 +50,7 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 # search tools.`).
 
 research_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='research_agent',
     instruction=(
         "You are a research assistant. Use google_search to find current "
@@ -64,7 +64,7 @@ research_agent = Agent(
 # Only the custom tools -- no google_search here.
 
 formatter_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='formatter_agent',
     instruction="""
 You are a report formatter. The user will give you a topic and some research

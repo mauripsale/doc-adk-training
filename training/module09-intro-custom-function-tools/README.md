@@ -160,7 +160,7 @@ Specifically, you cannot mix a **Built-in Tool** (like `google_search`) with **C
 #   all search tools.
 root_agent = Agent(
     name="MixedToolAgent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     tools=[google_search, custom_function],
 )
 ```

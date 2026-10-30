@@ -61,7 +61,7 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 # Only google_search -- it cannot be mixed with the custom tools below.
 
 research_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='research_agent',
     instruction=(
         "You are a research assistant. Use google_search to find current "
@@ -73,7 +73,7 @@ research_agent = Agent(
 
 # --- Agent 2: Formatter ---
 # TODO: Define `formatter_agent`.
-# 1. Use 'gemini-3.5-flash'.
+# 1. Use 'gemini-3.8-flash'.
 # 2. Add `extract_key_facts` and `format_research_notes` to tools (do NOT
 #    add google_search here -- that's the whole point of splitting these up).
 # 3. Write an instruction telling it to: first call extract_key_facts on the
@@ -196,7 +196,7 @@ def extract_key_facts(text: str, num_facts: int = 5) -> dict:
 # search tools.`).
 
 research_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='research_agent',
     instruction=(
         "You are a research assistant. Use google_search to find current "
@@ -210,7 +210,7 @@ research_agent = Agent(
 # Only the custom tools -- no google_search here.
 
 formatter_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='formatter_agent',
     instruction="""
 You are a report formatter. The user will give you a topic and some research

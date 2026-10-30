@@ -30,7 +30,7 @@ A `Part` can contain:
 *   **Text:** `types.Part.from_text(text="Describe this image")`
 *   **Image Data:** `types.Part(inline_data=types.Blob(data=image_bytes, mime_type='image/png'))`
 
-When you send a list of these parts to a vision-capable model like `gemini-3.5-flash`, the model can reason about the text and the image(s) together.
+When you send a list of these parts to a vision-capable model like `gemini-3.8-flash`, the model can reason about the text and the image(s) together.
 
 ![Figure 7.1: Multimodal Ingestion Pipeline & Part Serializer (Light)](img/multimodal-pipeline-light.webp#gh-light-mode-only)
 ![Figure 7.1: Multimodal Ingestion Pipeline & Part Serializer (Dark)](img/multimodal-pipeline-dark.webp#gh-dark-mode-only)
@@ -48,7 +48,7 @@ from google.genai import types
 # 1. Define the agent
 agent = Agent(
     name="vision_expert",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Describe the provided image in detail."
 )
 

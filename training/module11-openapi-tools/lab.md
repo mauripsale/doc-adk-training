@@ -189,7 +189,7 @@ currency_toolset = OpenAPIToolset(
 # ============================================================================
 root_agent = Agent(
     name="market_analyst",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="A specialist in global currency exchange rates.",
     instruction="""
 You are an expert Global Market Analyst.

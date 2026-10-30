@@ -38,7 +38,7 @@ def get_preferences(tool_context: ToolContext) -> dict:
 
 # --- Personalization Agent Definition ---
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="personalization_agent",
     description="A specialist agent that manages user preferences and shopping profiles.",
     instruction="""

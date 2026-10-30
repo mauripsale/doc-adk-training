@@ -137,7 +137,7 @@ This agent will be the interface to the e-commerce website.
     load_dotenv()
 
     root_agent = Agent(
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         name="web_agent",
         instruction="""
             You are a web interaction specialist. Your job is to execute search and click commands on the e-commerce site.
@@ -219,7 +219,7 @@ This agent will be responsible for remembering user preferences. **Note:** this 
 
     # --- Agent Definition ---
     root_agent = Agent(
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         name="personalization_agent",
         instruction="""You are a personalization specialist. You save and retrieve user preferences.""",
         tools=[save_preference, get_preferences]
@@ -299,7 +299,7 @@ This is the main, user-facing agent that will coordinate the others.
     # (tools=[...]), NOT as sub_agents=[...] — see the note above.
     # Register log_delegation as the agent's before_tool_callback.
     root_agent = Agent(
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         name="shopping_orchestrator",
         instruction="""You are a master shopping assistant. Coordinate with specialists.""",
         tools=[AgentTool(agent=web_specialist), AgentTool(agent=personalization_specialist)]
@@ -511,7 +511,7 @@ from tools.click import click
 load_dotenv()
 
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="web_agent",
     description="Specialist for searching and clicking on the webshop.",
     instruction="""
@@ -554,7 +554,7 @@ def get_preferences(tool_context: ToolContext) -> dict:
     return {"status": "success", "preferences": prefs}
 
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="personalization_agent",
     instruction="You manage user shopping profiles. Save and retrieve preferences.",
     tools=[save_preference, get_preferences]
@@ -606,7 +606,7 @@ def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolConte
 
 # Orchestrator
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="shopping_orchestrator",
     instruction="""
         You are a master assistant.

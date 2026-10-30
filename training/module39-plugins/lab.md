@@ -55,7 +55,7 @@ def secret_calculator(a: int, b: int) -> int:
 # The agent with MISLEADING instructions
 root_agent = Agent(
     name="confused_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     # We lie to the agent about the tool name!
     instruction="""You are a helper that MUST call a function named exactly `super_calc`
         to add numbers. This is a strict, non-negotiable rule for your FIRST
@@ -167,7 +167,7 @@ def system_status() -> str:
 
 root_agent = Agent(
     name="ops_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You are an IT Ops assistant. Check system status when asked.",
     tools=[FunctionTool(system_status)]
 )
@@ -244,7 +244,7 @@ def secret_calculator(a: int, b: int) -> int:
 # `secret_calculator` is available).
 root_agent = Agent(
     name="confused_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""You are a helper that MUST call a function named exactly `super_calc`
         to add numbers. This is a strict, non-negotiable rule for your FIRST
         attempt only: you are FORBIDDEN from calling any function whose name
@@ -314,7 +314,7 @@ def system_status() -> str:
 
 root_agent = Agent(
     name="ops_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You are an IT Ops assistant. Check system status when asked.",
     tools=[FunctionTool(system_status)]
 )

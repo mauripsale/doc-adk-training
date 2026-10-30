@@ -151,7 +151,7 @@ class MarketRoute(BaseModel):
 # 2. Create the Classifier Node
 classifier = Agent(
     name="classifier",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Extract the currency (USD, EUR, or GBP) from the user's request. Return ONLY the JSON.",
     output_schema=MarketRoute
 )
@@ -159,19 +159,19 @@ classifier = Agent(
 # 3. Create Specialist Agents (Nodes)
 usd_analyst = Agent(
     name="usd_analyst",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Provide a brief, bullish outlook for the US Dollar."
 )
 
 eur_analyst = Agent(
     name="eur_analyst",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Provide a brief, cautious outlook for the Euro."
 )
 
 gbp_analyst = Agent(
     name="gbp_analyst",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Provide a brief, neutral outlook for the British Pound."
 )
 

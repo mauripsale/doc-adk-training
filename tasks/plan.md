@@ -1,40 +1,31 @@
-# Technical Plan: Google Agents CLI Modernization & Integration
+# Plan: gemini-3.8-flash Curriculum Migration & Project Rule Update
 
-## Major Components & Sequence
-
-```mermaid
-flowchart TD
-    A["Phase 1: Environment & Tooling Foundations<br/>(Modules 02 & 05)"] --> B["Phase 2: Evaluation & Flywheel Tooling<br/>(Module 24)"]
-    B --> C["Phase 3: Multi-Target Deployment Modernization<br/>(Modules 32, 33, 35)"]
-    C --> D["Phase 4: Enterprise Registry & Publishing<br/>(Module 36)"]
-    D --> E["Phase 5: Socratic Quizzes, Solution Vault & Grader Sync"]
-    E --> F["Phase 6: Verification, Build & Testing"]
-```
+## Context & Objectives
+Migrate the Google ADK Training curriculum from `gemini-3.5-flash` to `gemini-3.8-flash` as the canonical default standard model across all 45 modules, while allowing `gemini-3.7-flash` and `gemini-3.6-flash` in grader rubrics.
 
 ---
 
-## Breakdown by Phase
+## Phases & Tasks
 
-### Phase 1: Environment & Tooling Foundations (Modules 02 & 05)
-- Update `training/module02-environment-setup/` to introduce `uvx google-agents-cli setup` and coding assistant skill binding.
-- Update `training/module05-running-agents/` to introduce `agents-cli playground` and compare it with `adk web` / `adk run` / `adk api_server`.
+### Phase 1: Project Rules & Environment Defaults
+- Update `/Users/maurizio.ipsale/Code/adk-docs/GEMINI.md` to establish the new binding standard model mandate (`gemini-3.8-flash`).
+- Update `.env.example` with `ADK_DEFAULT_MODEL="gemini-3.8-flash"`.
 
-### Phase 2: Evaluation & Quality Flywheel (Module 24)
-- Update `training/module24-evaluation/` to incorporate `uvx google-agents-cli eval run` alongside `adk eval`, teaching the complete Quality Flywheel workflow.
+### Phase 2: Grader Rubrics & Evaluation Engine
+- Update `scripts/rubrics/__init__.py` with default expected models: `["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-2.5-flash"]`.
+- Update `scripts/rubrics/definitions.py` across all module rubrics to accept `gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-3.6-flash`.
 
-### Phase 3: Multi-Target Deployment Modernization (Modules 32, 33, 35)
-- Update `training/module32-deployment-cloud-run/` with `agents-cli scaffold enhance --deployment-target cloud_run`.
-- Update `training/module33-deployment-gke/` with `agents-cli scaffold enhance --deployment-target gke`.
-- Update `training/module35-deployment-agent-runtime/` with the latest `agents-cli` flags and patterns.
+### Phase 3: Global Curriculum Code & Documentation Migration (45 Modules)
+- Update all training modules (`training/module*/README.md`, `lab.md`, `lab-solution.md`).
+- Update YAML configs (`support_agent/*.yaml`, etc.).
+- Update sample agents (`sample-agents/personalized-shopping/`).
+- Preserve Live API models in Module 30 (`gemini-live-2.5-flash-native-audio`).
 
-### Phase 4: Enterprise Publishing (Module 36)
-- Update `training/module36-gemini-enterprise/` to highlight `agents-cli publish gemini` (with ADK and A2A modes).
+### Phase 4: Socratic Quiz & Vault Registry Synchronization
+- Update `scripts/generate_vault_registry.py` with `gemini-3.8-flash` in Module 04 and other comprehension checks.
+- Run `python3 scripts/generate_vault_registry.py` to regenerate `doc/src/data/vaultRegistry.js`.
 
-### Phase 5: Socratic Quizzes, Solution Vault & Grader Sync
-- Update `doc/src/data/vaultRegistry.js` and `scripts/generate_vault_registry.py`.
-- Sync `scripts/rubrics/definitions.py` if needed.
-
-### Phase 6: Verification & Adversarial Review
-- Run `python3 scripts/test_solutions.py` and `python3 scripts/grade_lab.py`.
-- Build Docusaurus docs (`npm run build`).
-- Run adversarial debate to validate pedagogical quality.
+### Phase 5: Verification, Grader Testing & Docusaurus Build
+- Run `python3 scripts/grade_lab.py --all` to verify 100% pass across all 45 modules.
+- Run `npm --prefix doc run build` to verify clean compilation with zero broken links.
+- Commit all changes to `feat/gemini-3.8-flash-migration`.

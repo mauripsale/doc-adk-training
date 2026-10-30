@@ -23,11 +23,11 @@ RUBRICS: Dict[str, ModuleRubric] = {
         title="Your First Agent: Echo and Simple Instructions",
         required_imports=["google.adk", "Agent"],
         required_symbols=["agent"],
-        expected_models=["gemini-3.5-flash", "gemini-2.5-flash"],
+        expected_models=["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"],
         theory_ref="Module 03 Theory -> 'Creating Your First Agent'",
         hints={
             "missing_agent": "Ensure you define an Agent object with `name` and `instruction`.",
-            "wrong_model": "Use the standard course model 'gemini-3.5-flash'."
+            "wrong_model": "Use the standard course model 'gemini-3.8-flash'."
         }
     ),
     "04": ModuleRubric(
@@ -35,7 +35,7 @@ RUBRICS: Dict[str, ModuleRubric] = {
         title="Agent Configuration & Personas Deep Dive",
         required_imports=["google.adk", "Agent"],
         required_symbols=["agent"],
-        expected_models=["gemini-3.5-flash"],
+        expected_models=["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"],
         theory_ref="Module 04 Theory -> 'Designing Robust System Instructions'",
     ),
     "04_5": ModuleRubric(

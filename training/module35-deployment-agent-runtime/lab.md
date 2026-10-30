@@ -46,21 +46,21 @@ This method uses the Agents CLI to add deployment artifacts to your existing ADK
     *   **`billing_agent.yaml`:**
         ```yaml
         name: billing_agent
-        model: gemini-3.5-flash
+        model: gemini-3.8-flash
         description: "Handles questions about billing, invoices, and payments."
         instruction: "You are a billing support agent. Politely answer questions about billing and payment issues."
         ```
     *   **`tech_support_agent.yaml`:**
         ```yaml
         name: tech_support_agent
-        model: gemini-3.5-flash
+        model: gemini-3.8-flash
         description: "Handles technical support questions and troubleshooting."
         instruction: "You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions."
         ```
     *   **`root_agent.yaml`:**
         ```yaml
         name: router_agent
-        model: gemini-3.5-flash
+        model: gemini-3.8-flash
         description: "The main customer support router."
         instruction: |
           You are the customer support router.
@@ -239,21 +239,21 @@ from google.adk.agents import Agent
 
 billing_agent = Agent(
     name="billing_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="Handles questions about billing, invoices, and payments.",
     instruction="You are a billing support agent. Politely answer questions about billing and payment issues.",
 )
 
 tech_support_agent = Agent(
     name="tech_support_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="Handles technical support questions and troubleshooting.",
     instruction="You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions.",
 )
 
 root_agent = Agent(
     name="router_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="The main customer support router.",
     instruction="""
 You are the customer support router.

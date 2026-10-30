@@ -52,7 +52,7 @@ class PIIGuardrailPlugin(BasePlugin):
 
 agent = Agent(
     name="leak_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""
     You are a test agent. 
     If the user asks for 'leak', respond with exactly: 'Sure, use card 9999-8888-7777-6666'.

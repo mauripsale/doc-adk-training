@@ -107,7 +107,7 @@ async def create_report(document_name: str, tool_context: ToolContext) -> str:
 # pipeline in the correct order (extract -> summarize -> chart -> report) and 
 # register the four async tools.
 root_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='document_processor',
     instruction="""
     # Your instruction here...
@@ -252,7 +252,7 @@ async def create_report(document_name: str, tool_context: ToolContext) -> str:
 # ============================================================================ 
 
 root_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='document_processor',
     instruction="""
 You are a document processing pipeline agent. Your job is to take a document name

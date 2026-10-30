@@ -117,7 +117,7 @@ from mcp import StdioServerParameters
 PATH_TO_SERVER = str(pathlib.Path(__file__).parent / "cart_server.py")
 
 root_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='shopping_agent',
     instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
     tools=[

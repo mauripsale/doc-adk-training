@@ -168,7 +168,7 @@ def generate_text(topic: str, word_count: int) -> dict:
 # TODO: Define root_agent and register ALL six callbacks defined above.
 root_agent = Agent(
     name="secure_moderator",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     # instruction=...,
     # tools=[...],
     # before_agent_callback=...,
@@ -363,7 +363,7 @@ def generate_text(topic: str, word_count: int) -> dict:
 # --- Agent Registration ---
 root_agent = Agent(
     name="secure_moderator",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You are a professional content assistant.",
     tools=[generate_text],
     before_agent_callback=before_agent_callback,

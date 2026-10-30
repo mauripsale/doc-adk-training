@@ -57,7 +57,7 @@ app = App(
     events_compaction_config=EventsCompactionConfig(
         compaction_interval=20,
         overlap_size=3,
-        summarizer=LlmEventSummarizer(llm=Gemini(model="gemini-3.5-flash")),
+        summarizer=LlmEventSummarizer(llm=Gemini(model="gemini-3.8-flash")),
     ),
 )
 
@@ -99,7 +99,7 @@ app = App(
    - Command: `npm --prefix doc run build`
    - Verify zero build errors, zero broken markdown tags, zero missing imports or broken links.
 2. **Pedagogical Consistency**:
-   - Ensure all model mentions adhere strictly to user memory rule: `gemini-3.5-flash`.
+   - Ensure all model mentions adhere strictly to user memory rule: `gemini-3.8-flash`.
    - Maintain image links (`#gh-light-mode-only` / `#gh-dark-mode-only`) and existing visual headers.
 
 ---

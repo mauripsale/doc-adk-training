@@ -49,7 +49,7 @@ Riscriveremo questo modulo per essere la "Bibbia" del developer ADK:
 ---
 
 ## ✅ Prossimi Passi Immediati (Completato)
-1.  [x] Migrazione globale a **`gemini-3.5-flash`** (Standard 2026).
+1.  [x] Migrazione globale a **`gemini-3.8-flash`** (Standard 2026).
 2.  [x] Validazione pedagogica di tutti i nuovi moduli (4.5, 13.5, 21.5, 39.5, 38) tramite `adk-student-evaluator`.
 3.  [x] Aggiornamento dei timetable (`timetable-ilt.md`, `timetable-self-service.md`).
 4.  [x] Implementazione dei plugin di Observability e RAI (Moduli 25 e 25.5).

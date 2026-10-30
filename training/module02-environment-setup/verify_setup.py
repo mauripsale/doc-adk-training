@@ -32,7 +32,7 @@ async def main():
         print("Attempting to connect to the Gemini Enterprise Agent Platform...")
         agent = Agent(
             name="verify_agent",
-            model="gemini-3.5-flash",
+            model="gemini-3.8-flash",
             instruction="You are a helpful assistant. Reply with 'ADK 2.0 is ready!' if you can hear me."
         )
         app = App(name="verify", root_agent=agent)

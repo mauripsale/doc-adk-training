@@ -83,7 +83,7 @@ uv run python verify_setup.py
 
 ### 💡 Troubleshooting: Model Not Found (404)
 
-If you see a `404 NOT_FOUND` error for `gemini-3.5-flash`, it is likely a region availability issue.
+If you see a `404 NOT_FOUND` error for `gemini-3.8-flash`, it is likely a region availability issue.
 
 **The Fix:**
 1.  Open your `.env` file.

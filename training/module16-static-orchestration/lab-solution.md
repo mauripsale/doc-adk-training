@@ -18,21 +18,21 @@ from google.adk.workflow import JoinNode
 # 1. Define Specialist Nodes
 tech_researcher = Agent(
     name="tech_researcher",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Find 3 exciting headlines about AI and Robotics. Be concise.",
     output_key="tech_news"
 )
 
 market_researcher = Agent(
     name="market_researcher",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Find 3 key headlines about Stock Market trends. Be concise.",
     output_key="market_news"
 )
 
 summarizer = Agent(
     name="summarizer",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""
     You are a news editor. Create a brief newsletter using the data provided:
     TECH: {tech_news}

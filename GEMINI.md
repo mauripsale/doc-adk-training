@@ -20,6 +20,9 @@
     - It must contain a Base64-encoded hint of the solution path.
     - It must contain a direct link to the solution hidden via CSS opacity (0.01) to prevent accidental spoilers while enabling quick access for instructors.
 - **Python Version:** Target Python 3.10+ as per the migration plan.
+- **Standard Agent Model:** Always use **`gemini-3.8-flash`** as the default model for all agents, code examples, labs, YAML configurations, and solutions across the entire curriculum.
+    - Automated graders and evaluation rubrics must accept `gemini-3.8-flash`, `gemini-3.7-flash`, and `gemini-3.6-flash` as valid Flash family models.
+    - Legacy references to `gemini-3.5-flash` are deprecated and must be systematically replaced.
 
 ## How to run the Student Evaluator
 If the `adk` command is not in the PATH, use:

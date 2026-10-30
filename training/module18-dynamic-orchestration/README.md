@@ -86,7 +86,7 @@ def apply_discount(ctx: Context, tier: str) -> Generator[str, None, str]:
     return "20% off applied" if resume_input else "5% off applied"
 
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="pricing_agent",
     instruction="Help customers with discounts using the apply_discount tool.",
     tools=[apply_discount],

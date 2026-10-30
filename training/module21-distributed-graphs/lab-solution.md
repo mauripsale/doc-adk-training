@@ -20,7 +20,7 @@ load_dotenv()
 
 # 1. Specialist Node
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="research_specialist",
     description="A specialist node that conducts web research using Google Search.",
     instruction="""
@@ -57,7 +57,7 @@ remote_researcher = RemoteA2aAgent(
 
 # 2. Define the Coordinator Node
 coordinator = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="coordinator",
     instruction="Analyze the user request. If research is needed, delegate to 'remote_researcher'.",
     sub_agents=[remote_researcher]

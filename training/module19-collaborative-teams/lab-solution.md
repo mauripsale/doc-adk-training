@@ -19,7 +19,7 @@ from google.adk import Agent
 # with no need for further user interaction.
 weather_agent = Agent(
     name="weather_checker",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     mode="single_turn",
     # Required on every agent in a sub_agents dispatch chain -- without it:
     # "ValueError: A node must have rerun_on_resume=True."
@@ -32,7 +32,7 @@ weather_agent = Agent(
 # clarification questions before it considers its task "complete".
 flight_agent = Agent(
     name="flight_booker",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     mode="task",
     # Required for any node that might pause and resume across turns --
     # without it: "ValueError: A node must have rerun_on_resume=True."
@@ -49,7 +49,7 @@ flight_agent = Agent(
 # It doesn't need a mode.
 root_agent = Agent(
     name="travel_planner",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     # The coordinator itself also needs this -- it's part of the same
     # dispatch chain and can be "woken up" when a sub-agent's task resumes.
     rerun_on_resume=True,
@@ -89,13 +89,13 @@ from google.adk.tools.agent_tool import AgentTool
 # No mode needed -- AgentTool doesn't use the sub_agents lifecycle at all.
 weather_agent = Agent(
     name="weather_checker",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Provide a brief, enthusiastic 3-day weather forecast for the user's destination."
 )
 
 root_agent = Agent(
     name="travel_planner",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     rerun_on_resume=True,
     instruction="""
     You are a travel planning coordinator.

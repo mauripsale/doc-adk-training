@@ -515,7 +515,7 @@ def search_past_lessons(
 
 root_agent = Agent(
     name="personal_tutor",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="Personal learning tutor that tracks your progress, preferences, and learning history.",
     instruction="""
     You are a personalized learning tutor (Course Version {app:course_version?}) with memory of the user's progress.
@@ -564,7 +564,7 @@ from agent import root_agent
 async def test_advanced_memory():
     # 1. Configure Automatic Event Compaction
     compaction_config = EventsCompactionConfig(
-        summarizer=LlmEventSummarizer(model="gemini-3.5-flash"),
+        summarizer=LlmEventSummarizer(model="gemini-3.8-flash"),
         compaction_interval=6,
         overlap_size=1
     )

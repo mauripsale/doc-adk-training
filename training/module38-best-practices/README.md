@@ -61,7 +61,7 @@ my_agent_node = Agent(
 
 ### 3. Performance Optimization
 
-*   **Model Selection Hierarchy:** Use `gemini-3.5-flash` for routing, classification, and simple tool calling. Save `gemini-3.1-pro-preview` for complex multi-step reasoning.
+*   **Model Selection Hierarchy:** Use `gemini-3.8-flash` for routing, classification, and simple tool calling. Save `gemini-3.1-pro-preview` for complex multi-step reasoning.
 *   **Caching with `before_agent_callback`:** Implement a caching layer to skip LLM calls entirely if a similar request was recently processed.
 *   **Async Everything:** Always use `async` tool definitions to prevent blocking the event loop during I/O-bound tasks (API calls, DB queries).
 

@@ -33,7 +33,7 @@ In this lab, you will run an ADK agent as a backend API server and interact with
         instruction: |
           You are a friendly and talkative assistant. Keep your answers concise.
         ```
-    *   **Important:** the model must be one of the Gemini **Live API** models — a regular model like `gemini-3.5-flash` will fail to connect on `/run_live`. This particular model is a *native-audio* model: it only supports **audio** output, not text. That's by design for this lab — see the README for why.
+    *   **Important:** the model must be one of the Gemini **Live API** models — a regular model like `gemini-3.8-flash` will fail to connect on `/run_live`. This particular model is a *native-audio* model: it only supports **audio** output, not text. That's by design for this lab — see the README for why.
 
 ### Step 2: Add the Provided Audio Worklet
 
@@ -580,7 +580,7 @@ registerProcessor('audio-processor', AudioProcessor);
 
 *   **The connection closes with an error like "... is not supported in the live api":**
     *   **Cause:** `root_agent.yaml`'s `model` isn't a Gemini Live API model.
-    *   **Solution:** Use `gemini-live-2.5-flash-native-audio` (or another Live API model) — a regular model like `gemini-3.5-flash` doesn't support `/run_live` at all.
+    *   **Solution:** Use `gemini-live-2.5-flash-native-audio` (or another Live API model) — a regular model like `gemini-3.8-flash` doesn't support `/run_live` at all.
 
 *   **"NotAllowedError: Permission denied" in browser console:**
     *   **Cause:** You denied the browser's request to access your microphone.

@@ -24,7 +24,7 @@ class SupportAnalysis(BaseModel):
 # Define the root agent with ADK 2.0 structured features
 root_agent = Agent(
     name="support_analyzer_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="An agent that categorizes customer support tickets and extracts sentiment.",
     instruction="""
       You are an expert customer support analyzer. Your task is to:

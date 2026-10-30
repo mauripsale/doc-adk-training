@@ -259,7 +259,7 @@ registerProcessor('audio-processor', AudioProcessor);
 
 *   **The connection closes with an error like "... is not supported in the live api":**
     *   **Cause:** `root_agent.yaml`'s `model` isn't a Gemini Live API model.
-    *   **Solution:** Use `gemini-live-2.5-flash-native-audio` (or another Live API model) — a regular model like `gemini-3.5-flash` doesn't support `/run_live` at all.
+    *   **Solution:** Use `gemini-live-2.5-flash-native-audio` (or another Live API model) — a regular model like `gemini-3.8-flash` doesn't support `/run_live` at all.
 
 *   **"NotAllowedError: Permission denied" in browser console:**
     *   **Cause:** You denied the browser's request to access your microphone.

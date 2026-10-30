@@ -146,13 +146,13 @@ from typing import AsyncGenerator, Literal
 
 ai_support = Agent(
     name="ai_support_bot",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You are a helpful customer support AI. Answer technical questions clearly."
 )
 
 human_escalation = Agent(
     name="human_escalation_team",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You are a human rep. Frustrated customer. apologize and promise a call."
 )
 
@@ -163,7 +163,7 @@ class SentimentClassification(BaseModel):
 
 classifier = Agent(
     name="classifier",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Classify the sentiment of the user's latest message.",
     output_schema=SentimentClassification
 )

@@ -39,7 +39,7 @@ from google.adk.tools import google_search
 
 agent = Agent(
     name="grounded_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Search the web to answer the user's question.",
     tools=[google_search],
 )
@@ -62,7 +62,7 @@ def my_custom_tool(item_id: str) -> dict:
 # Agent 1: only the built-in tool
 research_agent = Agent(
     name="research_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Search the web to answer the user's question.",
     tools=[google_search],
 )
@@ -70,7 +70,7 @@ research_agent = Agent(
 # Agent 2: only your custom tool(s)
 warehouse_agent = Agent(
     name="warehouse_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Use my_custom_tool to check warehouse stock for the item you're given.",
     tools=[my_custom_tool],
 )

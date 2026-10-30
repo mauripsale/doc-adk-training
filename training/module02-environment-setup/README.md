@@ -143,7 +143,7 @@ The ADK automatically detects these credentials.
 
 ### Troubleshooting Common Errors
 
-#### 1. 🛑 `404: Model 'gemini-3.5-flash' not found`
+#### 1. 🛑 `404: Model 'gemini-3.8-flash' not found`
 This error usually occurs when the model has not yet been deployed to your specific Google Cloud location.
 
 **The Fix:**

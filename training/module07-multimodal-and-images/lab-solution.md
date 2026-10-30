@@ -42,7 +42,7 @@ class VisualCatalogApp:
         # 1. Define the Agent (The Intelligence)
         # Using the modern ADK 2.0 Agent class
         self.agent = Agent(
-            model='gemini-3.5-flash',
+            model='gemini-3.8-flash',
             name='catalog_writer',
             instruction="""
                 You are an expert product catalog writer. 

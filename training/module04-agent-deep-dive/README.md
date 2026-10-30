@@ -25,7 +25,7 @@ Every `Agent` has a few basic identity parameters:
 
 *   **`name` (Required):** A unique identifier for the agent (e.g., `echo_agent`).
 *   **`description` (Optional):** A short summary of the agent's purpose.
-*   **`model` (Required):** The specific LLM that powers the agent (e.g., `gemini-3.5-flash`).
+*   **`model` (Required):** The specific LLM that powers the agent (e.g., `gemini-3.8-flash`).
 
 ### The Art of the Instruction
 
@@ -63,7 +63,7 @@ Crafting good instructions is a skill often called "prompt engineering." Here ar
 
     root_agent = Agent(
         name="support_classifier",
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         instruction="""
           You are a customer support triage agent. 
           Your purpose is to read the user's message and categorize it into one of three departments: "billing", "technical", or "general".
@@ -120,7 +120,7 @@ class SentimentOutput(BaseModel):
 
 analyzer_agent = Agent(
     name="sentiment_analyzer",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Analyze the sentiment of the user's message.",
     output_schema=SentimentOutput # Force JSON output
 )

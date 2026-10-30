@@ -56,7 +56,7 @@ guarded_clear_tool = FunctionTool(
 
 root_agent = Agent(
     name="memory_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="An agent node that remembers users with guarded memory controls.",
     instruction="""
     You are a friendly assistant. 

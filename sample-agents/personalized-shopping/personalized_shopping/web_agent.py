@@ -27,7 +27,7 @@ load_dotenv()
 # --- Web Agent Definition ---
 # This agent acts as the interface to the simulated webshop.
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="web_agent",
     description="A specialist agent that can search and click on the e-commerce website.",
     instruction="""

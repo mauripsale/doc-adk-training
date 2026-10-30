@@ -102,7 +102,7 @@ from .tools.calculator import add, subtract, multiply, divide
 
 root_agent = Agent(
     name="calculator_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="An agent node that performs arithmetic.",
     instruction="""
 You are a helpful calculator assistant.
@@ -224,7 +224,7 @@ from .tools.calculator import add, subtract, multiply, divide
 
 root_agent = Agent(
     name="calculator_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="An agent node that can perform arithmetic calculations.",
     instruction="""
 You are a helpful calculator assistant.

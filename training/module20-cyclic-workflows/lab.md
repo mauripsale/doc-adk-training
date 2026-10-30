@@ -127,13 +127,13 @@ from google.adk.workflow import node
 # in the instruction (those are only filled from session state).
 writer = Agent(
     name="writer",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="Write a 2-sentence story based on the topic you're given."
 )
 
 critic = Agent(
     name="critic",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""
     You are a strict literary critic. Review the story you are given.
     If it is good, respond with exactly the word 'APPROVED' and nothing else.
@@ -143,7 +143,7 @@ critic = Agent(
 
 refiner = Agent(
     name="refiner",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""
     You are a writer revising a story based on feedback. You will be given
     the current story and the feedback on it. Rewrite the story addressing

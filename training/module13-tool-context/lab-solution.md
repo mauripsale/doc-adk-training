@@ -39,7 +39,7 @@ from .tools.finance import execute_investment
 # 1. Define the Specialist Node (Supervisor)
 supervisor = Agent(
     name="supervisor",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""
     You are a senior investment supervisor. 
     You have been called because a user wants to make a large investment (> $10,000).
@@ -57,7 +57,7 @@ secure_investment_tool = FunctionTool(
 # 3. Define the Main Agent Node
 finance_agent = Agent(
     name="finance_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="A secure finance assistant.",
     instruction="""
     You are a helpful investment assistant. 

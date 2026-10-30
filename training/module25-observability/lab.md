@@ -72,7 +72,7 @@ class AlertingPlugin(BasePlugin):
 # --- Create a simple Agent ---
 agent = Agent(
     name="monitored_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
     tools=[risky_operation],
 )
@@ -207,7 +207,7 @@ maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
 
 root_agent = Agent(
     name="monitored_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
     tools=[risky_operation],
 )

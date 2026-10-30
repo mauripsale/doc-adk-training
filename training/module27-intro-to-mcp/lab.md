@@ -83,7 +83,7 @@ Because the `McpToolset` requires Python code to configure the connection, we mu
     # -- Agent Definition --
     # TODO: 3. Define the root_agent.
     # Instantiate an Agent with the following properties:
-    # - model: 'gemini-3.5-flash'
+    # - model: 'gemini-3.8-flash'
     # - name: 'filesystem_agent'
     # - instruction: 'You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.'
     # - tools: A list containing one item: the McpToolset.
@@ -168,7 +168,7 @@ So far you connected to a *local* MCP server launched as a subprocess (`StdioCon
     GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 
     root_agent = Agent(
-        model="gemini-3.5-flash",
+        model="gemini-3.8-flash",
         name="github_agent",
         instruction="Help users get information from GitHub repositories.",
         tools=[
@@ -222,7 +222,7 @@ TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "t
 
 # -- Agent Definition --
 root_agent = Agent(
-    model='gemini-3.5-flash',
+    model='gemini-3.8-flash',
     name='filesystem_agent',
     instruction='You are a helpful assistant that can interact with a user\'s local file system. You can list files and read their content.',
     tools=[

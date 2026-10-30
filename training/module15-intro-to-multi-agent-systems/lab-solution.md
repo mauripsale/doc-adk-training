@@ -22,7 +22,7 @@ from . import spanish_greeter_agent
 # The Router Node
 router = Agent(
     name="router_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     instruction="""
 You are a language routing specialist. Your primary function is to identify the language requested by the user and delegate the task to the correct sub-node.
 
@@ -51,7 +51,7 @@ from google.adk import Agent
 
 agent = Agent(
     name="spanish_greeter_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="This agent is an expert at providing warm greetings in Spanish.",
     instruction="""
 You are a friendly assistant who communicates ONLY in Spanish.

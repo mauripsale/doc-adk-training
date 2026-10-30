@@ -120,7 +120,7 @@ app = App(
     events_compaction_config=EventsCompactionConfig(
         compaction_interval=20,  # Trigger summarization every 20 events
         overlap_size=3,          # Keep last 3 events uncompressed for seamless continuity
-        summarizer=LlmEventSummarizer(llm=Gemini(model="gemini-3.5-flash")),
+        summarizer=LlmEventSummarizer(llm=Gemini(model="gemini-3.8-flash")),
     ),
 )
 ```

@@ -16,7 +16,7 @@ pagination_label: "Module 03: Your First Agent: Echo Agent — 📖 Theory & Ove
 At its heart, an ADK Agent is a blueprint that tells a Large Language Model (LLM) how to behave. This blueprint consists of a few key pieces of information:
 
 *   **`name`:** A unique identifier for your agent.
-*   **`model`:** The specific LLM that will act as the agent's "brain" (e.g., `gemini-3.5-flash`).
+*   **`model`:** The specific LLM that will act as the agent's "brain" (e.g., `gemini-3.8-flash`).
 *   **`instruction`:** The most critical part. This is the detailed prompt that defines the agent's persona, goals, and constraints. Crafting a clear and effective instruction is the key to building a successful agent.
 *   **`description`:** A short, human-readable summary of the agent's purpose.
 
@@ -36,7 +36,7 @@ The simplest way to define an agent is with a **YAML** configuration file (e.g.,
 A typical YAML configuration looks like this:
 ```yaml
 name: echo_agent
-model: gemini-3.5-flash
+model: gemini-3.8-flash
 description: An agent that repeats the user's input.
 instruction: You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it.
 ```
@@ -56,7 +56,7 @@ from google.adk import Agent
 
 root_agent = Agent(
     name="echo_agent",
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     description="An agent that repeats the user's input.",
     instruction="You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it."
 )

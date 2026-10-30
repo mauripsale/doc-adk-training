@@ -134,7 +134,7 @@ def end_timer_and_sanitize(callback_context: CallbackContext, llm_response: LlmR
     })
 
 threat_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="threat_intel_agent",
     instruction="""
         You are a Threat Intelligence log investigator.
@@ -179,7 +179,7 @@ mitigation_service = RemoteA2aAgent(
 )
 
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="aegis_orchestrator",
     instruction="""
         You are the master coordinator for the Aegis Incident Response System.
@@ -242,7 +242,7 @@ async def build_and_upload_mitigation_brief(target_node: str, incident_type: str
     }
 
 mitigation_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="mitigation_agent",
     instruction="You generate patch scripts and executive briefings. Use the playbook search and brief-upload tools.",
     tools=[search_remediation_playbooks, build_and_upload_mitigation_brief]

@@ -38,7 +38,7 @@ personalization_specialist = RemoteA2aAgent(
 
 # --- Master Orchestrator Agent ---
 root_agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="shopping_orchestrator",
     instruction="""
         You are a master shopping assistant. Your job is to help users find and buy products by coordinating with specialists.

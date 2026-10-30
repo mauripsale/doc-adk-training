@@ -86,7 +86,7 @@ async def main():
         # 1. Define a simple Node (Agent)
         agent = Agent(
             name="verify_agent",
-            model="gemini-3.5-flash",
+            model="gemini-3.8-flash",
             instruction="Respond with: 'ADK 2.0 is Ready!'"
         )
 
@@ -132,7 +132,7 @@ uv run python verify_setup.py
 
 ### 💡 Troubleshooting: Model Not Found (404)
 
-If you see an error like `Publisher Model ... gemini-3.5-flash was not found`, it usually means the specific model is not yet available in your chosen Google Cloud region (e.g., `us-central1`).
+If you see an error like `Publisher Model ... gemini-3.8-flash was not found`, it usually means the specific model is not yet available in your chosen Google Cloud region (e.g., `us-central1`).
 
 **The Fix:**
 1.  Open your `.env` file.
@@ -232,7 +232,7 @@ uv run python verify_setup.py
 
 ### 💡 Troubleshooting: Model Not Found (404)
 
-If you see a `404 NOT_FOUND` error for `gemini-3.5-flash`, it is likely a region availability issue.
+If you see a `404 NOT_FOUND` error for `gemini-3.8-flash`, it is likely a region availability issue.
 
 **The Fix:**
 1.  Open your `.env` file.

@@ -119,7 +119,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 agent = Agent(
-    model="gemini-3.5-flash",
+    model="gemini-3.8-flash",
     name="PersistentAgent",
     instruction="You are a helpful assistant that remembers the user's favorite color."
 )

@@ -1,31 +1,21 @@
-# Tasks: Google Agents CLI Modernization & Integration
+# Tasks: gemini-3.8-flash Curriculum Migration & Project Rule Update
 
-- [x] Task 1: Module 02 & 05 Tooling Updates
-  - Acceptance: `module02` includes `uvx google-agents-cli setup` and coding agent skills; `module05` includes `agents-cli playground` and command taxonomy.
-  - Verify: Documentation renders clearly; instructions are step-by-step with zero ambiguity.
-  - Files: `training/module02-environment-setup/README.md`, `training/module05-running-agents/README.md`, `training/module05-running-agents/lab.md`
+- [x] Task 1: Project Rules & Environment Defaults
+  - Acceptance: `GEMINI.md` mandates `gemini-3.8-flash` as project standard rule; `.env.example` has `ADK_DEFAULT_MODEL="gemini-3.8-flash"`.
+  - Files: `GEMINI.md`, `.env.example`
 
-- [x] Task 2: Module 24 Evaluation Flywheel Modernization
-  - Acceptance: `module24` covers the Quality Flywheel with `agents-cli eval run` and eval dataset schemas alongside `adk eval`.
-  - Verify: Socratic quiz and lab instructions explain trajectory metrics and LLM-as-a-judge scoring.
-  - Files: `training/module24-evaluation/README.md`, `training/module24-evaluation/lab.md`
+- [x] Task 2: Grader Rubrics & Evaluation Engine
+  - Acceptance: `scripts/rubrics/__init__.py` and `scripts/rubrics/definitions.py` updated to accept `gemini-3.8-flash`, `gemini-3.7-flash`, `gemini-3.6-flash`, and `gemini-3.5-flash`.
+  - Files: `scripts/rubrics/__init__.py`, `scripts/rubrics/definitions.py`
 
-- [x] Task 3: Modules 32, 33, 35 Multi-Target Cloud Deployment
-  - Acceptance: Modules 32 (Cloud Run), 33 (GKE), and 35 (Agent Runtime) show how `agents-cli scaffold enhance` generates target-specific Terraform and Cloud Build pipelines.
-  - Verify: Clear distinction between manual Dockerfiles and automated CLI scaffolding.
-  - Files: `training/module32-deployment-cloud-run/README.md`, `training/module33-deployment-gke/README.md`, `training/module35-deployment-agent-runtime/README.md`, `training/module35-deployment-agent-runtime/lab.md`
+- [x] Task 3: Global Curriculum Code & Documentation Migration (45 Modules)
+  - Acceptance: Replace all `gemini-3.5-flash` with `gemini-3.8-flash` in training modules, YAML configs, and sample agents while preserving Live API model in M30.
+  - Files: `training/module*/*.md`, `sample-agents/personalized-shopping/*.py`
 
-- [x] Task 4: Module 36 Gemini Enterprise Publishing
-  - Acceptance: `module36` introduces `uvx google-agents-cli publish gemini` for registering ADK agents into the Gemini Enterprise agent catalog.
-  - Verify: CLI flags, service account permissions, and ADK vs A2A modes documented.
-  - Files: `training/module36-gemini-enterprise/README.md`
-
-- [x] Task 5: Socratic Quizzes, Solution Vault Registry & Grader Sync
-  - Acceptance: Regenerate vault registry with `agents-cli` questions and hints.
-  - Verify: `python3 scripts/generate_vault_registry.py` runs without errors and updates `doc/src/data/vaultRegistry.js`.
+- [x] Task 4: Socratic Quiz & Vault Registry Synchronization
+  - Acceptance: Update `scripts/generate_vault_registry.py` and run it to regenerate `doc/src/data/vaultRegistry.js`.
   - Files: `scripts/generate_vault_registry.py`, `doc/src/data/vaultRegistry.js`
 
-- [x] Task 6: Adversarial Debate, Grader Verification & Docusaurus Build
-  - Acceptance: Run test suite, student grader, Docusaurus build, and adversarial debate subagents.
-  - Verify: `python3 scripts/test_solutions.py` passes 100%, `npm run build` succeeds cleanly.
-  - Files: All touched modules, Docusaurus build artifacts.
+- [x] Task 5: Grader Verification & Docusaurus Build
+  - Acceptance: Run `python3 scripts/grade_lab.py --all` (100% pass) and `npm --prefix doc run build` (clean build). Commit to `feat/gemini-3.8-flash-migration`.
+  - Files: Full repository.

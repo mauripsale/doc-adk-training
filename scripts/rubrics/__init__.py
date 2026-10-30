@@ -22,7 +22,7 @@ class ModuleRubric:
     required_imports: List[str] = field(default_factory=list)
     forbidden_patterns: List[Tuple[str, str]] = field(default_factory=list)
     required_symbols: List[str] = field(default_factory=list)
-    expected_models: List[str] = field(default_factory=lambda: ["gemini-3.5-flash"])
+    expected_models: List[str] = field(default_factory=lambda: ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"])
     theory_ref: str = "Theory & Overview"
     hints: Dict[str, str] = field(default_factory=dict)
     has_code: bool = True

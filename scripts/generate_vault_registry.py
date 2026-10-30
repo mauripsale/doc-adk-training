@@ -43,15 +43,15 @@ VAULT_DATA = {
     "02": {
         "questions": [
             {
-                "question": "Why is `uv` recommended for managing environments and dependencies in ADK projects?",
+                "question": "Which modern command installs ADK development skills and configures coding assistants (Gemini Code Assist, Claude, Cursor) for agent authoring?",
                 "options": [
-                    "It is written in Rust, resolves packages extremely fast, and maintains deterministic lockfiles",
-                    "It compiles all Python code into WebAssembly ahead of time",
-                    "It only works with cloud-hosted virtual machines",
-                    "It replaces the Python interpreter with a C++ runtime"
+                    "uvx google-agents-cli setup",
+                    "npm install -g legacy-copilot-tools",
+                    "adk-install-all-plugins --force",
+                    "python setup.py --install-agent-ide"
                 ],
                 "correctIndex": 0,
-                "hint": "Module 02 highlights uv as the modern standard for blazing-fast virtual environments and reproducible lockfiles."
+                "hint": "The official Google Agents CLI setup wizard ('uvx google-agents-cli setup') installs curated agent development skills."
             },
             {
                 "question": "Which environment variable configures the ADK to use Vertex AI / Agent Platform instead of Google AI Studio?",
@@ -481,6 +481,191 @@ VAULT_DATA = {
                 ],
                 "correctIndex": 0,
                 "hint": "Grounded responses include citation links and grounding metadata verifying the factual basis of the response."
+            }
+        ]
+    },
+    "24": {
+        "questions": [
+            {
+                "question": "In the AgentOps Quality Flywheel, which command executes automated trajectory and rubric evaluations across your test datasets?",
+                "options": [
+                    "uvx google-agents-cli eval run",
+                    "adk-benchmark --quick",
+                    "python test.py --all-agents",
+                    "gcloud vertex ai models evaluate-all"
+                ],
+                "correctIndex": 0,
+                "hint": "google-agents-cli eval run is the automated evaluation runner for CI/CD and Quality Flywheel workflows."
+            },
+            {
+                "question": "Why is tool_trajectory_avg_score evaluation often prioritized over simple string response matching when regression testing complex ADK agents?",
+                "options": [
+                    "Validating the exact sequence of reasoning and tool invocations proves the agent followed the deterministic business workflow, regardless of semantic phrasing changes in the final text",
+                    "LLMs cannot output string responses in headless CI environments",
+                    "Evaluating tool trajectories uses 0 API tokens",
+                    "Tool calls cannot be recorded in evaluation datasets"
+                ],
+                "correctIndex": 0,
+                "hint": "Trajectory matching validates the agent's intermediate reasoning steps and tool selection."
+            },
+            {
+                "question": "What is the primary role of LLM-as-a-judge evaluators in ADK agent benchmarking?",
+                "options": [
+                    "To assess subjective qualitative criteria such as helpfulness, conciseness, and semantic equivalence against reference outputs",
+                    "To recompile the Python source code into machine bytecode",
+                    "To manage Docker container scaling on Cloud Run",
+                    "To encrypt database passwords in transit"
+                ],
+                "correctIndex": 0,
+                "hint": "LLM-as-a-judge scores semantic similarity and rubric-based qualitative measures."
+            }
+        ]
+    },
+    "32": {
+        "questions": [
+            {
+                "question": "Which google-agents-cli command generates production-ready Dockerfiles, Terraform IaC, and Cloud Build CI/CD pipelines for Google Cloud Run?",
+                "options": [
+                    "uvx google-agents-cli scaffold enhance . --deployment-target cloud_run",
+                    "adk build --cloud-run-all",
+                    "gcloud run deploy --generate-terraform",
+                    "docker init --template=adk-agent"
+                ],
+                "correctIndex": 0,
+                "hint": "The scaffold enhance command with --deployment-target cloud_run creates full infrastructure and CI/CD assets."
+            },
+            {
+                "question": "Why is Google Cloud Run an ideal deployment target for serverless ADK agents?",
+                "options": [
+                    "It offers automatic scaling (including scale-to-zero), managed SSL endpoints, and pay-per-use efficiency without managing VM infrastructure",
+                    "It only runs on quantum computers",
+                    "It disables HTTPS encryption for lower latency",
+                    "It requires manual operating system kernel patching"
+                ],
+                "correctIndex": 0,
+                "hint": "Cloud Run manages container provisioning, concurrency, and automatic scaling to zero when idle."
+            },
+            {
+                "question": "Why should the `--with_ui` flag be omitted when deploying headless ADK agents to production Cloud Run environments?",
+                "options": [
+                    "For security and efficiency: the Dev UI exposes internal instructions and traces, adding unnecessary container footprint",
+                    "Because Cloud Run cannot serve web pages",
+                    "Because browsers cannot connect to Google Cloud",
+                    "Because Python web servers are prohibited in containers"
+                ],
+                "correctIndex": 0,
+                "hint": "Omitting the Dev UI prevents exposing internal agent prompt details and reduces resource consumption."
+            }
+        ]
+    },
+    "33": {
+        "questions": [
+            {
+                "question": "When deploying ADK agents to Google Kubernetes Engine (GKE), what is the difference between Deployment and Service objects?",
+                "options": [
+                    "The Deployment manages pod replicas and container lifecycle, while the Service provides stable networking and load-balanced access",
+                    "The Service compiles Python code, while the Deployment manages user billing",
+                    "The Deployment is for databases only, while the Service is for static HTML files",
+                    "There is no difference; they are interchangeable synonyms"
+                ],
+                "correctIndex": 0,
+                "hint": "Deployments manage running container instances (Pods); Services manage network access and load balancing."
+            },
+            {
+                "question": "Which google-agents-cli command generates Kubernetes manifests and Terraform Autopilot modules for GKE?",
+                "options": [
+                    "uvx google-agents-cli scaffold enhance . --deployment-target gke",
+                    "kubectl autogenerate --agent adk",
+                    "gcloud gke scaffold --all",
+                    "adk kubernetes init"
+                ],
+                "correctIndex": 0,
+                "hint": "The 'scaffold enhance --deployment-target gke' command generates GKE deployment manifests and Kustomize overlays."
+            },
+            {
+                "question": "When is GKE preferred over Google Cloud Run for hosting ADK agents?",
+                "options": [
+                    "When agents require dedicated GPU acceleration, private VPC networking, or deep integration into an existing Kubernetes fleet",
+                    "When the agent has zero users and must never run",
+                    "When the developer does not have a Google Cloud account",
+                    "When running simple stateless single-file scripts"
+                ],
+                "correctIndex": 0,
+                "hint": "GKE provides granular control over hardware (GPUs), custom networking, and multi-pod cluster topology."
+            }
+        ]
+    },
+    "35": {
+        "questions": [
+            {
+                "question": "What is Google Cloud Agent Runtime in the Vertex AI Agent Platform?",
+                "options": [
+                    "A fully managed, enterprise serverless execution environment designed specifically for hosting, scaling, and securing ADK agents",
+                    "A desktop IDE application for editing Python code",
+                    "A legacy hardware rack server",
+                    "A replacement for the Gemini foundational model"
+                ],
+                "correctIndex": 0,
+                "hint": "Agent Runtime provides managed execution, autoscaling, OAuth2 authorization, and session isolation for ADK agents."
+            },
+            {
+                "question": "Which Agents CLI command is used to scaffold and deploy an ADK agent directly to Agent Runtime?",
+                "options": [
+                    "uvx google-agents-cli scaffold enhance -d agent_runtime && uvx google-agents-cli deploy",
+                    "adk cloud execute --runtime=agent",
+                    "gcloud vertex agents create-manual",
+                    "npm run deploy:agent-runtime"
+                ],
+                "correctIndex": 0,
+                "hint": "The standard Accelerated deployment path uses scaffold enhance with -d agent_runtime followed by deploy."
+            },
+            {
+                "question": "What is the key advantage of the Accelerated Deployment path over writing manual Vertex AI Python deployment scripts?",
+                "options": [
+                    "It generates repeatable Infrastructure-as-Code (Terraform) and Cloud Build CI/CD pipelines incorporating enterprise best practices",
+                    "It bypasses Google Cloud IAM permissions",
+                    "It converts Python agents to C++",
+                    "It makes all agent endpoints public without authentication"
+                ],
+                "correctIndex": 0,
+                "hint": "Accelerated deployment establishes reproducible Terraform IaC and Cloud Build pipelines automatically."
+            }
+        ]
+    },
+    "36": {
+        "questions": [
+            {
+                "question": "Which command is used to publish and register a deployed ADK agent into the enterprise Gemini Agent Catalog?",
+                "options": [
+                    "uvx google-agents-cli publish gemini --agent-name <name> --endpoint <url>",
+                    "adk share --public-internet",
+                    "gcloud marketplace publish --all",
+                    "kubectl apply -f gemini-catalog.yaml"
+                ],
+                "correctIndex": 0,
+                "hint": "The unified Agents CLI command 'publish gemini' registers your deployed agent service in Gemini Enterprise."
+            },
+            {
+                "question": "What are the two primary registration modes supported when publishing agents to Gemini Enterprise with google-agents-cli?",
+                "options": [
+                    "ADK Direct Mode (native session endpoint) and A2A Mode (Agent-to-Agent OpenAPI protocol)",
+                    "Stateless Mode and Offline Mode",
+                    "Single-Turn Mode and SMS Gateway Mode",
+                    "Public Mode and Deprecated Mode"
+                ],
+                "correctIndex": 0,
+                "hint": "google-agents-cli supports both ADK direct backend endpoints and standardized A2A (Agent-to-Agent) federation."
+            },
+            {
+                "question": "What enterprise benefit does the Gemini Enterprise Agent Gallery provide to organizations?",
+                "options": [
+                    "Centralized discovery, secure sharing, and governance of verified agents to prevent duplication and foster reuse",
+                    "It automatically deletes unapproved GitHub repositories",
+                    "It replaces all human software developers with bots",
+                    "It converts enterprise databases into static CSV files"
+                ],
+                "correctIndex": 0,
+                "hint": "The Agent Gallery acts as an internal marketplace for discovering, governing, and reusing enterprise AI agents."
             }
         ]
     }

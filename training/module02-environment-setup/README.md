@@ -94,6 +94,25 @@ If you prefer to work directly on your host operating system (macOS, Linux, or W
 2. Verify installation: `uv --version`
 3. Initialize your project with Python 3.10+: `uv init adk-training --python 3.10`
 
+---
+
+### 🤖 Elevating Your Toolchain: Google Agents CLI (`agents-cli`)
+
+Google provides **`agents-cli`** (`google-agents-cli`), the official toolset designed to accelerate the complete agent development lifecycle:
+
+```bash
+# 1. Install agents-cli and register agent skills into your AI coding assistants
+uvx google-agents-cli setup
+```
+
+**What `agents-cli setup` does:**
+* Installs the `agents-cli` global command-line utility.
+* Automatically configures **ADK Agent Skills** for your AI coding assistants (such as **Antigravity, Claude Code, Cursor, and Gemini CLI**).
+* Ensures your IDE understands ADK 2.0 object patterns, evaluation schemas, and deployment targets.
+
+> **Pedagogical Note — "De-Magic First, Accelerate Second":**  
+> In the first half of this course (Modules 01–23), we will write pure Python code to master the internal mechanics of nodes, state, routing, and tools. In the second half (Modules 24–36), we will leverage `agents-cli` to automate project scaffolding, evaluation flywheels, Cloud Run/GKE packaging, and Gemini Enterprise registry publication!
+
 
 
 ### Authentication: Connecting to Google Services

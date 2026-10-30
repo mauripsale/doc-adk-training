@@ -40,6 +40,42 @@ The typical workflow is to build and test your agent locally using the ADK, and 
 
 By providing a clear separation between development (ADK) and operations (Gemini Enterprise), this model allows developers to focus on building great agent logic, while platform administrators can focus on ensuring security, compliance, and efficient operation at scale.
 
+### Publishing Agents with `agents-cli publish gemini`
+
+Once your ADK agent is deployed to Cloud Run or Agent Runtime, you register and publish it into the Gemini Enterprise catalog using the official CLI command:
+
+```bash
+# Register an ADK agent into Gemini Enterprise
+uvx google-agents-cli publish gemini \
+  --agent-name "support-analyzer-prod" \
+  --endpoint "https://support-analyzer-xyz-uc.a.run.app" \
+  --project "$GOOGLE_CLOUD_PROJECT" \
+  --region "us-central1"
+```
+
+#### Dual Publishing Modes: ADK Direct vs. A2A Protocol
+
+| Feature | ADK Direct Mode | A2A (Agent-to-Agent) Mode |
+| :--- | :--- | :--- |
+| **Protocol** | Native ADK session & invocation endpoint | Standardized OpenAPI / Agent-to-Agent JSON RPC |
+| **Best For** | Internal Gemini Enterprise copilot chat integration | Cross-organization federation & multi-agent routing |
+| **Authentication** | Google Cloud IAM / OAuth2 Bearer Tokens | OAuth2 / mTLS / API Key gateway tokens |
+| **CLI Flag** | `--mode adk` (Default) | `--mode a2a --schema ./agent_card.json` |
+
+<KnowledgeCheck
+  id="m36-gemini-enterprise-publish"
+  question="Which CLI command is used to publish and register a deployed ADK agent into the enterprise Gemini Agent Catalog?"
+  options={[
+    "uvx google-agents-cli publish gemini",
+    "gcloud agents publish --all",
+    "uv run adk share --public",
+    "kubectl apply -f gemini-catalog.yaml"
+  ]}
+  correctIndex={0}
+  hint="Look for the unified publishing command in the Google Agents CLI."
+  explanation="'uvx google-agents-cli publish gemini' registers your deployed agent service with the Gemini Enterprise Agent Registry, making it discoverable and invocable across the enterprise."
+/>
+
 ### Key Takeaways
 - **Gemini Enterprise** is Google Cloud's managed platform for **operating** agents at an enterprise scale, while the **ADK** is the framework for **building** them.
 - It provides critical enterprise features like managed hosting, centralized governance (RBAC, audit logging), and compliance.

@@ -561,7 +561,9 @@ class ADKAgentUser(HttpUser):
               - name: Run agent evaluations
                 run: PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json
         ```
-        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed. This provides an automated safety net for agent development.
+        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed.
+
+        > **Enterprise AgentOps Tip:** In automated pipelines using the Google Agents CLI suite, you can run `uvx google-agents-cli eval run` to benchmark multiple golden datasets and enforce trajectory quality gates directly before cloud deployments.
 
 4.  **What is the difference between "Golden Path" testing and "User Simulation"?**
     *   **Answer:** "Golden Path" testing (Regression Testing) uses *static*, recorded conversations to ensure the agent performs exactly as it did in the past for known inputs. It verifies correctness and prevents breaking changes. "User Simulation" (Stress/Dynamic Testing) uses a generative model to act as a *dynamic* user. It creates varied, unpredictable conversations based on a scenario, helping to find edge cases, safety issues, or robustness failures that static tests might miss.

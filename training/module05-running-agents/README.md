@@ -54,7 +54,22 @@ The `uv run adk api_server` command runs your agent as a standalone HTTP server,
 
 This mode is essential for moving your agent from a local development tool to a component that can be integrated into a larger system.
 
-In the lab for this module, you will get hands-on experience with all three of these commands, giving you a complete toolkit for running and interacting with your agents.
+### 4. The Modern Lifecycle Companion: `agents-cli playground` & `run`
+
+Alongside the native `adk` framework commands, Google's **`agents-cli`** toolset provides a high-level developer workflow:
+
+* **Interactive Playground:** `agents-cli playground` spins up the local developer UI with automatic file-watching and hot-reloading.
+* **Single Prompt Execution:** `agents-cli run "Your prompt"` allows one-off command-line execution and automated CI assertions.
+
+```bash
+# Launch the interactive local playground
+uvx google-agents-cli playground
+
+# Test a prompt directly from the terminal
+uvx google-agents-cli run "Summarize system architecture"
+```
+
+In the lab for this module, you will get hands-on experience with these execution modes, giving you a complete toolkit for running and interacting with your agents.
 
 ### The ADK 2.0 CLI Engine
 

@@ -1,38 +1,40 @@
-# Implementation Plan: Global SolutionVault Rollout (45 Modules)
+# Technical Plan: Google Agents CLI Modernization & Integration
 
-## Overview
-Roll out the interactive, gamified, and hardened `<SolutionVault>` across all 45 training modules in Google ADK documentation.
+## Major Components & Sequence
+
+```mermaid
+flowchart TD
+    A["Phase 1: Environment & Tooling Foundations<br/>(Modules 02 & 05)"] --> B["Phase 2: Evaluation & Flywheel Tooling<br/>(Module 24)"]
+    B --> C["Phase 3: Multi-Target Deployment Modernization<br/>(Modules 32, 33, 35)"]
+    C --> D["Phase 4: Enterprise Registry & Publishing<br/>(Module 36)"]
+    D --> E["Phase 5: Socratic Quizzes, Solution Vault & Grader Sync"]
+    E --> F["Phase 6: Verification, Build & Testing"]
+```
 
 ---
 
-## Architecture & Technical Tasks Breakdown
+## Breakdown by Phase
 
-### Phase 1: Core Component Hardening & Global Registration
-1. **Dynamic Hashing & Security Fixes (`doc/src/components/SolutionVault/index.js`)**:
-   - Compute the expected SHA256 token deterministically from `moduleNumber` using a fast client-side JS implementation (Web Crypto API or deterministic SHA256 helper) so each module automatically gets a unique token.
-   - Remove the `clean.length >= 6` bypass.
-   - Add instructor bypass mechanism (`?instructor=1` query param / `Ctrl+Alt+U`).
-   - Fix dynamic counter text: `"All " + questions.length + " comprehension checks passed!"`.
-   - Prevent crash if `questions` array is empty or undefined.
-2. **Global MDX Registration (`doc/src/theme/MDXComponents.js`)**:
-   - Register `SolutionVault` globally in Docusaurus so `<SolutionVault>` can be used directly in any `.md` or `.mdx` file without manual imports.
-3. **Docusaurus Config Route Exclusion (`doc/docusaurus.config.js`)**:
-   - Add `exclude: ['**/lab-solution.md', '**/lab-solution/**']` to the docs plugin configuration to guarantee zero standalone HTML pages or sitemap entries for `/lab-solution`.
+### Phase 1: Environment & Tooling Foundations (Modules 02 & 05)
+- Update `training/module02-environment-setup/` to introduce `uvx google-agents-cli setup` and coding assistant skill binding.
+- Update `training/module05-running-agents/` to introduce `agents-cli playground` and compare it with `adk web` / `adk run` / `adk api_server`.
 
-### Phase 2: Central Questions Registry (`doc/src/data/vaultRegistry.js`)
-- Construct high-quality, pedagogically curated questions in English for all 45 modules:
-  - 3 multiple-choice conceptual & implementation questions per module.
-  - 4 distinct options per question.
-  - 1 correct index.
-  - Clear, educational hint for wrong answers.
+### Phase 2: Evaluation & Quality Flywheel (Module 24)
+- Update `training/module24-evaluation/` to incorporate `uvx google-agents-cli eval run` alongside `adk eval`, teaching the complete Quality Flywheel workflow.
 
-### Phase 3: Wave-based Rollout to `training/moduleXX/lab.md`
-- **Wave 1 (Modules 01-12):** Fundamentals, Environment, Echo Agent, LiteLLM, Running Agents, Execution, Multimodal, Tools, Custom Functions, OpenAPI, Grounding.
-- **Wave 2 (Modules 13-26):** Tool Context, Firestore Persistence, Third-party Tools, MAS Intro, Static Orchestration, Routing, Dynamic, Collaborative Teams, Cyclic Workflows, Distributed Graphs, Knowledge Milestone, State & Memory, Artifacts, Evaluation, Observability, RAI Safety Plugins, Callbacks.
-- **Wave 3 (Modules 27-40):** MCP Intro, Building MCP Tools, UI Integration, Streaming Client, Production Deployment, Cloud Run, GKE, MCP Cloud Run, Agent Runtime, Gemini Enterprise, Personalized Shopping Agent, Best Practices, Plugins, Agent Skills, Capstone Incident Response.
+### Phase 3: Multi-Target Deployment Modernization (Modules 32, 33, 35)
+- Update `training/module32-deployment-cloud-run/` with `agents-cli scaffold enhance --deployment-target cloud_run`.
+- Update `training/module33-deployment-gke/` with `agents-cli scaffold enhance --deployment-target gke`.
+- Update `training/module35-deployment-agent-runtime/` with the latest `agents-cli` flags and patterns.
 
-### Phase 4: Quality Assurance & Build Verification
-1. Run static validation script across all 45 modules.
-2. Run `npm run build` in `doc/` to verify 100% clean compilation.
-3. Verify that `/docs/module01-intro-to-ai-agents/lab` and other lab routes render cleanly without hydration mismatches.
-4. Verify `scripts/publish_to_students.sh` dry-run compatibility.
+### Phase 4: Enterprise Publishing (Module 36)
+- Update `training/module36-gemini-enterprise/` to highlight `agents-cli publish gemini` (with ADK and A2A modes).
+
+### Phase 5: Socratic Quizzes, Solution Vault & Grader Sync
+- Update `doc/src/data/vaultRegistry.js` and `scripts/generate_vault_registry.py`.
+- Sync `scripts/rubrics/definitions.py` if needed.
+
+### Phase 6: Verification & Adversarial Review
+- Run `python3 scripts/test_solutions.py` and `python3 scripts/grade_lab.py`.
+- Build Docusaurus docs (`npm run build`).
+- Run adversarial debate to validate pedagogical quality.

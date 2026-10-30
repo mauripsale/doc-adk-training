@@ -1,35 +1,31 @@
-# Task List: Global SolutionVault Rollout
+# Tasks: Google Agents CLI Modernization & Integration
 
-- [x] Task 1: Component Hardening & Security Fixes
-  - Acceptance: `SolutionVault/index.js` computes deterministic tokens based on `moduleNumber`, eliminates the length bypass, supports instructor fast-track, and handles defensive edge cases.
-  - Verify: Test terminal hash command and token validation in isolation.
-  - Files: `doc/src/components/SolutionVault/index.js`, `doc/src/components/SolutionVault/styles.module.css`
+- [x] Task 1: Module 02 & 05 Tooling Updates
+  - Acceptance: `module02` includes `uvx google-agents-cli setup` and coding agent skills; `module05` includes `agents-cli playground` and command taxonomy.
+  - Verify: Documentation renders clearly; instructions are step-by-step with zero ambiguity.
+  - Files: `training/module02-environment-setup/README.md`, `training/module05-running-agents/README.md`, `training/module05-running-agents/lab.md`
 
-- [x] Task 2: Docusaurus Global MDX & Route Exclusion Configuration
-  - Acceptance: `SolutionVault` is registered in `src/theme/MDXComponents.js` and `lab-solution.md` is excluded from static page generation in `docusaurus.config.js`.
-  - Verify: `npm run build` succeeds and `doc/build/sitemap.xml` contains 0 `lab-solution` entries.
-  - Files: `doc/docusaurus.config.js`, `doc/src/theme/MDXComponents.js`
+- [x] Task 2: Module 24 Evaluation Flywheel Modernization
+  - Acceptance: `module24` covers the Quality Flywheel with `agents-cli eval run` and eval dataset schemas alongside `adk eval`.
+  - Verify: Socratic quiz and lab instructions explain trajectory metrics and LLM-as-a-judge scoring.
+  - Files: `training/module24-evaluation/README.md`, `training/module24-evaluation/lab.md`
 
-- [x] Task 3: Centralized English Questions Registry
-  - Acceptance: `doc/src/data/vaultRegistry.js` contains 3 curated, rigorous English questions + options + hints for all 45 modules.
-  - Verify: Automated schema validation script confirms all 45 modules have valid entries.
-  - Files: `doc/src/data/vaultRegistry.js`, `scripts/validate_vaults.py`
+- [x] Task 3: Modules 32, 33, 35 Multi-Target Cloud Deployment
+  - Acceptance: Modules 32 (Cloud Run), 33 (GKE), and 35 (Agent Runtime) show how `agents-cli scaffold enhance` generates target-specific Terraform and Cloud Build pipelines.
+  - Verify: Clear distinction between manual Dockerfiles and automated CLI scaffolding.
+  - Files: `training/module32-deployment-cloud-run/README.md`, `training/module33-deployment-gke/README.md`, `training/module35-deployment-agent-runtime/README.md`, `training/module35-deployment-agent-runtime/lab.md`
 
-- [x] Task 4: Rollout Wave 1 (Modules 01-12)
-  - Acceptance: Modules 01 to 12 have legacy hidden solution replaced by `<SolutionVault moduleNumber="XX">` wrapping the reference solution.
-  - Verify: `npm run build` compiles with zero MDX errors.
-  - Files: `training/module01*` to `training/module12*` `lab.md`
+- [x] Task 4: Module 36 Gemini Enterprise Publishing
+  - Acceptance: `module36` introduces `uvx google-agents-cli publish gemini` for registering ADK agents into the Gemini Enterprise agent catalog.
+  - Verify: CLI flags, service account permissions, and ADK vs A2A modes documented.
+  - Files: `training/module36-gemini-enterprise/README.md`
 
-- [x] Task 5: Rollout Wave 2 (Modules 13-26)
-  - Acceptance: Modules 13 to 26 have legacy hidden solution replaced by `<SolutionVault moduleNumber="XX">`.
-  - Verify: `npm run build` compiles with zero MDX errors.
-  - Files: `training/module13*` to `training/module26*` `lab.md`
+- [x] Task 5: Socratic Quizzes, Solution Vault Registry & Grader Sync
+  - Acceptance: Regenerate vault registry with `agents-cli` questions and hints.
+  - Verify: `python3 scripts/generate_vault_registry.py` runs without errors and updates `doc/src/data/vaultRegistry.js`.
+  - Files: `scripts/generate_vault_registry.py`, `doc/src/data/vaultRegistry.js`
 
-- [x] Task 6: Rollout Wave 3 (Modules 27-40)
-  - Acceptance: Modules 27 to 40 have legacy hidden solution replaced by `<SolutionVault moduleNumber="XX">`.
-  - Verify: `npm run build` compiles with zero MDX errors.
-  - Files: `training/module27*` to `training/module40*` `lab.md`
-
-- [x] Task 7: Full Static Build & Zero Trust Validation
-  - Acceptance: Entire site builds cleanly (`npm run build`), no console errors, no URL leaks.
-  - Verify: `npm run build` in `doc/` completes with exit code 0.
+- [x] Task 6: Adversarial Debate, Grader Verification & Docusaurus Build
+  - Acceptance: Run test suite, student grader, Docusaurus build, and adversarial debate subagents.
+  - Verify: `python3 scripts/test_solutions.py` passes 100%, `npm run build` succeeds cleanly.
+  - Files: All touched modules, Docusaurus build artifacts.

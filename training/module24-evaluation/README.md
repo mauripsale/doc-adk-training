@@ -128,6 +128,73 @@ For this, the ADK provides **User Simulation**.
 
 This allows you to "stress test" your agent against hundreds of diverse, generated conversations to find edge cases you might have missed manually. Note that for dynamic scenarios, you typically use reference-free metrics like `safety_v1` and `hallucinations_v1` since there is no single "expected" response.
 
+### The Modern AgentOps Quality Flywheel with `agents-cli`
+
+In modern enterprise agent engineering, evaluation is not an isolated one-time test; it forms a continuous loop known as the **Quality Flywheel**:
+
+```mermaid
+flowchart TD
+    A["1. Scaffold & Develop<br/>(agents-cli scaffold create)"] --> B["2. Interactive Dev & Trace<br/>(agents-cli playground)"]
+    B --> C["3. Golden Dataset Benchmarking<br/>(agents-cli eval run)"]
+    C --> D{"Pass Threshold?<br/>(Trajectory & Rubrics)"}
+    D -- "No (Regressions Found)" --> E["4. Diagnose Trajectory & Prompt Failure"]
+    E --> B
+    D -- "Yes (Quality Gate Met)" --> F["5. Multi-Target Cloud Deploy<br/>(agents-cli deploy)"]
+```
+
+#### Automated Evaluation with `agents-cli eval run`
+
+While `adk eval` runs evaluations against `.evalset.json` files generated in the Dev UI, the official **Google Agents CLI (`google-agents-cli`)** provides an integrated evaluation runner designed for modern CI/CD pipelines and interactive benchmarking:
+
+```bash
+# Run evaluation across all configured evaluation sets in the project
+uvx google-agents-cli eval run
+
+# Run evaluation targeting a specific evaluation dataset
+uvx google-agents-cli eval run --dataset tests/eval_datasets/golden_cases.json
+```
+
+#### Evaluating Evaluation Datasets & Multi-Turn Schema
+
+An evaluation dataset defines the benchmark scenarios, expected tool calls, and reference outcomes. Below is the standard schema for evaluation cases:
+
+```json
+[
+  {
+    "eval_case_id": "calculator_add_basic",
+    "conversation": [
+      {
+        "role": "user",
+        "parts": [{ "text": "What is 10 + 5?" }]
+      },
+      {
+        "role": "model",
+        "intermediate_tool_calls": [
+          {
+            "name": "add",
+            "args": { "a": 10, "b": 5 }
+          }
+        ],
+        "parts": [{ "text": "The result of 10 + 5 is 15." }]
+      }
+    ],
+    "metrics": {
+      "tool_trajectory_avg_score": { "threshold": 1.0, "match_type": "EXACT" },
+      "final_response_match_v2": { "threshold": 0.85 }
+    }
+  }
+]
+```
+
+#### `agents-cli eval` vs `adk eval` Comparison
+
+| Feature | `adk eval` | `agents-cli eval run` |
+| :--- | :--- | :--- |
+| **Primary Focus** | Local ADK framework unit/integration evaluation | Enterprise AgentOps lifecycle & Quality Flywheel gate |
+| **Dataset Source** | Local `.evalset.json` files from ADK Dev UI | Project-level eval datasets and multi-scenario matrices |
+| **Execution Engine** | Local ADK Python evaluation runner | Multi-agent benchmarking engine with structured summary reports |
+| **CI/CD Integration** | Direct `pytest` or CLI invocation | Native exit-code quality gating for GitHub Actions / Cloud Build |
+
 <KnowledgeCheck
   id="m24-eval-trajectory-matching"
   question="Why is tool_trajectory_avg_score evaluation often prioritized over simple string response matching when regression testing complex ADK agents in CI/CD?"
@@ -148,4 +215,4 @@ This allows you to "stress test" your agent against hundreds of diverse, generat
 - **Metrics Categories:** Evaluation covers **Trajectory** (did it follow the right steps?), **Response Quality** (is the answer correct/good?), and **Safety/Groundedness** (is it harmless and factual?).
 - **User Simulation:** Use dynamic user simulation to test your agent against varied, LLM-generated personas and scenarios, going beyond static examples.
 - **Importance of Trajectory Testing:** Testing the `tool_trajectory` is often more critical than just the final response because it validates the agent's underlying reasoning process.
-- **CI/CD Integration:** The `uv run adk eval` command can be integrated as a standard test step in CI/CD pipelines to prevent regressions.
+- **Continuous Quality Flywheel:** Use `uvx google-agents-cli eval run` in your CI/CD pipelines to benchmark golden datasets before cloud deployment.

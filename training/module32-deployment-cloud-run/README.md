@@ -56,6 +56,23 @@ The result is a publicly accessible HTTPS endpoint for your agent, all from a si
 
 In the lab for this module, you will use the `uv run adk deploy cloud_run` command to deploy the multi-agent customer support system you'll build in this lab.
 
+### Production GitOps & Infrastructure Scaffolding with `agents-cli`
+
+For enterprise teams requiring reproducible Infrastructure-as-Code (IaC) and CI/CD pipelines, the **Google Agents CLI (`google-agents-cli`)** complements `adk deploy` by scaffolding production-grade deployment assets into your repository:
+
+```bash
+# 1. Enhance your existing agent with Cloud Run deployment assets
+uvx google-agents-cli scaffold enhance . --deployment-target cloud_run
+
+# 2. Deploy directly using the managed CLI workflow
+uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --no-confirm-project
+```
+
+#### What `agents-cli scaffold enhance --deployment-target cloud_run` Generates:
+- **`Dockerfile`**: Hardened, multi-stage production container definition optimized for Python ADK workloads.
+- **`cloudbuild.yaml`**: Google Cloud Build pipeline configuration with automated build, test, and container registry caching.
+- **`terraform/`**: Modular Terraform IaC scripts provisioning the Cloud Run v2 service, Artifact Registry repository, and least-privilege IAM service account bindings.
+
 ### Key Takeaways
 - **Deployment** is the process of packaging an agent into a **container** and running it on a production server.
 - **Google Cloud Run** is a fully managed, serverless platform that is ideal for deploying ADK agents due to its simplicity, automatic scaling (including to zero), and pay-per-use cost model.

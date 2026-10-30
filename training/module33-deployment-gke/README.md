@@ -65,6 +65,24 @@ The general steps are:
 
 While the ADK provides the `uv run adk deploy gke` command to automate some of these steps, understanding the underlying concepts is crucial for managing a production deployment on Kubernetes. In the lab, you will walk through the manual process to gain a deeper understanding of how GKE works.
 
+### GKE Kubernetes Manifest Generation with `agents-cli`
+
+For enterprise Kubernetes engineering, writing raw Helm charts and Kube manifests from scratch is error-prone. The **Google Agents CLI (`google-agents-cli`)** can automatically generate production-ready Kubernetes deployment manifests tailored for ADK agents:
+
+```bash
+# 1. Enhance your agent project with complete GKE manifests and Terraform setup
+uvx google-agents-cli scaffold enhance . --deployment-target gke
+
+# 2. Deploy your agent to the configured GKE Autopilot / Standard cluster
+uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --no-confirm-project
+```
+
+#### Assets Scaffolded for GKE:
+- **`k8s/deployment.yaml`**: Kubernetes Deployment with readiness/liveness probes, resource requests/limits, and Workload Identity annotation.
+- **`k8s/service.yaml`**: Internal or Ingress-backed Service routing traffic to agent pods on port 8000.
+- **`k8s/kustomization.yaml`**: Kustomize overlays for separating `dev`, `staging`, and `prod` environments.
+- **`terraform/gke/`**: Terraform IaC module provisioning GKE Autopilot clusters with VPC-native networking.
+
 ### Key Takeaways
 - **Google Kubernetes Engine (GKE)** is a managed container orchestration platform that provides more control and flexibility than serverless options like Cloud Run.
 - GKE is the preferred choice for complex applications with specific hardware needs (like GPUs), fine-grained networking requirements, or for organizations already invested in the Kubernetes ecosystem.

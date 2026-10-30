@@ -97,6 +97,5 @@ This detailed timetable maps out the complete multi-day master track for enterpr
 
 ---
 
-## 🛠️ Pedagogical Harness & Verification Architecture
+## 🛠️ Hands-on Labs & Knowledge Verification
 * **Student Experience:** Interactive Socratic Quizzes, hands-on active coding challenges with `TODO` skeletons, and automated local unit tests (`pytest`).
-* **Instructor QA Harness:** All 45 modules are continuously verified using the internal `adk-student-evaluator` zero-trust simulation framework.

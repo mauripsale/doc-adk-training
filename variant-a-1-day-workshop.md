@@ -32,6 +32,5 @@ This workshop is a high-impact, fast-paced training variant designed to provide 
 
 ---
 
-## 🛠️ Verification & Evaluation Methodology
-* **Student Verification:** Each module includes interactive **Socratic Quizzes** inside the documentation and hands-on challenge labs with test scripts (`pytest`).
-* **Instructor Note:** Comprehensive zero-trust lab grading is performed automatically by the internal `adk-student-evaluator` harness prior to training delivery.
+## 🛠️ Verification & Evaluation
+* **Knowledge Checks:** Each module includes interactive **Socratic Quizzes** inside the documentation and hands-on challenge labs with test scripts (`pytest`).

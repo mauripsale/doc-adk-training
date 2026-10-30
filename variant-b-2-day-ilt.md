@@ -60,7 +60,6 @@ This 2-day Instructor-Led Training (ILT) is the flagship curriculum for engineer
 
 ---
 
-## 🛠️ Assessment & Certification
+## 🛠️ Assessment & Labs
 * **In-Doc Socratic Checks:** Students complete embedded multiple-choice and conceptual verification checks after each module.
-* **Challenge Labs:** Students implement working code skeletons against deterministic test requirements.
-* **Zero-Trust Verification:** Course authors and instructors validate module reproducibility using the continuous `adk-student-evaluator` harness.
+* **Challenge Labs:** Students implement working code skeletons against deterministic test requirements with `pytest`.

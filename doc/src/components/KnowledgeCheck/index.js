@@ -220,78 +220,18 @@ export default function KnowledgeCheck({
 
   const handleReset = () => {
     if (cooldownRemaining > 0) return;
-    // Anti-Cheating: Shuffle options so sequential guessing (A,B,C,D) is disrupted
-    setDisplayOptions(shuffle(baseOptions));
     setSelectedOptionId(null);
     setIsEvaluated(false);
-    saveState({
-      selectedOptionId: null,
-      isEvaluated: false,
-      isCorrect: false,
-    });
+    // Shuffle options to prevent rote memory guessing
+    setDisplayOptions(shuffle(baseOptions));
   };
-
-  const handleToggleReveal = () => {
-    const nextRevealed = !isRevealed;
-    setIsRevealed(nextRevealed);
-    saveState({
-      isRevealed: nextRevealed,
-      isCorrect: true,
-    });
-  };
-
-  if (type === 'reveal') {
-    return (
-      <div
-        className={`${styles.container} ${isRevealed ? styles.containerCorrect : ''}`}
-        data-knowledge-check-id={quizId}
-        data-knowledge-check-type="reveal"
-        data-knowledge-check-solved={isRevealed ? 'true' : 'false'}
-      >
-        <div className={styles.header}>
-          <span className={`${styles.badge} ${isRevealed ? styles.badgeCorrect : ''}`}>
-            💡 Concept Check & Reflection
-          </span>
-          <span className={styles.statusIndicator}>
-            {isRevealed ? '✓ Architectural Review' : '🧠 Self Reflection'}
-          </span>
-        </div>
-
-        <p className={styles.questionText}>{question}</p>
-
-        <div style={{ marginTop: '1rem' }}>
-          <button
-            type="button"
-            className={styles.actionBtn}
-            onClick={handleToggleReveal}
-          >
-            {isRevealed ? 'Hide Explanation' : '🔍 Reveal Architectural Breakdown'}
-          </button>
-        </div>
-
-        {isRevealed && (
-          <div className={styles.explanationBox}>
-            <p className={styles.explanationTitle}>
-              <span>✨</span> Key Architectural Takeaway
-            </p>
-            <div className={styles.explanationText}>
-              {explanation || children}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   const alphabet = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
     <div
-      className={`${styles.container} ${
-        isSolved ? styles.containerCorrect : ''
-      }`}
+      className={`${styles.container} ${isSolved ? styles.containerCorrect : ''}`}
       data-knowledge-check-id={quizId}
-      data-knowledge-check-type="multiple-choice"
       data-knowledge-check-solved={isSolved ? 'true' : 'false'}
     >
       <div className={styles.header}>
@@ -313,7 +253,7 @@ export default function KnowledgeCheck({
 
       <p className={styles.questionText}>{question}</p>
 
-      <div className={styles.optionsList}>
+      <div className={styles.optionsList} role="radiogroup" aria-label={question}>
         {displayOptions.map((opt, idx) => {
           const isSelected = selectedOptionId === opt.id;
           let btnClass = styles.optionButton;
@@ -326,7 +266,6 @@ export default function KnowledgeCheck({
             if (opt.isCorrect) {
               btnClass += ` ${styles.optionCorrect}`;
             } else {
-              // NO SPOILER: only mark the chosen wrong answer in red, never show the correct answer green!
               btnClass += ` ${styles.optionIncorrect}`;
             }
           }
@@ -338,10 +277,12 @@ export default function KnowledgeCheck({
               className={btnClass}
               onClick={() => handleSelectOption(opt.id)}
               disabled={isSolved || (isEvaluated && !isSolved)}
+              role="radio"
+              aria-checked={isSelected}
               aria-label={`Option ${alphabet[idx]}: ${opt.text}`}
             >
               <span className={styles.optionLetter}>{alphabet[idx]}</span>
-              <span>{opt.text}</span>
+              <span className={styles.optionText}>{opt.text}</span>
             </button>
           );
         })}
@@ -361,27 +302,24 @@ export default function KnowledgeCheck({
           )}
 
           {isSolved && (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-                color: '#34a853',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-              }}
+            <div
+              className={styles.successMessage}
+              role="status"
+              aria-live="polite"
             >
-              <span>🎉</span> Correct! Excellent architectural comprehension.
-            </span>
+              <span>🎉</span>
+              <span>Correct! Excellent architectural comprehension.</span>
+            </div>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div className={styles.secondaryControls}>
           {hint && !isSolved && (
             <button
               type="button"
               className={styles.secondaryBtn}
               onClick={() => setShowHint(!showHint)}
+              aria-expanded={showHint}
             >
               {showHint ? 'Hide Hint' : '💡 Need a Hint?'}
             </button>
@@ -404,7 +342,11 @@ export default function KnowledgeCheck({
 
       {/* Socratic Feedback on Wrong Answer (Zero Spoiler) */}
       {isEvaluated && !isSolved && (
-        <div className={styles.socraticBox}>
+        <div
+          className={styles.socraticBox}
+          role="status"
+          aria-live="polite"
+        >
           <p className={styles.socraticTitle}>
             <span>🤔</span> Socratic Guidance: Why this choice doesn't work
           </p>
@@ -431,13 +373,13 @@ export default function KnowledgeCheck({
       )}
 
       {showHint && hint && !isSolved && !isEvaluated && (
-        <div className={styles.hintBox}>
+        <div className={styles.hintBox} role="note">
           <strong>Hint:</strong> {hint}
         </div>
       )}
 
       {isSolved && explanation && (
-        <div className={styles.explanationBox}>
+        <div className={styles.explanationBox} role="region" aria-label="Architectural Explanation">
           <p className={styles.explanationTitle}>
             <span>✨</span> Architectural Explanation
           </p>

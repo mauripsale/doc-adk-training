@@ -1,29 +1,35 @@
+/* DocCompletionCard Styles with Container Queries & Modern Tokens */
+
 .completionCard {
+  container-type: inline-size;
+  container-name: completion-card;
   margin: 2.5rem 0 1.5rem 0;
   padding: 1.5rem 1.75rem;
   border-radius: 12px;
-  background: var(--ifm-background-surface-color);
-  border: 1px solid var(--ifm-toc-border-color);
+  background: var(--ifm-background-surface-color, #f8fafc);
+  border: 1px solid var(--ifm-toc-border-color, #e2e8f0);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
   transition: all 0.25s ease-in-out;
   position: relative;
   overflow: hidden;
+  font-family: var(--adk-sans);
 }
 
 [data-theme='dark'] .completionCard {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   background: rgba(17, 24, 39, 0.7);
   backdrop-filter: blur(12px);
+  border-color: #1f293d;
 }
 
 .completionCardCompleted {
-  border-color: #34a853;
-  background: linear-gradient(135deg, rgba(52, 168, 83, 0.05) 0%, rgba(66, 133, 244, 0.04) 100%);
+  border-color: var(--adk-emerald, #10b981) !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(26, 115, 232, 0.04) 100%) !important;
 }
 
 [data-theme='dark'] .completionCardCompleted {
-  border-color: rgba(52, 168, 83, 0.4);
-  background: linear-gradient(135deg, rgba(52, 168, 83, 0.12) 0%, rgba(66, 133, 244, 0.08) 100%);
+  border-color: rgba(16, 185, 129, 0.45) !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(138, 180, 248, 0.08) 100%) !important;
 }
 
 .cardHeader {
@@ -41,23 +47,27 @@
 }
 
 .iconBadge {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.25rem;
   background: rgba(26, 115, 232, 0.1);
-  color: var(--adk-blue);
+  color: var(--adk-blue, #1a73e8);
   flex-shrink: 0;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .completionCardCompleted .iconBadge {
-  background: rgba(52, 168, 83, 0.15);
-  color: #34a853;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--adk-emerald-text-light, #047857);
   transform: scale(1.05);
+}
+
+[data-theme='dark'] .completionCardCompleted .iconBadge {
+  color: #34d399;
 }
 
 .cardTitles {
@@ -77,9 +87,13 @@
 
 .cardSubtitle {
   font-size: 0.825rem;
-  color: var(--ifm-color-emphasis-600);
+  color: var(--ifm-color-emphasis-600, #64748b);
   margin: 0.15rem 0 0 0;
   font-family: var(--adk-mono);
+}
+
+[data-theme='dark'] .cardSubtitle {
+  color: #94a3b8;
 }
 
 .instructorBadge {
@@ -92,243 +106,92 @@
   letter-spacing: 0.05em;
   padding: 0.25rem 0.65rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  color: #92400e;
-  border: 1px solid #f59e0b;
+  background: var(--adk-amber-surface, #fffbeb);
+  color: var(--adk-amber-text-light, #b45309);
+  border: 1px solid var(--adk-amber, #f59e0b);
   box-shadow: 0 2px 6px rgba(245, 158, 11, 0.25);
   animation: fadeIn 0.2s ease;
 }
 
-[data-theme='dark'] .instructorBadge {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.35) 100%);
-  color: #fde68a;
-  border-color: #f59e0b;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
-}
-
-.buttonWrapper {
-  position: relative;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.actionButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
+.toggleBtn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid var(--adk-blue);
-  background: var(--adk-blue);
-  color: #ffffff !important;
-  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 6px rgba(26, 115, 232, 0.25);
-  user-select: none;
+  font-family: var(--adk-sans);
+  border: none;
+  background: var(--adk-blue, #1a73e8);
+  color: #ffffff;
 }
 
-.actionButton:hover {
-  background: var(--adk-blue-hover);
-  border-color: var(--adk-blue-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.35);
+.toggleBtn:hover {
+  background: var(--adk-blue-hover, #1557b0);
 }
 
-.actionButtonCompleted {
-  background: #34a853;
-  border-color: #34a853;
-  box-shadow: 0 2px 6px rgba(52, 168, 83, 0.25);
+.toggleBtnCompleted {
+  background: var(--adk-emerald-surface, #ecfdf5);
+  color: var(--adk-emerald-text-light, #047857);
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.actionButtonCompleted:hover {
-  background: #2d9248;
-  border-color: #2d9248;
-  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.35);
+[data-theme='dark'] .toggleBtnCompleted {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
 }
 
-.actionButtonLocked {
-  background: var(--ifm-color-emphasis-100);
-  border-color: var(--ifm-color-emphasis-300);
-  color: var(--ifm-color-emphasis-700) !important;
-  cursor: pointer;
-  box-shadow: none;
-  opacity: 0.9;
+.toggleBtnGated {
+  background: var(--adk-slate-200, #e2e8f0);
+  color: var(--adk-slate-600, #475569);
+  cursor: not-allowed;
 }
 
-[data-theme='dark'] .actionButtonLocked {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #94a3b8 !important;
-}
-
-.actionButtonLocked:hover {
-  background: var(--ifm-color-emphasis-200);
-  border-color: var(--ifm-color-emphasis-400);
-  transform: translateY(-1px);
-}
-
-[data-theme='dark'] .actionButtonLocked:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.shakeAnimation {
-  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
-}
-
-@keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
-}
-
-.gateTooltip {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  right: 0;
-  width: 260px;
+[data-theme='dark'] .toggleBtnGated {
   background: #1e293b;
-  color: #f8fafc;
-  padding: 0.6rem 0.8rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  line-height: 1.35;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-  z-index: 50;
-  pointer-events: none;
-  animation: fadeIn 0.2s ease-out;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #64748b;
 }
 
-[data-theme='dark'] .gateTooltip {
-  background: #0f172a;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.gateHelperBanner {
+.gateAlert {
   margin-top: 1rem;
-  padding: 0.75rem 1rem;
+  padding: 0.85rem 1rem;
   border-radius: 8px;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px dashed rgba(245, 158, 11, 0.35);
+  background: var(--adk-amber-surface, #fffbeb);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: var(--adk-amber-text-light, #b45309);
+  font-size: 0.88rem;
   display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.825rem;
-  color: var(--ifm-font-color-base);
+  align-items: center;
+  gap: 0.5rem;
 }
 
-[data-theme='dark'] .gateHelperBanner {
-  background: rgba(245, 158, 11, 0.1);
-  border-color: rgba(245, 158, 11, 0.25);
-  color: #cbd5e1;
-}
-
-.gateHelperIcon {
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 0.05rem;
-}
-
-.gateHelperText {
-  line-height: 1.4;
-}
-
-.gateHelperText strong {
-  color: #d97706;
-}
-
-[data-theme='dark'] .gateHelperText strong {
+[data-theme='dark'] .gateAlert {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.35);
   color: #fbbf24;
 }
 
-.cardFooter {
-  margin-top: 1.25rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--ifm-toc-border-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.overallProgress {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.825rem;
-  color: var(--ifm-color-emphasis-700);
-}
-
-.progressBarContainer {
-  width: 120px;
-  height: 6px;
-  border-radius: 9999px;
-  background: var(--ifm-color-emphasis-200);
-  overflow: hidden;
-  position: relative;
-}
-
-[data-theme='dark'] .progressBarContainer {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.progressBarFill {
-  height: 100%;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, #1a73e8, #34a853);
-  transition: width 0.4s ease;
-}
-
-.nextStepLink {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--adk-blue);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  text-decoration: none;
-  transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.nextStepLink:hover {
-  color: var(--adk-blue-hover);
-  text-decoration: underline;
-  transform: translateX(2px);
-}
-
-[data-theme='dark'] .nextStepLink {
-  color: var(--ifm-color-primary);
-}
-
-@media (max-width: 640px) {
-  .completionCard {
-    padding: 1.25rem 1rem;
-  }
-  .cardHeader, .cardFooter {
+@container completion-card (max-width: 480px) {
+  .cardHeader {
     flex-direction: column;
-    align-items: flex-start;
-  }
-  .buttonWrapper {
-    width: 100%;
     align-items: stretch;
   }
-  .actionButton {
+  .toggleBtn {
     width: 100%;
-    justify-content: center;
   }
-  .progressBarContainer {
-    width: 100px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }

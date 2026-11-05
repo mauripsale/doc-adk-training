@@ -118,85 +118,22 @@ const MINDFULNESS_TIPS_POOL = [
   '📦 "Make it work, make it right, make it fast." — Kent Beck',
   '🎩 A well-crafted system instruction is 90% of the magic in autonomous task delegation.',
   '🧘 Relax your shoulders, unclench your jaw. The reference architecture is decrypting right now.',
-  '📐 Always separate deterministic tool logic from probabilistic LLM reasoning.',
-  '🚦 Use Guardrail callbacks (`before_tool_callback`) to block unsafe shell or database commands.'
 ];
 
 export default function SolutionVault({
-  moduleNumber = '01',
-  questions: propQuestions,
-  pythonChallenge,
-  cooldownSeconds = 15,
+  moduleNumber = '1',
+  questions = [],
+  cooldownSeconds = 5,
   children,
 }) {
-  // Normalize module ID key (e.g. "01", "21_5", "04_5")
-  const normKey = String(moduleNumber).replace(/^module/, '');
-
-  // Resolve raw questions from registry or prop fallback
-  const resolvedQuestions = useMemo(() => {
-    let raw = [];
-    if (propQuestions && propQuestions.length > 0) {
-      raw = propQuestions;
-    } else if (VAULT_REGISTRY && VAULT_REGISTRY[normKey]?.questions) {
-      raw = VAULT_REGISTRY[normKey].questions;
-    } else {
-      raw = [
-        {
-          question: `Module ${normKey} Comprehension Check: Did you complete the exercise steps locally?`,
-          options: [
-            'Yes, I verified the implementation with my local environment setup',
-            'No, I skipped the exercise steps',
-            'I am only browsing without executing code',
-            'None of the above',
-          ],
-          correctIndex: 0,
-          hint: 'Complete the lab steps locally before inspecting the reference solution.',
-        },
-      ];
-    }
-
-    return raw.map((q, qIdx) => {
-      const opts = (q.options || []).map((opt, oIdx) => {
-        if (typeof opt === 'string') {
-          return {
-            id: `q${qIdx}-opt${oIdx}`,
-            text: opt,
-            isCorrect: oIdx === (q.correctIndex || 0),
-          };
-        }
-        return {
-          id: `q${qIdx}-opt${oIdx}`,
-          text: opt.text || '',
-          isCorrect: opt.isCorrect !== undefined ? opt.isCorrect : oIdx === (q.correctIndex || 0),
-          explanation: opt.explanation,
-        };
-      });
-      return {
-        ...q,
-        normalizedOptions: opts,
-      };
-    });
-  }, [propQuestions, normKey]);
-
-  // Compute deterministic challenge token
-  const expectedToken = useMemo(() => {
-    return sha256Hex(`adk-v3-mod${normKey}-verified`).slice(0, 8);
-  }, [normKey]);
-
-  const challenge = pythonChallenge || {
-    command: `python3 -c "import hashlib; print(hashlib.sha256(b'adk-v3-mod${normKey}-verified').hexdigest()[:8])"`,
-    expectedToken: expectedToken,
-  };
-
-  const { isLoaded, isDocCompleted, markDocComplete } = useStudentProgress();
+  const normKey = String(moduleNumber).padStart(2, '0');
+  const { markDocComplete, isDocCompleted, isLoaded } = useStudentProgress();
 
   const docKey = useMemo(() => {
-    const cleanNorm = normKey.replace('.', '_');
-    const matched = CURRICULUM_MODULES.find((m) => {
-      const numPart = m.id.split('-')[0].replace('module', '');
-      return numPart === cleanNorm || numPart === cleanNorm.padStart(2, '0');
-    });
-    return matched ? `${matched.id}/lab` : null;
+    const mod = CURRICULUM_MODULES.find(
+      (m) => m.id.startsWith(`module${normKey}`) || m.id.startsWith(`module${parseInt(normKey, 10)}`)
+    );
+    return mod ? `${mod.id}/lab` : `module${normKey}/lab`;
   }, [normKey]);
 
   const isLabCompleted = Boolean(docKey && isLoaded && isDocCompleted(docKey));
@@ -218,6 +155,51 @@ export default function SolutionVault({
   const [tipIndex, setTipIndex] = useState(0);
   const [tokenError, setTokenError] = useState('');
   const [copied, setCopied] = useState(false);
+
+  // Normalize questions from props or registry
+  const resolvedQuestions = useMemo(() => {
+    let rawList = questions && questions.length > 0 ? questions : null;
+    if (!rawList && VAULT_REGISTRY[normKey]?.questions) {
+      rawList = VAULT_REGISTRY[normKey].questions;
+    }
+    if (!rawList || rawList.length === 0) {
+      rawList = [
+        {
+          question: `Did you implement and test your ADK solution locally for Module ${normKey}?`,
+          options: [
+            'Yes, I implemented the challenge and tested it in terminal',
+            'No, not yet',
+          ],
+          correctIndex: 0,
+          hint: 'Try implementing the TODO steps in your lab skeleton before accessing the solution.',
+        },
+      ];
+    }
+
+    return rawList.map((q, qIdx) => {
+      const opts = q.options.map((opt, optIdx) => {
+        if (typeof opt === 'string') {
+          return {
+            id: `q${qIdx}-opt-${optIdx}`,
+            originalIndex: optIdx,
+            text: opt,
+            isCorrect: optIdx === (q.correctIndex || 0),
+          };
+        }
+        return {
+          id: `q${qIdx}-opt-${optIdx}`,
+          originalIndex: optIdx,
+          text: opt.text || '',
+          isCorrect: opt.isCorrect !== undefined ? opt.isCorrect : optIdx === (q.correctIndex || 0),
+        };
+      });
+
+      return {
+        ...q,
+        normalizedOptions: opts,
+      };
+    });
+  }, [questions, normKey]);
 
   // Sync display options when current question changes
   useEffect(() => {
@@ -307,7 +289,7 @@ export default function SolutionVault({
       window.removeEventListener('adk-instructor-updated', handleInstructorEvent);
       window.removeEventListener('adk-progress-reset', handleProgressReset);
     };
-  }, [storageKey, checkInstructorAndSaved]);
+  }, [storageKey, checkInstructorAndSaved, cooldownSeconds]);
 
   // Cooldown timer for quiz retry
   useEffect(() => {
@@ -352,77 +334,87 @@ export default function SolutionVault({
       }
     }
     return () => clearTimeout(timer);
-  }, [status, secondsLeft, storageKey, cooldownSeconds, activeTips.length]);
+  }, [status, secondsLeft, cooldownSeconds, activeTips.length, storageKey]);
 
-  // Quiz Option Click
+  // Challenge command and expected token
+  const challenge = useMemo(() => {
+    const defaultCmd = `python3 -c "import hashlib; print(hashlib.sha256(b'adk-module-${normKey}').hexdigest()[:8])"`;
+    const defaultToken = sha256Hex(`adk-module-${normKey}`).slice(0, 8).toLowerCase();
+
+    const reg = VAULT_REGISTRY[normKey];
+    if (reg && reg.challenge) {
+      return {
+        command: reg.challenge.command || defaultCmd,
+        expectedToken: (reg.challenge.expectedToken || defaultToken).toLowerCase(),
+      };
+    }
+
+    return {
+      command: defaultCmd,
+      expectedToken: defaultToken,
+    };
+  }, [normKey]);
+
+  // Handlers
   const handleOptionSelect = (optId) => {
-    if (quizAnswered && isQuizCorrect) return;
-
+    if (quizAnswered) return;
     setSelectedOptionId(optId);
     setQuizAnswered(true);
 
     const chosen = currentDisplayOptions.find((o) => o.id === optId);
-    if (chosen && chosen.isCorrect) {
-      setIsQuizCorrect(true);
+    const correct = Boolean(chosen && chosen.isCorrect);
+    setIsQuizCorrect(correct);
+
+    if (correct) {
       setTimeout(() => {
         if (currentQuizIndex + 1 < resolvedQuestions.length) {
           setCurrentQuizIndex((prev) => prev + 1);
-          setSelectedOptionId(null);
           setQuizAnswered(false);
+          setSelectedOptionId(null);
           setIsQuizCorrect(false);
           setFailedAttempts(0);
         } else {
           setQuizPassed(true);
           setStatus('python_gate');
         }
-      }, 1200);
+      }, 700);
     } else {
-      setIsQuizCorrect(false);
       const nextFailures = failedAttempts + 1;
       setFailedAttempts(nextFailures);
-      // Cooldown: 1st fail 0s, 2nd fail 2s, 3rd+ fail 4s
-      const cd = nextFailures === 1 ? 0 : nextFailures === 2 ? 2 : 4;
-      if (cd > 0) {
-        setCooldownRemaining(cd);
+      const cooldownSecs = nextFailures === 1 ? 0 : nextFailures === 2 ? 3 : 5;
+      if (cooldownSecs > 0) {
+        setCooldownRemaining(cooldownSecs);
       }
     }
   };
 
   const handleRetryQuestion = () => {
     if (cooldownRemaining > 0) return;
-    // Anti-Cheating: Shuffle question options on retry so sequential brute forcing fails
-    const currentQ = resolvedQuestions[currentQuizIndex];
-    if (currentQ) {
-      setCurrentDisplayOptions(shuffle(currentQ.normalizedOptions));
-    }
-    setSelectedOptionId(null);
     setQuizAnswered(false);
+    setSelectedOptionId(null);
     setIsQuizCorrect(false);
-  };
-
-  const handleCopy = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(challenge.command);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    // Shuffle options to prevent rote memory guessing
+    setCurrentDisplayOptions(shuffle(resolvedQuestions[currentQuizIndex].normalizedOptions));
   };
 
   const handleTokenSubmit = (e) => {
     e.preventDefault();
+    setTokenError('');
     const clean = inputToken.trim().toLowerCase();
-    if (!clean) {
-      setTokenError('Please enter the generated session key.');
-      return;
-    }
 
-    if (clean === challenge.expectedToken.toLowerCase()) {
-      setTokenError('');
-      setTipIndex(0);
+    if (clean === challenge.expectedToken) {
       setStatus('cooldown');
       setSecondsLeft(cooldownSeconds);
     } else {
-      setTokenError('❌ Invalid token. Please run the Python command in your terminal to obtain the valid key.');
+      setTokenError('Invalid verification key. Make sure to run the exact Python command in your terminal.');
+    }
+  };
+
+  const handleCopy = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(challenge.command);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -437,34 +429,33 @@ export default function SolutionVault({
     setCurrentQuizIndex(0);
     setInputToken('');
     setTokenError('');
-    setSecondsLeft(cooldownSeconds);
     setFailedAttempts(0);
+    setCooldownRemaining(0);
+    setSecondsLeft(cooldownSeconds);
   };
 
-  const progressPercent = Math.max(
-    0,
-    Math.min(100, ((cooldownSeconds - secondsLeft) / cooldownSeconds) * 100)
-  );
-
-  const currentQ = resolvedQuestions[currentQuizIndex] || resolvedQuestions[0];
   const alphabet = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const currentQ = resolvedQuestions[currentQuizIndex] || resolvedQuestions[0];
+  const progressPercent = Math.min(100, Math.max(0, ((cooldownSeconds - secondsLeft) / cooldownSeconds) * 100));
 
   return (
     <div
       className={styles.vaultContainer}
-      data-solution-vault-id={normKey}
       data-solution-vault-status={status}
+      aria-expanded={status === 'unlocked'}
     >
-      {/* Header Banner */}
+      {/* Vault Header Bar */}
       <div className={styles.header}>
         <div className={styles.headerTitle}>
-          <span className={styles.lockIcon}>
+          <span className={styles.lockIcon} aria-hidden="true">
             {status === 'unlocked' ? '🔓' : '🔐'}
           </span>
           <div>
-            <h3>Module {normKey} Reference Solution Vault</h3>
+            <h3>Official Solution Vault — Module {normKey}</h3>
             <p className={styles.subtitle}>
-              Active Comprehension Gate • Zero Guessable URLs • Guided Verification
+              {status === 'unlocked'
+                ? 'Reference Architecture & Full Implementation'
+                : 'Locked Challenge — Active Pedagogical Socratic Gate'}
             </p>
           </div>
         </div>
@@ -472,15 +463,16 @@ export default function SolutionVault({
           <button
             onClick={handleRelock}
             className={styles.relockBtn}
-            title="Relock the vault"
+            title="Relock solution to test knowledge again"
+            aria-label="Relock solution vault"
           >
-            🔒 Lock Again
+            🔒 Relock Vault
           </button>
         )}
       </div>
 
       {/* Main Vault Content */}
-      <div className={styles.body}>
+      <div className={styles.body} id="solution-vault-content">
         {/* Step 1: Sequential Comprehension Questions */}
         {status === 'quiz' && (
           <div className={styles.quizBox}>
@@ -488,7 +480,7 @@ export default function SolutionVault({
               <span>
                 Step 1/3: Question {currentQuizIndex + 1} of {resolvedQuestions.length}
               </span>
-              <div className={styles.progressBar}>
+              <div className={styles.progressBar} role="progressbar" aria-valuenow={currentQuizIndex + 1} aria-valuemin={1} aria-valuemax={resolvedQuestions.length}>
                 <div
                   className={styles.progressFill}
                   style={{
@@ -500,7 +492,7 @@ export default function SolutionVault({
 
             <h4 className={styles.questionText}>{currentQ.question}</h4>
 
-            <div className={styles.optionsList}>
+            <div className={styles.optionsList} role="radiogroup" aria-label={currentQ.question}>
               {currentDisplayOptions.map((opt, idx) => {
                 const isSelected = selectedOptionId === opt.id;
                 let btnClass = styles.optionBtn;
@@ -517,6 +509,8 @@ export default function SolutionVault({
                     className={btnClass}
                     onClick={() => handleOptionSelect(opt.id)}
                     disabled={(quizAnswered && isQuizCorrect) || (quizAnswered && !isQuizCorrect)}
+                    role="radio"
+                    aria-checked={isSelected}
                     aria-label={`Option ${alphabet[idx]}: ${opt.text}`}
                   >
                     <span className={styles.optionLetter}>
@@ -530,7 +524,11 @@ export default function SolutionVault({
 
             {/* Socratic Feedback on Wrong Answer (Zero Spoiler) */}
             {quizAnswered && !isQuizCorrect && (
-              <div className={styles.socraticBox}>
+              <div
+                className={styles.socraticBox}
+                role="status"
+                aria-live="polite"
+              >
                 <p className={styles.socraticTitle}>
                   <span>🤔</span> Socratic Feedback
                 </p>
@@ -560,7 +558,11 @@ export default function SolutionVault({
             )}
 
             {quizAnswered && isQuizCorrect && (
-              <div className={styles.correctBanner}>
+              <div
+                className={styles.correctBanner}
+                role="status"
+                aria-live="polite"
+              >
                 ✅ Excellent comprehension! Advancing to the next step...
               </div>
             )}
@@ -580,7 +582,7 @@ export default function SolutionVault({
 
             <div className={styles.codeBox}>
               <code>{challenge.command}</code>
-              <button onClick={handleCopy} className={styles.copyBtn}>
+              <button onClick={handleCopy} className={styles.copyBtn} aria-label="Copy verification command">
                 {copied ? '✓ Copied' : '📋 Copy Command'}
               </button>
             </div>
@@ -598,24 +600,34 @@ export default function SolutionVault({
                   value={inputToken}
                   onChange={(e) => setInputToken(e.target.value)}
                   className={styles.keyInput}
+                  aria-describedby={tokenError ? "token-error-msg" : undefined}
                 />
                 <button type="submit" className={styles.unlockBtn}>
                   🔓 Submit Token
                 </button>
               </div>
-              {tokenError && <div className={styles.errorMsg}>{tokenError}</div>}
+              {tokenError && (
+                <div
+                  id="token-error-msg"
+                  className={styles.errorMsg}
+                  role="alert"
+                  aria-live="assertive"
+                >
+                  {tokenError}
+                </div>
+              )}
             </form>
           </div>
         )}
 
         {/* Step 3: Intentional Cooldown Timer */}
         {status === 'cooldown' && (
-          <div className={styles.cooldownBox}>
+          <div className={styles.cooldownBox} role="status" aria-live="polite">
             <div className={styles.timerRing}>{secondsLeft}s</div>
             <div className={styles.cooldownHeading}>
               ⏳ Intentional Mindfulness Cooldown Active
             </div>
-            <div className={styles.progressBarTrack}>
+            <div className={styles.progressBarTrack} role="progressbar" aria-valuenow={Math.round(progressPercent)} aria-valuemin={0} aria-valuemax={100}>
               <div
                 className={styles.progressBarFill}
                 style={{ width: `${progressPercent}%` }}
@@ -644,7 +656,7 @@ export default function SolutionVault({
           {docKey && (
             <div className={styles.completionBanner}>
               <div className={styles.completionBannerLeft}>
-                <span className={styles.completionIcon}>
+                <span className={styles.completionIcon} aria-hidden="true">
                   {isLabCompleted ? '🏆' : '🎉'}
                 </span>
                 <div>

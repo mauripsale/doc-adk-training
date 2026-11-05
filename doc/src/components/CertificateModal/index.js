@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 import { useStudentProgress } from '@site/src/context/ProgressContext';
 import styles from './styles.module.css';
@@ -7,10 +7,28 @@ const STUDENT_NAME_STORAGE_KEY = 'adk_student_name_v1';
 const QUIZ_STORAGE_KEY = 'adk_quiz_mastery_v1';
 
 export default function CertificateModal({ isOpen, onClose }) {
+  const dialogRef = useRef(null);
   const { stats, exportProgress } = useStudentProgress();
   const [studentName, setStudentName] = useState('Google ADK Developer');
   const [quizMasteryCount, setQuizMasteryCount] = useState(0);
   const [copiedSummary, setCopiedSummary] = useState(false);
+
+  // Sync native dialog state
+  useEffect(() => {
+    if (!ExecutionEnvironment.canUseDOM) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    if (isOpen) {
+      if (!dialog.open) {
+        dialog.showModal();
+      }
+    } else {
+      if (dialog.open) {
+        dialog.close();
+      }
+    }
+  }, [isOpen]);
 
   // Load custom student name & quiz stats from localStorage
   useEffect(() => {
@@ -43,7 +61,12 @@ export default function CertificateModal({ isOpen, onClose }) {
     }
   };
 
-  if (!isOpen) return null;
+  // Close on backdrop click
+  const handleDialogClick = (e) => {
+    if (e.target === dialogRef.current) {
+      onClose();
+    }
+  };
 
   // Determine achievement rank title
   const pct = stats.overallPercentage || 0;
@@ -101,10 +124,16 @@ Course: Google Agent Development Kit (ADK 2.0) Masterclass`;
   };
 
   return (
-    <div className={styles.modalBackdrop} onClick={onClose} role="dialog" aria-modal="true">
+    <dialog
+      ref={dialogRef}
+      className={styles.nativeDialog}
+      onClick={handleDialogClick}
+      onClose={onClose}
+      aria-labelledby="certificate-modal-title"
+    >
       <div className={styles.modalCard} onClick={e => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h2 className={styles.modalTitle}>
+          <h2 id="certificate-modal-title" className={styles.modalTitle}>
             <span>🏆</span> Certificate & Learning Portfolio
           </h2>
           <button
@@ -179,6 +208,6 @@ Course: Google Agent Development Kit (ADK 2.0) Masterclass`;
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 }

@@ -194,21 +194,35 @@ export default function Home() {
 
               {/* LIVE ARCHITECTURE & CODE PREVIEW */}
               <div className={styles.heroTerminal}>
+                <div className={styles.terminalContextHeader}>
+                  <div className={styles.terminalContextBadge}>
+                    <span className={styles.terminalContextDot}></span>
+                    WHAT YOU'LL BUILD
+                  </div>
+                  <div className={styles.terminalContextTitle}>Production Multi-Agent Architecture in Python</div>
+                </div>
+
                 <div className={styles.terminalHeader}>
                   <div className={styles.tabButtons}>
                     <button
                       type="button"
                       className={`${styles.tabBtn} ${activeCodeTab === 'workflow' ? styles.tabBtnActive : ''}`}
                       onClick={() => setActiveCodeTab('workflow')}
+                      aria-label="View workflow.py Multi-Agent Orchestration code"
                     >
-                      workflow.py
+                      <span className={styles.tabIcon}>📑</span>
+                      <span className={styles.tabText}>workflow.py</span>
+                      <span className={styles.tabPill}>Orchestrator</span>
                     </button>
                     <button
                       type="button"
                       className={`${styles.tabBtn} ${activeCodeTab === 'tools' ? styles.tabBtnActive : ''}`}
                       onClick={() => setActiveCodeTab('tools')}
+                      aria-label="View secops_tools.py Custom Tool code"
                     >
-                      secops_tools.py
+                      <span className={styles.tabIcon}>🛠️</span>
+                      <span className={styles.tabText}>secops_tools.py</span>
+                      <span className={styles.tabPill}>Pydantic Tool</span>
                     </button>
                   </div>
                   <span className={styles.terminalBadge}>ADK 2.0 Runtime</span>
@@ -217,6 +231,12 @@ export default function Home() {
                   <pre className={styles.codeBlock}>
                     <code>{CODE_EXAMPLES[activeCodeTab]}</code>
                   </pre>
+                </div>
+                <div className={styles.terminalFooter}>
+                  <span className={styles.terminalFooterIcon}>⚡</span>
+                  <span className={styles.terminalFooterText}>
+                    Real-world architectural patterns taught across 40 challenge labs with <strong>gemini-3.8-flash</strong>.
+                  </span>
                 </div>
               </div>
             </div>

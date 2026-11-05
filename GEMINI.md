@@ -23,6 +23,7 @@
 - **Standard Agent Model:** Always use **`gemini-3.8-flash`** as the default model for all agents, code examples, labs, YAML configurations, and solutions across the entire curriculum.
     - Automated graders and evaluation rubrics must accept `gemini-3.8-flash`, `gemini-3.7-flash`, and `gemini-3.6-flash` as valid Flash family models.
     - Legacy references to `gemini-3.5-flash` are deprecated and must be systematically replaced.
+- **Strict English Language Mandate:** All curriculum materials, documentation, UI strings, components, code examples, comments, lab challenges, and solutions must be authored exclusively and strictly in **English**. No non-English or mixed-language strings in the public repository.
 
 ## How to run the Student Evaluator
 If the `adk` command is not in the PATH, use:

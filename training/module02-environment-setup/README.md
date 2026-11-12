@@ -58,7 +58,7 @@ If you don't want to install Docker, Python, or tools on your computer, launch a
 <LaunchBadges />
 
 * **GitHub Codespaces:** Launches a full VS Code browser IDE pre-configured with Python 3.11, `uv`, `gcloud`, and all course dependencies.
-* **Google Cloud Shell:** Clones the repository directly into your Google Cloud web shell and opens Cloud Shell Editor with pre-authenticated Google Cloud tooling.
+* **Google Cloud Shell:** Clones the repository directly into your Google Cloud web shell, launches the Cloud Shell Editor, and opens the interactive Project Selector Walkthrough panel (`tutorial.md`).
 
 > [!WARNING]
 > **Cloud Shell Account & Project Isolation Guardrail:**

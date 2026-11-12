@@ -1,7 +1,7 @@
 # 🎓 Google ADK Training: From Zero to Hero 🚀
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mauripsale/doc-adk-training?quickstart=1)
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/mauripsale/doc-adk-training.git)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/mauripsale/doc-adk-training.git&cloudshell_tutorial=tutorial.md)
 
 Welcome! This repository contains a comprehensive, multi-module training course for the **Google Agent Development Kit (ADK)**. Through a series of hands-on modules, you will learn the core and advanced concepts of the ADK to build, test, deploy, and observe your own AI agents.
 

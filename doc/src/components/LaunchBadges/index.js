@@ -27,7 +27,7 @@ export default function LaunchBadges({
         target="_blank"
         rel="noopener noreferrer"
         className={`${styles.launchButton} ${styles.btnCloudShell}`}
-        title="Launch in Google Cloud Shell Editor with pre-authenticated gcloud"
+        title="Launch in Google Cloud Shell (Note: attaches to your active browser GCP project/account)"
       >
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7.5 14.5l3.5-3.5-3.5-3.5L8.9 6.1l4.9 4.9-4.9 4.9-1.4-1.4zM12 15h5v2h-5v-2z" />

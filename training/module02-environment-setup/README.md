@@ -60,6 +60,21 @@ If you don't want to install Docker, Python, or tools on your computer, launch a
 * **GitHub Codespaces:** Launches a full VS Code browser IDE pre-configured with Python 3.11, `uv`, `gcloud`, and all course dependencies.
 * **Google Cloud Shell:** Clones the repository directly into your Google Cloud web shell and opens Cloud Shell Editor with pre-authenticated Google Cloud tooling.
 
+> [!WARNING]
+> **Cloud Shell Account & Project Isolation Guardrail:**
+> When opening Google Cloud Shell, it immediately attaches to whichever Google account and default GCP project is currently active in your browser.
+> **Before running any deployment or provisioning commands**, always verify and set your dedicated sandbox/training project:
+> ```bash
+> # 1. Verify your active identity
+> gcloud auth list
+> 
+> # 2. Check the currently selected project
+> gcloud config get-value project
+> 
+> # 3. Explicitly switch to your dedicated sandbox project
+> gcloud config set project <YOUR_TRAINING_PROJECT_ID>
+> ```
+
 ---
 
 #### 🐳 Path 2: VS Code Dev Containers (Local Docker)

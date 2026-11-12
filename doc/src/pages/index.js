@@ -307,7 +307,7 @@ export default function Home() {
           <section className={styles.philosophy}>
             <div className={styles.sectionHeaderCentered}>
               <p className={styles.sectionEyebrow}>Zero Trust Learning</p>
-              <h2 className={styles.sectionTitle}>Active Learning vs Passie Tutorials</h2>
+              <h2 className={styles.sectionTitle}>Active Learning vs Passive Tutorials</h2>
               <p className={styles.sectionLead}>
                 You don't master agent systems by reading solutions. Every module enforces active problem-solving before revealing reference code.
               </p>

@@ -108,8 +108,10 @@ root_agent = Agent(
 You are a helpful calculator assistant.
 When the user asks you to perform a calculation, you MUST use the appropriate tool.
 """,
-    # TODO: Add the four imported functions directly to this list.
-    tools=[add, subtract, multiply, divide]
+    # TODO: Add the four imported tool functions directly to this list.
+    tools=[
+        # Insert add, subtract, multiply, divide
+    ]
 )
 ```
 

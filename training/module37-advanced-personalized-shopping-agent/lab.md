@@ -276,17 +276,10 @@ This is the main, user-facing agent that will coordinate the others.
     from google.adk.tools.base_tool import BaseTool
 
     # TODO: 1. Define remote specialist nodes
-    web_specialist = RemoteA2aAgent(
-        name="web_agent",
-        agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}",
-        use_legacy=False,
-    )
+    # Instantiate RemoteA2aAgent for web_specialist (port 8001) and personalization_specialist (port 8002)
+    web_specialist = ...
 
-    personalization_specialist = RemoteA2aAgent(
-        name="personalization_agent",
-        agent_card=f"http://localhost:8002{AGENT_CARD_WELL_KNOWN_PATH}",
-        use_legacy=False,
-    )
+    personalization_specialist = ...
 
     # TODO: 2. Write a before_tool_callback that logs the name of the tool
     # being called (tool.name) every time the orchestrator delegates to a
@@ -296,13 +289,14 @@ This is the main, user-facing agent that will coordinate the others.
 
     # TODO: 3. Define the main Orchestrator Agent.
     # Wire web_specialist and personalization_specialist in as AgentTools
-    # (tools=[...]), NOT as sub_agents=[...] — see the note above.
+    # (tools=[AgentTool(agent=...), AgentTool(agent=...)]), NOT as sub_agents=[...] — see the note above.
     # Register log_delegation as the agent's before_tool_callback.
     root_agent = Agent(
         model="gemini-3.8-flash",
         name="shopping_orchestrator",
         instruction="""You are a master shopping assistant. Coordinate with specialists.""",
-        tools=[AgentTool(agent=web_specialist), AgentTool(agent=personalization_specialist)]
+        before_tool_callback=...,
+        tools=[...]
     )
     ```
 

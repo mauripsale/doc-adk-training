@@ -172,8 +172,8 @@ threat_agent = Agent(
         Always summarize what you found before handing off to another agent.
     """,
     tools=[mcp_toolset],
-    # before_model_callback=...,
-    # after_model_callback=...,
+    before_model_callback=...,  # TODO: Pass start_timer callback
+    after_model_callback=...,   # TODO: Pass end_timer_and_sanitize callback
 )
 
 a2a_app = to_a2a(threat_agent, port=8001)
@@ -276,7 +276,7 @@ mitigation_agent = Agent(
     model="gemini-3.8-flash",
     name="mitigation_agent",
     instruction="You generate patch scripts and executive briefings. Use the playbook search and brief-upload tools.",
-    tools=[search_remediation_playbooks, build_and_upload_mitigation_brief]
+    tools=[...]  # TODO: Register search_remediation_playbooks and build_and_upload_mitigation_brief
 )
 
 a2a_app = to_a2a(mitigation_agent, port=8003)

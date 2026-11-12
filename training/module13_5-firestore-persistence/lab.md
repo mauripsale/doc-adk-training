@@ -147,16 +147,16 @@ agent = Agent(
 )
 
 async def main():
-    # TODO: 1. Setup metadata
-    project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
-    app = App(name="extensibility_demo", root_agent=agent)
+    # TODO: 1. Setup metadata and App instance
+    project_id = ...
+    app = ...
     
     # TODO: 2. Instantiate your custom service
-    # custom_fs = ...
+    custom_fs = ...
     
     # TODO: 3. Create a base Runner (NOT InMemoryRunner)
     # Inject your custom_fs into the session_service parameter
-    # runner = Runner(app=app, session_service=...)
+    runner = ...
     
     # 4. Test it
     print("Agent is now powered by Firestore persistence!")

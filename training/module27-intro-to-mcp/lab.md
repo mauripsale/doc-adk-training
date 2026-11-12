@@ -77,8 +77,8 @@ Because the `McpToolset` requires Python code to configure the connection, we mu
     from mcp import StdioServerParameters
 
     # -- Configuration --
-    # TODO: 2. Define the TARGET_FOLDER_PATH.
-    TARGET_FOLDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "test_files/")
+    # TODO: 2. Define the TARGET_FOLDER_PATH (point to test_files directory).
+    TARGET_FOLDER_PATH = ...
 
     # -- Agent Definition --
     # TODO: 3. Define the root_agent.

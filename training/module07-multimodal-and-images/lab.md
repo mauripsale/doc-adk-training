@@ -94,13 +94,8 @@ class VisualCatalogApp:
         image_part = ...
 
         # TODO: 3. Create the multimodal message (types.Content object)
-        msg = types.Content(
-            role="user",
-            parts=[
-                types.Part(text=f"Analyze this image for product {product_id}."),
-                image_part
-            ]
-        )
+        # Hint: Build a types.Content with role="user" and parts containing a prompt text and image_part
+        msg = ...
 
         # TODO: 4. Run the agent using run_async
         print("📸 Sending image to Gemini...")

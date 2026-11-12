@@ -93,6 +93,14 @@ weather_agent = Agent(
     instruction="Provide a brief, enthusiastic 3-day weather forecast for the user's destination."
 )
 
+flight_agent = Agent(
+    name="flight_booker",
+    model="gemini-3.8-flash",
+    mode="task",
+    rerun_on_resume=True,
+    instruction="Help the user book a flight. Confirm the booking and stop."
+)
+
 root_agent = Agent(
     name="travel_planner",
     model="gemini-3.8-flash",

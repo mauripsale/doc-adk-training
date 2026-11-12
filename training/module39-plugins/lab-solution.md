@@ -125,7 +125,7 @@ async def main():
     
     # 2. Enterprise-wide governance header injection
     compliance_plugin = GlobalInstructionPlugin(
-        instruction="[ENTERPRISE COMPLIANCE AUDITED: Keep all answers concise, secure, and professional.]"
+        global_instruction="[ENTERPRISE COMPLIANCE AUDITED: Keep all answers concise, secure, and professional.]"
     )
     
     # 3. Register plugins on the App container

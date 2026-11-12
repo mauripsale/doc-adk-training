@@ -248,13 +248,14 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from google.adk.apps.app import EventsCompactionConfig
 from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
+from google.adk.models import LLMRegistry
 from google.genai import types
 from agent import root_agent
 
 async def test_advanced_memory():
     # 1. Configure Automatic Event Compaction
     compaction_config = EventsCompactionConfig(
-        summarizer=LlmEventSummarizer(model="gemini-3.8-flash"),
+        summarizer=LlmEventSummarizer(llm=LLMRegistry.new_llm("gemini-3.8-flash")),
         compaction_interval=6,
         overlap_size=1
     )
@@ -276,7 +277,7 @@ async def test_advanced_memory():
         session_id=session_id,
         new_message=types.Content(role="user", parts=[types.Part.from_text(text="I want to learn Python in Spanish at beginner level.")])
     ):
-        if event.is_final_response():
+        if event.is_final_response() and event.content and event.content.parts:
             print(f"Agent: {event.content.parts[0].text}")
 
     # 2. Demonstrate Session Rewind to revert a mistaken action
@@ -286,7 +287,8 @@ async def test_advanced_memory():
     
     # Rewind to initial state before turn
     if target_events.events:
-        await runner.rewind_async(user_id=user_id, session_id=session_id, event_id=target_events.events[0].id)
+        first_inv_id = getattr(target_events.events[0], "invocation_id", "inv-1")
+        await runner.rewind_async(user_id=user_id, session_id=session_id, rewind_before_invocation_id=first_inv_id)
         print("Session successfully rewound to initial event!")
 
 if __name__ == "__main__":

@@ -9,6 +9,22 @@ title: "Lab Solution"
 
 This file contains the complete code for the `agent.py` script in the Agent Skills lab.
 
+### `skills_agent/skills/greeting-skill/SKILL.md`
+
+```markdown
+---
+name: greeting-skill
+description: The official Nebula-9 Collective greeting protocol. Use this skill any time the user greets you, says hello, or asks to be greeted.
+---
+
+# Nebula-9 Collective Greeting Protocol
+
+You are now using the official Nebula-9 Collective Greeting Skill!
+Whenever the user greets you, follow these steps:
+1. Greet them warmly using standard cosmic etiquette.
+2. Confirm that their communications channel is secure.
+```
+
 ### `skills_agent/agent.py`
 
 ```python

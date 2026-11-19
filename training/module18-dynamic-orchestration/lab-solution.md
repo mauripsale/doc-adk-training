@@ -14,11 +14,9 @@ This file contains the complete code for the `agent.py` script in the Smart Supp
 ```python
 from __future__ import annotations
 from pydantic import BaseModel
-from google.adk.agents import Agent
-from google.adk.events import Event
-from google.adk import Workflow, Context
+from google.adk import Agent, Workflow, Context
 from google.adk.workflow import node
-from typing import AsyncGenerator, Literal
+from typing import Literal
 
 # ===== 1. Specialist Agent Nodes =====
 
@@ -31,7 +29,11 @@ ai_support = Agent(
 human_escalation = Agent(
     name="human_escalation_team",
     model="gemini-3.8-flash",
-    instruction="You are a human rep. Frustrated customer. apologize and promise a call."
+    instruction=(
+        "You are a senior human escalation rep handling a frustrated customer. "
+        "Apologize sincerely, promise a follow-up call, and include any preliminary "
+        "technical troubleshooting steps provided to you."
+    )
 )
 
 # ===== 2. Classifier Agent Node =====
@@ -51,22 +53,21 @@ classifier = Agent(
 @node(rerun_on_resume=True)
 async def support_router_workflow(ctx: Context, node_input: str):
     # Step 3a: Run the classifier node.
-    # In ADK 2.0, run_node returns the node's output directly! No more manual
-    # digging into session state -- but note it comes back as a plain dict,
-    # even though the node's output_schema is a Pydantic model.
+    # run_node() returns the structured output directly as a plain Python dict.
     classification: dict = await ctx.run_node(classifier, node_input)
     
-    # Step 3b: Routing Logic.
-    # Use standard Python logic to choose the next node in the graph.
+    # Step 3b: Dynamic multi-step orchestration using plain Python control flow.
     if classification["sentiment"] == "angry":
-        chosen_agent = human_escalation
-    else:
-        chosen_agent = ai_support
+        # Chain 2 agents dynamically: first draft a technical fix, then escalate with context!
+        tech_draft = await ctx.run_node(ai_support, node_input)
+        escalation_prompt = (
+            f"Customer message: {node_input}\n\n"
+            f"Preliminary technical analysis: {tech_draft}"
+        )
+        return await ctx.run_node(human_escalation, escalation_prompt)
     
-    # Step 3c: Execute the chosen specialist agent and return its result.
-    # By returning the result of run_node, the workflow engine automatically
-    # handles the event emission to the user.
-    return await ctx.run_node(chosen_agent, node_input)
+    # Standard path: single call to AI support
+    return await ctx.run_node(ai_support, node_input)
 
 # ===== 4. Register the Workflow as the Root =====
 
@@ -78,8 +79,8 @@ root_agent = Workflow(
 
 ### Self-Reflection Answers
 
-1.  **How is `ctx.run_node()` in ADK 2.0 different from the way we passed data between agents in ADK 1.x?**
-    *   **Answer:** In ADK 1.x, you had to set an `output_key` on an agent and then manually retrieve that data from the `ctx.session.state` dictionary in the parent agent. In ADK 2.0, `ctx.run_node()` returns the result of the node execution directly (as a string, or as a plain `dict` when the node has an `output_schema` -- never a Pydantic instance), making the data flow much more intuitive and "Pythonic".
+1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 16)?**
+    *   **Answer:** With Static Edges (Module 16), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
 
 2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
     *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.

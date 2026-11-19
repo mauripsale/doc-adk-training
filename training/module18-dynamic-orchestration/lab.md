@@ -10,9 +10,15 @@ import Setup from '../_setup-snippet.mdx';
 
 ## Goal
 
-In this lab, you will build a sophisticated orchestration system using a **Dynamic Workflow**. You will create a `support_router_workflow` node that intercepts user requests, uses a fast LLM node to classify the sentiment (angry, neutral, happy), and then programmatically routes the request to the appropriate specialist agent node.
+In this lab, you will build a multi-step orchestration system using a **Dynamic Workflow** — doing something a Module 17 dictionary edge *cannot* do on its own:
 
-This exercise demonstrates the power of ADK 2.0: using standard Python logic to orchestrate multiple AI components with deterministic control.
+1. Run `classifier` to detect the customer's sentiment (`"angry"`, `"neutral"`, or `"happy"`).
+2. If the customer is **not** angry, simply call `ai_support` and return its technical answer.
+3. If the customer **is** `"angry"`, execute a **dynamic 2-step chain**:
+   * **First**, call `ai_support` to draft a quick technical troubleshooting note.
+   * **Second**, pass *both* the customer's original message and that technical draft into `human_escalation`, so the escalation team responds with empathy **and** an immediate technical fix!
+
+This shows the real superpower of `@node` + `ctx.run_node()`: chaining and combining multiple agent outputs in plain Python variables.
 
 ### Step 1: Create the Project Structure
 
@@ -70,13 +76,13 @@ async def support_router_workflow(ctx: Context, node_input: str):
     # access fields with result["sentiment"], not result.sentiment.
     classification = None 
     
-    # Step 2b: Routing Logic.
-    # Use a standard Python 'if' statement to choose the target agent.
-    # If sentiment is "angry", choose human_escalation.
-    # Otherwise, choose ai_support.
-    chosen_agent = None 
-    
-    # Step 2c: Execute the chosen target node via ctx.run_node() and return its result.
+    # Step 2b: Dynamic Multi-Step Orchestration.
+    # - If classification["sentiment"] == "angry":
+    #     1. Call `ai_support` via ctx.run_node() to draft a preliminary technical fix.
+    #     2. Combine `node_input` and that technical draft into a prompt, then
+    #        call `human_escalation` via ctx.run_node() and return its response.
+    # - Otherwise:
+    #     Call `ai_support` directly via ctx.run_node() and return its response.
     return None
 
 # ===== 3. Register the System =====
@@ -97,9 +103,9 @@ root_agent = Workflow(
     uv run adk web
     ```
     *(Select `support_router_v2` from the agent dropdown in the UI).*
-2.  **Test the routing:**
-    *   **Input:** "My internet is down, help!" -> Should route to `ai_support_bot`.
-    *   **Input:** "THIS IS DISGUSTING! I WANT TO CANCEL EVERYTHING!" -> Should route to `human_escalation_team`.
+2.  **Test the dynamic orchestration:**
+    *   **Input:** "My internet is down, help!" -> Runs `classifier` -> calls `ai_support_bot` directly.
+    *   **Input:** "THIS IS DISGUSTING! MY ROUTER IS STILL BROKEN!" -> Runs `classifier` -> calls `ai_support_bot` for a preliminary technical fix -> passes both the complaint and the fix to `human_escalation_team`!
 3.  **Inspect the Workflow Graph:**
     In the Dev UI, open the **Graph View**. You will see the visual representation of your dynamic execution: the flow from the router node to the specific specialist agent.
 
@@ -132,9 +138,9 @@ This file contains the complete code for the `agent.py` script in the Smart Supp
 ```python
 from __future__ import annotations
 from pydantic import BaseModel
-from google.adk import Agent, Workflow, Context, Event
+from google.adk import Agent, Workflow, Context
 from google.adk.workflow import node
-from typing import AsyncGenerator, Literal
+from typing import Literal
 
 # ===== 1. Specialist Agent Nodes =====
 
@@ -147,7 +153,11 @@ ai_support = Agent(
 human_escalation = Agent(
     name="human_escalation_team",
     model="gemini-3.8-flash",
-    instruction="You are a human rep. Frustrated customer. apologize and promise a call."
+    instruction=(
+        "You are a senior human escalation rep handling a frustrated customer. "
+        "Apologize sincerely, promise a follow-up call, and include any preliminary "
+        "technical troubleshooting steps provided to you."
+    )
 )
 
 # ===== 2. Classifier Agent Node =====
@@ -167,22 +177,21 @@ classifier = Agent(
 @node(rerun_on_resume=True)
 async def support_router_workflow(ctx: Context, node_input: str):
     # Step 3a: Run the classifier node.
-    # In ADK 2.0, run_node returns the node's output directly! No more manual
-    # digging into session state -- but note it comes back as a plain dict,
-    # even though the node's output_schema is a Pydantic model.
+    # run_node() returns the structured output directly as a plain Python dict.
     classification: dict = await ctx.run_node(classifier, node_input)
     
-    # Step 3b: Routing Logic.
-    # Use standard Python logic to choose the next node in the graph.
+    # Step 3b: Dynamic multi-step orchestration using plain Python control flow.
     if classification["sentiment"] == "angry":
-        chosen_agent = human_escalation
-    else:
-        chosen_agent = ai_support
+        # Chain 2 agents dynamically: first draft a technical fix, then escalate with context!
+        tech_draft = await ctx.run_node(ai_support, node_input)
+        escalation_prompt = (
+            f"Customer message: {node_input}\n\n"
+            f"Preliminary technical analysis: {tech_draft}"
+        )
+        return await ctx.run_node(human_escalation, escalation_prompt)
     
-    # Step 3c: Execute the chosen specialist agent and return its result.
-    # By returning the result of run_node, the workflow engine automatically
-    # handles the event emission to the user.
-    return await ctx.run_node(chosen_agent, node_input)
+    # Standard path: single call to AI support
+    return await ctx.run_node(ai_support, node_input)
 
 # ===== 4. Register the Workflow as the Root =====
 
@@ -194,8 +203,8 @@ root_agent = Workflow(
 
 ### Self-Reflection Answers
 
-1.  **How is `ctx.run_node()` in ADK 2.0 different from the way we passed data between agents in ADK 1.x?**
-    *   **Answer:** In ADK 1.x, you had to set an `output_key` on an agent and then manually retrieve that data from the `ctx.session.state` dictionary in the parent agent. In ADK 2.0, `ctx.run_node()` returns the result of the node execution directly (as a string, or as a plain `dict` when the node has an `output_schema` -- never a Pydantic instance), making the data flow much more intuitive and "Pythonic".
+1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 16)?**
+    *   **Answer:** With Static Edges (Module 16), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
 
 2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
     *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.

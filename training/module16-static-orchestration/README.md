@@ -87,28 +87,28 @@ When multiple parallel branches converge into a `JoinNode`, a single downstream 
 2. The downstream agent references those saved keys directly inside its `instruction` string using curly braces **`{key_name}`**.
 
 ```python
-tech_researcher = Agent(
-    name="tech_researcher",
+weather_scout = Agent(
+    name="weather_scout",
     model="gemini-3.8-flash",
-    instruction="Find 3 headlines about AI.",
-    output_key="tech_news",   # Stored in session.state["tech_news"]
+    instruction="Summarize the weekend weather forecast for the requested city.",
+    output_key="weather_info",   # Stored in session.state["weather_info"]
 )
 
-market_researcher = Agent(
-    name="market_researcher",
+events_scout = Agent(
+    name="events_scout",
     model="gemini-3.8-flash",
-    instruction="Find 3 headlines about Stock Markets.",
-    output_key="market_news", # Stored in session.state["market_news"]
+    instruction="List 3 popular cultural events happening this weekend in the city.",
+    output_key="local_events",   # Stored in session.state["local_events"]
 )
 
-summarizer = Agent(
-    name="summarizer",
+city_briefing = Agent(
+    name="city_briefing",
     model="gemini-3.8-flash",
-    instruction="Combine TECH: {tech_news} and MARKET: {market_news} into one briefing.",
+    instruction="Create a short weekend guide combining WEATHER: {weather_info} and EVENTS: {local_events}.",
 )
 ```
 
-Before sending the prompt to Gemini, ADK automatically replaces `{tech_news}` and `{market_news}` with the values stored in `session.state`.
+Before sending the prompt to Gemini, ADK automatically replaces `{weather_info}` and `{local_events}` with the values stored in `session.state`.
 
 ### Why use Static Orchestration?
 

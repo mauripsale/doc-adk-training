@@ -42,6 +42,11 @@ We will use the `adk` command-line tool to create the file structure for our new
     ```shell
     uv run adk create echo_agent
     ```
+    > **Note on `adk create` wizard options:** When prompted for the backend:
+    > - Choose **Google AI** if using `GOOGLE_API_KEY`.
+    > - Choose **Vertex AI** if using Google Cloud ADC (`gcloud auth application-default login`) with project and `GOOGLE_CLOUD_LOCATION="global"`.
+    > - Choose **Login with Google** for interactive browser OAuth.
+
     This command creates a new directory named `echo_agent/` with an `agent.py` file and a `.env` file inside.
 
 ### Step 2: Configure the Agent
@@ -60,7 +65,7 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
         ```
         GOOGLE_GENAI_USE_VERTEXAI=1
         GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-        GOOGLE_CLOUD_LOCATION=us-central1
+        GOOGLE_CLOUD_LOCATION=global
         ```
 
 2.  **Define the agent's behavior (Python method):**

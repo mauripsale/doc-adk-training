@@ -116,7 +116,7 @@ from google.adk.apps import App
 from firestore_provider import FirestoreSessionService
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 agent = Agent(
     model="gemini-3.8-flash",

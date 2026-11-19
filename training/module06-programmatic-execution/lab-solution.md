@@ -39,7 +39,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from agent import root_agent
 
-load_dotenv()
+load_dotenv(override=True)
 
 # 1. Create the App container.
 # This separates infrastructure (App) from intelligence (Agent).

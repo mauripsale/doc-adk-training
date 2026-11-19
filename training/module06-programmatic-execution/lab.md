@@ -43,7 +43,7 @@ from ... import ...
 # Optional: Suppress noisy ADK/httpx logs
 logging.getLogger("google.adk").setLevel(logging.WARNING)
 
-load_dotenv()
+load_dotenv(override=True)
 
 # --- Step 2: Infrastructure Setup ---
 # TODO: 1. Create the App instance named "support_app".
@@ -126,7 +126,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from agent import root_agent
 
-load_dotenv()
+load_dotenv(override=True)
 
 # 1. Create the App container.
 # This separates infrastructure (App) from intelligence (Agent).

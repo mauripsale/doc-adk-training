@@ -21,7 +21,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import asyncio
 
-load_dotenv()
+load_dotenv(override=True)
 
 # The actual tool
 def secret_calculator(a: int, b: int) -> int:
@@ -106,7 +106,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import asyncio
 
-load_dotenv()
+load_dotenv(override=True)
 
 def system_status() -> str:
     """Returns the internal cluster health status."""

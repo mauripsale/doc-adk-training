@@ -47,7 +47,7 @@ from google.adk.models.llm_response import LlmResponse
 from google.genai import types
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # --- Configuration ---
 BLOCKED_WORDS = ['unsafe', 'offensive']
@@ -222,7 +222,7 @@ from google.adk.models.llm_response import LlmResponse
 from google.genai import types
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # --- Configuration ---
 BLOCKED_WORDS = ['unsafe', 'offensive']

@@ -61,7 +61,7 @@ GOOGLE_API_KEY="AIzaSy..."
 ```text
 GOOGLE_GENAI_USE_VERTEXAI="1"
 GOOGLE_CLOUD_PROJECT="your-project-id"
-GOOGLE_CLOUD_LOCATION="us-central1"
+GOOGLE_CLOUD_LOCATION="global"
 ```
 *Note: If using Agent Platform, ensure you have run `gcloud auth application-default login`.*
 

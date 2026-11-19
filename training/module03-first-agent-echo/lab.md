@@ -28,7 +28,10 @@ Your task is to create, configure, and run a simple "Echo" agent using the ADK.
     ```shell
     uv run adk create echo_agent
     ```
-    > **Note:** This is an interactive wizard — it will prompt you for choices like the model, backend, GCP project, and region. Answer the prompts as they appear.
+    > **Note on `adk create` wizard options:** When prompted for the backend:
+    > - Choose **Google AI** if you are using a `GOOGLE_API_KEY` from Google AI Studio.
+    > - Choose **Vertex AI** if you are using Google Cloud ADC (`gcloud auth application-default login`) with a project ID and `GOOGLE_CLOUD_LOCATION="global"`.
+    > - Choose **Login with Google** if you want interactive OAuth browser sign-in.
 2.  Follow the **Python Approach** below to define the agent's behavior.
 3.  **Instruction Strategy:** Craft an instruction that forces the agent to only echo and explicitly forbids it from answering questions or being helpful.
 4.  Configure the `.env` file with your Google API key or Google Cloud project details.
@@ -136,7 +139,7 @@ Now, let's tell the agent how to behave and provide it with the necessary creden
         ```
         GOOGLE_GENAI_USE_VERTEXAI=1
         GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-        GOOGLE_CLOUD_LOCATION=us-central1
+        GOOGLE_CLOUD_LOCATION=global
         ```
 
 2.  **Define the agent's behavior (Python method):**

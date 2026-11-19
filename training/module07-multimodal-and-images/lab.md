@@ -108,7 +108,7 @@ class VisualCatalogApp:
                 print(f"✅ Description:\n{event.content.parts[0].text}\n")
 
 async def main():
-    load_dotenv()
+    load_dotenv(override=True)
     catalog = VisualCatalogApp()
 
     # Images are expected to be in the parent directory for this lab
@@ -242,7 +242,7 @@ class VisualCatalogApp:
 ")
 
 async def main():
-    load_dotenv()
+    load_dotenv(override=True)
     catalog = VisualCatalogApp()
 
     # Assumes images are in the parent directory relative to your terminal

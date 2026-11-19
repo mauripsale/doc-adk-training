@@ -136,7 +136,7 @@ import os
 from tools.search import search
 from tools.click import click
 
-load_dotenv()
+load_dotenv(override=True)
 
 root_agent = Agent(
     model="gemini-3.8-flash",
@@ -165,7 +165,7 @@ from google.adk.tools import ToolContext
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     """Saves a user's preference to the session state."""
@@ -209,7 +209,7 @@ from google.adk.tools.agent_tool import AgentTool
 from google.adk.tools.base_tool import BaseTool
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Define remote nodes
 web_agent = RemoteA2aAgent(

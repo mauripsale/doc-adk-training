@@ -84,7 +84,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 mcp_toolset = McpToolset(
     connection_params=StdioConnectionParams(
@@ -164,7 +164,7 @@ from google.adk.runners import InMemoryRunner
 from google.adk.tools.agent_tool import AgentTool
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 threat_intel_service = RemoteA2aAgent(
     name="threat_intel_agent",
@@ -219,7 +219,7 @@ from google.adk.tools import ToolContext
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 def search_remediation_playbooks(vulnerability_type: str) -> str:
     """

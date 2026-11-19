@@ -93,7 +93,7 @@ class VisualCatalogApp:
                 print(f"✅ Description Generated:\n{description}\n")
 
 async def main():
-    load_dotenv()
+    load_dotenv(override=True)
     catalog = VisualCatalogApp()
 
     # Assumes images are in the parent directory relative to your terminal

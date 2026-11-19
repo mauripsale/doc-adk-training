@@ -146,6 +146,8 @@ flowchart TD
 
 While `adk eval` runs evaluations against `.evalset.json` files generated in the Dev UI, the official **Google Agents CLI (`google-agents-cli`)** provides an integrated evaluation runner designed for modern CI/CD pipelines and interactive benchmarking:
 
+> **Note:** Like other `agents-cli` lifecycle commands, `eval run` expects an `agents-cli-manifest.yaml` in your project root (generated via `uvx google-agents-cli scaffold enhance .` or `agents-cli create`).
+
 ```bash
 # Run evaluation across all configured evaluation sets in the project
 uvx google-agents-cli eval run

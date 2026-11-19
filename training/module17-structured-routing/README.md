@@ -52,50 +52,31 @@ my_workflow = Workflow(
 
 #### Router Edges (Conditional Dictionary Routing)
 
-In Module 16, every edge ran unconditionally. Here, you want a **fork in the road** — like a `switch` statement in your graph:
+In Module 16, every step in the graph ran automatically. Here, you want a **fork in the road** — like an office **switchboard** that routes incoming requests to the right department using a simple lookup table (a Python dictionary):
 
 ```python
 edges=[
-    ("START", router),
-    (router, {
-        "fast_track": priority_agent,
-        "standard": normal_agent,
+    ("START", classify_and_route),
+    (classify_and_route, {
+        "technical": tech_agent,
+        "billing": billing_agent,
+        "other": general_agent,
     }),
 ]
 ```
 
-**How does `Workflow` know which branch to pick?**
-Look at the two separate things a `router` node does:
-- **`ctx.route = ...`** → decides **WHERE** to go (matches a key in the dictionary).
-- **`return ...`** → decides **WHAT** text to send to that next agent.
+##### The Switchboard Analogy: Why we need a tiny `@node` function
 
-```text
-User: "URGENT: server down!"
-       │
-       ▼
-  ┌──────────┐
-  │  router  │── ctx.route = "fast_track"  ──► picks `priority_agent` from dict
-  │  (@node) │── returns "URGENT: server.."──► passes this prompt to `priority_agent`
-  └──────────┘
-```
+Suppose a customer writes: *"I was charged twice on my invoice!"*
 
-In Python, you write the `router` as a small `@node` function (a decorator from `google.adk.workflow` that lets a Python function act as a graph node):
+Gemini (`classifier_node`) is great at reading that message and replying `{"category": "billing"}`. **However, an `Agent` only generates text or JSON — it doesn't have hands to turn the switchboard dial.**
 
-```python
-from google.adk import Workflow, Context
-from google.adk.workflow import node
+So we put a tiny 4-line Python function (`classify_and_route`) in front of the dictionary to act as the **switchboard operator**:
+1. It asks Gemini which department should handle the message.
+2. It dials that department's extension (**`ctx.route`**).
+3. It transfers the customer on the line (**`return node_input`**) so the specialist hears the real question, not just the word `"billing"`.
 
-@node(rerun_on_resume=True)  # Re-run on every new turn in a chat
-async def check_urgency(ctx: Context, node_input: str):
-    # 1. WHERE to go
-    ctx.route = "fast_track" if "urgent" in node_input.lower() else "standard"
-    # 2. WHAT to pass along (keep the user's original message)
-    return node_input
-```
-
-##### Using an LLM Classifier Instead of an `if` Statement
-
-What if you need Gemini to classify the intent instead of checking keywords? A regular `Agent` only generates text or JSON — it never sets `ctx.route` on its own. So the `@node` function simply calls the classifier `Agent` (`await ctx.run_node(...)`) and copies its result into `ctx.route`:
+> **Think of it in one sentence:** `ctx.route` is the **extension number** you dial; `return node_input` is the **customer on the line** you connect to that extension.
 
 ```python
 from pydantic import BaseModel
@@ -106,7 +87,7 @@ from google.adk.workflow import node
 class RequestType(BaseModel):
     category: Literal["technical", "billing", "other"]
 
-# 1. Classifier Agent (returns JSON like {"category": "billing"})
+# 1. The Classifier Agent
 classifier_node = Agent(
     name="classifier",
     model="gemini-3.8-flash",
@@ -114,14 +95,14 @@ classifier_node = Agent(
     output_schema=RequestType,
 )
 
-# 2. 3-line bridge: run classifier -> set ctx.route -> forward original prompt
+# 2. The Switchboard Operator (@node)
 @node(rerun_on_resume=True)
 async def classify_and_route(ctx: Context, node_input: str):
-    result = await ctx.run_node(classifier_node, node_input)  # Plain dict from output_schema
-    ctx.route = result["category"]                            # WHERE to go
-    return node_input                                         # WHAT to send
+    result = await ctx.run_node(classifier_node, node_input)  # a dict, not the Pydantic instance
+    ctx.route = result["category"]
+    return node_input
 
-# 3. Wire the dictionary edge
+# 3. The Workflow Graph
 my_workflow = Workflow(
     name="SmartRouter",
     edges=[
@@ -135,7 +116,22 @@ my_workflow = Workflow(
 )
 ```
 
-That's it: only those 3 lines of glue code are Python, while all your specialist agents stay purely declarative.
+##### Line-by-Line Breakdown
+
+*   **`classifier_node = Agent(..., output_schema=RequestType)`**
+    Creates a normal Gemini agent whose only job is to read the message and return guaranteed JSON matching `RequestType` (for example, `{"category": "billing"}`).
+*   **`@node(rerun_on_resume=True)`**
+    `@node` tells ADK to treat this Python function as a step in the graph. `rerun_on_resume=True` ensures that in a multi-turn chat, this router runs again for every new message the user sends instead of being skipped.
+*   **`async def classify_and_route(ctx: Context, node_input: str):`**
+    `async def` lets the function wait for Gemini without blocking. `ctx` is ADK's workflow control panel (where `ctx.route` lives), and `node_input` is the user's message arriving at this step (e.g., `"I was charged twice..."`).
+*   **`result = await ctx.run_node(classifier_node, node_input)`**
+    Calls `classifier_node` and waits for its answer. Because `classifier_node` uses `output_schema`, ADK gives you `result` as a plain Python dictionary (`{"category": "billing"}`), not a Pydantic class instance.
+*   **`ctx.route = result["category"]`**
+    Dials the extension on the switchboard. ADK reads `ctx.route` (`"billing"`), looks it up in the dictionary edge, and activates `billing_agent`.
+*   **`return node_input`**
+    Passes the customer's original message (`"I was charged twice..."`) untouched to `billing_agent`. Without this line (if you returned `result` instead), `billing_agent` would only see `{"category": "billing"}` and wouldn't know what the customer actually asked!
+
+The specialist branches (`tech_agent`, `billing_agent`, `general_agent`) stay completely declarative — only those 4 lines of glue code are Python.
 
 ### The "START" and "END" Reserved Keywords
 - **`START`**: The entry point of your workflow. Every workflow must have at least one edge originating from `"START"`.

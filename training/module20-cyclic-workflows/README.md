@@ -19,59 +19,67 @@ Many real-world AI tasks — writing code, drafting legal summaries, or crafting
 
 In ADK 2.0, you build cyclic workflows using a **`@node` Dynamic Workflow** (from Module 18) with a standard Python **`for`** or **`while`** loop. Because the loop is plain Python, you have total control over termination conditions and safety guardrails like `max_iterations`.
 
-### The Critic → Refiner Loop Pattern
+### The Evaluator → Optimizer Loop Pattern
 
 ![Evaluator-Optimizer Iteration Loop (Light)](img/cyclic-workflows-loop-light.webp#gh-light-mode-only)
 ![Evaluator-Optimizer Iteration Loop (Dark)](img/cyclic-workflows-loop-dark.webp#gh-dark-mode-only)
 *Figure: Generator-Evaluator feedback architecture showing draft critique, rubric scoring thresholding, and iteration limits.*
 
-The most common iterative architecture is the **Critic → Refiner** loop:
+The most common iterative architecture is the **Evaluator → Optimizer** loop (for example, a **Code Auditor → Code Fixer** pipeline):
 
 ```python
+from pydantic import BaseModel
 from google.adk import Agent, Context, Workflow
 from google.adk.workflow import node
 
+class AuditResult(BaseModel):
+    passed: bool
+    issues: str
+
 # 1. Define the specialist agents
-critic = Agent(
-    name="critic",
+code_auditor = Agent(
+    name="code_auditor",
     model="gemini-3.8-flash",
-    instruction="Review the draft. Reply 'APPROVED' if great, otherwise give brief feedback.",
+    instruction="Check the Python snippet for bugs or security issues. Set passed=True only if clean.",
+    output_schema=AuditResult,
 )
-refiner = Agent(
-    name="refiner",
+code_fixer = Agent(
+    name="code_fixer",
     model="gemini-3.8-flash",
-    instruction="Rewrite the draft using the provided feedback. Return only the improved text.",
+    instruction="Fix the provided Python snippet based on the listed issues. Return only the corrected code.",
 )
 
 # 2. Define the Orchestrator Node with a bounded Python loop
 @node(rerun_on_resume=True)
-async def refinement_workflow(ctx: Context, node_input: str):
-    current_work = node_input
+async def code_review_loop(ctx: Context, node_input: str):
+    current_code = node_input
 
     # Bounded loop (max 5 iterations) prevents infinite loops and runaway API costs
     for i in range(5):
-        print(f"--- Iteration {i + 1} ---")
+        print(f"--- Review Iteration {i + 1} ---")
 
-        # Ask the Critic to review the current draft
-        feedback = await ctx.run_node(critic, current_work)
+        # Ask the Auditor to review the current code (returns a plain dict)
+        audit = await ctx.run_node(code_auditor, current_code)
 
-        # Early exit condition
-        if "APPROVED" in feedback:
+        # Structured, reliable early exit condition
+        if audit["passed"]:
             break
 
-        # Ask the Refiner to improve the draft using the Critic's feedback
-        current_work = await ctx.run_node(
-            refiner, f"WORK:\n{current_work}\n\nFEEDBACK:\n{feedback}"
+        # Ask the Fixer to improve the code using the Auditor's feedback
+        current_code = await ctx.run_node(
+            code_fixer, f"CODE:\n{current_code}\n\nISSUES:\n{audit['issues']}"
         )
 
-    return current_work
+    return current_code
 
 # 3. Register the orchestrator in a Workflow
 root_agent = Workflow(
-    name="RefinementSystem",
-    edges=[("START", refinement_workflow)],
+    name="CodeReviewSystem",
+    edges=[("START", code_review_loop)],
 )
 ```
+
+> **Pro Tip — Avoid Fragile Substring Checks:** If you use a plain-text evaluator instead of a Pydantic `output_schema`, avoid loose substring checks like `if "APPROVED" in feedback:` — if the model replies `"NOT APPROVED: needs more detail"`, `"APPROVED" in feedback` evaluates to `True` and exits early on a failed draft! Prefer either a boolean `output_schema` field (as above) or an exact check like `feedback.strip().upper() == "APPROVED"`.
 
 ### Why Use Python Loops in `@node` Workflows?
 

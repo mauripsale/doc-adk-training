@@ -61,8 +61,8 @@ async def refinement_orchestrator(ctx: Context, node_input: str):
         # A. Call the critic node
         feedback = await ctx.run_node(critic, current_story)
         
-        # B. Termination Condition
-        if "APPROVED" in feedback:
+        # B. Termination Condition (exact match avoids misfiring on "NOT APPROVED")
+        if feedback.strip().upper() == "APPROVED":
             break
             
         # C. Refinement

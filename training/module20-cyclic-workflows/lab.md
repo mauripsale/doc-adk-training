@@ -31,7 +31,7 @@ In this lab, you will build a self-improving agent system that uses a **Dynamic 
 
 ### Step 2: Define the Nodes and Orchestrator
 
-**Exercise:** Open `agent.py`. Your task is to define the specialist agents and the `@node` function that runs the loop.
+**Exercise:** Open `essay_refiner/agent.py`. Your task is to define the specialist agents and the `@node` function that runs the loop.
 
 ```python
 # In agent.py (Starter Code)
@@ -67,7 +67,8 @@ async def refinement_orchestrator(ctx: Context, node_input: str):
 
     # Step B: Run the loop (max 3 times)
     # 1. Call the 'critic' with ctx.run_node(critic, current_story)
-    # 2. Check if 'APPROVED' is in the feedback (break if so)
+    # 2. Check if feedback.strip().upper() == "APPROVED" (break if so; avoid
+    #    loose `"APPROVED" in feedback` which misfires on "NOT APPROVED"!)
     # 3. Call the 'refiner' to improve 'current_story' based on feedback
 
     # [STUDENT TODO: Implement the loop here]
@@ -166,17 +167,13 @@ async def refinement_orchestrator(ctx: Context, node_input: str):
         # A. Call the critic node
         feedback = await ctx.run_node(critic, current_story)
         
-        # B. Termination Condition
-        if "APPROVED" in feedback:
+        # B. Termination Condition (exact match avoids misfiring on "NOT APPROVED")
+        if feedback.strip().upper() == "APPROVED":
             break
             
         # C. Refinement
         current_story = await ctx.run_node(
-            refiner, f"STORY:
-{current_story}
-
-FEEDBACK:
-{feedback}"
+            refiner, f"STORY:\n{current_story}\n\nFEEDBACK:\n{feedback}"
         )
         
     return current_story

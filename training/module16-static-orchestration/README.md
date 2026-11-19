@@ -13,18 +13,18 @@ pagination_label: "Module 16: Static Orchestration (Linear & Parallel) — 📖 
 
 ## Theory
 
-In ADK 2.0, orchestration is no longer about choosing between a "Sequential" or a "Parallel" agent. Instead, you design the **geometry of your graph** using **Edges**.
+In ADK 2.0, static orchestration is modeled directly through the **geometry of your `Workflow` graph** using **Edges**.
 
-A `Workflow` is a deterministic engine that executes nodes based on these connections. By arranging your edges, you can create linear pipelines, concurrent branches, or a mix of both.
+A `Workflow` is a deterministic execution engine that runs nodes in the exact order defined by their connections. By arranging `edges`, you can build linear pipelines, concurrent fan-out branches, or hybrid topologies combining both.
 
 ### 1. Sequential Flow (Linear Edges)
 
-When you define edges in a chain, the ADK executes them one after another. Each node waits for the previous one to finish and receives its output as input.
+When you connect nodes in a chain, ADK executes them one after another:
 
 ```python
 from google.adk import Workflow
 
-# A -> B -> C
+# START -> researcher -> writer -> editor
 my_pipeline = Workflow(
     name="SequentialSystem",
     edges=[
@@ -35,12 +35,14 @@ my_pipeline = Workflow(
 )
 ```
 
+> **Edge Shorthand:** You can also write a multi-hop chain as a single tuple `(A, B, C)`, which is shorthand for `(A, B)` followed by `(B, C)`. For example, `("START", researcher, writer, editor)` defines the exact same pipeline.
+
 ### 2. Parallel Flow (Fan-Out)
 
-When multiple edges originate from the same source (like `"START"` or a specific node), the ADK triggers all target nodes **simultaneously**.
+When multiple edges originate from the same source (such as `"START"` or an upstream node), ADK executes all target branches **concurrently**:
 
 ```python
-# A and B start at the same time
+# task_a and task_b run simultaneously
 parallel_run = Workflow(
     name="ParallelSystem",
     edges=[
@@ -50,40 +52,71 @@ parallel_run = Workflow(
 )
 ```
 
-### 3. Synchronization (The `JoinNode`)
+### 3. Synchronization (Fan-In with `JoinNode`)
 
 ![Linear and Parallel Graph Edges Pipeline (Light)](img/static-orchestration-pipeline-light.webp#gh-light-mode-only)
 ![Linear and Parallel Graph Edges Pipeline (Dark)](img/static-orchestration-pipeline-dark.webp#gh-dark-mode-only)
 *Figure: Multi-stage workflow topology demonstrating concurrent branch execution converging into a barrier join node.*
 
+When parallel branches finish, you often need to **wait for all of them** before running a final aggregation step. This pattern is called **Fan-In**, and it is handled by **`JoinNode`**.
 
-When you have parallel branches, you often need to "wait" for all of them to finish before moving to a final step. This is called **Fan-In**, and it is handled by the **`JoinNode`**.
-
-The `JoinNode` acts as a barrier: it will not fire its outgoing edge until **every incoming edge** has completed.
+A `JoinNode` acts as a synchronization barrier: it pauses execution until **every incoming edge** has completed, and only then fires its outgoing edge.
 
 ```python
+from google.adk import Workflow
 from google.adk.workflow import JoinNode
 
 syncer = JoinNode(name="sync_point")
 
-# Fan-out to A and B, then converge at 'syncer' to run C
+# Fan-out from START to task_a and task_b, converge at syncer, then run final_task
 complex_graph = Workflow(
     name="HybridSystem",
     edges=[
-        ("START", task_a, syncer),
-        ("START", task_b, syncer),
+        ("START", task_a, syncer),  # Shorthand for ("START", task_a) + (task_a, syncer)
+        ("START", task_b, syncer),  # Shorthand for ("START", task_b) + (task_b, syncer)
         (syncer, final_task)
     ]
 )
 ```
 
+### 4. Passing Data Between Parallel Branches (`output_key` & `{placeholders}`)
+
+When multiple parallel branches converge into a `JoinNode`, a single downstream agent needs a clean way to read **both** upstream results separately. ADK solves this using **Session State Interpolation**:
+
+1. Each upstream branch saves its output under a unique key using **`output_key`** (introduced in Module 04).
+2. The downstream agent references those saved keys directly inside its `instruction` string using curly braces **`{key_name}`**.
+
+```python
+tech_researcher = Agent(
+    name="tech_researcher",
+    model="gemini-3.8-flash",
+    instruction="Find 3 headlines about AI.",
+    output_key="tech_news",   # Stored in session.state["tech_news"]
+)
+
+market_researcher = Agent(
+    name="market_researcher",
+    model="gemini-3.8-flash",
+    instruction="Find 3 headlines about Stock Markets.",
+    output_key="market_news", # Stored in session.state["market_news"]
+)
+
+summarizer = Agent(
+    name="summarizer",
+    model="gemini-3.8-flash",
+    instruction="Combine TECH: {tech_news} and MARKET: {market_news} into one briefing.",
+)
+```
+
+Before sending the prompt to Gemini, ADK automatically replaces `{tech_news}` and `{market_news}` with the values stored in `session.state`.
+
 ### Why use Static Orchestration?
 
 1.  **Performance:** Parallel execution reduces total latency to the duration of the slowest branch.
-2.  **Predictability:** The path is fixed and code-defined; there is no "hallucination" risk in the routing.
+2.  **Predictability:** The path is fixed and code-defined; there is no risk of routing hallucinations.
 3.  **Transparency:** The Dev UI Graph View gives you a 1:1 visual map of your business process.
 
 ### Key Takeaways
-- **Edges define the flow:** Chain them for sequential, branch them for parallel.
-- **`JoinNode`** is the mandatory synchronization point for parallel branches.
-- **Data Flow:** ADK 2.0 handles passing results between nodes automatically, ensuring a seamless pipeline.
+- **Edges define the flow:** Chain nodes sequentially or fan them out from a shared source for parallel execution.
+- **`JoinNode`** acts as the barrier synchronization point for parallel branches (Fan-In).
+- **`output_key` + `{placeholder}`**: Upstream branches save named outputs to session state, and downstream agents inject them cleanly into their `instruction` templates.

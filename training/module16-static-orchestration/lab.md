@@ -88,7 +88,12 @@ root_agent = Workflow(
 
 ### Step 4: Run and Verify
 
-1.  **Start the Dev UI:** `uv run adk web .`
+1.  **Return to the parent directory and start the Dev UI:**
+    ```bash
+    cd ..
+    uv run adk web
+    ```
+    *(Select `news_aggregator` from the agent dropdown in the UI).*
 2.  **Test:** Send the prompt "Give me today's update."
 3.  **Inspect:** Open the **Graph View**. Verify that the researchers start at the same time and the summarizer only runs after both finish.
 

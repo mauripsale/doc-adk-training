@@ -50,26 +50,44 @@ my_workflow = Workflow(
 )
 ```
 
-#### Router Edges (Conditional)
-You can use a **dictionary as the target of an edge** to route to different nodes without writing a full `if`/`else` orchestrator. The key that gets matched isn't the node's raw output, though — it's `ctx.route`, a value the source node must set explicitly.
+#### Router Edges (Conditional Dictionary Routing)
 
-A plain `Agent` never sets `ctx.route` on its own, even with a Pydantic `output_schema` — so the source of a Router Edge needs to be a small `@node` function that runs the classifier and then sets the route from its result:
+You can use a **Python dictionary as the target of an edge** to branch dynamically to different specialist agents based on a classification decision — without having to write manual `if`/`else` logic for every branch.
+
+However, a dictionary edge does **not** inspect a plain `Agent`'s raw text or Pydantic JSON automatically. Instead, ADK matches the dictionary keys against **`ctx.route`**, a special routing attribute on the workflow execution `Context` (`ctx`).
+
+Because a plain `Agent` never sets `ctx.route` on its own, we use a lightweight **`@node` wrapper function** (a Python function decorated with `@node` from `google.adk.workflow`) to bridge the classifier agent and the router dictionary:
+
+1. **`@node(rerun_on_resume=True)`**: Turns an `async def` Python function into a graph node. `rerun_on_resume=True` ensures the router runs again on subsequent turns in a multi-turn conversation.
+2. **`await ctx.run_node(classifier_node, node_input)`**: Executes the classifier `Agent` programmatically and returns its structured `output_schema` result as a plain Python **`dict`** (e.g., `{"category": "technical"}`).
+3. **`ctx.route = result["category"]`**: Tells the `Workflow` which key in the dictionary edge to follow.
+4. **`return node_input`**: Separates *routing* from *data flow*. Returning `node_input` passes the user's original prompt unchanged to the chosen specialist agent, rather than overwriting it with the classification dict.
 
 ```python
-from google.adk import Workflow, Context
+from pydantic import BaseModel
+from typing import Literal
+from google.adk import Agent, Workflow, Context
 from google.adk.workflow import node
 
-# The classifier itself is a plain Agent with a Pydantic output_schema
-classifier_node = Agent(..., output_schema=RequestType)
+class RequestType(BaseModel):
+    category: Literal["technical", "billing", "other"]
 
-# A tiny @node wrapper is what actually makes the dictionary routing work
+# 1. Plain classifier Agent enforcing a strict output schema
+classifier_node = Agent(
+    name="classifier",
+    model="gemini-3.8-flash",
+    instruction="Classify the user request into 'technical', 'billing', or 'other'.",
+    output_schema=RequestType,
+)
+
+# 2. Lightweight @node wrapper that sets ctx.route and forwards the original prompt
 @node(rerun_on_resume=True)
 async def classify_and_route(ctx: Context, node_input: str):
-    result = await ctx.run_node(classifier_node, node_input)  # a dict, not the Pydantic instance
-    ctx.route = result["category"]
-    return node_input
+    result = await ctx.run_node(classifier_node, node_input)  # Returns a plain dict
+    ctx.route = result["category"]                            # Sets the routing key
+    return node_input                                         # Forwards original input
 
-# A system that routes based on ctx.route
+# 3. Workflow graph wiring the dictionary edge
 my_workflow = Workflow(
     name="SmartRouter",
     edges=[
@@ -83,7 +101,7 @@ my_workflow = Workflow(
 )
 ```
 
-The specialist branches (`tech_agent`, `billing_agent`, `general_agent`) stay fully declarative — only the classifier needs this small amount of glue code, which is what keeps this pattern meaningfully simpler than a full Dynamic Workflow (Module 18), where *every* routing decision is hand-written Python.
+The specialist branches (`tech_agent`, `billing_agent`, `general_agent`) stay completely declarative — only the classifier needs this small glue function, keeping this pattern much simpler than a full Dynamic Workflow (Module 18), where *every* routing step is custom Python logic.
 
 ### The "START" and "END" Reserved Keywords
 - **`START`**: The entry point of your workflow. Every workflow must have at least one edge originating from `"START"`.

@@ -10,7 +10,7 @@ import Setup from '../_setup-snippet.mdx';
 
 ## Goal
 
-In this lab, you will build a structured workflow that analyzes currency conversion requests. You will use a **Deterministic Workflow** with explicit edges to create a pipeline that classifies a request and routes it to a specific specialist tool.
+In this lab, you will build a structured workflow that analyzes currency conversion requests. You will use a **Deterministic Workflow** with explicit edges to create a pipeline that classifies a request and routes it to a specific specialist agent.
 
 This demonstrates how to create predictable AI pipelines in ADK 2.0 with just a few lines of routing glue code, instead of hand-writing full `if`/`else` orchestration for every branch.
 
@@ -29,9 +29,11 @@ This demonstrates how to create predictable AI pipelines in ADK 2.0 with just a 
 
 ### Step 2: Define the Specialist Nodes
 
-Open `agent.py`. We will create three main components:
-1.  **A Classifier Agent:** To detect the target currency.
-2.  **Specialist Tools:** To handle the "market analysis" (simulated).
+Open `agent.py`. We will create four main components:
+1.  **A Classification Schema (`MarketRoute`):** A Pydantic model constraining the classifier output to `"USD"`, `"EUR"`, or `"GBP"`.
+2.  **A Classifier Agent:** To detect the target currency from the user's message.
+3.  **Specialist Agents:** Three dedicated `Agent` nodes (`usd_analyst`, `eur_analyst`, `gbp_analyst`) to handle each currency's market analysis.
+4.  **A `@node` Router Wrapper (`classify_and_route`):** To execute the classifier, assign `ctx.route`, and forward the user's original prompt.
 
 ```python
 from __future__ import annotations
@@ -101,10 +103,12 @@ root_agent = Workflow(
 
 ### Step 4: Run and Test
 
-1.  **Launch the Dev UI:**
+1.  **Return to the parent directory and launch the Dev UI:**
     ```shell
-    uv run adk web .
+    cd ..
+    uv run adk web
     ```
+    *(Select `market_analyst` from the agent dropdown in the UI).*
 2.  **Test the routing:**
     - "What is happening with the Dollar?" -> Should run `usd_analyst`.
     - "Give me news on the Euro." -> Should run `eur_analyst`.

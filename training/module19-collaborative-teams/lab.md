@@ -88,10 +88,12 @@ root_agent = Agent(
 
 ### Step 3: Run and Test
 
-1.  **Launch the Dev UI:**
+1.  **Return to the parent directory and launch the Dev UI:**
     ```shell
-    uv run adk web .
+    cd ..
+    uv run adk web
     ```
+    *(Select `travel_team` from the agent dropdown in the UI).*
 2.  **Verify the Flow:**
     - Ask: "I want to go to Tokyo next week."
     - **Observe:** The `travel_planner` should call the `weather_checker`. 

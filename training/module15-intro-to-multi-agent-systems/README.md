@@ -42,45 +42,75 @@ This design pattern offers significant advantages:
 *   **Reusability:** A well-defined "Billing Agent" can be reused in other applications across your organization.
 *   **Scalability:** It's easier to reason about and scale a system of smaller, collaborating components than one giant, complex agent.
 
-### How Agents Collaborate in ADK 2.0: The Workflow Runtime
+### How Multi-Agent Systems Work in ADK 2.0
 
-In ADK 2.0, multi-agent collaboration is managed by the **Workflow Runtime**. Instead of a simple hierarchy, your application is a **Graph** where each agent is a **Node**.
+Up to this point, you have built single `Agent` applications where `root_agent` handles everything on its own. In ADK 2.0, multi-agent systems are built natively around a **Graph Execution Model** managed by the **Workflow Runtime**.
 
-#### 1. **The Graph Structure (`Workflow`)**
-The `Workflow` class is the container for your multi-agent system. You define the relationships between nodes using **Edges**. 
+Rather than cramming dozens of tools and instructions into one prompt, you compose independent **Nodes** inside a **`Workflow`** graph and connect them with **Edges** — all sharing the same session state.
 
-#### 2. **Registration vs. Execution**
-*   **Registration:** You still use the `sub_agents` list when defining an `Agent` or `Workflow`. This tells the framework which nodes are part of the system for discovery and telemetry.
-*   **Execution:** The actual collaboration happens via **Routing**. 
-    *   **Agent Transfer:** An agent can decide to transfer control to another node in the graph.
-    *   **Programmatic Routing:** A `@node` or a deterministic `Workflow` can call `ctx.run_node(specialist_agent)` to delegate a task and receive the result.
+#### 1. The Three Core Building Blocks
 
-#### 3. **The "Specialist" Pattern**
-This is the most common MAS architecture. You have:
-*   **Specialist Nodes:** Agents or tools focused on a single domain (e.g., `billing_expert`, `tech_support`).
-*   **Orchestrator Node:** A node (often an `Agent` or a `@node` function) that analyzes the user input and routes the request to the appropriate specialist.
+1. **Nodes (The Workers):**
+   A node is any executable unit in your system. In ADK 2.0, a node is typically an **`Agent`** (LLM-powered reasoning with its own `instruction`, `model`, and `tools`) or a custom Python **`@node`** function (covered in Module 18).
+2. **`Workflow` (The Graph Container):**
+   `Workflow` is the top-level orchestrator that replaces a standalone `Agent` as your `root_agent`. It holds the graph topology and drives execution from node to node.
+3. **Edges (The Execution Paths):**
+   Edges are directed pairs `(source, target)` that tell the `Workflow` where execution starts and how control flows. Every workflow begins at the reserved **`"START"`** entry point — for example, `("START", router)` means the `router` node executes first when a user sends a message.
+
+#### 2. Two Ways Agents Collaborate
+
+Depending on how much control you want over routing, ADK 2.0 supports two complementary collaboration mechanisms:
+
+*   **Dynamic LLM Transfer (`sub_agents`):**
+    When you pass `sub_agents=[billing_expert, tech_support]` to an `Agent`, ADK automatically registers those specialists and exposes their **`name`** and **`description`** to the parent agent's LLM via a built-in transfer mechanism (`transfer_to_agent`). At runtime, Gemini reads the user request, inspects each specialist's `description`, and dynamically decides whether to handle the request itself or transfer control to a specialist.
+*   **Explicit Graph Routing (`edges` & `@node`):**
+    When you want deterministic, predictable pipelines (A → B → C), parallel fan-out, or code-driven branching, you wire nodes directly using `Workflow` `edges` or call `ctx.run_node(specialist_agent)` inside a `@node` function. You will master these patterns in Modules 16–18.
+
+#### 3. Shared Session State Across Nodes
+
+Because all nodes in a `Workflow` run within the same session, they share `ctx.session.state`. An upstream specialist can save structured results using `output_key` (introduced in Module 04), and downstream agents or router nodes can immediately read that data without re-parsing the conversation.
+
+#### 4. The "Specialist + Orchestrator" Pattern in Practice
+
+Below is the canonical ADK 2.0 Multi-Agent blueprint combining a `Workflow` entry point with an LLM-driven orchestrator and two domain specialists:
 
 ```python
 from google.adk import Agent, Workflow
 
-# Specialists
-billing_expert = Agent(name="billing_expert", ...)
-tech_support = Agent(name="tech_support", ...)
+# 1. Define Specialist Nodes (each with a clear `description` for discovery)
+billing_expert = Agent(
+    name="billing_expert",
+    model="gemini-3.8-flash",
+    description="Handles invoices, refunds, and payment questions.",
+    instruction="You are a billing specialist. Help the user with payment issues.",
+)
 
-# The Orchestrator (Router)
-# It uses sub_agents for registration/discovery
+tech_support = Agent(
+    name="tech_support",
+    model="gemini-3.8-flash",
+    description="Handles bugs, login errors, and technical troubleshooting.",
+    instruction="You are a technical support engineer. Diagnose and resolve technical issues.",
+)
+
+# 2. Define the Orchestrator (Router) and register specialists via `sub_agents`
 router = Agent(
     name="router",
-    instruction="Route requests to 'billing' or 'technical' experts.",
-    sub_agents=[billing_expert, tech_support]
+    model="gemini-3.8-flash",
+    instruction=(
+        "Triage the user's request and transfer it to the appropriate specialist: "
+        "'billing_expert' for payment issues or 'tech_support' for technical problems."
+    ),
+    sub_agents=[billing_expert, tech_support],
 )
 
-# The Workflow Graph
+# 3. Wrap the entry node in a Workflow graph
 root_agent = Workflow(
     name="SupportSystem",
-    edges=[("START", router)]
+    edges=[("START", router)],
 )
 ```
+
+> **Why `description` matters so much:** Notice that `router` does not guess blindly — Gemini relies directly on each sub-agent's `description` to decide *which* specialist matches the user's intent. Writing crisp, non-overlapping descriptions is one of the most important skills in MAS design.
 
 <KnowledgeCheck
   id="m15-mas-orchestration-specialists"

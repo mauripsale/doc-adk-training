@@ -66,7 +66,7 @@ When you list specialists in `sub_agents=[...]`, ADK automatically injects deleg
 
 For **local** specialists (Python `Agent` objects in your codebase), `sub_agents=[...]` with `mode="single_turn"` or `mode="task"` is the recommended approach.
 
-For **remote** specialists running as separate services over A2A (`RemoteA2aAgent`), a bare `sub_agents` transfer has no automatic way back within the same turn (and `mode="task"` requires the remote service to explicitly implement a `finish_task` signal). In that case, wrap the remote agent with **`AgentTool`** inside `tools=[...]`:
+For **remote** specialists running as separate network services via the A2A (Agent-to-Agent) protocol (`RemoteA2aAgent`, covered in depth in Module 21), a bare `sub_agents` transfer has no automatic way back within the same turn (and `mode="task"` requires the remote service to explicitly implement a `finish_task` signal). In that case, wrap the remote agent with **`AgentTool`** inside `tools=[...]`:
 
 ```python
 from google.adk import Agent

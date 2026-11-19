@@ -52,16 +52,62 @@ my_workflow = Workflow(
 
 #### Router Edges (Conditional Dictionary Routing)
 
-You can use a **Python dictionary as the target of an edge** to branch dynamically to different specialist agents based on a classification decision — without having to write manual `if`/`else` logic for every branch.
+In Module 16, every edge was unconditional: when Node A finished, Node B always ran. But in real applications, you often want a **fork in the road** — running *only one* specialist based on a decision.
 
-However, a dictionary edge does **not** inspect a plain `Agent`'s raw text or Pydantic JSON automatically. Instead, ADK matches the dictionary keys against **`ctx.route`**, a special routing attribute on the workflow execution `Context` (`ctx`).
+ADK 2.0 lets you express a fork in the road by passing a **Python dictionary** as the edge target:
 
-Because a plain `Agent` never sets `ctx.route` on its own, we use a lightweight **`@node` wrapper function** (a Python function decorated with `@node` from `google.adk.workflow`) to bridge the classifier agent and the router dictionary:
+```python
+(router_node, {
+    "fast_track": priority_agent,
+    "standard": normal_agent,
+})
+```
 
-1. **`@node(rerun_on_resume=True)`**: Turns an `async def` Python function into a graph node. `rerun_on_resume=True` ensures the router runs again on subsequent turns in a multi-turn conversation.
-2. **`await ctx.run_node(classifier_node, node_input)`**: Executes the classifier `Agent` programmatically and returns its structured `output_schema` result as a plain Python **`dict`** (e.g., `{"category": "technical"}`).
-3. **`ctx.route = result["category"]`**: Tells the `Workflow` which key in the dictionary edge to follow.
-4. **`return node_input`**: Separates *routing* from *data flow*. Returning `node_input` passes the user's original prompt unchanged to the chosen specialist agent, rather than overwriting it with the classification dict.
+##### How does the `Workflow` know which dictionary key to pick? (`ctx.route`)
+
+Every node running inside a `Workflow` receives a `Context` object (**`ctx`**), which carries shared state and execution controls. One of its built-in properties is **`ctx.route`**: think of it as a **railroad switch lever**.
+
+* When a node finishes, ADK checks `ctx.route`.
+* If `ctx.route` is `"fast_track"`, ADK activates **only** the `"fast_track"` branch in the dictionary and ignores the others.
+
+To set `ctx.route`, you write a small Python function decorated with **`@node`** (from `google.adk.workflow`), which turns a regular `async def` function into a graph node:
+
+```python
+from google.adk import Workflow, Context
+from google.adk.workflow import node
+
+@node(rerun_on_resume=True)
+async def check_urgency(ctx: Context, node_input: str):
+    # 1. Decide which branch to take by setting ctx.route
+    if "urgent" in node_input.lower():
+        ctx.route = "fast_track"
+    else:
+        ctx.route = "standard"
+
+    # 2. Return the data to pass to the next node
+    return node_input
+
+my_workflow = Workflow(
+    name="UrgencyRouter",
+    edges=[
+        ("START", check_urgency),
+        (check_urgency, {
+            "fast_track": priority_agent,
+            "standard": normal_agent,
+        }),
+    ],
+)
+```
+
+Notice two crucial details in those 6 lines:
+1. **Why `return node_input`?** In a `Workflow`, whatever a node *returns* becomes the input to the next node. By returning `node_input` unchanged, the chosen specialist (`priority_agent` or `normal_agent`) still receives the user's original message — while `ctx.route` separately tells the `Workflow` *which* branch to activate.
+2. **Why `rerun_on_resume=True`?** In a multi-turn conversation, each new user message resumes the workflow; `rerun_on_resume=True` ensures the router re-evaluates every new message instead of reusing the previous turn's decision.
+
+##### Combining a Classifier `Agent` with a `@node` Router
+
+Simple `if` statements work for keywords, but what if you need an LLM to understand user intent (e.g., *"My invoice is wrong"* → `"billing"`)?
+
+A plain `Agent` only generates text or JSON — **it never sets `ctx.route` on its own**, even with `output_schema`. So you simply call your classifier `Agent` *inside* the `@node` function using `await ctx.run_node(...)`:
 
 ```python
 from pydantic import BaseModel
@@ -80,12 +126,12 @@ classifier_node = Agent(
     output_schema=RequestType,
 )
 
-# 2. Lightweight @node wrapper that sets ctx.route and forwards the original prompt
+# 2. Small @node wrapper: calls the classifier, flips the ctx.route switch, forwards the prompt
 @node(rerun_on_resume=True)
 async def classify_and_route(ctx: Context, node_input: str):
-    result = await ctx.run_node(classifier_node, node_input)  # Returns a plain dict
-    ctx.route = result["category"]                            # Sets the routing key
-    return node_input                                         # Forwards original input
+    result = await ctx.run_node(classifier_node, node_input)  # Returns a plain dict, e.g. {"category": "billing"}
+    ctx.route = result["category"]                            # Sets the dictionary key to follow
+    return node_input                                         # Forwards original user message to specialist
 
 # 3. Workflow graph wiring the dictionary edge
 my_workflow = Workflow(
@@ -100,6 +146,8 @@ my_workflow = Workflow(
     ]
 )
 ```
+
+> **Why `result["category"]` instead of `result.category`?** When `ctx.run_node()` executes an `Agent` with `output_schema`, ADK deserializes the JSON output into a plain Python `dict` (e.g., `{"category": "billing"}`), not a Pydantic model object.
 
 The specialist branches (`tech_agent`, `billing_agent`, `general_agent`) stay completely declarative — only the classifier needs this small glue function, keeping this pattern much simpler than a full Dynamic Workflow (Module 18), where *every* routing step is custom Python logic.
 

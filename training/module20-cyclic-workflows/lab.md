@@ -82,10 +82,11 @@ root_agent = Workflow(
 
 ### Step 3: Run and Test
 
-1.  **Start the Dev UI:**
+1.  **Start the Dev UI from your parent `adk-training` directory:**
     ```shell
-    uv run adk web .
+    uv run adk web
     ```
+    *(Select `essay_refiner` from the agent dropdown in the UI).*
 2.  **Observe the Trace:**
     Notice how each call to `ctx.run_node()` appears in the trace. You can see the story evolving iteration by iteration.
 

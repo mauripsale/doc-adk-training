@@ -15,59 +15,70 @@ pagination_label: "Module 20: Cyclic Workflows (Iteration & Self-Correction) —
 
 ### Iterative Refinement in ADK 2.0
 
-In ADK 2.0, the legacy `LoopAgent` is superseded by **Dynamic Workflows** using the **`@node`** decorator. This allows you to use standard Python `for` or `while` loops to orchestrate iterative tasks.
+Many real-world AI tasks — writing code, drafting legal summaries, or crafting essays — rarely produce a perfect result on the first try. Instead of accepting the first draft, you can let one agent **critique** the work and another agent **improve** it in a loop until it meets your quality bar.
 
-This approach is more flexible because you have full control over the termination logic, and you can easily implement safety features like `max_iterations`.
+In ADK 2.0, you build cyclic workflows using a **`@node` Dynamic Workflow** (from Module 18) with a standard Python **`for`** or **`while`** loop. Because the loop is plain Python, you have total control over termination conditions and safety guardrails like `max_iterations`.
 
-### The Dynamic Loop Pattern
+### The Critic → Refiner Loop Pattern
 
 ![Evaluator-Optimizer Iteration Loop (Light)](img/cyclic-workflows-loop-light.webp#gh-light-mode-only)
 ![Evaluator-Optimizer Iteration Loop (Dark)](img/cyclic-workflows-loop-dark.webp#gh-dark-mode-only)
 *Figure: Generator-Evaluator feedback architecture showing draft critique, rubric scoring thresholding, and iteration limits.*
 
-
-The most common pattern for iteration is the **Critic -> Refiner** loop. Instead of a dedicated class, you define it as a function:
+The most common iterative architecture is the **Critic → Refiner** loop:
 
 ```python
-from google.adk import Context, Agent
+from google.adk import Agent, Context, Workflow
 from google.adk.workflow import node
 
-# 1. Define the specialist nodes
-critic = Agent(name="critic", ...)
-refiner = Agent(name="refiner", ...)
+# 1. Define the specialist agents
+critic = Agent(
+    name="critic",
+    model="gemini-3.8-flash",
+    instruction="Review the draft. Reply 'APPROVED' if great, otherwise give brief feedback.",
+)
+refiner = Agent(
+    name="refiner",
+    model="gemini-3.8-flash",
+    instruction="Rewrite the draft using the provided feedback. Return only the improved text.",
+)
 
-# 2. Define the Orchestrator Node with a Python loop
-# rerun_on_resume=True is required on every @node used with ctx.run_node().
+# 2. Define the Orchestrator Node with a bounded Python loop
 @node(rerun_on_resume=True)
 async def refinement_workflow(ctx: Context, node_input: str):
     current_work = node_input
-    
-    # Standard Python loop for max_iterations
+
+    # Bounded loop (max 5 iterations) prevents infinite loops and runaway API costs
     for i in range(5):
-        print(f"--- Iteration {i+1} ---")
-        
-        # Call the Critic node. ctx.run_node()'s second argument is
-        # positional -- there's no `input=` keyword.
+        print(f"--- Iteration {i + 1} ---")
+
+        # Ask the Critic to review the current draft
         feedback = await ctx.run_node(critic, current_work)
-        
-        # Termination Condition
+
+        # Early exit condition
         if "APPROVED" in feedback:
             break
-            
-        # Call the Refiner node to improve the work
+
+        # Ask the Refiner to improve the draft using the Critic's feedback
         current_work = await ctx.run_node(
             refiner, f"WORK:\n{current_work}\n\nFEEDBACK:\n{feedback}"
         )
-        
+
     return current_work
+
+# 3. Register the orchestrator in a Workflow
+root_agent = Workflow(
+    name="RefinementSystem",
+    edges=[("START", refinement_workflow)],
+)
 ```
 
-### Why Dynamic Loops are Superior
+### Why Use Python Loops in `@node` Workflows?
 
-1.  **Python Native:** No need to learn custom "Loop" classes; just use `for` or `while`.
-2.  **Explicit Logic:** You can easily add complex exit conditions (e.g., "stop if the quality score is > 0.8" or "stop if the changes are minimal").
-3.  **Resilience:** You can use standard try/except blocks inside the loop to handle errors in specific iterations.
-4.  **Transparency:** In the Dev UI, each call to `ctx.run_node()` creates a new entry in the trace, allowing you to see exactly how the work improved over time.
+1.  **Zero Boilerplate:** Just write a normal Python `for` or `while` loop — no special loop DSL required.
+2.  **Flexible Exit Conditions:** Stop on `"APPROVED"`, on a structured numeric score (`score >= 0.8`), or when the draft stops changing.
+3.  **Built-in Cost Guardrails:** `for i in range(max_iterations)` guarantees the loop always terminates, even if the Critic is never satisfied.
+4.  **Full Trace Visibility:** In the Dev UI, every `ctx.run_node()` call inside the loop shows up as its own trace step, letting you watch the draft improve iteration by iteration.
 
 ### Key Takeaways
 - **Iterative tasks** require multiple passes of review and refinement.

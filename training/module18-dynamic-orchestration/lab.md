@@ -28,26 +28,18 @@ This exercise demonstrates the power of ADK 2.0: using standard Python logic to 
     cd support_router_v2
     ```
 
-3.  **Upgrade your environment:**
-    Ensure you are using ADK 2.0 or higher:
-    ```shell
-    uv pip install -U "google-adk>=2.1.0"
-    ```
-
 ### Step 2: Implement the Dynamic Router
 
-**Exercise:** Open `agent.py`. The two specialist agents (`ai_support` and `human_escalation`) have been provided for you as starter nodes.
-
-Your task is to implement the `support_router_workflow` function using the `@node` decorator and the `ctx.run_node()` method.
+**Exercise:** Open `agent.py`. Complete the `TODO` placeholders to define the two specialist agents (`ai_support` and `human_escalation`), the `classifier` agent, and the `support_router_workflow` function using `@node` and `ctx.run_node()`.
 
 ```python
 # In agent.py (Starter Code)
 
 from __future__ import annotations
 from pydantic import BaseModel
-from google.adk import Agent, Workflow, Context, Event
+from google.adk import Agent, Workflow, Context
 from google.adk.workflow import node
-from typing import AsyncGenerator, Literal
+from typing import Literal
 
 # ===== Specialist Agent Nodes =====
 
@@ -99,10 +91,12 @@ root_agent = Workflow(
 
 ### Step 3: Run and Test the Router
 
-1.  **Start the Dev UI:**
+1.  **Return to the parent directory and start the Dev UI:**
     ```shell
-    uv run adk web .
+    cd ..
+    uv run adk web
     ```
+    *(Select `support_router_v2` from the agent dropdown in the UI).*
 2.  **Test the routing:**
     *   **Input:** "My internet is down, help!" -> Should route to `ai_support_bot`.
     *   **Input:** "THIS IS DISGUSTING! I WANT TO CANCEL EVERYTHING!" -> Should route to `human_escalation_team`.
@@ -117,7 +111,7 @@ By completing this lab, you have mastered the fundamental orchestration pattern 
 *   Implementing **Programmable Routing** that combines AI classification with deterministic business rules.
 
 ### Self-Reflection Questions
-- How is `ctx.run_node()` in ADK 2.0 different from the way we passed data between agents in ADK 1.x?
+- How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 16)?
 - Why is it important to set `rerun_on_resume=True` for the orchestrator node?
 - Can a dynamic workflow call another dynamic workflow? (Hint: Yes, every workflow is just a node!)
 

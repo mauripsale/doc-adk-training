@@ -24,3 +24,4 @@ python-dotenv
 # Testing & Code Quality
 pytest
 ruff
+locust

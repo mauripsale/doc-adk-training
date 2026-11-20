@@ -46,9 +46,9 @@ This 2-day Instructor-Led Training (ILT) is the flagship curriculum for engineer
 | **09:00 - 09:35** | [Module 12: Built-in Tools and Grounding](./training/module12-built-in-tools-grounding/) | 35 min | Lab | Google Search grounding and enterprise knowledge retrieval. |
 | **09:35 - 10:20** | [Module 27: Introduction to MCP & Stateful Tools](./training/module27-intro-to-mcp/) | 45 min | Theory/Lab | Connecting ADK agents to external Model Context Protocol (`McpToolset`) servers. |
 | **10:20 - 10:35** | *Morning Break* | 15 min | — | — |
-| **10:35 - 11:05** | [Module 15: Introduction to Multi-Agent Systems (MAS)](./training/module15-intro-to-multi-agent-systems/) | 30 min | Theory | When to use MAS, coordinator vs peer topologies, and handoff protocols. |
-| **11:05 - 12:00** | [Module 16: Static Orchestration (Linear & Parallel)](./training/module16-static-orchestration/) | 55 min | Lab | Building deterministic multi-agent pipelines with sequential and parallel steps. |
-| **12:00 - 12:40** | [Module 17: Structured Routing & Agent Teams](./training/module17-structured-routing/) | 40 min | Lab | Intent-based routing, specialist sub-agents, and dynamic delegation. |
+| **10:35 - 11:05** | [Module 15: Introduction to Multi-Agent Systems (MAS)](./training/module15-intro-to-multi-agent-systems/) | 30 min | Theory/Lab | MAS architectures, `sub_agents` delegation, and live Greeting Router. |
+| **11:05 - 11:50** | [Module 16: Collaborative Teams (Modes & Handoffs)](./training/module16-collaborative-teams/) | 45 min | Lab | Collaboration modes (`chat`, `single_turn`, `task`) and automatic control return. |
+| **11:50 - 12:40** | [Module 17: Static Workflows (Linear & Parallel)](./training/module17-static-orchestration/) | 50 min | Lab | Deterministic `Workflow` pipelines with parallel fan-out and `JoinNode` fan-in. |
 | **12:40 - 13:40** | *Lunch Break* | 60 min | — | — |
 | **13:40 - 14:40** | [Module 24: Evaluating Agent Performance](./training/module24-evaluation/) | 60 min | Lab | Evaluating agents using `agents-cli eval` / `adk eval`, LLM-as-judge, and evalsets. |
 | **14:40 - 15:30** | [Module 25: Observability & Tracing](./training/module25-observability/) | 50 min | Lab | Cloud Trace, OpenTelemetry plugins, turn logging, and debugging production traffic. |

@@ -56,11 +56,16 @@ Your task is to run and interact with your **"Support Analyzer"** agent using th
     *   Verify that you receive a stream of JSON responses containing the structured analysis (category, sentiment, summary).
 4.  **Bonus: `uvx google-agents-cli playground`:**
     *   Stop the API server (`Ctrl+C`).
-    *   Run the modern AgentOps playground from your parent directory:
+    *   **Prerequisite:** `google-agents-cli` requires an `agents-cli-manifest.yaml` in your project root (unlike `uv run adk web`). If you created your agent with `adk create`, first enhance your project inside the agent folder (`support_analyzer`) or initialize the manifest:
+        ```bash
+        cd support_analyzer
+        uvx google-agents-cli scaffold enhance . --agent-directory .
+        ```
+    *   Now launch the modern AgentOps playground from that project directory:
         ```bash
         uvx google-agents-cli playground
         ```
-    *   Open `http://localhost:8080` in your browser to experience the next-generation agent developer console with multi-turn inspection, evaluation hooks, and deployment configuration.
+    *   Open the printed local URL in your browser to experience the next-generation agent developer console with multi-turn inspection, evaluation hooks, and deployment configuration. *(Note: Remember to `cd ..` back to `adk-training` before continuing to future modules).*
 
 ### Self-Reflection Questions
 - In what scenarios would the detailed "Trace View" in `uv run adk web` be more useful than the simple chat interface of `uv run adk run`?

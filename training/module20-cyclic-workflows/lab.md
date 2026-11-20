@@ -31,7 +31,7 @@ In this lab, you will build a self-improving agent system that uses a **Dynamic 
 
 ### Step 2: Define the Nodes and Orchestrator
 
-**Exercise:** Open `agent.py`. Your task is to define the specialist agents and the `@node` function that runs the loop.
+**Exercise:** Open `essay_refiner/agent.py`. Your task is to define the specialist agents and the `@node` function that runs the loop.
 
 ```python
 # In agent.py (Starter Code)
@@ -60,17 +60,18 @@ refiner = ...
 # rerun_on_resume=True is required on every @node used with ctx.run_node().
 @node(rerun_on_resume=True)
 async def refinement_orchestrator(ctx: Context, node_input: str):
-    # Step A: Get the initial draft from the 'writer'.
+    # Step A: Get the initial draft from the 'writer' via await ctx.run_node().
     # Note: ctx.run_node()'s second argument is positional, not a keyword
     # (there's no `input=` parameter).
-    current_story = await ctx.run_node(writer, f"Topic: {node_input}")
+    current_story = ...  # TODO: Call writer with f"Topic: {node_input}"
 
     # Step B: Run the loop (max 3 times)
     # 1. Call the 'critic' with ctx.run_node(critic, current_story)
-    # 2. Check if 'APPROVED' is in the feedback (break if so)
+    # 2. Check if feedback.strip().upper() == "APPROVED" (break if so; avoid
+    #    loose `"APPROVED" in feedback` which misfires on "NOT APPROVED"!)
     # 3. Call the 'refiner' to improve 'current_story' based on feedback
 
-    # [STUDENT TODO: Implement the loop here]
+    # TODO: Implement the bounded for-loop here
 
     return current_story
 
@@ -82,10 +83,11 @@ root_agent = Workflow(
 
 ### Step 3: Run and Test
 
-1.  **Start the Dev UI:**
+1.  **Start the Dev UI from your parent `adk-training` directory:**
     ```shell
-    uv run adk web .
+    uv run adk web
     ```
+    *(Select `essay_refiner` from the agent dropdown in the UI).*
 2.  **Observe the Trace:**
     Notice how each call to `ctx.run_node()` appears in the trace. You can see the story evolving iteration by iteration.
 
@@ -165,17 +167,13 @@ async def refinement_orchestrator(ctx: Context, node_input: str):
         # A. Call the critic node
         feedback = await ctx.run_node(critic, current_story)
         
-        # B. Termination Condition
-        if "APPROVED" in feedback:
+        # B. Termination Condition (exact match avoids misfiring on "NOT APPROVED")
+        if feedback.strip().upper() == "APPROVED":
             break
             
         # C. Refinement
         current_story = await ctx.run_node(
-            refiner, f"STORY:
-{current_story}
-
-FEEDBACK:
-{feedback}"
+            refiner, f"STORY:\n{current_story}\n\nFEEDBACK:\n{feedback}"
         )
         
     return current_story

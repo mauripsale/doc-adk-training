@@ -61,7 +61,12 @@ Alongside the native `adk` framework commands, Google's **`agents-cli`** toolset
 * **Interactive Playground:** `agents-cli playground` spins up the local developer UI with automatic file-watching and hot-reloading.
 * **Single Prompt Execution:** `agents-cli run "Your prompt"` allows one-off command-line execution and automated CI assertions.
 
+> **Important Prerequisite (`agents-cli-manifest.yaml`):** Unlike `adk web` (which auto-discovers any subdirectory containing `agent.py`), `agents-cli` commands expect an `agents-cli-manifest.yaml` in your project root. Before running `playground` or `run` on an existing ADK agent, you must either generate the manifest via `uvx google-agents-cli scaffold enhance .` or initialize the project with `uvx google-agents-cli create`.
+
 ```bash
+# Ensure your project has an agents-cli-manifest.yaml first:
+uvx google-agents-cli scaffold enhance .
+
 # Launch the interactive local playground
 uvx google-agents-cli playground
 

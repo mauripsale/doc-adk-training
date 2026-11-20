@@ -138,6 +138,42 @@ agent = Agent(
 ```
 This is essential for building multi-agent systems where one agent's output is needed as another agent's input.
 
+#### 3. Fine-Tuning Model Behavior with `generate_content_config`
+Beyond prompts and schemas, you can control the underlying Gemini model's generation parameters and safety guardrails using `generate_content_config` with `google.genai.types.GenerateContentConfig`:
+
+```python
+from google.genai import types
+from google.adk import Agent
+
+root_agent = Agent(
+    name="tuned_support_agent",
+    model="gemini-3.8-flash",
+    instruction="Provide concise, deterministic customer support answers.",
+    generate_content_config=types.GenerateContentConfig(
+        temperature=0.2,           # Lower values = more deterministic, factual output
+        max_output_tokens=250,     # Cap response length and token cost
+        top_p=0.9,                 # Nucleus sampling probability threshold
+        top_k=40,                  # Restrict sampling to top K probable tokens
+        stop_sequences=["END"],    # Stop generation immediately on specific tokens
+        seed=42,                   # Best-effort reproducibility for testing
+        safety_settings=[
+            types.SafetySetting(
+                category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                threshold=types.HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+            )
+        ],
+    ),
+)
+```
+
+**Common `GenerateContentConfig` Parameters:**
+*   **`temperature` (`0.0` – `2.0`):** Controls randomness. Use `0.0`–`0.2` for classification, extraction, and tool calling; use `0.7`–`1.0` for brainstorming and creative writing.
+*   **`max_output_tokens`:** Sets a hard ceiling on how many tokens the model can emit in a single turn.
+*   **`top_p` & `top_k`:** Control token sampling diversity. Adjusting `temperature` alone is usually sufficient for most use cases.
+*   **`stop_sequences`:** A list of strings that immediately terminate text generation if produced by the model.
+*   **`seed`:** Integer seed for deterministic sampling (useful for reproducible test suites).
+*   **`safety_settings`:** Fine-grained content moderation thresholds across Gemini harm categories.
+
 <KnowledgeCheck
   id="m04-output-schema-state"
   question="In ADK 2.0, how does `output_schema` behave when an agent also has tools configured?"
@@ -157,3 +193,4 @@ This is essential for building multi-agent systems where one agent's output is n
 - The `instruction` parameter is the most powerful tool for controlling behavior.
 - **`output_schema`**: Enforces strict JSON output via Pydantic on the final response -- the agent can still call tools during its thought loop; only the final answer is constrained to the schema.
 - **`output_key`**: Automatically saves the agent's response into the session state for cross-node data passing.
+- **`generate_content_config`**: Fine-tunes model inference behavior (`temperature`, `max_output_tokens`, `top_p`, `top_k`, `stop_sequences`, `seed`, and `safety_settings`) via `types.GenerateContentConfig`.

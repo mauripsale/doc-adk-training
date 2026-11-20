@@ -137,7 +137,7 @@ from google.adk.apps import App
 from firestore_provider import FirestoreSessionService # Import your custom class
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # --- 1. Define a simple agent ---
 agent = Agent(
@@ -298,7 +298,7 @@ from google.adk.apps import App
 from firestore_provider import FirestoreSessionService
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 agent = Agent(
     model="gemini-3.8-flash",

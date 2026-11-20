@@ -38,16 +38,16 @@ This self-paced track is optimized for individual software developers, AI practi
 
 ---
 
-### 🤝 Part 3: Multi-Agent Systems (~4.5 Hours / 275 min)
+### 🤝 Part 3: Multi-Agent Systems (~4.75 Hours / 285 min)
 | Module | Complexity | Estimated Time | Focus |
 | :--- | :---: | :---: | :--- |
-| 🤖 [Module 15: Introduction to MAS](./training/module15-intro-to-multi-agent-systems/) | Low | 15 min | Multi-agent architectures & trade-offs |
-| 🤖 [Module 16: Static Orchestration (Linear & Parallel)](./training/module16-static-orchestration/) | Medium | 40 min | Deterministic multi-agent pipelines |
-| 🤖 [Module 17: Structured Routing (Edges & Dicts)](./training/module17-structured-routing/) | Medium | 30 min | Routing classifiers & dynamic routing |
-| 🤖 [Module 18: Dynamic Orchestration (@node)](./training/module18-dynamic-orchestration/) | High | 40 min | Graph-based dynamic orchestration |
-| 🤖 [Module 19: Collaborative Teams (Modes & Handoffs)](./training/module19-collaborative-teams/) | High | 45 min | Collaborative multi-agent communication |
-| 🤖 [Module 20: Cyclic Workflows (Self-Correction)](./training/module20-cyclic-workflows/) | High | 40 min | Iteration loops & critic agents |
-| 🤖 [Module 21: Distributed Graphs (A2A & External)](./training/module21-distributed-graphs/) | High | 50 min | Agent-to-Agent (A2A) networking |
+| 🤖 [Module 15: Introduction to MAS](./training/module15-intro-to-multi-agent-systems/) | Low | 25 min | Multi-agent architectures & `sub_agents` delegation |
+| 🤖 [Module 16: Collaborative Teams (Modes & Handoffs)](./training/module16-collaborative-teams/) | Medium | 45 min | Collaboration modes (`chat`, `single_turn`, `task`) |
+| 🤖 [Module 17: Static Workflows (Linear & Parallel)](./training/module17-static-orchestration/) | Medium | 40 min | Deterministic `Workflow` pipelines & `JoinNode` |
+| 🤖 [Module 18: Dynamic Workflows (@node)](./training/module18-dynamic-orchestration/) | High | 40 min | Programmable `@node` orchestration & `ctx.run_node()` |
+| 🤖 [Module 19: Structured Routing (Dict Edges)](./training/module19-structured-routing/) | Medium-High | 30 min | Dictionary router edges & `ctx.route` |
+| 🤖 [Module 20: Cyclic Workflows (Self-Correction)](./training/module20-cyclic-workflows/) | High | 40 min | Iteration loops & evaluator agents |
+| 🤖 [Module 21: Distributed Graphs (A2A & External)](./training/module21-distributed-graphs/) | High | 50 min | Agent-to-Agent (A2A) networking & `AgentTool` |
 | 🏁 [Module 21.5: MAS Architecture Milestone](./training/module21_5-mas-knowledge-milestone/) | Low | 15 min | Multi-agent architecture synthesis |
 
 ---
@@ -68,7 +68,7 @@ This self-paced track is optimized for individual software developers, AI practi
 | Module | Complexity | Estimated Time | Focus |
 | :--- | :---: | :---: | :--- |
 | 🔌 [Module 27: Introduction to MCP & Stateful Tools](./training/module27-intro-to-mcp/) | High | 40 min | Model Context Protocol architecture |
-| 🔌 [Module 28: Building Custom MCP Tools](./module28-building-mcp-tools/) | High | 40 min | Creating FastMCP tool servers |
+| 🔌 [Module 28: Building Custom MCP Tools](./training/module28-building-mcp-tools/) | High | 40 min | Creating FastMCP tool servers |
 | 🔌 [Module 29: Introduction to UI Integration](./training/module29-ui-integration-intro/) | High | 35 min | Frontend chat integration |
 | 🔌 [Module 30: Building Custom Streaming Clients](./training/module30-custom-streaming-client/) | High | 45 min | Real-time token streaming client |
 

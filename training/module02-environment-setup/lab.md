@@ -55,11 +55,11 @@ Create a file named `.env` in your `adk-training` directory. This file will secu
 
 **Option B: Use Agent Platform (Advanced)**
 1.  Authenticate with the gcloud CLI: `gcloud auth application-default login`
-2.  Add the following lines to your `.env` file, replacing the placeholder values with your Google Cloud project details:
+2.  Add the following lines to your `.env` file, replacing the placeholder values with your Google Cloud project details (we recommend `global` as the location because many of Google's newest Gemini models and endpoints are published globally):
     ```
     GOOGLE_GENAI_USE_VERTEXAI="1"
     GOOGLE_CLOUD_PROJECT="your-gcp-project-id"
-    GOOGLE_CLOUD_LOCATION="us-central1"
+    GOOGLE_CLOUD_LOCATION="global"
     ```
 
 > **Note on `adk create` and `.env` variables:** Later modules use `uv run adk create <name>` to scaffold a project. That command is an **interactive wizard** — it will prompt you for choices like the model, backend, GCP project, and region, so don't be surprised when it asks questions instead of just running silently. Also, the `.env` file it auto-generates may show `GOOGLE_GENAI_USE_ENTERPRISE=1` instead of the `GOOGLE_GENAI_USE_VERTEXAI=1` used in this lab's examples. Both variables are real and fully supported — they are functionally equivalent ways of telling the ADK to use Vertex AI/Agent Platform. If you see `GOOGLE_GENAI_USE_ENTERPRISE=1` in a generated `.env` file, that's fine; there's no need to "fix" it to match the `GOOGLE_GENAI_USE_VERTEXAI=1` shown elsewhere in the docs.
@@ -78,7 +78,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 
 async def main():
-    load_dotenv()
+    load_dotenv(override=True)
     
     print("🔍 Testing ADK 2.0 Environment...")
 
@@ -210,7 +210,7 @@ GOOGLE_API_KEY="AIzaSy..."
 ```text
 GOOGLE_GENAI_USE_VERTEXAI="1"
 GOOGLE_CLOUD_PROJECT="your-project-id"
-GOOGLE_CLOUD_LOCATION="us-central1"
+GOOGLE_CLOUD_LOCATION="global"
 ```
 *Note: If using Agent Platform, ensure you have run `gcloud auth application-default login`.*
 

@@ -6,7 +6,7 @@ from google.adk.apps import App
 from google.adk.runners import InMemoryRunner
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 async def main():
     try:

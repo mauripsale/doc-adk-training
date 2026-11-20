@@ -47,7 +47,7 @@ A multinational corp has a main website agent.
 
 ### Self-Reflection Questions
 - Why is a "Hybrid" approach (combining static and dynamic nodes) often the reality of production systems?
-- What are the risks of using a fully "Collaborative" team (Module 19) for a strictly regulated financial process?
+- What are the risks of using a fully "Collaborative" LLM-driven team (Module 16) for a strictly regulated financial process?
 - How does the "Graph" mental model help you communicate with business stakeholders compared to "Chatbot" terminology?
 
 <hr/>
@@ -73,7 +73,7 @@ This solution provides the architectural blueprints and justifications for the s
     3.  `Extractor` -> `LiabilityChecker` (Edge 2)
     4.  `PrivacyChecker` -> `JoinNode`
     5.  `LiabilityChecker` -> `JoinNode`
-    6.  `JoinNode` -> `ReviewRouter` (Structured Routing via Dictionary)
+    6.  `JoinNode` -> `ReviewRouter` (a `@node` function inspecting `{privacy_risk}` / `{liability_risk}` in `session.state` and setting `ctx.route` into a Dictionary Edge)
     7.  `ReviewRouter` -> `SeniorPartner` (IF high risk)
     8.  `ReviewRouter` -> `Summarizer` (IF low risk)
 

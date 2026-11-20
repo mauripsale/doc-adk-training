@@ -35,10 +35,10 @@ The simplest way to define an agent is with a **YAML** configuration file (e.g.,
 
 A typical YAML configuration looks like this:
 ```yaml
-name: echo_agent
+name: greeter_agent
 model: gemini-3.8-flash
-description: An agent that repeats the user's input.
-instruction: You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it.
+description: A polite greeting agent.
+instruction: You are a friendly greeter. Welcome the user warmly and introduce yourself.
 ```
 
 #### 2. Programmatic (Python)
@@ -55,10 +55,10 @@ The same agent defined in Python would look like this:
 from google.adk import Agent
 
 root_agent = Agent(
-    name="echo_agent",
+    name="greeter_agent",
     model="gemini-3.8-flash",
-    description="An agent that repeats the user's input.",
-    instruction="You are an echo agent. Your only job is to repeat the user's input back to them exactly as they wrote it."
+    description="A polite greeting agent.",
+    instruction="You are a friendly greeter. Welcome the user warmly and introduce yourself."
 )
 ```
 **Important:** When defining an agent in Python, the ADK requires that the main agent variable be named exactly `root_agent`.
@@ -91,15 +91,29 @@ When you use the CLI command `uv run adk web`, the ADK automatically creates an 
 />
 
 ### Scaffolding Your Project with `uv run adk create`
-...
+
 The ADK command-line tool helps you quickly set up the necessary file structure for a new agent.
 
-Running `uv run adk create <agent_name>` initiates a wizard that lets you choose your preferred method (Config-based or Programmatic). It then creates a directory containing:
+Running `uv run adk create <agent_name>` initiates an interactive wizard that lets you choose your preferred method (Config-based or Programmatic) and authentication backend. It then creates a directory containing:
 
 *   **`root_agent.yaml`** (for config-based) or **`agent.py`** (for programmatic).
-*   **`.env`:** A file for storing environment variables, such as your API keys. This keeps your secrets separate from your agent's code and configuration.
+*   **`.env`:** A file for storing environment variables, such as your API keys and project settings.
 
-In the upcoming lab, you will use these concepts to create, configure, and run your first agent using both methods.
+#### Understanding the `adk create` Wizard Backend Options
+
+During creation, the wizard will ask: **"Which backend do you want to use?"** Here is how each option corresponds to your environment:
+
+1. **Google AI (Google AI Studio API Key):**
+   * **Authentication:** Uses a `GOOGLE_API_KEY` obtained from [Google AI Studio](https://aistudio.google.com/app/apikey).
+   * **Best For:** Quick personal prototyping or developers without a Google Cloud project.
+2. **Vertex AI (Agent Platform / Enterprise ADC):**
+   * **Authentication:** Connects to Google Cloud Vertex AI using Application Default Credentials (`gcloud auth application-default login`) or Service Accounts. Sets `GOOGLE_GENAI_USE_VERTEXAI="1"`, `GOOGLE_CLOUD_PROJECT`, and `GOOGLE_CLOUD_LOCATION="global"`.
+   * **Best For:** Enterprise projects, team training environments, and production deployments on Google Cloud.
+3. **Login with Google (Interactive OAuth):**
+   * **Authentication:** Launches a browser window to authenticate with your Google account credentials, acquiring temporary user tokens managed directly by the CLI.
+   * **Best For:** Fast developer setup without manually copying API keys or creating GCP service accounts.
+
+In the upcoming lab, you will use these concepts to create, configure, and run your first agent.
 
 ### Key Takeaways
 - An ADK agent is defined by its `name`, `model`, `instruction`, and `description`.

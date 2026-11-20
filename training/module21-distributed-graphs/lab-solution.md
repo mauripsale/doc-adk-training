@@ -41,7 +41,7 @@ a2a_app = to_a2a(root_agent, port=8001)
 ### `a2a_orchestrator/agent.py` (The Main Workflow)
 
 ```python
-from google.adk.agents import Agent, SequentialAgent
+from google.adk import Agent, Workflow
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
 from dotenv import load_dotenv
 load_dotenv(override=True)
@@ -63,11 +63,11 @@ coordinator = Agent(
     sub_agents=[remote_researcher]
 )
 
-# 3. Build the Root Orchestration
-# This orchestrates both local and remote nodes in a unified multi-agent system.
-root_agent = SequentialAgent(
+# 3. Build the Root Workflow
+# This orchestrates both local and remote nodes in a single graph.
+root_agent = Workflow(
     name="DistributedSupportSystem",
-    sub_agents=[coordinator]
+    edges=[("START", coordinator)]
 )
 ```
 
@@ -79,5 +79,5 @@ root_agent = SequentialAgent(
 2.  **Why is "A2A Context Handling" even more important in a graph architecture?**
     *   **Answer:** In ADK 2.0, the conversation history can include detailed events from the Workflow Runtime (like node transitions or state updates). Without explicit instructions to ignore these, the remote node might try to "help" with the orchestration logic instead of performing its specific task.
 
-3.  **How does `RemoteA2aAgent` simplify building distributed systems?**
-    *   **Answer:** It abstracts the network layer. To the `Workflow` engine, `RemoteA2aAgent` is just another node. You don't have to manually write HTTP requests or handle JSON serialization; you just define the edge in the graph, and ADK handles the rest.
+3.  **How do the Agent Card (`/.well-known/agent-card.json`) and `RemoteA2aAgent` work together to simplify building decoupled distributed systems?**
+    *   **Answer:** The Agent Card (`/.well-known/agent-card.json`) publishes the remote service's name, description, and endpoint metadata dynamically at a standard discovery URL so callers don't have to hardcode internal schemas. `RemoteA2aAgent` consumes that card and abstracts the HTTP/JSON network layer so, to your local `Workflow`, the remote service behaves like a standard node.

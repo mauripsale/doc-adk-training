@@ -20,7 +20,7 @@ This solution provides the architectural blueprints and justifications for the s
     3.  `Extractor` -> `LiabilityChecker` (Edge 2)
     4.  `PrivacyChecker` -> `JoinNode`
     5.  `LiabilityChecker` -> `JoinNode`
-    6.  `JoinNode` -> `ReviewRouter` (Structured Routing via Dictionary)
+    6.  `JoinNode` -> `ReviewRouter` (a `@node` function inspecting `{privacy_risk}` / `{liability_risk}` in `session.state` and setting `ctx.route` into a Dictionary Edge)
     7.  `ReviewRouter` -> `SeniorPartner` (IF high risk)
     8.  `ReviewRouter` -> `Summarizer` (IF low risk)
 

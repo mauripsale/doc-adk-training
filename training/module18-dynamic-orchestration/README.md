@@ -1,40 +1,36 @@
 ---
 sidebar_position: 18
-title: "Module 18: Dynamic Orchestration - Programmable Graphs with @node"
-pagination_label: "Module 18: Dynamic Orchestration (@node) — 📖 Theory & Overview"
+title: "Module 18: Dynamic Workflows - Programmable Graphs with @node"
+pagination_label: "Module 18: Dynamic Workflows (@node) — 📖 Theory & Overview"
 ---
 
-# Module 18: Dynamic Orchestration - Programmable Graphs with @node
+# Module 18: Dynamic Workflows - Programmable Graphs with `@node`
+
+> **🧭 Where We Are in Part 3:** In **Module 17**, you built fixed pipelines (`A → B`, parallel fan-out + `JoinNode`) where every branch always ran. What if your workflow needs **runtime decisions** — like *"inspect an article draft first; if it passes length and quality checks, send it to the publisher; otherwise stop early"*? Welcome to **Dynamic Workflows (`@node`)**, where **standard Python code** (`if/else`, variables, functions) becomes your orchestrator!
 
 ![Dynamic Orchestration Hero (Light)](img/dynamic-orchestration-hero-light.webp#gh-light-mode-only)
 ![Dynamic Orchestration Hero (Dark)](img/dynamic-orchestration-hero-dark.webp#gh-dark-mode-only)
 *Figure: Fully programmable multi-agent workflows executing dynamic routing and state evaluation with the `@node` decorator.*
 
-
 ## Theory
 
-In Modules 16 and 17, you wired workflows using static `edges` and dictionary lookups (`ctx.route`). That works great when your routing rules fit in a fixed table.
+Static `edges` (Module 17) are unbeatable when every step in your pipeline is fixed ahead of time. When execution depends on runtime conditions, **Dynamic Workflows** let you write an ordinary Python `async def` function that calls agents just like regular Python functions!
 
-**Dynamic Workflows** go one step further: instead of expressing routing rules through `edges` and `ctx.route`, **your Python function *is* the orchestrator**. You get the full power of standard Python (`if/else`, `for` loops, `try/except`) to decide which agents to run and in what order.
-
-### Dynamic Workflows with `@node` and `ctx.run_node()`
+### Building Your First `@node` Orchestrator
 
 ![Dynamic Node Execution Engine (Light)](img/dynamic-orchestration-engine-light.webp#gh-light-mode-only)
 ![Dynamic Node Execution Engine (Dark)](img/dynamic-orchestration-engine-dark.webp#gh-dark-mode-only)
 *Figure: Programmatic node invocation lifecycle with context state inspection, adaptive node dispatch, and result aggregation.*
 
-In Module 17, you already saw `@node` and `await ctx.run_node(...)` used as a small bridge for `ctx.route`. In Module 18, **you drop `ctx.route` and dictionary edges completely** and orchestrate everything directly inside your `@node` function:
-
-1.  **Define your specialist `Agent` nodes** as usual (`researcher`, `writer`, etc.).
-2.  **Write an `async def` orchestrator function** decorated with `@node(rerun_on_resume=True)`.
-3.  **Call any node directly with `await ctx.run_node(agent, input)`** — just like calling a normal Python function! It runs that agent and returns its response directly into a Python variable.
-4.  **Wire `"START"` to your orchestrator** inside `Workflow(edges=[("START", my_orchestrator)])`.
+ADK 2.0 introduces two simple primitives for programmable orchestration:
+*   **`@node`** (from `google.adk.workflow`): A decorator that turns any Python function into a graph node that a `Workflow` can run.
+*   **`await ctx.run_node(target_node, input_data)`**: Executes an `Agent` (or another node) and returns its output directly into a Python variable!
 
 ```python
 from google.adk import Agent, Workflow, Context
 from google.adk.workflow import node
 
-# 1. Define specialist agents
+# 1. Define specialist agents as usual
 researcher = Agent(
     name="researcher",
     model="gemini-3.8-flash",
@@ -46,38 +42,47 @@ writer = Agent(
     instruction="Turn the provided research notes into a short, engaging article.",
 )
 
-# 2. Build the Dynamic Orchestrator (pure Python control flow!)
+# 2. Write a Python orchestrator decorated with @node
 @node(rerun_on_resume=True)
 async def newsletter_workflow(ctx: Context, node_input: str):
-    # Step A: Call researcher just like a Python function
+    # Step A: Run researcher and store its answer in a normal Python variable
     research_notes = await ctx.run_node(researcher, node_input)
 
-    # Step B: Pass its output directly to writer
-    final_article = await ctx.run_node(writer, research_notes)
+    # Step B: Use standard Python if/else or string formatting freely!
+    if len(research_notes) < 50:
+        return "Not enough public information found on this topic."
 
-    # Step C: Return the final answer to the user
+    # Step C: Pass research_notes directly into writer and return its final article
+    final_article = await ctx.run_node(writer, research_notes)
     return final_article
 
-# 3. Register the orchestrator as the entry point
+# 3. Register the orchestrator as the Workflow's entry point
 root_agent = Workflow(
     name="NewsletterSystem",
     edges=[("START", newsletter_workflow)],
 )
 ```
 
-Notice how clean that is:
-*   **No `ctx.route`:** You don't need dictionary keys; you just write Python `if`/`else` statements.
-*   **No `output_key` boilerplate:** `await ctx.run_node(...)` returns the agent's output directly into your Python variable (`research_notes`), ready to pass to the next step.
+#### Line-by-Line Breakdown of the New Primitives
 
-### When to Choose Dynamic Workflows (`@node`)
+*   **`@node(rerun_on_resume=True)`**: Registers `newsletter_workflow` as a workflow node. Setting `rerun_on_resume=True` ensures that in a multi-turn conversation, this orchestrator runs fresh on every new message the user sends rather than being skipped.
+*   **`async def newsletter_workflow(ctx: Context, node_input: str):`**:
+    *   `ctx: Context` is ADK's runtime control object (giving you `ctx.run_node(...)` and `ctx.session.state`).
+    *   `node_input: str` is the incoming user message (because `"START"` connects to this function).
+*   **`await ctx.run_node(researcher, node_input)`**: Runs `researcher` with `node_input` as its prompt and returns the result directly:
+    *   If the agent returns plain text, you get a `str`.
+    *   If the agent has a Pydantic `output_schema`, ADK automatically parses the JSON and returns a plain Python **`dict`** (e.g., `result["approved"]`).
+*   **`return final_article`**: Whatever your `@node` function returns is emitted as the workflow's final response to the user!
 
-1.  **Complex Control Flow:** Use standard `if/else` branching, `for` loops (e.g., retry or refine until quality passes), and `try/except` error handling.
-2.  **Direct Variable Passing:** Pass outputs between agents using normal Python variables without needing `output_key` state templates.
-3.  **Automatic Checkpointing & Tracing:** ADK's Workflow Runtime still tracks every `ctx.run_node()` call, giving you full trace visibility and graph inspection in the Dev UI.
+### When to Choose Dynamic `@node` Workflows
+
+1.  **Multi-Step Conditional Chains:** Run Agent A, inspect or combine its result in Python, and conditionally pass enriched context to Agent B.
+2.  **Direct Variable Passing:** No need for `output_key` or `{placeholder}` templates — outputs live in normal Python variables.
+3.  **Full Trace Visibility:** Even though routing happens in Python, ADK's Workflow Runtime still records every `ctx.run_node()` call in the Dev UI **Trace** tab!
 
 ### Bonus: Using a `@node` as an Agent Tool
 
-Because every `@node` function is a first-class ADK component, you can also pass a `@node` directly into an `Agent`'s `tools=[...]` list without any extra wrapper — ADK wraps it automatically so Gemini can invoke it as a tool whenever needed:
+Because every `@node` function is a first-class ADK component, you can also pass a `@node` directly into an `Agent`'s `tools=[...]` list without any extra wrapper:
 
 ```python
 from google.adk import Agent, Context
@@ -96,7 +101,21 @@ root_agent = Agent(
 )
 ```
 
+<KnowledgeCheck
+  id="m18-dynamic-run-node"
+  question="When `await ctx.run_node(topic_checker, node_input)` executes an `Agent` configured with a Pydantic `output_schema`, what Python type does `run_node()` return at runtime?"
+  options={[
+    "A raw unparsed XML string",
+    "A plain Python `dict` matching the schema fields (accessed via `result['field']`)",
+    "An unawaited coroutine object",
+    "None — results can only be read from disk"
+  ]}
+  correctIndex={1}
+  hint="Remember how structured outputs are deserialized by `ctx.run_node()`."
+  explanation="When an `Agent` uses `output_schema`, `await ctx.run_node()` validates the JSON output and returns it directly as a plain Python `dict` (so you access fields with `result['key']` rather than dot notation)."
+/>
+
 ### Key Takeaways
-- **Dynamic Workflows** let you write orchestration logic in plain Python (`if/else`, loops) inside a `@node` function.
-- **`await ctx.run_node(node, input)`** executes an agent or sub-workflow and returns its result directly into a Python variable.
-- Use Module 16 for fixed pipelines, Module 17 for simple dictionary switches, and **Module 18** when routing depends on complex Python logic, loops, or multi-step decisions.
+- **`@node(rerun_on_resume=True)`** turns a standard `async def` Python function into a programmable workflow orchestrator.
+- **`await ctx.run_node(node, input)`** executes any agent and returns its output directly (`str`, or `dict` when `output_schema` is set).
+- Use Module 17 for fixed pipelines, and **Module 18** when orchestration requires conditional multi-step Python logic!

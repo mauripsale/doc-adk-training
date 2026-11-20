@@ -84,7 +84,7 @@ def extract_imports(tree: ast.AST) -> List[Tuple[str, List[str]]]:
             for alias in node.names:
                 imports.append((alias.name, []))
         elif isinstance(node, ast.ImportFrom):
-            mod = node.module or ""
+            mod = ("." * (node.level or 0)) + (node.module or "")
             names = [alias.name for alias in node.names]
             imports.append((mod, names))
     return imports

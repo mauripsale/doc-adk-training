@@ -79,8 +79,8 @@ root_agent = Workflow(
 
 ### Self-Reflection Answers
 
-1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 16)?**
-    *   **Answer:** With Static Edges (Module 16), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
+1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 17)?**
+    *   **Answer:** With Static Edges (Module 17), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
 
 2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
     *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.

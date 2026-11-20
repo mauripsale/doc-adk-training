@@ -34,8 +34,8 @@ if not PYTHON_BIN.exists():
 
 MOCK_ENV = {
     **os.environ,
-    "GOOGLE_API_KEY": "AIzaSyMockKeyForRuntimeValidation1234567",
-    "GEMINI_API_KEY": "AIzaSyMockKeyForRuntimeValidation1234567",
+    "GOOGLE_API_KEY": "mock-student-eval-api-key",
+    "GEMINI_API_KEY": "mock-student-eval-api-key",
     "GOOGLE_GENAI_USE_VERTEXAI": "0",
     "VERTEX_AI_PROJECT_ID": "mock-student-eval-project",
     "VERTEX_AI_LOCATION": "us-central1",

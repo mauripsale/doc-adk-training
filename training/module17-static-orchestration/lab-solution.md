@@ -3,7 +3,7 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 16 Solution: Building a Hybrid News Aggregator
+# Lab 17 Solution: Building a Hybrid News Aggregator
 
 ## Goal
 

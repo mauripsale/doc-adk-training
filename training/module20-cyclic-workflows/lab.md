@@ -60,10 +60,10 @@ refiner = ...
 # rerun_on_resume=True is required on every @node used with ctx.run_node().
 @node(rerun_on_resume=True)
 async def refinement_orchestrator(ctx: Context, node_input: str):
-    # Step A: Get the initial draft from the 'writer'.
+    # Step A: Get the initial draft from the 'writer' via await ctx.run_node().
     # Note: ctx.run_node()'s second argument is positional, not a keyword
     # (there's no `input=` parameter).
-    current_story = await ctx.run_node(writer, f"Topic: {node_input}")
+    current_story = ...  # TODO: Call writer with f"Topic: {node_input}"
 
     # Step B: Run the loop (max 3 times)
     # 1. Call the 'critic' with ctx.run_node(critic, current_story)
@@ -71,7 +71,7 @@ async def refinement_orchestrator(ctx: Context, node_input: str):
     #    loose `"APPROVED" in feedback` which misfires on "NOT APPROVED"!)
     # 3. Call the 'refiner' to improve 'current_story' based on feedback
 
-    # [STUDENT TODO: Implement the loop here]
+    # TODO: Implement the bounded for-loop here
 
     return current_story
 

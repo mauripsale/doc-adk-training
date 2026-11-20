@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
-pagination_label: "Module 18: Dynamic Orchestration (@node) — 🧪 Challenge Lab"
+pagination_label: "Module 18: Dynamic Workflows (@node) — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';
@@ -10,7 +10,7 @@ import Setup from '../_setup-snippet.mdx';
 
 ## Goal
 
-In this lab, you will build a multi-step orchestration system using a **Dynamic Workflow** — doing something a Module 17 dictionary edge *cannot* do on its own:
+In this lab, you will build a conditional multi-step orchestration system using a **Dynamic Workflow** — doing something Module 17's fixed static `edges` cannot do:
 
 1. Run `classifier` to detect the customer's sentiment (`"angry"`, `"neutral"`, or `"happy"`).
 2. If the customer is **not** angry, simply call `ai_support` and return its technical answer.
@@ -49,8 +49,8 @@ from typing import Literal
 
 # ===== Specialist Agent Nodes =====
 
-# TODO: Define ai_support and human_escalation agents.
-# Hint: One is for technical help, the other for frustrated customers.
+# TODO: Define ai_support (name="ai_support_bot") and human_escalation (name="human_escalation_team") agents.
+# Hint: One answers technical questions clearly; the other apologizes to frustrated customers and includes any provided technical steps.
 ai_support = ...
 human_escalation = ...
 
@@ -117,7 +117,7 @@ By completing this lab, you have mastered the fundamental orchestration pattern 
 *   Implementing **Programmable Routing** that combines AI classification with deterministic business rules.
 
 ### Self-Reflection Questions
-- How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 16)?
+- How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 17)?
 - Why is it important to set `rerun_on_resume=True` for the orchestrator node?
 - Can a dynamic workflow call another dynamic workflow? (Hint: Yes, every workflow is just a node!)
 
@@ -203,8 +203,8 @@ root_agent = Workflow(
 
 ### Self-Reflection Answers
 
-1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 16)?**
-    *   **Answer:** With Static Edges (Module 16), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
+1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 17)?**
+    *   **Answer:** With Static Edges (Module 17), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
 
 2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
     *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.

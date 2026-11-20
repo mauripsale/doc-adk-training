@@ -6,6 +6,8 @@ pagination_label: "Module 20: Cyclic Workflows (Iteration & Self-Correction) —
 
 # Module 20: Cyclic Workflows - Iteration and Self-Correction
 
+> **🧭 Where We Are in Part 3:** Here in **Module 20**, we conclude **Chapter B (Graph & Code Workflows)**! Using the exact same `@node` + `await ctx.run_node(...)` pattern from Module 18, you add a bounded Python **`for` loop** so agents can iteratively critique and refine their own output until quality passes!
+
 ![Cyclic Workflows Hero (Light)](img/cyclic-workflows-hero-light.webp#gh-light-mode-only)
 ![Cyclic Workflows Hero (Dark)](img/cyclic-workflows-hero-dark.webp#gh-dark-mode-only)
 *Figure: Iterative critique, evaluation, and self-correction loops with strict iteration guardrails.*
@@ -87,6 +89,20 @@ root_agent = Workflow(
 2.  **Flexible Exit Conditions:** Stop on `"APPROVED"`, on a structured numeric score (`score >= 0.8`), or when the draft stops changing.
 3.  **Built-in Cost Guardrails:** `for i in range(max_iterations)` guarantees the loop always terminates, even if the Critic is never satisfied.
 4.  **Full Trace Visibility:** In the Dev UI, every `ctx.run_node()` call inside the loop shows up as its own trace step, letting you watch the draft improve iteration by iteration.
+
+<KnowledgeCheck
+  id="m20-cyclic-loop-guardrails"
+  question="Why should you avoid loose substring checks like `if 'APPROVED' in feedback: break` when terminating an iterative Critic -> Refiner loop?"
+  options={[
+    "Python strings do not support the `in` operator inside async functions",
+    "If the Critic replies `'NOT APPROVED: needs more detail'`, `'APPROVED' in feedback` evaluates to `True` and breaks early on a rejected draft",
+    "ADK automatically deletes uppercase characters from agent responses",
+    "The `break` keyword restarts the workflow from iteration 0"
+  ]}
+  correctIndex={1}
+  hint="Test what `'APPROVED' in 'NOT APPROVED'` returns in Python!"
+  explanation="Substring checks misfire on negations like `'NOT APPROVED'`. Always use either a boolean Pydantic `output_schema` field (`audit['passed']`) or an exact match like `feedback.strip().upper() == 'APPROVED'`."
+/>
 
 ### Key Takeaways
 - **Iterative tasks** require multiple passes of review and refinement.

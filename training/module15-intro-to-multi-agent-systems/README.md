@@ -6,6 +6,8 @@ pagination_label: "Module 15: Introduction to MAS — 📖 Theory & Overview"
 
 # Module 15: Introduction to Multi-Agent Systems
 
+> **🧭 Where We Are in Part 3:** Welcome to **Part 3: Multi-Agent Systems**! Here in **Chapter A (Modules 15–16)**, we start with **LLM-Driven Agent Teams**, where a coordinator `Agent` dynamically delegates work to specialist `sub_agents`. Later in **Chapter B (Modules 17–20)**, you will build deterministic and programmable workflows where your graph and Python code control the exact execution order.
+
 ![Multi-Agent Systems Hero (Light)](img/multi-agent-systems-hero-light.webp#gh-light-mode-only)
 ![Multi-Agent Systems Hero (Dark)](img/multi-agent-systems-hero-dark.webp#gh-dark-mode-only)
 *Figure: Architectural transition from monolithic agent bottlenecks to distributed, specialized Multi-Agent Systems.*
@@ -42,42 +44,28 @@ This design pattern offers significant advantages:
 *   **Reusability:** A well-defined "Billing Agent" can be reused in other applications across your organization.
 *   **Scalability:** It's easier to reason about and scale a system of smaller, collaborating components than one giant, complex agent.
 
-### How Multi-Agent Systems Work in ADK 2.0
+### The Master Map of Multi-Agent Systems in ADK 2.0
 
-Up to this point, you have built single `Agent` applications where `root_agent` handles everything on its own. In ADK 2.0, multi-agent systems are built natively around a **Graph Execution Model** managed by the **Workflow Runtime**.
+In ADK 2.0, every multi-agent architecture falls into one of **three clear families**, which you will master step by step across Part 3:
 
-Rather than cramming dozens of tools and instructions into one prompt, you compose independent **Nodes** inside a **`Workflow`** graph and connect them with **Edges** — all sharing the same session state.
+| Chapter | Modules | Who Controls Routing? | Core Pattern | When to Choose It |
+| :--- | :--- | :--- | :--- | :--- |
+| **A. LLM-Driven Agent Teams** | **15 – 16** | **Gemini decides dynamically** based on specialist descriptions | Coordinator `Agent` + `sub_agents` & collaboration modes | Conversational triage, open-ended requests, interactive sub-tasks. |
+| **B. Graph & Code Workflows** | **17 – 20** | **Your graph / Python code decides** deterministically | Sequential/parallel pipelines, Python orchestrators, dictionary switches, loops | Fixed business steps, parallel fan-out/fan-in, multi-step Python logic, iterative refinement. |
+| **C. Distributed MAS** | **21** | **Cross-service network calls** over HTTP | Remote network proxy agents & tool wrappers | Agents owned by separate teams or running as independent microservices. |
 
-#### 1. The Three Core Building Blocks
+### Your First Multi-Agent Pattern: `sub_agents` Delegation
 
-1. **Nodes (The Workers):**
-   A node is any executable unit in your system. In ADK 2.0, a node is typically an **`Agent`** (LLM-powered reasoning with its own `instruction`, `model`, and `tools`) or a custom Python **`@node`** function (covered in Module 18).
-2. **`Workflow` (The Graph Container):**
-   `Workflow` is the top-level orchestrator that replaces a standalone `Agent` as your `root_agent`. It holds the graph topology and drives execution from node to node.
-3. **Edges (The Execution Paths):**
-   Edges are directed pairs `(source, target)` that tell the `Workflow` where execution starts and how control flows. Every workflow begins at the reserved **`"START"`** entry point — for example, `("START", router)` means the `router` node executes first when a user sends a message.
+Let's start with the simplest, most intuitive pattern — **LLM-Driven Delegation** using `sub_agents`:
 
-#### 2. Two Ways Agents Collaborate
-
-Depending on how much control you want over routing, ADK 2.0 supports two complementary collaboration mechanisms:
-
-*   **Dynamic LLM Transfer (`sub_agents`):**
-    When you pass `sub_agents=[billing_expert, tech_support]` to an `Agent`, ADK automatically registers those specialists and exposes their **`name`** and **`description`** to the parent agent's LLM via a built-in transfer mechanism (`transfer_to_agent`). At runtime, Gemini reads the user request, inspects each specialist's `description`, and dynamically decides whether to handle the request itself or transfer control to a specialist.
-*   **Explicit Graph Routing (`edges` & `@node`):**
-    When you want deterministic, predictable pipelines (A → B → C), parallel fan-out, or code-driven branching, you wire nodes directly using `Workflow` `edges` or call `ctx.run_node(specialist_agent)` inside a `@node` function. You will master these patterns in Modules 16–18.
-
-#### 3. Shared Session State Across Nodes
-
-Because all nodes in a `Workflow` run within the same session, they share `ctx.session.state`. An upstream specialist can save structured results using `output_key` (introduced in Module 04), and downstream agents or router nodes can immediately read that data without re-parsing the conversation.
-
-#### 4. The "Specialist + Orchestrator" Pattern in Practice
-
-Below is the canonical ADK 2.0 Multi-Agent blueprint combining a `Workflow` entry point with an LLM-driven orchestrator and two domain specialists:
+1. **Define Specialist Agents:** Create focused `Agent` instances, giving each one a crisp, action-oriented **`description`**.
+2. **Define a Coordinator (`root_agent`):** Pass your specialists into the coordinator's **`sub_agents=[...]`** list.
+3. **Automatic Hand-off Under the Hood:** ADK inspects every specialist's `name` and `description` and automatically injects a built-in `transfer_to_agent` capability into the coordinator. At runtime, Gemini reads the user's message, matches it against the specialists' descriptions, and hands off the conversation to the right expert!
 
 ```python
-from google.adk import Agent, Workflow
+from google.adk import Agent
 
-# 1. Define Specialist Nodes (each with a clear `description` for discovery)
+# 1. Define Specialist Agents (each with a clear `description` for discovery)
 billing_expert = Agent(
     name="billing_expert",
     model="gemini-3.8-flash",
@@ -92,42 +80,38 @@ tech_support = Agent(
     instruction="You are a technical support engineer. Diagnose and resolve technical issues.",
 )
 
-# 2. Define the Orchestrator (Router) and register specialists via `sub_agents`
-router = Agent(
-    name="router",
+# 2. Define the Coordinator as root_agent and register specialists via `sub_agents`
+root_agent = Agent(
+    name="support_router",
     model="gemini-3.8-flash",
     instruction=(
         "Triage the user's request and transfer it to the appropriate specialist: "
-        "'billing_expert' for payment issues or 'tech_support' for technical problems."
+        "'billing_expert' for payment issues or 'tech_support' for technical problems. "
+        "If neither applies, answer politely yourself."
     ),
     sub_agents=[billing_expert, tech_support],
 )
-
-# 3. Wrap the entry node in a Workflow graph
-root_agent = Workflow(
-    name="SupportSystem",
-    edges=[("START", router)],
-)
 ```
 
-> **Why `description` matters so much:** Notice that `router` does not guess blindly — Gemini relies directly on each sub-agent's `description` to decide *which* specialist matches the user's intent. Writing crisp, non-overlapping descriptions is one of the most important skills in MAS design.
+> **Why `description` matters so much:** Notice that `support_router` does not guess blindly — Gemini relies directly on each sub-agent's `description` to decide *which* specialist matches the user's intent. Writing clear, non-overlapping descriptions is one of the most important skills in MAS design.
+
+All agents in the same session also share `ctx.session.state`, so any structured data saved via `output_key` (from Module 04) remains accessible across the team.
 
 <KnowledgeCheck
   id="m15-mas-orchestration-specialists"
-  question="In an ADK 2.0 multi-agent architecture using the Specialist/Orchestrator pattern, what is the primary purpose of passing specialist agents to the router's sub_agents list?"
+  question="In an ADK 2.0 multi-agent team using `sub_agents=[...]`, what is the primary role of each specialist agent's `description` parameter?"
   options={[
-    "To register the nodes for discovery, routing schema generation, and telemetry within the Workflow graph",
-    "To force all specialist agents to execute in parallel synchronously on every turn",
-    "To merge all specialist tools into a single shared prompt template",
-    "To disable session state isolation between specialist nodes"
+    "Gemini reads each sub-agent's description (via ADK's built-in transfer mechanism) to decide which specialist matches the user's request",
+    "It forces all specialist agents to execute in parallel synchronously on every turn",
+    "It merges all specialist tools into a single shared prompt template",
+    "It disables session state sharing between specialist agents"
   ]}
   correctIndex={0}
-  hint="Think about how the router agent discovers available specialist targets and how the ADK runtime instruments them."
-  explanation="In ADK 2.0, passing specialist agents to sub_agents registers them with the orchestrator, enabling automatic tool/transfer schema generation for Gemini and graph telemetry in the Workflow runtime."
+  hint="Think about how the coordinator's LLM knows what each specialist actually does."
+  explanation="When you register specialists in `sub_agents`, ADK exposes their `name` and `description` to the coordinator's LLM so Gemini can accurately transfer control to the matching expert."
 />
 
 ### Key Takeaways
-- **Think in Graphs:** Multi-agent systems are collections of nodes orchestrated by a Workflow.
-- **Specialization is Key:** Each node should have a narrow, well-defined purpose.
-- **Workflow Runtime:** ADK 2.0 manages the transitions and state sharing between nodes automatically.
-- **Modularity:** Breaking a large problem into multiple nodes makes your AI application easier to test, debug, and scale.
+- **Three MAS Families:** Part 3 progresses from LLM-driven `sub_agents` teams (15–16) to deterministic/programmable `Workflow` graphs (17–20) to distributed A2A services (21).
+- **Specialization is Key:** Each agent should have a narrow, well-defined domain and toolset.
+- **`sub_agents` + `description`:** Registering specialists in `sub_agents` enables automatic LLM-driven hand-offs guided by each specialist's `description`.

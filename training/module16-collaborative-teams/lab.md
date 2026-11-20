@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
-pagination_label: "Module 19: Collaborative Teams (Modes & Handoffs) — 🧪 Challenge Lab"
+pagination_label: "Module 16: Collaborative Teams (Modes & Handoffs) — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';
 
-# Lab 19: Building a Collaborative Travel Team
+# Lab 16: Building a Collaborative Travel Team
 
 ## Goal
 
@@ -27,7 +27,7 @@ uv run adk create travel_team
 cd travel_team
 ```
 
-### Step 2: Implement the Collaborative Nodes
+### Step 2: Implement the Collaborative Specialists
 
 Open `agent.py`. Your task is to define the team and configure their modes correctly.
 
@@ -37,7 +37,7 @@ Open `agent.py`. Your task is to define the team and configure their modes corre
 # In agent.py (Starter Code)
 from google.adk import Agent
 
-# Note: every agent below needs rerun_on_resume=True. Any node that's part
+# Note: every agent below needs rerun_on_resume=True. Any agent that's part
 # of a sub_agents dispatch chain can be "woken up" when a task-mode
 # sub-agent pauses and resumes across turns -- without the flag on ALL
 # three agents (coordinator included), you'll hit:
@@ -48,6 +48,7 @@ from google.adk import Agent
 weather_agent = Agent(
     name="weather_checker",
     model="gemini-3.8-flash",
+    mode=...,  # TODO: Set collaboration mode for a quick 1-step lookup
     rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to provide a brief 3-day forecast 
@@ -61,6 +62,7 @@ weather_agent = Agent(
 flight_agent = Agent(
     name="flight_booker",
     model="gemini-3.8-flash",
+    mode=...,  # TODO: Set collaboration mode for multi-turn task with auto-return
     rerun_on_resume=True,
     instruction="""
     # TODO: Write instructions to help the user book a flight. 
@@ -110,18 +112,17 @@ You have built a Collaborative Agent Team!
 - You observed how the ADK 2.0 framework manages the hand-off lifecycle so you can focus on agent logic.
 
 ### Self-Reflection Questions
-- Why would you use `single_turn` instead of `task` for a database lookup node?
+- Why would you use `single_turn` instead of `task` for a database lookup specialist?
 - What happens to the conversation history when a sub-agent is in `task` mode? (Hint: Check the Trace tab).
 - How does the `mode` setting improve the reliability of complex, multi-step workflows compared to standard `chat` mode?
-- In this lab, `travel_planner` consults two sub-agents (`weather_checker`, `flight_booker`) and combines their results, because both use `mode="task"`/`"single_turn"`, which forces the return to the coordinator. Now imagine `weather_checker` and `flight_booker` were both `RemoteA2aAgent`s -- separate services -- registered via a bare `sub_agents=[...]` with no `mode` set. What would happen the first time the coordinator delegated? What are two different ways to fix it?
 
 <hr/>
 
 ### 🔐 Reference Solution Vault
 
-<SolutionVault moduleNumber="19">
+<SolutionVault moduleNumber="16">
 
-# Lab 19 Solution: Building a Collaborative Travel Team
+# Lab 16 Solution: Building a Collaborative Travel Team
 
 ## Goal
 
@@ -186,7 +187,7 @@ root_agent = Agent(
 
 ### Self-Reflection Answers
 
-1.  **Why would you use `single_turn` instead of `task` for a database lookup node?**
+1.  **Why would you use `single_turn` instead of `task` for a database lookup specialist?**
     *   **Answer:** Efficiency. `single_turn` is faster and cheaper because it forbids any further interaction. If a node's job is purely to fetch data and return it, `single_turn` ensures it doesn't accidentally start a conversation with the user, which would waste tokens and time.
 
 2.  **What happens to the conversation history when a sub-agent is in `task` mode?**
@@ -194,9 +195,6 @@ root_agent = Agent(
 
 3.  **How does the `mode` setting improve the reliability of complex workflows?**
     *   **Answer:** It makes the "Return to Parent" behavior deterministic. Instead of hoping the LLM will remember to hand back control, the framework **enforces** the return based on the mode. This prevents "lost in thought" scenarios where a sub-agent continues chatting with the user indefinitely instead of returning to the main workflow.
-
-4.  **If `weather_checker` and `flight_booker` were both `RemoteA2aAgent`s registered via a bare `sub_agents=[...]` with no `mode` set, what would happen the first time the coordinator delegated? What are two different ways to fix it?**
-    *   **Answer:** A bare `sub_agents` entry defaults to `chat` mode, which is a permanent, one-way handoff. The coordinator would transfer to `weather_checker`, and `weather_checker` -- a separate remote service with no knowledge of `flight_booker` or the original coordinator -- would become the active agent for the rest of the run. `flight_booker` would never be called, and the coordinator would never regain control to combine the two results. Two fixes: (1) set `mode="task"` on each `RemoteA2aAgent` -- that's the only mode a `RemoteA2aAgent` accepts besides `None` (no `"single_turn"` there, unlike local agents), and it also requires the remote side to implement a `finish_task` signal; or (2) wrap both remote agents as `AgentTool(agent=...)` entries in the coordinator's `tools=[...]` list instead of `sub_agents`, which gives call-and-return semantics without configuring `mode`, or needing anything extra from the remote side, at all (see Module 19's README, Section 4).
 
 ### Bonus Solution: `weather_checker` as an `AgentTool`
 

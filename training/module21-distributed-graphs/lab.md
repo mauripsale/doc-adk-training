@@ -78,19 +78,16 @@ This requires two separate terminals.
 
 1.  **Terminal 1 (Specialist Server):**
     *   Navigate to the `research_specialist` directory.
-    *   Run `uvicorn agent:a2a_app --host localhost --port 8001`.
+    *   Run `uv run uvicorn agent:a2a_app --host localhost --port 8001`.
 
 2.  **Terminal 2 (Orchestrator Client):**
     *   Navigate to the parent `adk-training` directory.
-    *   Run `uv run adk web a2a_orchestrator`.
+    *   Run `uv run adk web` and select `a2a_orchestrator` from the agent dropdown.
 
 3.  **Interact with the System:**
     *   Open the Dev UI for the orchestrator (`http://localhost:8000` -- `adk web`'s default port).
     *   Give it a research task, like: "Please research the latest advancements in quantum computing."
-    *   Observe the **Trace View** to confirm that the `orchestrator_agent` successfully delegates the task to the `remote_researcher`.
-
-### Having Trouble?
-If you get stuck, you can find the complete, working code in the `lab-solution.md` file.
+    *   Observe the **Trace View** to confirm that `coordinator` successfully delegates the task to `remote_researcher`.
 
 ### Lab Summary
 You have successfully built a distributed multi-agent system. You have learned to:
@@ -101,7 +98,7 @@ You have successfully built a distributed multi-agent system. You have learned t
 ### Self-Reflection Questions
 - What are the main benefits of running the `research_specialist` as a separate service instead of just including it as a local sub-agent in the orchestrator?
 - The "A2A Context Handling" instruction is critical for the remote agent to function correctly. What kind of problems could arise if you forgot to include it?
-- How does the Agent Card (`/.well-known/agent-card.json`) enable a decoupled architecture? What would you need to do if this discovery mechanism didn't exist?
+- How do the Agent Card (`/.well-known/agent-card.json`) and `RemoteA2aAgent` work together to simplify building decoupled distributed systems?
 
 <hr/>
 
@@ -185,7 +182,7 @@ root_agent = Workflow(
 2.  **Why is "A2A Context Handling" even more important in a graph architecture?**
     *   **Answer:** In ADK 2.0, the conversation history can include detailed events from the Workflow Runtime (like node transitions or state updates). Without explicit instructions to ignore these, the remote node might try to "help" with the orchestration logic instead of performing its specific task.
 
-3.  **How does `RemoteA2aAgent` simplify building distributed systems?**
-    *   **Answer:** It abstracts the network layer. To the `Workflow` engine, `RemoteA2aAgent` is just another node. You don't have to manually write HTTP requests or handle JSON serialization; you just define the edge in the graph, and ADK handles the rest.
+3.  **How do the Agent Card (`/.well-known/agent-card.json`) and `RemoteA2aAgent` work together to simplify building decoupled distributed systems?**
+    *   **Answer:** The Agent Card (`/.well-known/agent-card.json`) publishes the remote service's name, description, and endpoint metadata dynamically at a standard discovery URL so callers don't have to hardcode internal schemas. `RemoteA2aAgent` consumes that card and abstracts the HTTP/JSON network layer so, to your local `Workflow`, the remote service behaves like a standard node.
 
 </SolutionVault>

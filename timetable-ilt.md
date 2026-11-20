@@ -41,13 +41,13 @@ This detailed timetable maps out the complete multi-day master track for enterpr
 ### 🤖🤖 Part 3: Multi-Agent Systems (Day 3) — 355 min
 | Module | Estimated Complexity | Duration (min) | Focus |
 | :--- | :---: | :---: | :--- |
-| 🤖 [Module 15: Introduction to MAS](./training/module15-intro-to-multi-agent-systems/) | Low | 25 | MAS architectures, sub-agent topologies |
-| 🤖 [Module 16: Static Orchestration (Linear & Parallel)](./training/module16-static-orchestration/) | Medium | 50 | Sequential and parallel deterministic flows |
-| 🤖 [Module 17: Structured Routing (Edges & Dicts)](./training/module17-structured-routing/) | Medium | 45 | Router agents and conditional branching |
-| 🤖 [Module 18: Dynamic Orchestration (@node)](./training/module18-dynamic-orchestration/) | High | 55 | Dynamic execution graph construction |
-| 🤖 [Module 19: Collaborative Teams (Modes & Handoffs)](./training/module19-collaborative-teams/) | High | 60 | Autonomous agent collaboration & handoffs |
-| 🤖 [Module 20: Cyclic Workflows (Self-Correction)](./training/module20-cyclic-workflows/) | High | 50 | Loops, validator agents, iterative refinement |
-| 🤖 [Module 21: Distributed Graphs (A2A & External)](./training/module21-distributed-graphs/) | High | 50 | Agent-to-Agent (A2A) network protocol |
+| 🤖 [Module 15: Introduction to MAS](./training/module15-intro-to-multi-agent-systems/) | Low | 30 | MAS architectures & `sub_agents` delegation |
+| 🤖 [Module 16: Collaborative Teams (Modes & Handoffs)](./training/module16-collaborative-teams/) | Medium | 55 | `mode` (`chat`, `single_turn`, `task`) & handoffs |
+| 🤖 [Module 17: Static Workflows (Linear & Parallel)](./training/module17-static-orchestration/) | Medium | 50 | Sequential/parallel `Workflow` edges & `JoinNode` |
+| 🤖 [Module 18: Dynamic Workflows (@node)](./training/module18-dynamic-orchestration/) | High | 55 | Programmable Python orchestration & `ctx.run_node()` |
+| 🤖 [Module 19: Structured Routing (Dict Edges)](./training/module19-structured-routing/) | Medium-High | 45 | Dictionary router edges & `ctx.route` |
+| 🤖 [Module 20: Cyclic Workflows (Self-Correction)](./training/module20-cyclic-workflows/) | High | 50 | Loops, evaluator agents, iterative refinement |
+| 🤖 [Module 21: Distributed Graphs (A2A & External)](./training/module21-distributed-graphs/) | High | 50 | Agent-to-Agent (A2A) network protocol & `AgentTool` |
 | 🏁 [Module 21.5: MAS Architecture Milestone](./training/module21_5-mas-knowledge-milestone/) | Low | 20 | Multi-agent design review milestone |
 
 ---

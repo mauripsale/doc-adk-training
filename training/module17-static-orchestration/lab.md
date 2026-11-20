@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
-pagination_label: "Module 16: Static Orchestration (Linear & Parallel) — 🧪 Challenge Lab"
+pagination_label: "Module 17: Static Workflows (Linear & Parallel) — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';
 
-# Lab 16: Building a Hybrid News Aggregator
+# Lab 17: Building a Hybrid News Aggregator
 
 ## Goal
 
@@ -105,15 +105,20 @@ You have built a hybrid multi-agent graph!
 - You mastered **Fan-out** by defining multiple edges from START.
 - You mastered **Fan-in** using the **`JoinNode`**.
 - You learned that sequential and parallel execution are just different edge configurations.
-- **A few things worth internalizing:** the `JoinNode` waits for *every* incoming edge -- if one parallel branch fails, it won't fire, so production graphs need retry/error handling to guarantee convergence. Adding a third parallel branch (e.g. a `sports_researcher`) is just one more `("START", sports_researcher, syncer)` edge -- the `syncer` automatically waits for all of them. And `output_key` matters specifically *because* a `JoinNode` merges multiple upstream outputs into one: it saves each branch's result into session state under its own name, so the `summarizer` can reliably pull `{tech_news}` and `{market_news}` as separate variables instead of one ambiguous blob.
+- **A few things worth internalizing:** the `JoinNode` waits for *every* incoming edge -- if one parallel branch fails, it won't fire, so production graphs need retry/error handling to guarantee convergence.
+
+### Self-Reflection Questions
+- What happens if one of the parallel researchers fails?
+- Can you add a third researcher (e.g., `'sports_researcher'`) to this hybrid graph? What single line would you add?
+- Why use `output_key` here if ADK 2.0 already passes data between sequential nodes automatically?
 
 <hr/>
 
 ### 🔐 Reference Solution Vault
 
-<SolutionVault moduleNumber="16">
+<SolutionVault moduleNumber="17">
 
-# Lab 16 Solution: Building a Hybrid News Aggregator
+# Lab 17 Solution: Building a Hybrid News Aggregator
 
 ## Goal
 

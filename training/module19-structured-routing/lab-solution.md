@@ -3,13 +3,13 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 17 Solution: Market Analyst with Deterministic Edges
+# Lab 19 Solution: Market Analyst with Dictionary Edges
 
 ## Goal
 
 This file contains the complete code for the `agent.py` script using the ADK 2.0 Deterministic Workflow pattern.
 
-### `market_analyst/agent.py`
+### `currency_router/agent.py`
 
 ```python
 from __future__ import annotations

@@ -27,10 +27,10 @@ export const CURRICULUM_MODULES = [
 
   // Part 3: Multi-Agent Systems (Modules 15–21.5)
   { id: 'module15-intro-to-multi-agent-systems', title: '15: Intro to Multi-Agent Systems', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
-  { id: 'module16-static-orchestration', title: '16: Static Orchestration', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
-  { id: 'module17-structured-routing', title: '17: Structured Routing', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
-  { id: 'module18-dynamic-orchestration', title: '18: Dynamic Orchestration', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
-  { id: 'module19-collaborative-teams', title: '19: Collaborative Teams', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
+  { id: 'module16-collaborative-teams', title: '16: Collaborative Teams', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
+  { id: 'module17-static-orchestration', title: '17: Static Workflows', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
+  { id: 'module18-dynamic-orchestration', title: '18: Dynamic Workflows (@node)', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
+  { id: 'module19-structured-routing', title: '19: Structured Dictionary Routing', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
   { id: 'module20-cyclic-workflows', title: '20: Cyclic Workflows & Loops', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
   { id: 'module21-distributed-graphs', title: '21: Distributed Multi-Agent Graphs', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
   { id: 'module21_5-mas-knowledge-milestone', title: '21.5: MAS Knowledge Milestone', part: 3, partTitle: 'Part 3: Multi-Agent Systems' },
@@ -80,7 +80,28 @@ export function ProgressProvider({ children }) {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed && typeof parsed.completedDocs === 'object') {
-          setCompletedDocs(parsed.completedDocs);
+          const LEGACY_PREFIX_MAP = {
+            'module19-collaborative-teams/': 'module16-collaborative-teams/',
+            'module16-static-orchestration/': 'module17-static-orchestration/',
+            'module17-structured-routing/': 'module19-structured-routing/',
+          };
+          const validIds = new Set(CURRICULUM_MODULES.map((m) => m.id));
+          const migrated = {};
+          for (const [k, v] of Object.entries(parsed.completedDocs)) {
+            if (!v) continue;
+            let nextKey = k;
+            for (const [oldP, newP] of Object.entries(LEGACY_PREFIX_MAP)) {
+              if (k.startsWith(oldP)) {
+                nextKey = newP + k.slice(oldP.length);
+                break;
+              }
+            }
+            const modId = nextKey.split('/')[0];
+            if (validIds.has(modId)) {
+              migrated[nextKey] = true;
+            }
+          }
+          setCompletedDocs(migrated);
         }
       }
     } catch (e) {

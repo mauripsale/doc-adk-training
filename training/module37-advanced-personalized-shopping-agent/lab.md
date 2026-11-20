@@ -134,7 +134,7 @@ This agent will be the interface to the e-commerce website.
 
     # TODO: import search from tools.search and click from tools.click
 
-    load_dotenv()
+    load_dotenv(override=True)
 
     root_agent = Agent(
         model="gemini-3.8-flash",
@@ -198,7 +198,7 @@ This agent will be responsible for remembering user preferences. **Note:** this 
     from dotenv import load_dotenv
     import uvicorn
 
-    load_dotenv()
+    load_dotenv(override=True)
 
     # --- Stateful Tools ---
     # IMPORTANT: use tool_context.state (the tracked delta proxy), NOT
@@ -502,7 +502,7 @@ import os
 from tools.search import search
 from tools.click import click
 
-load_dotenv()
+load_dotenv(override=True)
 
 root_agent = Agent(
     model="gemini-3.8-flash",
@@ -531,7 +531,7 @@ from google.adk.tools import ToolContext
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     """Saves a user's preference to the session state."""
@@ -575,7 +575,7 @@ from google.adk.tools.agent_tool import AgentTool
 from google.adk.tools.base_tool import BaseTool
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Define remote nodes
 web_agent = RemoteA2aAgent(

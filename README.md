@@ -77,14 +77,14 @@ This part focuses on giving your agents "superpowers" by connecting them to tool
 ### 🤖🤖 Part 3: Multi-Agent Systems (Modules 15-21)
 Learn how to go beyond single agents and build complex systems where multiple agents collaborate to solve complex problems using ADK 2.0 Graph-based Workflows.
 
-*   🤝 **[Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/)** (🧑‍💻 15 min / 👨‍🏫 30 min)
-*   🤝 **[Module 16: Static Orchestration](./training/module16-static-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
-*   🤝 **[Module 17: Structured Routing](./training/module17-structured-routing/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
-*   🤝 **[Module 18: Dynamic Orchestration](./training/module18-dynamic-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
-*   🤝 **[Module 19: Collaborative Teams](./training/module19-collaborative-teams/)** (🧑‍💻 45 min / 👨‍🏫 75 min)
-*   🤝 **[Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/)** (🧑‍💻 40 min / 👨‍🏫 65 min)
+*   🤝 **[Module 15: Introduction to Multi-Agent Systems](./training/module15-intro-to-multi-agent-systems/)** (🧑‍💻 25 min / 👨‍🏫 40 min)
+*   🤝 **[Module 16: Collaborative Teams](./training/module16-collaborative-teams/)** (🧑‍💻 45 min / 👨‍🏫 60 min)
+*   🤝 **[Module 17: Static Workflows](./training/module17-static-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 55 min)
+*   🤝 **[Module 18: Dynamic Workflows (`@node`)](./training/module18-dynamic-orchestration/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
+*   🤝 **[Module 19: Structured Routing](./training/module19-structured-routing/)** (🧑‍💻 30 min / 👨‍🏫 45 min)
+*   🤝 **[Module 20: Cyclic Workflows](./training/module20-cyclic-workflows/)** (🧑‍💻 40 min / 👨‍🏫 60 min)
 *   🤝 **[Module 21: Distributed Graphs](./training/module21-distributed-graphs/)** (🧑‍💻 50 min / 👨‍🏫 70 min)
-*   🏁 **[Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/)** (🧑‍💻 15 min / 👨‍🏫 30 min)
+*   🏁 **[Module 21.5: MAS Knowledge Milestone](./training/module21_5-mas-knowledge-milestone/)** (🧑‍💻 15 min / 👨‍🏫 25 min)
 
 ### 🏭 Part 4: Production Readiness (Modules 22-26)
 This part covers the essential features for making your agents robust, observable, and reliable in a production environment.

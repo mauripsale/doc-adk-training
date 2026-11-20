@@ -131,7 +131,7 @@ export default function SolutionVault({
 
   const docKey = useMemo(() => {
     const mod = CURRICULUM_MODULES.find(
-      (m) => m.id.startsWith(`module${normKey}`) || m.id.startsWith(`module${parseInt(normKey, 10)}`)
+      (m) => m.id.startsWith(`module${normKey}-`) || (!normKey.includes('_') && m.id.startsWith(`module${parseInt(normKey, 10)}-`))
     );
     return mod ? `${mod.id}/lab` : `module${normKey}/lab`;
   }, [normKey]);
@@ -441,6 +441,7 @@ export default function SolutionVault({
   return (
     <div
       className={styles.vaultContainer}
+      data-solution-vault-id={normKey}
       data-solution-vault-status={status}
       aria-expanded={status === 'unlocked'}
     >
@@ -662,13 +663,13 @@ export default function SolutionVault({
                 <div>
                   <div className={styles.completionTitle}>
                     {isLabCompleted
-                      ? 'Laboratorio Completato!'
-                      : 'Sfida del Laboratorio Superata!'}
+                      ? 'Challenge Lab Completed!'
+                      : 'Challenge Lab Unlocked!'}
                   </div>
                   <div className={styles.completionSubtext}>
                     {isLabCompleted
-                      ? 'Questo modulo è registrato come completato nel tuo Learning Portfolio.'
-                      : 'Vuoi registrare questo laboratorio nel tuo piano di studi?'}
+                      ? 'This lab is recorded as completed in your Learning Portfolio.'
+                      : 'Record this lab as completed in your study plan?'}
                   </div>
                 </div>
               </div>
@@ -682,9 +683,9 @@ export default function SolutionVault({
                 className={
                   isLabCompleted ? styles.completedBtn : styles.markCompleteBtn
                 }
-                aria-label="Registra progresso laboratorio"
+                aria-label="Record lab completion progress"
               >
-                {isLabCompleted ? '✓ Completato (Annulla)' : '✓ Segna come Completato'}
+                {isLabCompleted ? '✓ Completed (Undo)' : '✓ Mark as Complete'}
               </button>
             </div>
           )}

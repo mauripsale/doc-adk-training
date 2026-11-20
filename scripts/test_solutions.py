@@ -10,6 +10,7 @@ Performs:
 import ast
 import argparse
 import importlib
+import importlib.util
 import os
 import re
 import sys
@@ -83,7 +84,7 @@ def extract_imports(tree: ast.AST) -> List[Tuple[str, List[str]]]:
             for alias in node.names:
                 imports.append((alias.name, []))
         elif isinstance(node, ast.ImportFrom):
-            mod = node.module or ""
+            mod = ("." * (node.level or 0)) + (node.module or "")
             names = [alias.name for alias in node.names]
             imports.append((mod, names))
     return imports
@@ -110,6 +111,12 @@ def verify_imports(imports: List[Tuple[str, List[str]]], ignore_missing_optional
             continue
             
         try:
+            # Special case for modules like locust that trigger gevent monkey patching in existing processes
+            if mod_name == "locust" or mod_name.startswith("locust."):
+                if importlib.util.find_spec(mod_name) is None:
+                    errors.append(f"Missing dependency '{mod_name}': No module named '{mod_name}'")
+                continue
+
             mod = importlib.import_module(mod_name)
             for sym in symbols:
                 if sym == "*":

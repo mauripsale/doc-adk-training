@@ -858,9 +858,9 @@ export const VAULT_REGISTRY = {
   "15": {
     "questions": [
       {
-        "question": "In Module 15 (Intro to Multi-Agent Systems), what is the primary role of specialized agent delegation in ADK architectures?",
+        "question": "In Module 15 (Intro to Multi-Agent Systems), what is the primary role of specialized sub_agents delegation in ADK architectures?",
         "options": [
-          "It enables robust, scalable implementation of specialized agent delegation to streamline agent behavior and data flow",
+          "It enables robust, scalable implementation of specialized sub_agents delegation to streamline agent behavior and data flow",
           "It replaces the Python runtime with a custom kernel driver",
           "It disables network connectivity for security reasons",
           "It forces the agent to only respond in binary code"
@@ -869,7 +869,7 @@ export const VAULT_REGISTRY = {
         "hint": "Review the core theory section of Module 15 regarding Multi-Agent System architectures."
       },
       {
-        "question": "When implementing Multi-Agent System architectures, why is coordinator and subagent roles critical for production reliability?",
+        "question": "When implementing Multi-Agent System architectures, why is coordinator and specialist descriptions critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -877,7 +877,7 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 15 for robust coordinator and subagent roles."
+        "hint": "Consider the design principles outlined in Module 15 for robust coordinator and specialist descriptions."
       },
       {
         "question": "What is the recommended best practice for verifying and testing Intro to Multi-Agent Systems in Google ADK?",
@@ -895,18 +895,18 @@ export const VAULT_REGISTRY = {
   "16": {
     "questions": [
       {
-        "question": "In Module 16 (Static Orchestration), what is the primary role of sequential chaining in ADK architectures?",
+        "question": "In Module 16 (Collaborative Teams), what is the primary role of single_turn and task modes in ADK architectures?",
         "options": [
-          "It enables robust, scalable implementation of sequential chaining to streamline agent behavior and data flow",
+          "It enables robust, scalable implementation of single_turn and task modes to streamline agent behavior and data flow",
           "It replaces the Python runtime with a custom kernel driver",
           "It disables network connectivity for security reasons",
           "It forces the agent to only respond in binary code"
         ],
         "correctIndex": 0,
-        "hint": "Review the core theory section of Module 16 regarding Deterministic static agent pipelines."
+        "hint": "Review the core theory section of Module 16 regarding Collaboration modes and hand-offs."
       },
       {
-        "question": "When implementing Deterministic static agent pipelines, why is fixed workflow routing critical for production reliability?",
+        "question": "When implementing Collaboration modes and hand-offs, why is guaranteed control return via finish_task critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -914,10 +914,10 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 16 for robust fixed workflow routing."
+        "hint": "Consider the design principles outlined in Module 16 for robust guaranteed control return via finish_task."
       },
       {
-        "question": "What is the recommended best practice for verifying and testing Static Orchestration in Google ADK?",
+        "question": "What is the recommended best practice for verifying and testing Collaborative Teams in Google ADK?",
         "options": [
           "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
           "Deploying directly to production without testing",
@@ -932,18 +932,18 @@ export const VAULT_REGISTRY = {
   "17": {
     "questions": [
       {
-        "question": "In Module 17 (Structured Routing), what is the primary role of classification-based routing in ADK architectures?",
+        "question": "In Module 17 (Static Workflows), what is the primary role of sequential and parallel edges in ADK architectures?",
         "options": [
-          "It enables robust, scalable implementation of classification-based routing to streamline agent behavior and data flow",
+          "It enables robust, scalable implementation of sequential and parallel edges to streamline agent behavior and data flow",
           "It replaces the Python runtime with a custom kernel driver",
           "It disables network connectivity for security reasons",
           "It forces the agent to only respond in binary code"
         ],
         "correctIndex": 0,
-        "hint": "Review the core theory section of Module 17 regarding Structured agent routers."
+        "hint": "Review the core theory section of Module 17 regarding Deterministic static workflow graphs."
       },
       {
-        "question": "When implementing Structured agent routers, why is intent mapping critical for production reliability?",
+        "question": "When implementing Deterministic static workflow graphs, why is JoinNode fan-in synchronization critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -951,10 +951,10 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 17 for robust intent mapping."
+        "hint": "Consider the design principles outlined in Module 17 for robust JoinNode fan-in synchronization."
       },
       {
-        "question": "What is the recommended best practice for verifying and testing Structured Routing in Google ADK?",
+        "question": "What is the recommended best practice for verifying and testing Static Workflows in Google ADK?",
         "options": [
           "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
           "Deploying directly to production without testing",
@@ -969,18 +969,18 @@ export const VAULT_REGISTRY = {
   "18": {
     "questions": [
       {
-        "question": "In Module 18 (Dynamic Orchestration), what is the primary role of runtime delegation in ADK architectures?",
+        "question": "In Module 18 (Dynamic Workflows), what is the primary role of await ctx.run_node() calls in ADK architectures?",
         "options": [
-          "It enables robust, scalable implementation of runtime delegation to streamline agent behavior and data flow",
+          "It enables robust, scalable implementation of await ctx.run_node() calls to streamline agent behavior and data flow",
           "It replaces the Python runtime with a custom kernel driver",
           "It disables network connectivity for security reasons",
           "It forces the agent to only respond in binary code"
         ],
         "correctIndex": 0,
-        "hint": "Review the core theory section of Module 18 regarding Dynamic multi-agent routing."
+        "hint": "Review the core theory section of Module 18 regarding Programmable @node orchestration."
       },
       {
-        "question": "When implementing Dynamic multi-agent routing, why is autonomous agent task allocation critical for production reliability?",
+        "question": "When implementing Programmable @node orchestration, why is conditional multi-step Python routing critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -988,10 +988,10 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 18 for robust autonomous agent task allocation."
+        "hint": "Consider the design principles outlined in Module 18 for robust conditional multi-step Python routing."
       },
       {
-        "question": "What is the recommended best practice for verifying and testing Dynamic Orchestration in Google ADK?",
+        "question": "What is the recommended best practice for verifying and testing Dynamic Workflows in Google ADK?",
         "options": [
           "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
           "Deploying directly to production without testing",
@@ -1006,18 +1006,18 @@ export const VAULT_REGISTRY = {
   "19": {
     "questions": [
       {
-        "question": "In Module 19 (Collaborative Teams), what is the primary role of peer-to-peer agent communication in ADK architectures?",
+        "question": "In Module 19 (Structured Routing), what is the primary role of ctx.route switchboard routing in ADK architectures?",
         "options": [
-          "It enables robust, scalable implementation of peer-to-peer agent communication to streamline agent behavior and data flow",
+          "It enables robust, scalable implementation of ctx.route switchboard routing to streamline agent behavior and data flow",
           "It replaces the Python runtime with a custom kernel driver",
           "It disables network connectivity for security reasons",
           "It forces the agent to only respond in binary code"
         ],
         "correctIndex": 0,
-        "hint": "Review the core theory section of Module 19 regarding Collaborative agent swarms."
+        "hint": "Review the core theory section of Module 19 regarding Dictionary router edges and ctx.route."
       },
       {
-        "question": "When implementing Collaborative agent swarms, why is consensus and handoffs critical for production reliability?",
+        "question": "When implementing Dictionary router edges and ctx.route, why is Graph View branch transparency critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -1025,10 +1025,10 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 19 for robust consensus and handoffs."
+        "hint": "Consider the design principles outlined in Module 19 for robust Graph View branch transparency."
       },
       {
-        "question": "What is the recommended best practice for verifying and testing Collaborative Teams in Google ADK?",
+        "question": "What is the recommended best practice for verifying and testing Structured Routing in Google ADK?",
         "options": [
           "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
           "Deploying directly to production without testing",
@@ -1054,7 +1054,7 @@ export const VAULT_REGISTRY = {
         "hint": "Review the core theory section of Module 20 regarding Cyclic and iterative graph loops."
       },
       {
-        "question": "When implementing Cyclic and iterative graph loops, why is convergence conditions critical for production reliability?",
+        "question": "When implementing Cyclic and iterative graph loops, why is bounded max_iterations guardrails critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -1062,7 +1062,7 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 20 for robust convergence conditions."
+        "hint": "Consider the design principles outlined in Module 20 for robust bounded max_iterations guardrails."
       },
       {
         "question": "What is the recommended best practice for verifying and testing Cyclic Workflows in Google ADK?",
@@ -1080,18 +1080,18 @@ export const VAULT_REGISTRY = {
   "21": {
     "questions": [
       {
-        "question": "In Module 21 (Distributed Graphs), what is the primary role of parallel branching in ADK architectures?",
+        "question": "In Module 21 (Distributed Graphs), what is the primary role of to_a2a() and RemoteA2aAgent proxies in ADK architectures?",
         "options": [
-          "It enables robust, scalable implementation of parallel branching to streamline agent behavior and data flow",
+          "It enables robust, scalable implementation of to_a2a() and RemoteA2aAgent proxies to streamline agent behavior and data flow",
           "It replaces the Python runtime with a custom kernel driver",
           "It disables network connectivity for security reasons",
           "It forces the agent to only respond in binary code"
         ],
         "correctIndex": 0,
-        "hint": "Review the core theory section of Module 21 regarding Distributed multi-agent workflow graphs."
+        "hint": "Review the core theory section of Module 21 regarding Distributed A2A multi-agent graphs."
       },
       {
-        "question": "When implementing Distributed multi-agent workflow graphs, why is fork-join synchronization critical for production reliability?",
+        "question": "When implementing Distributed A2A multi-agent graphs, why is AgentTool remote call-and-return composition critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -1099,7 +1099,7 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 21 for robust fork-join synchronization."
+        "hint": "Consider the design principles outlined in Module 21 for robust AgentTool remote call-and-return composition."
       },
       {
         "question": "What is the recommended best practice for verifying and testing Distributed Graphs in Google ADK?",
@@ -1128,7 +1128,7 @@ export const VAULT_REGISTRY = {
         "hint": "Review the core theory section of Module 21_5 regarding Multi-Agent Systems milestone architecture."
       },
       {
-        "question": "When implementing Multi-Agent Systems milestone architecture, why is robust error recovery critical for production reliability?",
+        "question": "When implementing Multi-Agent Systems milestone architecture, why is error recovery and pattern selection critical for production reliability?",
         "options": [
           "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
           "It compresses all database records into base64 strings",
@@ -1136,7 +1136,7 @@ export const VAULT_REGISTRY = {
           "It bypasses all cloud security authentication policies"
         ],
         "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 21_5 for robust robust error recovery."
+        "hint": "Consider the design principles outlined in Module 21_5 for robust error recovery and pattern selection."
       },
       {
         "question": "What is the recommended best practice for verifying and testing MAS Knowledge Milestone in Google ADK?",

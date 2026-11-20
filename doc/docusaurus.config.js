@@ -145,6 +145,15 @@ const config = {
     [
       '@docusaurus/plugin-client-redirects',
       {
+        redirects: [
+          // Part 3 MAS redesign redirects (19->16, 16->17, 17->19)
+          { from: ['/docs/module19-collaborative-teams/', '/module19-collaborative-teams/'], to: '/docs/module16-collaborative-teams/' },
+          { from: ['/docs/module19-collaborative-teams/lab', '/module19-collaborative-teams/lab'], to: '/docs/module16-collaborative-teams/lab' },
+          { from: ['/docs/module16-static-orchestration/', '/module16-static-orchestration/'], to: '/docs/module17-static-orchestration/' },
+          { from: ['/docs/module16-static-orchestration/lab', '/module16-static-orchestration/lab'], to: '/docs/module17-static-orchestration/lab' },
+          { from: ['/docs/module17-structured-routing/', '/module17-structured-routing/'], to: '/docs/module19-structured-routing/' },
+          { from: ['/docs/module17-structured-routing/lab', '/module17-structured-routing/lab'], to: '/docs/module19-structured-routing/lab' },
+        ],
         // Every doc used to live at the site root (routeBasePath: '/').
         // Now docs live under /docs — redirect every old bare URL to its
         // new /docs-prefixed home so no previously-shared link breaks.

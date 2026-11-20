@@ -117,7 +117,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 # Launches bigquery_mock_server.py as a local subprocess (same pattern as
 # Module 27/28's StdioConnectionParams) — standing in for a real hosted
@@ -198,7 +198,7 @@ from google.adk.runners import InMemoryRunner
 from google.adk.tools.agent_tool import AgentTool
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 # TODO 1: Define the two Remote A2A Agent Gateways.
 # Hint: agent_card=f"http://localhost:8001{AGENT_CARD_WELL_KNOWN_PATH}" — no extra
@@ -255,7 +255,7 @@ from google.adk.tools import ToolContext
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 # TODO 1: Write a tool to search Playbook reference documents.
 # This simulates a Vertex AI Search (RAG) lookup over CIS/NIST playbooks —
@@ -396,7 +396,7 @@ from google.genai import types
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 mcp_toolset = McpToolset(
     connection_params=StdioConnectionParams(
@@ -476,7 +476,7 @@ from google.adk.runners import InMemoryRunner
 from google.adk.tools.agent_tool import AgentTool
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 threat_intel_service = RemoteA2aAgent(
     name="threat_intel_agent",
@@ -531,7 +531,7 @@ from google.adk.tools import ToolContext
 from dotenv import load_dotenv
 import uvicorn
 
-load_dotenv()
+load_dotenv(override=True)
 
 def search_remediation_playbooks(vulnerability_type: str) -> str:
     """

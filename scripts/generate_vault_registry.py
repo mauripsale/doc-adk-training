@@ -484,6 +484,43 @@ VAULT_DATA = {
             }
         ]
     },
+    "22": {
+        "questions": [
+            {
+                "question": "In ADK 2.0, which composite 3-part coordinate uniquely addresses a Session, and what happens when you create a new session_id for the same user_id in DatabaseSessionService?",
+                "options": [
+                    "(project_id, region, model_name); all previous state is wiped",
+                    "(app_name, user_id, session_id); app:* and user:* state keys carry over while unprefixed session keys start clean",
+                    "(host, port, thread_id); only temp:* keys carry over across sessions",
+                    "(agent_name, tool_name, turn_id); sessions cannot share any state"
+                ],
+                "correctIndex": 1,
+                "hint": "Review 'Anatomy of an ADK Session' and how state prefixes map to (app_name, user_id, session_id)."
+            },
+            {
+                "question": "How are durable state mutations committed to a SessionService backend during an agent run?",
+                "options": [
+                    "By directly mutating a detached Session object returned by session_service.get_session()",
+                    "By writing raw SQL UPDATE statements inside the system prompt",
+                    "Through event-sourced EventActions(state_delta=...) emitted via tool_context.state, callback_context.state, or output_key",
+                    "By storing all variables under the temp: prefix"
+                ],
+                "correctIndex": 2,
+                "hint": "Recall the Event-Sourced State Mutation diagram: why does tool_context.state work while mutating a detached get_session() snapshot does not?"
+            },
+            {
+                "question": "What is the architectural distinction between SessionService and MemoryService in Google ADK?",
+                "options": [
+                    "SessionService only runs on cloud servers, whereas MemoryService only runs inside volatile local RAM",
+                    "MemoryService replaces tool_context.state for single-turn scratchpad calculations within one invocation",
+                    "SessionService manages an active thread's events and structured state, while MemoryService enables cross-session search",
+                    "Both classes share the exact same database tables and API methods under different alias names"
+                ],
+                "correctIndex": 2,
+                "hint": "Compare 'The Active Workbench' (SessionService) vs. 'The Searchable Archive' (MemoryService) in Module 22 Theory."
+            }
+        ]
+    },
     "24": {
         "questions": [
             {

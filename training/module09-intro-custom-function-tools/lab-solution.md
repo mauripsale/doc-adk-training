@@ -31,7 +31,7 @@ This file contains the complete, step-by-step guide to creating the "Calculator"
 2.  **Create the `tools/calculator.py` file:**
     Create `tools/calculator.py` and add the following code. In ADK 2.0, returning a **Pydantic model** is the best practice for type-safe tool outputs.
 
-### `tools/calculator.py`
+### `calculator_agent/tools/calculator.py`
 
 ```python
 from pydantic import BaseModel
@@ -73,11 +73,11 @@ def divide(a: int, b: int) -> MathResult:
 
 Open `agent.py` and replace its contents with the following. We use the modern **`Agent`** class and pass the raw Python functions directly into the `tools` list.
 
-### `agent.py`
+### `calculator_agent/agent.py`
 
 ```python
 from google.adk import Agent
-from tools.calculator import add, subtract, multiply, divide
+from .tools.calculator import add, subtract, multiply, divide
 
 root_agent = Agent(
     name="calculator_agent",

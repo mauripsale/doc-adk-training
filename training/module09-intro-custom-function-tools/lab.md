@@ -177,48 +177,52 @@ This file contains the complete, step-by-step guide to creating the "Calculator"
     touch tools/__init__.py
     ```
 
-2.  **Create the `calculator.py` file:**
+2.  **Create the `tools/calculator.py` file:**
     Create `tools/calculator.py` and add the following code. In ADK 2.0, returning a **Pydantic model** is the best practice for type-safe tool outputs.
 
-    ```python
-    from pydantic import BaseModel
+### `calculator_agent/tools/calculator.py`
 
-    class MathResult(BaseModel):
-        status: str
-        result: float = 0
-        message: str | None = None
+```python
+from pydantic import BaseModel
 
-    def add(a: int, b: int) -> MathResult:
-        """
-        Adds two numbers together.
-        Use this tool when the user asks to find the sum of two numbers.
-        """
-        return MathResult(status="success", result=a + b)
+class MathResult(BaseModel):
+    status: str
+    result: float = 0
+    message: str | None = None
 
-    def subtract(a: int, b: int) -> MathResult:
-        """
-        Subtracts the second number from the first number.
-        """
-        return MathResult(status="success", result=a - b)
+def add(a: int, b: int) -> MathResult:
+    """
+    Adds two numbers together.
+    Use this tool when the user asks to find the sum of two numbers.
+    """
+    return MathResult(status="success", result=a + b)
 
-    def multiply(a: int, b: int) -> MathResult:
-        """
-        Multiplies two numbers together.
-        """
-        return MathResult(status="success", result=a * b)
+def subtract(a: int, b: int) -> MathResult:
+    """
+    Subtracts the second number from the first number.
+    """
+    return MathResult(status="success", result=a - b)
 
-    def divide(a: int, b: int) -> MathResult:
-        """
-        Divides the first number by the second number.
-        """
-        if b == 0:
-            return MathResult(status="error", message="Cannot divide by zero.")
-        return MathResult(status="success", result=a / b)
-    ```
+def multiply(a: int, b: int) -> MathResult:
+    """
+    Multiplies two numbers together.
+    """
+    return MathResult(status="success", result=a * b)
+
+def divide(a: int, b: int) -> MathResult:
+    """
+    Divides the first number by the second number.
+    """
+    if b == 0:
+        return MathResult(status="error", message="Cannot divide by zero.")
+    return MathResult(status="success", result=a / b)
+```
 
 ### Step 3: Configure the Agent Node
 
 Open `agent.py` and replace its contents with the following. We use the modern **`Agent`** class and pass the raw Python functions directly into the `tools` list.
+
+### `calculator_agent/agent.py`
 
 ```python
 from google.adk import Agent

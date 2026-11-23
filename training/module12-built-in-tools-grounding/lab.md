@@ -254,11 +254,8 @@ async def main():
     print("--- RESEARCH FINDINGS ---")
     print(findings)
 
-    report = await run_agent(formatter_agent, "formatter_app", f"Topic: {topic}
-
-Findings: {findings}")
-    print("
---- FINAL REPORT ---")
+    report = await run_agent(formatter_agent, "formatter_app", f"Topic: {topic}\n\nFindings: {findings}")
+    print("\n--- FINAL REPORT ---")
     print(report)
 
 if __name__ == "__main__":

@@ -115,6 +115,25 @@ You have learned to:
 
 In this lab, you learned how to run an ADK agent programmatically from within a Python script using the modern `App` and `Runner` architecture. You wrapped the **Support Analyzer** agent (from Module 4) in an `App` and executed it for two different users to demonstrate session isolation.
 
+### `support_analyzer/agent.py`
+
+```python
+from pydantic import BaseModel, Field
+from google.adk import Agent
+
+class SupportTicket(BaseModel):
+    category: str = Field(description="The category of the issue: billing, technical, or general")
+    urgency: str = Field(description="The urgency level: low, medium, high, or critical")
+    summary: str = Field(description="A concise summary of the user issue")
+
+root_agent = Agent(
+    name="support_analyzer",
+    model="gemini-3.8-flash",
+    instruction="Analyze incoming customer support requests and classify them into structured ticket fields.",
+    output_schema=SupportTicket
+)
+```
+
 ### `support_analyzer/main.py`
 
 Here is the complete `main.py` script:
@@ -148,8 +167,7 @@ async def main():
         if event.is_final_response():
             print(f"DEBUG: Alice's JSON: {event.content.parts[0].text}")
 
-    print("
---- User B (Bob) ---")
+    print("\n--- User B (Bob) ---")
     # 4. Run for Bob (Technical Issue)
     # Even with the same Runner, Bob's state is separate from Alice's.
     await runner.run_debug("My wifi is not working.", user_id="Bob")

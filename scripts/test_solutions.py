@@ -5,6 +5,7 @@ Extracts and validates all Python code blocks across curriculum lab-solution.md 
 Performs:
   - Layer 1: AST / Syntax Analysis (Python 3.10+ compliance, dedented)
   - Layer 2: ADK 2.0 Import & Symbol Resolution
+  - Layer 3: 1:1 <SolutionVault> vs. lab-solution.md Python Code Parity
 """
 
 import ast
@@ -40,7 +41,7 @@ def extract_python_blocks(markdown_path: Path) -> List[Tuple[int, str]]:
     
     for idx, line in enumerate(lines, 1):
         stripped = line.strip()
-        if stripped.startswith("```python") or stripped.startswith("```py"):
+        if not in_block and stripped in ("```python", "```py"):
             in_block = True
             current_block = []
             start_line = idx + 1
@@ -164,9 +165,48 @@ def verify_imports(imports: List[Tuple[str, List[str]]], ignore_missing_optional
     return errors
 
 
+def extract_vault_python_blocks(lab_path: Path) -> Tuple[bool, bool, List[Tuple[int, str]]]:
+    """
+    Extracts Python code blocks located inside <SolutionVault ...>...</SolutionVault> in lab.md.
+    Returns (has_vault_tag, is_well_formed, list_of_(line_offset, dedented_code)).
+    """
+    if not lab_path.exists():
+        return False, True, []
+    content = lab_path.read_text(encoding="utf-8")
+    has_tag = "<SolutionVault" in content or "</SolutionVault>" in content
+    match = re.search(r"<SolutionVault\b.*?>([\s\S]*?)</SolutionVault>", content)
+    if not match:
+        return has_tag, not has_tag, []
+
+    vault_start_line = content[: match.start(1)].count("\n") + 1
+    vault_lines = match.group(1).splitlines()
+    blocks: List[Tuple[int, str]] = []
+    in_block = False
+    current_block: List[str] = []
+    start_line = 0
+
+    for idx, line in enumerate(vault_lines):
+        stripped = line.strip()
+        if not in_block and stripped in ("```python", "```py"):
+            in_block = True
+            current_block = []
+            start_line = vault_start_line + idx + 1
+        elif in_block and stripped == "```":
+            in_block = False
+            dedented_code = textwrap.dedent("\n".join(current_block))
+            if dedented_code.strip():
+                blocks.append((start_line, dedented_code))
+            current_block = []
+        elif in_block:
+            current_block.append(line)
+
+    return True, True, blocks
+
+
 def test_solution_file(file_path: Path, ignore_missing_optional: bool = False, verbose: bool = False) -> Dict[str, Any]:
     """
-    Runs full verification on a single lab-solution.md file.
+    Runs full verification on a single lab-solution.md file, including 1:1 parity
+    with any <SolutionVault> block in the sibling lab.md file.
     """
     blocks = extract_python_blocks(file_path)
     result = {
@@ -176,7 +216,34 @@ def test_solution_file(file_path: Path, ignore_missing_optional: bool = False, v
         "passed": True,
         "errors": []
     }
-    
+
+    # Layer 3: Verify <SolutionVault> in sibling lab.md is well-formed and matches lab-solution.md 1:1
+    lab_path = file_path.parent / "lab.md"
+    has_vault, is_well_formed, vault_blocks = extract_vault_python_blocks(lab_path)
+    if not is_well_formed:
+        result["passed"] = False
+        result["errors"].append("[SolutionVault Parity] Malformed or unclosed <SolutionVault> tag in lab.md")
+    elif blocks and lab_path.exists() and not has_vault:
+        result["passed"] = False
+        result["errors"].append("[SolutionVault Parity] Missing <SolutionVault> in lab.md for technical module")
+    elif has_vault:
+        sol_norm = [code.strip() for _, code in blocks]
+        vlt_norm = [code.strip() for _, code in vault_blocks]
+        if len(sol_norm) != len(vlt_norm):
+            result["passed"] = False
+            result["errors"].append(
+                f"[SolutionVault Parity] lab.md <SolutionVault> has {len(vlt_norm)} Python block(s), "
+                f"expected {len(sol_norm)} matching lab-solution.md"
+            )
+        else:
+            for idx, (s_code, (v_line, v_code)) in enumerate(zip(sol_norm, vault_blocks), 1):
+                if s_code != v_code.strip():
+                    result["passed"] = False
+                    result["errors"].append(
+                        f"[SolutionVault Parity @ lab.md:L{v_line}] Block {idx} in <SolutionVault> "
+                        f"drifted from lab-solution.md Block {idx}"
+                    )
+
     if not blocks:
         return result
         

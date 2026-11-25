@@ -286,18 +286,16 @@ Workflow:
     *   **Answer:** You would modify the `Runner` initialization in your main application entry point (e.g., `main.py`). Instead of `InMemoryArtifactService`, you would use `GcsArtifactService` and provide it with a Google Cloud Storage bucket name:
 
         ```python
+        from google.adk import Agent
         from google.adk.artifacts import GcsArtifactService
-        from google.adk.runners import Runner
+        from google.adk.apps import App
+        from google.adk.runners import InMemoryRunner
 
-        # ... root_agent definition ...
-
+        root_agent = Agent(name="document_processor", model="gemini-3.8-flash")
         gcs_artifact_service = GcsArtifactService(bucket_name="your-production-bucket-name")
-
-        runner = Runner(
-            agent=root_agent,
-            artifact_service=gcs_artifact_service,
-            # ... other services ...
-        )
+        app = App(name="doc_app", root_agent=root_agent)
+        runner = InMemoryRunner(app=app)
+        runner.artifact_service = gcs_artifact_service
         ```
         You would also need to ensure your environment has the necessary Google Cloud authentication configured (e.g., via `GOOGLE_APPLICATION_CREDENTIALS` or a service account).
 

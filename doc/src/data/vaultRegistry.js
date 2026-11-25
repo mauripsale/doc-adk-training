@@ -485,6 +485,43 @@ export const VAULT_REGISTRY = {
       }
     ]
   },
+  "22": {
+    "questions": [
+      {
+        "question": "In ADK 2.0, which composite 3-part coordinate uniquely addresses a Session, and what happens when you create a new session_id for the same user_id in DatabaseSessionService?",
+        "options": [
+          "(project_id, region, model_name); all previous state is wiped",
+          "(app_name, user_id, session_id); app:* and user:* state keys carry over while unprefixed session keys start clean",
+          "(host, port, thread_id); only temp:* keys carry over across sessions",
+          "(agent_name, tool_name, turn_id); sessions cannot share any state"
+        ],
+        "correctIndex": 1,
+        "hint": "Review 'Anatomy of an ADK Session' and how state prefixes map to (app_name, user_id, session_id)."
+      },
+      {
+        "question": "How are durable state mutations committed to a SessionService backend during an agent run?",
+        "options": [
+          "By directly mutating a detached Session object returned by session_service.get_session()",
+          "By writing raw SQL UPDATE statements inside the system prompt",
+          "Through event-sourced EventActions(state_delta=...) emitted via tool_context.state, callback_context.state, or output_key",
+          "By storing all variables under the temp: prefix"
+        ],
+        "correctIndex": 2,
+        "hint": "Recall the Event-Sourced State Mutation diagram: why does tool_context.state work while mutating a detached get_session() snapshot does not?"
+      },
+      {
+        "question": "What is the architectural distinction between SessionService and MemoryService in Google ADK?",
+        "options": [
+          "SessionService only runs on cloud servers, whereas MemoryService only runs inside volatile local RAM",
+          "MemoryService replaces tool_context.state for single-turn scratchpad calculations within one invocation",
+          "SessionService manages an active thread's events and structured state, while MemoryService enables cross-session search",
+          "Both classes share the exact same database tables and API methods under different alias names"
+        ],
+        "correctIndex": 2,
+        "hint": "Compare 'The Active Workbench' (SessionService) vs. 'The Searchable Archive' (MemoryService) in Module 22 Theory."
+      }
+    ]
+  },
   "24": {
     "questions": [
       {
@@ -1148,43 +1185,6 @@ export const VAULT_REGISTRY = {
         ],
         "correctIndex": 0,
         "hint": "Follow the verification guidelines and zero-trust evaluation approach taught in Module 21_5."
-      }
-    ]
-  },
-  "22": {
-    "questions": [
-      {
-        "question": "In Module 22 (State and Memory), what is the primary role of user vs app state scopes in ADK architectures?",
-        "options": [
-          "It enables robust, scalable implementation of user vs app state scopes to streamline agent behavior and data flow",
-          "It replaces the Python runtime with a custom kernel driver",
-          "It disables network connectivity for security reasons",
-          "It forces the agent to only respond in binary code"
-        ],
-        "correctIndex": 0,
-        "hint": "Review the core theory section of Module 22 regarding Session state management and memory."
-      },
-      {
-        "question": "When implementing Session state management and memory, why is state delta reducers critical for production reliability?",
-        "options": [
-          "It guarantees consistent execution, proper isolation, and predictable error handling across agent turns",
-          "It compresses all database records into base64 strings",
-          "It eliminates the need for unit testing",
-          "It bypasses all cloud security authentication policies"
-        ],
-        "correctIndex": 0,
-        "hint": "Consider the design principles outlined in Module 22 for robust state delta reducers."
-      },
-      {
-        "question": "What is the recommended best practice for verifying and testing State and Memory in Google ADK?",
-        "options": [
-          "Validating agent behavior and tool trajectories using local runners, automated evaluations, and comprehensive test suites",
-          "Deploying directly to production without testing",
-          "Removing all error handling code to maximize performance",
-          "Using hardcoded API keys directly in client-side code"
-        ],
-        "correctIndex": 0,
-        "hint": "Follow the verification guidelines and zero-trust evaluation approach taught in Module 22."
       }
     ]
   },

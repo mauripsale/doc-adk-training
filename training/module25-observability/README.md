@@ -77,7 +77,7 @@ flowchart LR
     A["ADK Agent\n(App Runtime)"] -->|"OTel Spans"| B["Google Cloud Trace"]
     A -->|"Structured Logs"| C["Google Cloud Logging"]
     C -->|"Log Sink Export"| D[("BigQuery\nAnalytics Warehouse")]
-    D -->|"Live BI Cruscotto"| E["Looker Studio\nExecutive Dashboard"]
+    D -->|"Live BI Analytics"| E["Looker Studio\nExecutive Dashboard"]
 ```
 
 #### Configuring Cloud Trace in Code:
@@ -108,15 +108,18 @@ maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
 
 <details>
 <summary><b>1. What happens if a tool raises an unhandled exception and no plugin handles <code>on_tool_error_callback</code>?</b></summary>
+
 The exception propagates up the call stack, halting the agent runner and failing the user's turn. Returning a recovery dictionary from <code>on_tool_error_callback</code> allows the agent to inform the LLM of the error and attempt recovery.
 </details>
 
 <details>
 <summary><b>2. Why is <code>event.is_final_response()</code> crucial for tracking turn completion?</b></summary>
+
 An agent may emit multiple intermediate events (e.g. tool calls, thinking steps, thoughts). <code>is_final_response()</code> indicates that the model has finished its entire turn and delivered the final response to the user.
 </details>
 
 <details>
 <summary><b>3. What is the key advantage of streaming agent logs to BigQuery for Looker Studio?</b></summary>
+
 It allows business leaders and SRE teams to analyze long-term agent trends: token consumption, cost per user, tool success rates, and user drop-off over thousands of historical sessions.
 </details>

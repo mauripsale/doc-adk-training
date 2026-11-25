@@ -301,7 +301,8 @@ from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from google.adk.runners import InMemoryRunner
 from google.adk.apps.app import App
-from google.adk.plugins import ReflectAndRetryToolPlugin, GlobalInstructionPlugin
+from google.adk.plugins.reflect_retry_tool_plugin import ReflectAndRetryToolPlugin
+from google.adk.plugins.global_instruction_plugin import GlobalInstructionPlugin
 from google.genai import types
 from dotenv import load_dotenv
 import asyncio
@@ -325,7 +326,7 @@ async def main():
     
     # 2. Enterprise-wide governance header injection
     compliance_plugin = GlobalInstructionPlugin(
-        instruction="[ENTERPRISE COMPLIANCE AUDITED: Keep all answers concise, secure, and professional.]"
+        global_instruction="[ENTERPRISE COMPLIANCE AUDITED: Keep all answers concise, secure, and professional.]"
     )
     
     # 3. Register plugins on the App container

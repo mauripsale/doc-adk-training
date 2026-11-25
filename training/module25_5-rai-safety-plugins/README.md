@@ -19,11 +19,11 @@ Enterprise agent applications deploy multi-layered guardrails:
 
 ```mermaid
 flowchart TD
-    User([User Prompt / API Client]) --> L1["1. Input Guardrail<br/>(Prompt Injection & Jailbreak Defense)"]
+    User(["User Prompt / API Client"]) --> L1["1. Input Guardrail<br/>(Prompt Injection & Jailbreak Defense)"]
     L1 --> L2["2. Tool Execution Policy<br/>(Argument Whitelisting & Blast-Radius Control)"]
     L2 --> Agent["3. Core Agent Reasoner<br/>(ADK Agent & Foundation Model)"]
     Agent --> L4["4. Output Guardrail<br/>(Fail-Closed PII Redaction & Data Loss Prevention)"]
-    L4 --> Response([Verified Safe Response to User])
+    L4 --> Response(["Verified Safe Response to User"])
     
     L1 -- "Violation Detected" --> Block["🛑 Intercept & Security Audit Log (Cloud Logging / BigQuery)"]
     L4 -- "PII Detected" --> Redact["🛡️ Fail-Closed Masking & Security Warning"]

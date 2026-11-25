@@ -10,26 +10,22 @@ import Setup from '../_setup-snippet.mdx';
 
 ## Goal
 
-In this lab, you will build a comprehensive observability system for an agent using the ADK's **Plugin System**. You will implement separate plugins for metrics collection, alerting, and performance profiling.
+In this lab, you will build a production-style observability layer for an agent using the ADK's **Plugin System** (`AgentOpsMetricsPlugin`) combined with native **Google Cloud Trace** OpenTelemetry hooks.
 
 ### Step 1: Create the Agent Project
 
 <Setup/>
 
-1.  **Create the agent project:**
-    ```shell
-    uv run adk create observability_agent
-    ```
-    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
+From your `adk-training` workspace directory, create the `observability_agent` package *(stay inside `adk-training` for all subsequent steps!)*:
 
-2.  **Navigate into the new directory:**
-    ```shell
-    cd observability_agent
-    ```
+```shell
+uv run adk create observability_agent
+```
+This prompts for a model/backend choice (any option is fine—you'll set `gemini-3.8-flash` explicitly in `observability_agent/agent.py` below).
 
 ### Step 2: Implement a Business Logic Plugin
 
-**Exercise:** Open `agent.py`. We will start by creating an **AgentOps Alerting & Metrics Plugin** that detects consecutive errors and tracks telemetry events locally.
+**Exercise:** Open `observability_agent/agent.py`. We will start by creating an **AgentOps Alerting & Metrics Plugin** that detects consecutive errors and tracks telemetry events locally.
 
 ```python
 # In agent.py (Starter Code)
@@ -73,7 +69,7 @@ class AgentOpsMetricsPlugin(BasePlugin):
         pass
 
 # --- Create a simple Agent ---
-agent = Agent(
+root_agent = Agent(
     name="agentops_monitored_agent",
     model="gemini-3.8-flash",
     instruction="You have a risky_operation tool. If the user says 'FAIL', call it with should_fail=True. Otherwise, call it with should_fail=False.",
@@ -82,37 +78,38 @@ agent = Agent(
 
 # --- Register Plugin with App ---
 app = App(
-    name="agentops_observability_demo",
-    root_agent=agent,
+    name="observability_agent",
+    root_agent=root_agent,
     plugins=[AgentOpsMetricsPlugin()]
 )
 ```
 
 ### Step 3: Configure Enterprise Telemetry
 
-**Exercise:** Now, let's enable native **Cloud Trace** integration. In a real production environment, this would send data to Google Cloud. Here, we will configure the hooks.
-
-`get_gcp_exporters` needs the OpenTelemetry GCP exporter packages, which aren't installed by the base `google-adk` dependency. Install the `gcp` extra first:
+**Exercise:** Now, let's enable native **Cloud Trace** integration. Install the `gcp` extra first:
 
 ```shell
 uv add "google-adk[gcp]"
 ```
 
 ```python
-# Add this to your agent.py imports
+# Add this to your observability_agent/agent.py imports
+from google.auth.exceptions import DefaultCredentialsError
 from google.adk.telemetry.google_cloud import get_gcp_exporters
 from google.adk.telemetry.setup import maybe_set_otel_providers
 
-# TODO: 1. Use get_gcp_exporters to enable cloud tracing and metrics.
-# TODO: 2. Call maybe_set_otel_providers to register the hooks.
+# TODO: Inside a `try ... except DefaultCredentialsError:` block (so local API-key runs don't fail):
+# 1. Call get_gcp_exporters(enable_cloud_tracing=True, enable_cloud_metrics=True).
+# 2. Pass the returned hook into maybe_set_otel_providers(otel_hooks_to_setup=[...]).
 ```
 
 ### Step 4: Run and Verify
 
-1.  **Launch the Dev UI:**
+1.  **Launch the Dev UI from your `adk-training` workspace directory:**
     ```shell
-    uv run adk web .
+    uv run adk web
     ```
+    Select **`observability_agent`** from the agent dropdown (`adk web` automatically loads `app` with its registered `AgentOpsMetricsPlugin`!).
 2.  **Test the Alerting Plugin:**
     Send prompts and verify the console output.
 3.  **Inspect the Trace Metadata:**
@@ -120,7 +117,7 @@ from google.adk.telemetry.setup import maybe_set_otel_providers
 
 
 ### Having Trouble?
-If you get stuck, you can find the complete, working code in the `lab-solution.md` file.
+If you get stuck, unlock the **Reference Solution Vault** at the bottom of this page.
 
 ### Lab Summary
 You have successfully built a modular observability system using the ADK's Plugin System and OpenTelemetry. You have learned to:
@@ -141,7 +138,7 @@ You have successfully built a modular observability system using the ADK's Plugi
 
 <SolutionVault moduleNumber="25">
 
-# Lab 25 Solution: Building an Observability System with Plugins
+## Lab 25 Solution: Building an Observability System with Plugins
 
 ## Goal
 
@@ -150,6 +147,7 @@ This file contains the complete code for the `agent.py` script in the Observabil
 ### `observability_agent/agent.py`
 
 ```python
+from google.auth.exceptions import DefaultCredentialsError
 from google.adk import Agent
 from google.adk.apps import App
 from google.adk.plugins import BasePlugin
@@ -184,7 +182,7 @@ class AgentOpsMetricsPlugin(BasePlugin):
         
         event_record = {
             "type": "TOOL_ERROR",
-            "tool": getattr(tool, "__name__", str(tool)),
+            "tool": tool.name,
             "args": tool_args,
             "error": str(error),
             "consecutive_errors": self.consecutive_errors
@@ -214,14 +212,15 @@ class AgentOpsMetricsPlugin(BasePlugin):
 
 # --- 2. Enterprise Telemetry Configuration (Cloud Trace / Monitoring) ---
 
-# Enable Cloud Trace and Monitoring exporters
-otel_hooks = get_gcp_exporters(
-    enable_cloud_tracing=True,
-    enable_cloud_metrics=True
-)
-
-# Initialize OpenTelemetry providers
-maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
+# Enable Cloud Trace and Monitoring exporters (gracefully skipped if running with GOOGLE_API_KEY only)
+try:
+    otel_hooks = get_gcp_exporters(
+        enable_cloud_tracing=True,
+        enable_cloud_metrics=True,
+    )
+    maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
+except DefaultCredentialsError:
+    print("ℹ️ Running locally without GCP ADC; skipping Cloud Trace export.")
 
 # --- 3. App Definition ---
 
@@ -233,7 +232,7 @@ root_agent = Agent(
 )
 
 app = App(
-    name="agentops_observability_demo",
+    name="observability_agent",
     root_agent=root_agent,
     plugins=[AgentOpsMetricsPlugin()]
 )

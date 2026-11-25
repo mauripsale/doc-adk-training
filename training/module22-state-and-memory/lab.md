@@ -11,180 +11,183 @@ import Setup from '../_setup-snippet.mdx';
 
 ### Goal
 
-Understanding how to manage an agent's state and memory is crucial for developing intelligent, personalized, and robust AI assistants. In this lab, you'll put theory into practice by building a personal tutor that remembers user preferences, tracks progress, and simulates long-term knowledge retrieval.
-
-In this lab, you will build a **Personal Learning Tutor** that uses all four state scopes (`user:`, `app:`, session, and `temp:`) and simulates interacting with a long-term memory service. This will teach you how to create a truly stateful and personalized agent.
+In this lab, you will put ADK's session architecture into practice by building a **Personal Learning Tutor** that leverages all four state scopes (`user:`, `app:`, unprefixed session state, and `temp:`), inspecting live `state_delta` events in `adk web`, and programmatically persisting multi-session state to a local SQLite database with `DatabaseSessionService` alongside `InMemoryMemoryService`.
 
 ### The Use Case
 
-You will build a tutor that:
-*   Stores a user's preferences (language, difficulty) in **`user:`** state.
-*   Tracks the current topic in **session** state.
-*   Uses **`temp:`** state for an intermediate quiz calculation.
-*   Reads a global "course version" from **`app:`** state.
-*   Simulates searching its **long-term memory** for past lessons.
+You will build and verify a tutor system that:
+* Stores a student's preferences (`language`, `difficulty_level`) and completed study history in **`user:`** state so they survive across every new session.
+* Tracks the active lesson topic in unprefixed **session** state so each conversation thread stays independent.
+* Uses **`temp:`** state for single-turn quiz grading math that is discarded immediately after the turn.
+* Dynamically injects global catalog metadata from **`app:`** state into the system prompt via `{app:course_version?}`.
+* Persists multiple sessions onto disk using **`DatabaseSessionService`** (`sqlite+aiosqlite`) and archives completed sessions into **`InMemoryMemoryService`**.
+
+---
 
 ### Step 1: Create the Project Structure
 
 <Setup/>
 
-1.  **Create the agent project:**
-    ```shell
-    uv run adk create personal_tutor
-    ```
-    This prompts for a model choice (any option is fine, you'll set the real model in `agent.py` below) and, if needed, a backend -- there's no separate "type" prompt, `agent.py`/Code is already the default.
+From your `adk-training` workspace directory, scaffold the `personal_tutor` agent package *(stay inside `adk-training` for all subsequent commands!)*:
 
-2.  **Navigate into the new directory:**
-    ```shell
-    cd personal_tutor
-    ```
+```shell
+uv run adk create personal_tutor
+```
+Select any default model/backend prompt during creation—you will configure `gemini-3.8-flash` explicitly in `personal_tutor/agent.py` next.
 
-### Step 2: Implement the State-Management Tools
+---
 
-**Exercise:** Open `agent.py`. You will find a skeleton script. Your task is to complete the tool functions by using the correct state prefixes (`user:`, `temp:`, or no prefix) based on the requirements in the docstrings.
+### Step 2: Implement the State-Management Tools (`personal_tutor/agent.py`)
+
+**Exercise:** Open `personal_tutor/agent.py`, replace its contents with the starter skeleton below, and complete every `# TODO:` using `tool_context.state` and the appropriate scoping prefixes (`user:`, `temp:`, or unprefixed session keys) from the **Theory** tab.
 
 ```python
-# agent.py (Starter Code)
+# personal_tutor/agent.py (Starter Code)
 
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict
+
+from dotenv import load_dotenv
 from google.adk.agents import Agent
 from google.adk.tools.tool_context import ToolContext
-from typing import Dict, Any
+
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
+ALLOWED_DIFFICULTIES = {"beginner", "intermediate", "advanced"}
 
 # ============================================================================
 # TOOLS: State Management & Memory Operations
 # ============================================================================
 
+
 def set_user_preferences(
     language: str,
     difficulty_level: str,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Set user learning preferences (stored persistently).
+    Set user learning preferences (stored persistently across all sessions).
 
     Args:
-        language: Preferred language (en, es, fr, etc.)
+        language: Preferred language code or name (en, es, fr, it, etc.)
         difficulty_level: beginner, intermediate, or advanced
     """
-    # TODO: Store the language and difficulty_level in the tool_context.state.
-    # Use the correct prefix for data that should persist for the user.
-    pass # Implement here
+    # TODO: Normalize/validate inputs (e.g., fallback to 'beginner' if difficulty_level
+    # is not in ALLOWED_DIFFICULTIES) and save 'user:language' and 'user:difficulty_level'
+    # in tool_context.state so they persist across all sessions for this user.
+    pass
 
     return {
-        'status': 'success',
-        'message': f'Preferences saved: {language}, {difficulty_level} level'
+        "status": "success",
+        "message": f"Preferences saved: {language}, {difficulty_level} level",
     }
 
 
 def record_topic_completion(
     topic: str,
     quiz_score: int,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Record that user completed a topic (stored persistently).
+    Record that the user completed a topic (stored persistently across sessions).
 
     Args:
         topic: Topic name (e.g., "Python Basics", "Data Structures")
         quiz_score: Score out of 100
     """
-    # TODO: Get existing lists or create new ones for topics and scores.
-    # TODO: Update persistent user state with the new topic and score.
-    pass # Implement here
+    # TODO: Read 'user:topics_covered' (list) and 'user:quiz_scores' (dict) from state,
+    # append/update them with the new topic and quiz_score, and write them back to state.
+    # Tip: Wrap retrieved values in list(...) and dict(...) before mutating!
+    topics = []  # Placeholder
 
     return {
-        'status': 'success',
-        'topics_count': 0, # Placeholder
-        'message': f'Recorded: {topic} with score {quiz_score}/100'
+        "status": "success",
+        "topics_count": len(topics),
+        "message": f"Recorded: {topic} with score {quiz_score}/100",
     }
 
 
 def get_user_progress(tool_context: ToolContext) -> Dict[str, Any]:
     """
-    Get user's learning progress summary.
-
-    Returns persistent user data across all sessions.
+    Get the user's learning progress summary across all sessions.
     """
-    # TODO: Read persistent user state for language, difficulty, topics, and scores.
-    # TODO: Calculate average score.
-    language = "en" # Placeholder
-    difficulty = "beginner" # Placeholder
-    topics = [] # Placeholder
-    scores = {} # Placeholder
-    avg_score = 0 # Placeholder
+    # TODO: Read 'user:language', 'user:difficulty_level', 'user:topics_covered',
+    # and 'user:quiz_scores' from tool_context.state and compute the average score.
+    language = "en"
+    difficulty = "beginner"
+    topics = []
+    scores = {}
+    avg_score = 0.0
 
     return {
-        'status': 'success',
-        'language': language,
-        'difficulty_level': difficulty,
-        'topics_completed': len(topics),
-        'topics': topics,
-        'average_quiz_score': round(avg_score, 1),
-        'all_scores': scores
+        "status": "success",
+        "language": language,
+        "difficulty_level": difficulty,
+        "topics_completed": len(topics),
+        "topics": topics,
+        "average_quiz_score": round(avg_score, 1),
+        "all_scores": scores,
     }
 
 
 def start_learning_session(
     topic: str,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
     Start a new learning session for a topic.
 
-    Uses session state (no prefix) to track current topic.
+    Uses unprefixed session state to track the active topic in this session only.
     """
-    # TODO: Store the topic and a simplified start time in session-level state.
-    # TODO: Get user's difficulty level for personalization.
-    difficulty = "beginner" # Placeholder
+    # TODO: Store 'current_topic' and an ISO-8601 'session_start_time'
+    # (datetime.now(timezone.utc).isoformat()) in session-scoped state (no prefix).
+    # TODO: Read the user's persistent difficulty level (defaulting to 'beginner').
+    difficulty = "beginner"
 
     return {
-        'status': 'success',
-        'topic': topic,
-        'difficulty_level': difficulty,
-        'message': f'Started learning session: {topic} at {difficulty} level'
+        "status": "success",
+        "topic": topic,
+        "difficulty_level": difficulty,
+        "message": f"Started learning session: {topic} at {difficulty} level",
     }
 
 
 def calculate_quiz_grade(
     correct_answers: int,
     total_questions: int,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Calculate quiz grade using temporary state.
-
-    Demonstrates temp: prefix for invocation-scoped data.
+    Calculate a quiz grade using temporary invocation-scoped state (temp:).
     """
-    # TODO: Store the 'percentage' and 'raw_score' in temp state.
-    # TODO: Determine grade letter based on percentage.
-    grade = "F" # Placeholder
+    # TODO: Guard against total_questions <= 0, compute percentage, store 'temp:raw_score'
+    # and 'temp:quiz_percentage' in temporary state, and assign a letter grade
+    # ('A' >= 90, 'B' >= 80, 'C' >= 70, 'D' >= 60, else 'F').
+    percentage = 0.0
+    grade = "F"
 
     return {
-        'status': 'success',
-        'score': f'{correct_answers}/{total_questions}',
-        'percentage': 0.0, # Placeholder
-        'grade': grade,
-        'message': f'Quiz grade: {grade} ({0.0:.1f}%)' # Placeholder
+        "status": "success",
+        "score": f"{correct_answers}/{total_questions}",
+        "percentage": round(percentage, 1),
+        "grade": grade,
+        "message": f"Quiz grade: {grade} ({percentage:.1f}%)",
     }
 
 
 def search_past_lessons(
     query: str,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Search memory for relevant past learning sessions.
-
-    This demonstrates memory service integration.
-    In production, this would use MemoryService.search_memory().
+    Search past learning history for relevant completed topics.
     """
-    # TODO: Simulate searching past lessons based on topics covered in user state.
-    # NOTE: This is a simplified simulation for demonstration purposes. In a real application,
-    # this would integrate with a persistent MemoryService like VertexAiMemoryBankService.
+    # TODO: Read 'user:topics_covered' from state and filter topics matching query.lower().
     return {
-        'status': 'success',
-        'found': False,
-        'message': f'No past sessions found for "{query}"' # Placeholder
+        "status": "success",
+        "found": False,
+        "message": f'No past sessions found for "{query}"',
     }
 
 
@@ -192,121 +195,221 @@ def search_past_lessons(
 # AGENT DEFINITION
 # ============================================================================
 
-# TODO: Define the root_agent.
-# 1. Register all six tool functions you just implemented.
-# 2. In the instruction, try using the special syntax {app:course_version?}
-#    to dynamically inject the course version from the app state!
+# TODO: Instantiate root_agent with model="gemini-3.8-flash", all 6 tools,
+# output_key="last_tutor_response", and an instruction that includes {app:course_version?}
+# so global app state is dynamically interpolated when present!
 root_agent = None
 ```
 
-### Step 3: Run and Test the State Scopes
+---
 
-1.  **Set up your API key** in the `.env` file.
-2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
-    ```shell
-    uv run adk web personal_tutor
-    ```
-3.  **Interact with the agent:**
-    *   Go to the **State** tab in the Dev UI. Set the global app state by entering `{"app:course_version": "2.1"}` and clicking "Set State".
-    *   Go back to the **Chat** tab and test your agent. Ask it to set your preferences, start a lesson, and check your progress.
-    *   **Note on Persistence:** The default `InMemorySessionService` used in development will lose `user:` and `app:` state if the `uv run adk web` server is restarted. For true persistence, a database-backed `SessionService` would be required.
-    *   Start a new session (refresh the page) and verify that your preferences were remembered but the current lesson topic was forgotten.
+### Step 3: Inspect Live Sessions & Scoped State in `adk web`
 
-### Bonus Challenge: Dynamic Instructions
+1. Verify your credentials in `personal_tutor/.env`.
+2. From your `adk-training` workspace directory, launch the Dev UI:
+   ```shell
+   uv run adk web
+   ```
+3. Select **`personal_tutor`** from the agent dropdown and test the 4 state scopes:
+   * In the chat input bar, click the **Actions (`+`)** button → **Update state**, enter `{"app:course_version": "2.1"}`, and send: *"Set my preferred language to Italian at intermediate level, and start a session on Python Decorators."*
+   * Open the **State** tab in the left panel to inspect the live merged dictionary, and check the **Events / Trace** view to see `EventActions(state_delta=...)` emitted by your tools!
+   * Click **+ New Session** in the top bar and ask: *"What is my progress and what topic are we studying right now?"* Notice how `user:language` (`Italian`) and `app:course_version` (`2.1`) carried over into the new `session_id`, while `current_topic` started clean!
+   * **Local Storage Under the Hood:** Stop (`Ctrl+C`) and restart `uv run adk web`. Because ADK 2.0+ enables `--use_local_storage` by default (`personal_tutor/.adk/session.db`), your sessions and `user:`/`app:` state survive server restarts! Try `uv run adk web --no_use_local_storage` whenever you want volatile RAM-only testing instead.
 
-Did you notice the `app:course_version` in Step 3?
-Try to modify your `root_agent` instruction to include:
-`"You are a personalized learning tutor (Course Version {app:course_version?}) ..."`
+---
 
-This demonstrates **Instruction Injection**, where the ADK automatically replaces `{key}` placeholders with values from the state before sending the prompt to the LLM. The `?` makes it optional, so it won't crash if the state key is missing!
+### Step 4: Programmatic SQLite Persistence (`DatabaseSessionService`) & `MemoryService`
 
-### Step 4: Advanced Challenge — Context Compaction & Session Rewind
+Now let's build a standalone Python script that wires `Runner` to both `DatabaseSessionService` (`sqlite+aiosqlite`) and `InMemoryMemoryService`, proving multi-session scoping on disk plus cross-session recall.
 
-In production tutoring environments, long multi-turn sessions can quickly exceed model context limits or accumulate noisy intermediate turns. 
-
-**Exercise:** Create a script named `test_memory_advanced.py` to programmatically configure automatic context compaction and test session rewind:
+1. From your `adk-training` workspace directory, install the ADK SQLAlchemy database extra *(or `uv pip install "google-adk[db]"` if running inside a non-`pyproject.toml` container)*:
+   ```shell
+   uv add "google-adk[db]"
+   ```
+2. Create `personal_tutor/test_session_persistence.py` using the starter skeleton below and complete the `# TODO:` steps:
 
 ```python
-# test_memory_advanced.py (Starter Code)
+# personal_tutor/test_session_persistence.py (Starter Code)
+
 import asyncio
-from google.adk.apps import App
-from google.adk.runners import InMemoryRunner
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google.adk.memory import InMemoryMemoryService
+from google.adk.runners import Runner
+from google.adk.sessions import DatabaseSessionService
 from google.genai import types
+
 from agent import root_agent
 
-# TODO: 1. Import event compaction structures and LLM summarizer from ADK events module
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
+
+async def test_sqlite_sessions():
+    db_file = Path(__file__).resolve().with_name("tutor_sessions.db")
+    if db_file.exists():
+        db_file.unlink()
+
+    db_url = f"sqlite+aiosqlite:///{db_file.as_posix()}"
+    app_name = "personal_tutor_app"
+    user_id = "student_42"
+    memory_service = InMemoryMemoryService()
+
+    # TODO 1: Open DatabaseSessionService(db_url=db_url) using `async with ... as session_service:`
+    # and instantiate a `Runner` bound to app_name, root_agent, session_service, and memory_service.
+
+    # TODO 2: Create "session_1" via `await session_service.create_session(...)`
+    # seeded with state={"app:course_version": "2.1", "current_topic": "Onboarding"}.
+
+    # TODO 3: Run one user turn on "session_1" via `runner.run_async(...)` asking the tutor
+    # to set language="Spanish", difficulty="intermediate", and start a session on "Python Asyncio".
+    # Then reload "session_1" via `get_session(...)`, archive it with
+    # `await memory_service.add_session_to_memory(s1_loaded)`, and query `memory_service.search_memory(...)`!
+
+    # TODO 4: Create a brand-new "session_2" for the SAME user_id ("student_42")
+    # and print `session_2.state` to verify that `app:*` and `user:*` persisted across sessions
+    # while unprefixed session keys (`current_topic`, `last_tutor_response`) started clean!
+
+    # TODO 5: Call `await session_service.list_sessions(app_name=app_name, user_id=user_id)`
+    # and print the list of stored session IDs from SQLite.
+    pass
+
+
+if __name__ == "__main__":
+    asyncio.run(test_sqlite_sessions())
+```
+
+3. Run your persistence verification script from `adk-training`:
+   ```shell
+   uv run python personal_tutor/test_session_persistence.py
+   ```
+   Confirm in the terminal output that `MemoryService` recalls `Asyncio`, `session_2.state` inherits `app:course_version` and your `user:*` preferences from `tutor_sessions.db`, and `list_sessions()` reports `['session_1', 'session_2']`!
+
+---
+
+### Step 5 (Bonus Challenge): Context Compaction & Session Rewind
+
+For fast finishers: in long-running tutoring threads, you can configure automatic sliding-window summarization (`EventsCompactionConfig`) and roll back an accidental turn (`runner.rewind_async`).
+
+**Exercise:** Create `personal_tutor/test_memory_advanced.py` and complete the `# TODO:` markers:
+
+```python
+# personal_tutor/test_memory_advanced.py (Bonus Starter Code)
+
+import asyncio
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google.adk.apps.app import App
+from google.adk.runners import InMemoryRunner
+from google.genai import types
+
+from agent import root_agent
+
+# TODO 1: Import EventsCompactionConfig (from google.adk.apps.app),
+# LlmEventSummarizer (from google.adk.apps.llm_event_summarizer),
+# and LLMRegistry (from google.adk.models).
+
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
 
 async def test_advanced_memory():
-    # TODO: 2. Configure an automated event compaction strategy using an LLM summarizer:
-    # Set the compaction interval to 6 and window overlap to 1.
-    compaction_config = None # Replace with configured compaction instance
+    # TODO 2: Instantiate EventsCompactionConfig with compaction_interval=2,
+    # overlap_size=1, and summarizer=LlmEventSummarizer(llm=LLMRegistry.new_llm("gemini-3.8-flash")).
+    compaction_config = None
 
     app = App(
         name="advanced_tutor_app",
         root_agent=root_agent,
-        events_compaction_config=compaction_config
+        events_compaction_config=compaction_config,
     )
-    runner = InMemoryRunner(app=app)
-    
-    user_id = "student_42"
-    session_id = "session_math_1"
-    await runner.session_service.create_session(app_name=app.name, user_id=user_id, session_id=session_id)
-    
-    # Send message 1: set preferences
-    print("Turn 1: Setting preferences...")
-    # ...
-    
-    # TODO: 3. Demonstrate Session Rewind:
-    # Use runner.rewind_async(...) to rollback the session to a prior event if the user wants to retry a quiz.
+
+    async with InMemoryRunner(app=app) as runner:
+        user_id = "student_42"
+        session_id = "session_math_1"
+        await runner.session_service.create_session(
+            app_name=app.name,
+            user_id=user_id,
+            session_id=session_id,
+        )
+
+        # TODO 3: Run Turn 1 (setting preferences), Turn 2 (starting Python Lists),
+        # and Turn 3 (starting an accidental topic like Quantum Tensor Calculus).
+        # Capture `event.invocation_id` from Turn 3, then call:
+        # await runner.rewind_async(user_id=user_id, session_id=session_id, rewind_before_invocation_id=...)
+        # Print rewound.state afterward to verify session state rolled back while user: state stayed intact!
+
 
 if __name__ == "__main__":
     asyncio.run(test_advanced_memory())
 ```
 
-### Having Trouble?
+Run it from `adk-training` with:
+```shell
+uv run python personal_tutor/test_memory_advanced.py
+```
 
-If you get stuck, you can find the complete, working code in the `lab-solution.md` file.
+---
 
 ### Lab Summary
 
-You have successfully built a sophisticated agent that leverages all four state scopes to provide a continuous, personalized experience. You have learned:
-*   How to use `user:` state for persistent user preferences.
-*   How to use session state for conversation-specific context.
-*   How to use `temp:` state for single-turn, intermediate data.
-*   How to use `app:` state for global, application-wide data.
-*   How to configure automatic **Context Compaction** with `LlmEventSummarizer`.
-*   How to execute **Session Rewind** (`runner.rewind_async`) to rollback conversation state.
-*   **Bonus:** How to inject state directly into instructions.
+You have built and verified a stateful Personal Learning Tutor backed by real ADK session management:
+* Scoped state cleanly across `user:`, `app:`, unprefixed session keys, and ephemeral `temp:` keys.
+* Interpolated optional state into instructions with `{app:course_version?}`.
+* Inspected `EventActions(state_delta=...)` and `.adk/` local SQLite storage in `adk web`.
+* Persisted multi-session state onto disk with `DatabaseSessionService` (`sqlite+aiosqlite`), archived sessions into `InMemoryMemoryService`, and queried sessions via `create_session`, `get_session`, and `list_sessions`.
+* *(Bonus)* Configured `EventsCompactionConfig` and rolled back session-scoped state with `runner.rewind_async`.
 
 ### Self-Reflection & Interactive Knowledge Checks
 
 <KnowledgeCheck
   id="m22-temp-state-scope"
-  question="Why is `temp:` state prefix automatically discarded at the end of each invocation turn?"
+  question="Why is the 'temp:' state prefix automatically stripped before SessionService commits an event to storage?"
   options={[
-    "To save disk space on the client machine.",
-    "To prevent ephemeral calculations or transient intermediate values from polluting persistent session context across turns.",
-    "Because the LLM refuses to read keys containing colons.",
-    "To automatically trigger memory compaction."
+    "To save browser localStorage quota on the frontend client.",
+    "To prevent single-turn scratchpad calculations or transient values from polluting persistent session context across future turns.",
+    "Because Gemini models reject any state key containing a colon character.",
+    "To automatically trigger sliding-window event compaction after every message."
   ]}
   correctIndex={1}
-  hint="Consider what happens when you store a single-turn scratch variable (like a raw calculation) in long-term session memory."
-  explanation="`temp:` state is strictly scoped to the current turn invocation. This prevents intermediate scratchpad calculations or one-off tokens from polluting long-term session memory or consuming LLM prompt context in future turns."
+  hint="Consider what happens when you store a single-turn scratch variable (like a raw quiz percentage) in durable session storage."
+  explanation="The 'temp:' prefix is strictly scoped to the current invocation. Stripping it before persistence prevents intermediate scratchpad calculations from cluttering future turns or database tables while still keeping them visible in the current turn's Trace View."
+/>
+
+<KnowledgeCheck
+  id="m22-database-session-lifecycle"
+  question="In Step 4, when you created 'session_2' in DatabaseSessionService for the same user_id ('student_42'), which keys were automatically present in session_2.state?"
+  options={[
+    "Only unprefixed session keys like current_topic and last_tutor_response.",
+    "Both app:* keys and user:* keys for student_42, while unprefixed keys from session_1 were absent.",
+    "All temp:* scratchpad keys calculated during session_1.",
+    "An empty dictionary because SQLite cannot share state across distinct session IDs."
+  ]}
+  correctIndex={1}
+  hint="Recall how DatabaseSessionService merges global app: state and per-user user: state whenever a new session is created."
+  explanation="DatabaseSessionService stores app: and user: state in dedicated tables keyed by app_name and (app_name, user_id). Creating session_2 automatically merges those durable scopes while giving session_2 a clean slate for unprefixed session keys."
 />
 
 <KnowledgeCheck
   id="m22-context-compaction"
-  question="How does `EventsCompactionConfig` with an LLM summarizer maintain conversational context in long-running agent sessions?"
+  question="How does EventsCompactionConfig with LlmEventSummarizer keep long-running sessions healthy?"
   options={[
-    "It deletes all prior events after 5 messages.",
-    "It condenses older dialogue history into a structured semantic summary while preserving recent raw events and critical state keys.",
+    "It deletes the entire session database every 6 turns.",
+    "It condenses older conversation events into a structured LLM summary while preserving overlap_size recent events and persistent state keys.",
     "It lowers the Gemini model temperature to zero.",
-    "It converts all audio and video inputs into plain text."
+    "It disables all function tools after 20 turns."
   ]}
   correctIndex={1}
-  hint="How can an agent remember what was discussed hours ago without blowing past token limits?"
-  explanation="`EventsCompactionConfig` automatically triggers an LLM summarizer once historical events reach a threshold, replacing bulky past conversation turns with a concise summary while retaining recent turns and persistent state intact."
+  hint="How can an agent remember what was discussed an hour ago without exhausting the context window?"
+  explanation="EventsCompactionConfig triggers LlmEventSummarizer once invocations reach compaction_interval, compressing older turn logs into a concise summary while retaining recent turns (overlap_size) and all structured state."
 />
+
+#### Classroom Debrief Questions
+
+1. How does `uv run adk web` persist sessions locally compared to `InMemorySessionService` and `DatabaseSessionService` (SQLite vs. PostgreSQL)?
+2. Why is `temp:` state discarded after each turn, and why must secrets/API keys still never be placed in `temp:`?
+3. How does `MemoryService` (`InMemoryMemoryService` / `VertexAiMemoryBankService`) complement `session.state`?
+4. When `runner.rewind_async(...)` rolls back a turn, why does `user:` state remain untouched?
 
 <hr/>
 
@@ -314,199 +417,205 @@ You have successfully built a sophisticated agent that leverages all four state 
 
 <SolutionVault moduleNumber="22">
 
-# Lab 22 Solution: Building a Personal Learning Tutor
+## Lab 22 Solution: Building a Personal Learning Tutor
 
-## Goal
+### Goal
 
-This file contains the complete code for the `agent.py` script in the Personal Learning Tutor lab.
+This solution provides the complete implementation for the Personal Learning Tutor (`personal_tutor/agent.py`), the SQLite multi-session persistence & memory archive script (`personal_tutor/test_session_persistence.py`), and the optional context compaction & rewind script (`personal_tutor/test_memory_advanced.py`).
 
 ### `personal_tutor/agent.py`
 
 ```python
 """
-Personal Learning Tutor - Demonstrates State & Memory Management
+Personal Learning Tutor - Demonstrates Session State & Memory Management
 
 This agent uses:
 - user: prefix for persistent preferences (language, difficulty)
-- Session state for current topic tracking
-- temp: prefix for temporary quiz calculations
-- Memory service for retrieving past learning sessions
+- Session state (unprefixed) for current topic tracking
+- app: prefix for global catalog metadata ({app:course_version?})
+- temp: prefix for single-turn quiz calculations
+- Simulated long-term memory search across past lessons
 """
 
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict
+
+from dotenv import load_dotenv
 from google.adk.agents import Agent
 from google.adk.tools.tool_context import ToolContext
-from typing import Dict, Any
+
+# Load local .env if present (override=True helps override stale shell vars during local labs)
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
+ALLOWED_DIFFICULTIES = {"beginner", "intermediate", "advanced"}
 
 # ============================================================================
 # TOOLS: State Management & Memory Operations
 # ============================================================================
 
+
 def set_user_preferences(
     language: str,
     difficulty_level: str,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Set user learning preferences (stored persistently).
+    Set user learning preferences (stored persistently across all sessions).
 
     Args:
-        language: Preferred language (en, es, fr, etc.)
+        language: Preferred language code or name (en, es, fr, it, etc.)
         difficulty_level: beginner, intermediate, or advanced
     """
-    # Use user: prefix for persistent cross-session storage
-    tool_context.state['user:language'] = language
-    tool_context.state['user:difficulty_level'] = difficulty_level
+    clean_lang = language.strip()[:20] or "en"
+    norm_diff = difficulty_level.strip().lower()
+    if norm_diff not in ALLOWED_DIFFICULTIES:
+        norm_diff = "beginner"
+
+    tool_context.state["user:language"] = clean_lang
+    tool_context.state["user:difficulty_level"] = norm_diff
 
     return {
-        'status': 'success',
-        'message': f'Preferences saved: {language}, {difficulty_level} level'
+        "status": "success",
+        "message": f"Preferences saved: {clean_lang}, {norm_diff} level",
     }
 
 
 def record_topic_completion(
     topic: str,
     quiz_score: int,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Record that user completed a topic (stored persistently).
+    Record that the user completed a topic (stored persistently across sessions).
 
     Args:
         topic: Topic name (e.g., "Python Basics", "Data Structures")
         quiz_score: Score out of 100
     """
-    # Get existing lists or create new ones
-    topics = tool_context.state.get('user:topics_covered', [])
-    scores = tool_context.state.get('user:quiz_scores', {})
+    topics = list(tool_context.state.get("user:topics_covered", []))
+    scores = dict(tool_context.state.get("user:quiz_scores", {}))
 
-    # Update persistent user state
     if topic not in topics:
         topics.append(topic)
     scores[topic] = quiz_score
 
-    tool_context.state['user:topics_covered'] = topics
-    tool_context.state['user:quiz_scores'] = scores
+    tool_context.state["user:topics_covered"] = topics
+    tool_context.state["user:quiz_scores"] = scores
 
     return {
-        'status': 'success',
-        'topics_count': len(topics),
-        'message': f'Recorded: {topic} with score {quiz_score}/100'
+        "status": "success",
+        "topics_count": len(topics),
+        "message": f"Recorded: {topic} with score {quiz_score}/100",
     }
 
 
 def get_user_progress(tool_context: ToolContext) -> Dict[str, Any]:
     """
-    Get user's learning progress summary.
-
-    Returns persistent user data across all sessions.
+    Get the user's learning progress summary across all sessions.
     """
-    # Read persistent user state
-    language = tool_context.state.get('user:language', 'en')
-    difficulty = tool_context.state.get('user:difficulty_level', 'beginner')
-    topics = tool_context.state.get('user:topics_covered', [])
-    scores = tool_context.state.get('user:quiz_scores', {})
+    language = tool_context.state.get("user:language", "en")
+    difficulty = tool_context.state.get("user:difficulty_level", "beginner")
+    topics = list(tool_context.state.get("user:topics_covered", []))
+    scores = dict(tool_context.state.get("user:quiz_scores", {}))
 
-    # Calculate average score
-    avg_score = sum(scores.values()) / len(scores) if scores else 0
+    avg_score = sum(scores.values()) / len(scores) if scores else 0.0
 
     return {
-        'status': 'success',
-        'language': language,
-        'difficulty_level': difficulty,
-        'topics_completed': len(topics),
-        'topics': topics,
-        'average_quiz_score': round(avg_score, 1),
-        'all_scores': scores
+        "status": "success",
+        "language": language,
+        "difficulty_level": difficulty,
+        "topics_completed": len(topics),
+        "topics": topics,
+        "average_quiz_score": round(avg_score, 1),
+        "all_scores": scores,
     }
 
 
 def start_learning_session(
     topic: str,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
     Start a new learning session for a topic.
 
-    Uses session state (no prefix) to track current topic.
+    Uses unprefixed session state to track the active topic in this session only.
     """
-    # Session-level state (persists within this session only)
-    tool_context.state['current_topic'] = topic
-    tool_context.state['session_start_time'] = 'now'  # Simplified
+    tool_context.state["current_topic"] = topic
+    tool_context.state["session_start_time"] = datetime.now(timezone.utc).isoformat()
 
-    # Get user's difficulty level for personalization
-    difficulty = tool_context.state.get('user:difficulty_level', 'beginner')
+    difficulty = tool_context.state.get("user:difficulty_level", "beginner")
 
     return {
-        'status': 'success',
-        'topic': topic,
-        'difficulty_level': difficulty,
-        'message': f'Started learning session: {topic} at {difficulty} level'
+        "status": "success",
+        "topic": topic,
+        "difficulty_level": difficulty,
+        "message": f"Started learning session: {topic} at {difficulty} level",
     }
 
 
 def calculate_quiz_grade(
     correct_answers: int,
     total_questions: int,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Calculate quiz grade using temporary state.
-
-    Demonstrates temp: prefix for invocation-scoped data.
+    Calculate a quiz grade using temporary invocation-scoped state (temp:).
     """
-    # Store intermediate calculation in temp state (discarded after invocation)
-    percentage = (correct_answers / total_questions) * 100
-    tool_context.state['temp:raw_score'] = correct_answers
-    tool_context.state['temp:quiz_percentage'] = percentage
+    if total_questions <= 0:
+        return {
+            "status": "error",
+            "message": "total_questions must be greater than zero.",
+        }
 
-    # Determine grade letter
+    percentage = (correct_answers / total_questions) * 100
+    tool_context.state["temp:raw_score"] = correct_answers
+    tool_context.state["temp:quiz_percentage"] = percentage
+
     if percentage >= 90:
-        grade = 'A'
+        grade = "A"
     elif percentage >= 80:
-        grade = 'B'
+        grade = "B"
     elif percentage >= 70:
-        grade = 'C'
+        grade = "C"
     elif percentage >= 60:
-        grade = 'D'
+        grade = "D"
     else:
-        grade = 'F'
+        grade = "F"
 
     return {
-        'status': 'success',
-        'score': f'{correct_answers}/{total_questions}',
-        'percentage': round(percentage, 1),
-        'grade': grade,
-        'message': f'Quiz grade: {grade} ({percentage:.1f}%)'
+        "status": "success",
+        "score": f"{correct_answers}/{total_questions}",
+        "percentage": round(percentage, 1),
+        "grade": grade,
+        "message": f"Quiz grade: {grade} ({percentage:.1f}%)",
     }
 
 
 def search_past_lessons(
     query: str,
-    tool_context: ToolContext
+    tool_context: ToolContext,
 ) -> Dict[str, Any]:
     """
-    Search memory for relevant past learning sessions.
+    Search past learning history for relevant completed topics.
 
-    This demonstrates memory service integration.
-    In production, this would use MemoryService.search_memory().
+    In production, pair this with MemoryService.search_memory() for semantic recall.
     """
-    # NOTE: This is a simplified simulation
-    topics = tool_context.state.get('user:topics_covered', [])
+    topics = tool_context.state.get("user:topics_covered", [])
     relevant = [t for t in topics if query.lower() in t.lower()]
 
     if relevant:
         return {
-            'status': 'success',
-            'found': True,
-            'relevant_topics': relevant,
-            'message': f'Found {len(relevant)} past sessions related to "{query}"'
+            "status": "success",
+            "found": True,
+            "relevant_topics": relevant,
+            "message": f'Found {len(relevant)} past sessions related to "{query}"',
         }
-    else:
-        return {
-            'status': 'success',
-            'found': False,
-            'message': f'No past sessions found for "{query}"'
-        }
+    return {
+        "status": "success",
+        "found": False,
+        "message": f'No past sessions found for "{query}"',
+    }
 
 
 # ============================================================================
@@ -516,7 +625,7 @@ def search_past_lessons(
 root_agent = Agent(
     name="personal_tutor",
     model="gemini-3.8-flash",
-    description="Personal learning tutor that tracks your progress, preferences, and learning history.",
+    description="Personal learning tutor that tracks preferences, active topics, and progress.",
     instruction="""
     You are a personalized learning tutor (Course Version {app:course_version?}) with memory of the user's progress.
 
@@ -526,15 +635,14 @@ root_agent = Agent(
     - Start new learning sessions on specific topics
     - Calculate quiz grades and store results
     - Search past learning sessions for context
-    - Adapt teaching based on user's level and history
 
     WORKFLOW:
-    1. If new user, ask about preferences (language, difficulty).
-    2. For learning requests, start a session with start_learning_session and teach the topic.
-    3. After teaching, record completion with the user's quiz score.
-    4. When asked, search past lessons to provide context.
+    1. When the user shares preferences, call set_user_preferences immediately.
+    2. When starting a topic, call start_learning_session and adapt to their difficulty level.
+    3. After a quiz, call calculate_quiz_grade and record_topic_completion.
+    4. When asked about prior study history, call search_past_lessons or get_user_progress.
 
-    Always be encouraging and adapt to the user's learning pace!
+    Always be encouraging and concise!
     """,
     tools=[
         set_user_preferences,
@@ -542,62 +650,220 @@ root_agent = Agent(
         get_user_progress,
         start_learning_session,
         calculate_quiz_grade,
-        search_past_lessons
+        search_past_lessons,
     ],
-    output_key="last_tutor_response"
+    output_key="last_tutor_response",
 )
+```
+
+### `personal_tutor/test_session_persistence.py`
+
+```python
+"""
+Step 4 Solution: Durable Session Lifecycle (SQLite) & Long-Term Memory Archive
+"""
+
+import asyncio
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google.adk.memory import InMemoryMemoryService
+from google.adk.runners import Runner
+from google.adk.sessions import DatabaseSessionService
+from google.genai import types
+
+from agent import root_agent
+
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
+
+async def test_sqlite_sessions():
+    db_file = Path(__file__).resolve().with_name("tutor_sessions.db")
+    if db_file.exists():
+        db_file.unlink()
+
+    db_url = f"sqlite+aiosqlite:///{db_file.as_posix()}"
+    app_name = "personal_tutor_app"
+    user_id = "student_42"
+    memory_service = InMemoryMemoryService()
+
+    # Use async with so DatabaseSessionService cleanly disposes its SQLite pool on exit
+    async with DatabaseSessionService(db_url=db_url) as session_service:
+        runner = Runner(
+            app_name=app_name,
+            agent=root_agent,
+            session_service=session_service,
+            memory_service=memory_service,
+        )
+
+        # 1. Create Session 1 seeded with global app: state and session-scoped state
+        await session_service.create_session(
+            app_name=app_name,
+            user_id=user_id,
+            session_id="session_1",
+            state={
+                "app:course_version": "2.1",
+                "current_topic": "Onboarding",
+            },
+        )
+
+        print("=== Session 1: Setting user preferences & starting a topic ===")
+        prompt_1 = (
+            "Please set my preferred language to Spanish and difficulty to intermediate, "
+            "then start a learning session on Python Asyncio."
+        )
+        async for event in runner.run_async(
+            user_id=user_id,
+            session_id="session_1",
+            new_message=types.Content(
+                role="user",
+                parts=[types.Part.from_text(text=prompt_1)],
+            ),
+        ):
+            if event.is_final_response() and event.content and event.content.parts:
+                print(f"Tutor: {event.content.parts[0].text}")
+
+        s1_loaded = await session_service.get_session(
+            app_name=app_name,
+            user_id=user_id,
+            session_id="session_1",
+        )
+        print(f"\nSession 1 events count: {len(s1_loaded.events)}")
+        print(f"Session 1 persisted state keys: {list(s1_loaded.state.keys())}")
+
+        # Archive Session 1 into MemoryService for cross-session recall
+        await memory_service.add_session_to_memory(s1_loaded)
+        recalled = await memory_service.search_memory(
+            app_name=app_name,
+            user_id=user_id,
+            query="Asyncio",
+        )
+        print(f"MemoryService search hits for 'Asyncio': {len(recalled.memories)}")
+
+        # 2. Open a brand-new Session 2 for the SAME user_id
+        session_2 = await session_service.create_session(
+            app_name=app_name,
+            user_id=user_id,
+            session_id="session_2",
+        )
+        print("\n=== Session 2 (Fresh Thread for Same User) ===")
+        print(f"Session 2 inherited state: {session_2.state}")
+        print(
+            "Notice: 'app:*' and 'user:*' keys persisted across sessions, "
+            "while session-only keys ('current_topic', 'last_tutor_response') started clean!"
+        )
+
+        # 3. List all sessions stored in SQLite for student_42
+        listed = await session_service.list_sessions(
+            app_name=app_name,
+            user_id=user_id,
+        )
+        print(f"Stored SQLite session IDs: {[s.id for s in listed.sessions]}")
+
+
+if __name__ == "__main__":
+    asyncio.run(test_sqlite_sessions())
 ```
 
 ### `personal_tutor/test_memory_advanced.py`
 
 ```python
 """
-Advanced Memory Test: Context Compaction and Session Rewind
+Step 5 Bonus Solution: Context Compaction and Session Rewind
 """
+
 import asyncio
-from google.adk.apps import App
+from pathlib import Path
+
+from dotenv import load_dotenv
+from google.adk.apps.app import App, EventsCompactionConfig
+from google.adk.apps.llm_event_summarizer import LlmEventSummarizer
+from google.adk.models import LLMRegistry
 from google.adk.runners import InMemoryRunner
-from google.adk.events import EventsCompactionConfig, LlmEventSummarizer
 from google.genai import types
+
 from agent import root_agent
 
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
+
 async def test_advanced_memory():
-    # 1. Configure Automatic Event Compaction
+    # 1. Configure sliding-window LLM event compaction (small interval=2 for demo)
     compaction_config = EventsCompactionConfig(
-        summarizer=LlmEventSummarizer(model="gemini-3.8-flash"),
-        compaction_interval=6,
-        overlap_size=1
+        summarizer=LlmEventSummarizer(llm=LLMRegistry.new_llm("gemini-3.8-flash")),
+        compaction_interval=2,
+        overlap_size=1,
     )
 
     app = App(
         name="advanced_tutor_app",
         root_agent=root_agent,
-        events_compaction_config=compaction_config
+        events_compaction_config=compaction_config,
     )
-    runner = InMemoryRunner(app=app)
-    
-    user_id = "student_42"
-    session_id = "session_math_1"
-    session = await runner.session_service.create_session(app_name=app.name, user_id=user_id, session_id=session_id)
-    
-    print("--- 1. Set preferences ---")
-    async for event in runner.run_async(
-        user_id=user_id,
-        session_id=session_id,
-        new_message=types.Content(role="user", parts=[types.Part.from_text(text="I want to learn Python in Spanish at beginner level.")])
-    ):
-        if event.is_final_response():
-            print(f"Agent: {event.content.parts[0].text}")
 
-    # 2. Demonstrate Session Rewind to revert a mistaken action
-    print("\n--- 2. Demonstrating Session Rewind ---")
-    target_events = await runner.session_service.get_session(app_name=app.name, user_id=user_id, session_id=session_id)
-    print(f"Total events recorded before rewind: {len(target_events.events)}")
-    
-    # Rewind to initial state before turn
-    if target_events.events:
-        await runner.rewind_async(user_id=user_id, session_id=session_id, event_id=target_events.events[0].id)
-        print("Session successfully rewound to initial event!")
+    async with InMemoryRunner(app=app) as runner:
+        user_id = "student_42"
+        session_id = "session_math_1"
+        await runner.session_service.create_session(
+            app_name=app.name,
+            user_id=user_id,
+            session_id=session_id,
+        )
+
+        print("--- Turn 1: Save persistent user preferences ---")
+        async for event in runner.run_async(
+            user_id=user_id,
+            session_id=session_id,
+            new_message=types.Content(
+                role="user",
+                parts=[types.Part.from_text(text="Set my language to English and difficulty to beginner.")],
+            ),
+        ):
+            if event.is_final_response() and event.content and event.content.parts:
+                print(f"Agent: {event.content.parts[0].text}")
+
+        print("\n--- Turn 2: Study Python Lists (triggers compaction window) ---")
+        async for event in runner.run_async(
+            user_id=user_id,
+            session_id=session_id,
+            new_message=types.Content(
+                role="user",
+                parts=[types.Part.from_text(text="Start a learning session on Python Lists.")],
+            ),
+        ):
+            if event.is_final_response() and event.content and event.content.parts:
+                print(f"Agent: {event.content.parts[0].text}")
+
+        print("\n--- Turn 3: Accidental topic we want to undo via rewind ---")
+        turn3_invocation_id = None
+        async for event in runner.run_async(
+            user_id=user_id,
+            session_id=session_id,
+            new_message=types.Content(
+                role="user",
+                parts=[types.Part.from_text(text="Start a learning session on Quantum Tensor Calculus.")],
+            ),
+        ):
+            if turn3_invocation_id is None and event.invocation_id:
+                turn3_invocation_id = event.invocation_id
+            if event.is_final_response() and event.content and event.content.parts:
+                print(f"Agent: {event.content.parts[0].text}")
+
+        # 2. Rewind session state to right before Turn 3
+        if turn3_invocation_id:
+            await runner.rewind_async(
+                user_id=user_id,
+                session_id=session_id,
+                rewind_before_invocation_id=turn3_invocation_id,
+            )
+            rewound = await runner.session_service.get_session(
+                app_name=app.name,
+                user_id=user_id,
+                session_id=session_id,
+            )
+            print(f"\nSession rewound before invocation {turn3_invocation_id}!")
+            print(f"State after rewind: {rewound.state}")
+
 
 if __name__ == "__main__":
     asyncio.run(test_advanced_memory())
@@ -605,25 +871,19 @@ if __name__ == "__main__":
 
 ### Self-Reflection Answers
 
-1.  **The `InMemorySessionService` loses `user:` and `app:` state on restart. What are the advantages and disadvantages of using a persistent `SessionService` (like one backed by a database) in a production environment?**
-    *   **Answer:**
-        *   **Advantages:** True persistence across restarts/deployments; enables long-term personalization; supports horizontal scaling (multiple instances of your agent can access the same state); critical for user-facing applications that need to remember users.
-        *   **Disadvantages:** Adds operational overhead (database management, network latency); requires careful schema design; potential for data consistency issues in distributed systems if not managed well.
+1. **How does `uv run adk web` persist sessions locally compared to `InMemorySessionService` and `DatabaseSessionService`?**
+   * **Answer:**
+     * **`InMemorySessionService`** keeps sessions and state strictly in RAM—ideal for fast unit tests (`InMemoryRunner`), but everything vanishes when the Python process exits.
+     * **`uv run adk web`** enables `--use_local_storage` by default, writing sessions to `<agent_folder>/.adk/session.db` via `SqliteSessionService` (unless `--no_use_local_storage` or `--session_service_uri="memory://"` is passed).
+     * **`DatabaseSessionService`** (`google-adk[db]`) uses SQLAlchemy 2.0's async engine: `sqlite+aiosqlite:///` is great for single-instance local/CI testing, while `postgresql+asyncpg://` (Cloud SQL / AlloyDB) unlocks row-level `SELECT ... FOR UPDATE` locking for multi-replica Cloud Run / GKE deployments.
 
-2.  **The `temp:` state is automatically discarded after each turn. Why is this a useful feature? What kind of problems could arise if this temporary data was accidentally persisted?**
-    *   **Answer:** `temp:` state is useful for intermediate calculations or ephemeral data that is only relevant for a single turn (e.g., a quiz score before it's saved to `user:` state). If this data was accidentally persisted:
-        *   **State Bloat:** The state object would grow unnecessarily large over time, slowing down processing.
-        *   **Data Pollution:** Irrelevant data would clutter the state, potentially confusing the LLM in later turns or leading to incorrect decisions.
-        *   **Security Risks:** Sensitive temporary data might be unintentionally exposed or stored longer than intended.
+2. **Why is `temp:` state automatically discarded after each turn, and why must secrets still never be placed in `temp:`?**
+   * **Answer:** `temp:` state is scoped strictly to the current `invocation_id` for transient scratchpad calculations, preventing database bloat and state pollution across turns. However, `temp:` deltas are still emitted inside live `Event` streams and observability traces—so API keys and OAuth tokens belong in Secret Manager or ADK `AuthCredential` stores, never `session.state`.
 
-3.  **Our `search_past_lessons` tool simulates a memory search. In a real application using `VertexAiMemoryBankService`, the search would be semantic (based on meaning) rather than keyword-based. How does this change the kinds of queries the user could make?**
-    *   **Answer:** Semantic search is much more powerful. Instead of needing to remember exact keywords or topic titles, a user could ask conceptual questions like:
-        *   "What did we discuss about data transformation last week?" (Even if the topic was 'ETL processes').
-        *   "Remind me about the security implications of that code review we did." (Even if the exact phrase 'security implications' wasn't used).
-        *   "I'm confused about asynchronous programming; what did you teach me about Python coroutines?"
-        This allows for a more natural, intuitive, and flexible interaction with the agent's long-term knowledge.
+3. **How does `MemoryService` (`InMemoryMemoryService` / `VertexAiMemoryBankService`) complement `session.state`?**
+   * **Answer:** `session.state` (including `user:` and `app:` prefixes) excels at **structured key-value attributes** looked up by exact key name (`user:language`, `current_topic`). `MemoryService` (`add_session_to_memory` / `search_memory`) archives **unstructured knowledge across past conversations** so an agent can recall open-ended discussions weeks later without keeping every historical event inside the active context window.
 
-4.  **How does `EventsCompactionConfig` prevent token context window exhaustion without losing critical user background?**
-    *   **Answer:** It uses an LLM summarizer (`LlmEventSummarizer`) at defined turn intervals (`compaction_interval`) to compress older turn event logs into concise structured summaries while preserving an `overlap_size` of recent turns and all persistent state keys. This keeps active context lean without erasing what happened in prior lessons.
+4. **When `runner.rewind_async(...)` rolls back a turn, why does `user:` state remain untouched?**
+   * **Answer:** Rewind restores **session-scoped state and session artifacts** to their snapshot prior to `rewind_before_invocation_id` (resetting keys introduced after that point to `None`), undoing conversational missteps in the current thread without erasing global `app:` settings or durable `user:` profile preferences shared across other sessions.
 
 </SolutionVault>

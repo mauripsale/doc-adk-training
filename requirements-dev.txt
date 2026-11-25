@@ -3,7 +3,7 @@
 # ==============================================================================
 
 # Core ADK & Google Gen AI
-google-adk[extensions,a2a]>=2.1.0
+google-adk[extensions,a2a,db]>=2.1.0
 google-genai>=1.0.0
 litellm>=1.40.0
 

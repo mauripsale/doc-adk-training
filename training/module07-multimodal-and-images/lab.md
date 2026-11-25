@@ -202,8 +202,7 @@ class VisualCatalogApp:
         self.runner = InMemoryRunner(app=self.app)
 
     async def analyze_product(self, product_id: str, image_path: str):
-        print(f"
---- Analyzing Product: {product_id} ---")
+        print(f"\n--- Analyzing Product: {product_id} ---")
         user_id = "catalog_admin"
         session_id = f"sess_{product_id}"
 
@@ -237,9 +236,7 @@ class VisualCatalogApp:
             # Step 5: Extract the final text response
             if event.is_final_response():
                 description = event.content.parts[0].text
-                print(f"✅ Description Generated:
-{description}
-")
+                print(f"✅ Description Generated:\n{description}\n")
 
 async def main():
     load_dotenv(override=True)

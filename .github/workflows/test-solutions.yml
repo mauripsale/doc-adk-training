@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "google-adk[extensions,a2a]" "mcp<2" litellm langchain-core langchain-community wikipedia google-cloud-firestore google-cloud-aiplatform uvicorn fastapi pydantic pytest python-dotenv locust
+          pip install "google-adk[extensions,a2a,db]" "mcp<2" litellm langchain-core langchain-community wikipedia google-cloud-firestore google-cloud-aiplatform uvicorn fastapi pydantic pytest python-dotenv locust
 
       - name: Run Student Lab Grader Suite across Curriculum
         env:
@@ -46,4 +46,4 @@ jobs:
           VERTEX_AI_PROJECT_ID: "mock-ci-project"
           VERTEX_AI_LOCATION: "us-central1"
         run: |
-          python scripts/test_solutions.py --ignore-missing-optional
+          python scripts/test_solutions.py

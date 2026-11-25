@@ -57,13 +57,13 @@ class TurnMetricsPlugin(BasePlugin):
     """Observes tool errors and turn lifecycles."""
     
     async def on_tool_error_callback(self, *, tool, tool_args, tool_context, error):
-        print(f"⚠️ [AgentOps Alert] Tool {tool.__name__} failed: {error}")
+        print(f"⚠️ [AgentOps Alert] Tool {tool.name} failed: {error}")
         # Recover gracefully without crashing the turn
         return {"status": "error", "message": str(error)}
 
     async def on_event_callback(self, *, event: Event, **kwargs):
         if event.is_final_response():
-            print(f" Turn completed successfully for agent: {event.author}")
+            print(f"Turn completed successfully for agent: {event.author}")
 ```
 
 ---
@@ -74,25 +74,28 @@ In enterprise Google Cloud environments, ADK integrates natively with OpenTeleme
 
 ```mermaid
 flowchart LR
-    A["ADK Agent\n(App Runtime)"] -->|"OTel Spans"| B["Google Cloud Trace"]
+    A["ADK Agent<br/>(App Runtime)"] -->|"OTel Spans"| B["Google Cloud Trace"]
     A -->|"Structured Logs"| C["Google Cloud Logging"]
-    C -->|"Log Sink Export"| D[("BigQuery\nAnalytics Warehouse")]
-    D -->|"Live BI Analytics"| E["Looker Studio\nExecutive Dashboard"]
+    C -->|"Log Sink Export"| D[("BigQuery<br/>Analytics Warehouse")]
+    D -->|"Live BI Analytics"| E["Looker Studio<br/>Executive Dashboard"]
 ```
 
 #### Configuring Cloud Trace in Code:
 ```python
+from google.auth.exceptions import DefaultCredentialsError
 from google.adk.telemetry.google_cloud import get_gcp_exporters
 from google.adk.telemetry.setup import maybe_set_otel_providers
 
-# 1. Configure GCP Exporters (Requires google-adk[gcp])
-otel_hooks = get_gcp_exporters(
-    enable_cloud_tracing=True,
-    enable_cloud_metrics=True
-)
-
-# 2. Register OpenTelemetry providers
-maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
+# Configure GCP Exporters when Application Default Credentials are available
+# (Requires google-adk[gcp]; degrades gracefully in local API-key-only dev)
+try:
+    otel_hooks = get_gcp_exporters(
+        enable_cloud_tracing=True,
+        enable_cloud_metrics=True,
+    )
+    maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
+except DefaultCredentialsError:
+    print("ℹ️ Running locally without GCP ADC; skipping Cloud Trace export.")
 ```
 
 ---
@@ -104,7 +107,21 @@ maybe_set_otel_providers(otel_hooks_to_setup=[otel_hooks])
 
 ---
 
-### 🧠 Socratic Knowledge Check
+### 🧠 Interactive Knowledge Check
+
+<KnowledgeCheck
+  id="m25-plugin-error-recovery"
+  question="What happens inside an ADK BasePlugin when on_tool_error_callback returns a recovery dictionary like {'status': 'error', 'message': '...'} instead of None?"
+  options={[
+    "The unhandled tool exception is caught and converted into a structured tool response so the agent can recover gracefully",
+    "The Python process immediately exits with status code 1",
+    "The runner deletes the current session and restarts from Turn 0",
+    "OpenTelemetry spans are permanently disabled for the rest of the session"
+  ]}
+  correctIndex={0}
+  hint="Review how TurnMetricsPlugin handles tool failures in on_tool_error_callback."
+  explanation="Returning a dict from on_tool_error_callback intercepts the raised Python exception and feeds that dict back to the LLM as the tool's response, allowing graceful recovery while still recording the failure metric."
+/>
 
 <details>
 <summary><b>1. What happens if a tool raises an unhandled exception and no plugin handles <code>on_tool_error_callback</code>?</b></summary>

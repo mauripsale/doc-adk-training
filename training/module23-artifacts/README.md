@@ -37,23 +37,27 @@ An **artifact** is a versioned file stored by the agent system. Each `save` oper
 
 Before using artifacts, you must configure an `artifact_service` in your `Runner`.
 
-*   **`InMemoryArtifactService`**: The default for local development. It stores files in memory and they are lost when the application restarts.
-*   **`GcsArtifactService`**: The production-ready solution. It stores artifacts securely and persistently in a Google Cloud Storage bucket.
+*   **`InMemoryArtifactService`**: Stores artifacts in volatile RAM (lost on process exit). Ideal for fast unit tests and `InMemoryRunner`.
+*   **`FileArtifactService`**: Stores versioned artifacts on the local filesystem (`file://<path>`). **Used automatically by `uv run adk web`** (`<agent>/.adk/artifacts/`) unless `--no_use_local_storage` is passed!
+*   **`GcsArtifactService`**: The cloud production solution (`gs://<bucket>`). Stores versioned artifacts durably in a Google Cloud Storage bucket across multi-replica deployments.
 
 ```python
-# For local dev
-from google.adk.artifacts import InMemoryArtifactService
+# Local volatile testing
+from google.adk.artifacts import InMemoryArtifactService, FileArtifactService, GcsArtifactService
 artifact_service = InMemoryArtifactService()
 
-# For production
-from google.adk.artifacts import GcsArtifactService
-artifact_service = GcsArtifactService(bucket_name='your-gcs-bucket')
+# Local filesystem persistence
+local_artifact_service = FileArtifactService(root_dir="./local_artifacts")
 
-# Add to runner
+# Production Google Cloud Storage
+gcs_artifact_service = GcsArtifactService(bucket_name="your-gcs-bucket")
+
+# Attach to Runner
 runner = Runner(
+    app_name="doc_app",
     agent=root_agent,
-    artifact_service=artifact_service
-    # Other services (session, memory) can also be configured here
+    session_service=session_service,
+    artifact_service=gcs_artifact_service,
 )
 ```
 
@@ -72,10 +76,10 @@ One of the main reasons to use Artifacts instead of simple state is to handle bi
 You must always specify the **MIME type** (e.g., `image/png`, `application/pdf`) so the system knows how to handle the file.
 
 ```python
-# Saving an image
-image_data = b'\x89PNG\r\n...' # Raw bytes
+# Saving an image inside an async tool
+image_data = b'\x89PNG\r\n...'  # Raw bytes
 part = types.Part.from_bytes(data=image_data, mime_type='image/png')
-await context.save_artifact('chart.png', part)
+await tool_context.save_artifact('chart.png', part)
 ```
 
 ### Artifact Scopes: Session vs. User
@@ -89,20 +93,34 @@ To make an artifact **persistent for a specific user across multiple sessions**,
 
 ### Credential Management
 
-While you can store simple secrets in the session state, the ADK provides a more secure, dedicated system for sensitive data like API keys and OAuth tokens.
+Never store sensitive API keys or OAuth tokens in `session.state` (`user:` or `app:`) or unencrypted artifacts. Instead, ADK provides a dedicated credential subsystem for runtime secrets and user-delegated OAuth tokens:
 
-*   **`await context.save_credential(auth_config)`**
-*   **`await context.load_credential(auth_config)`**
+*   **`await tool_context.save_credential(auth_config)`**
+*   **`await tool_context.load_credential(auth_config)`**
 
-This system uses a more complex `AuthConfig` object and is designed for production scenarios requiring robust security. For many use cases, storing simple API keys in the `user:` or `app:` state is a sufficient and simpler alternative.
+This subsystem pairs an `AuthConfig` object with a `CredentialService` (or Google Cloud Secret Manager for service-level keys) so sensitive tokens stay isolated from conversation logs, trace exports, and cross-user state tables.
 
 > **Going Further:** this module's lab doesn't exercise Credential Management hands-on — setting up a real OAuth flow is more infrastructure than a single lab warrants. If you want to try it, wire up `save_credential`/`load_credential` around a real third-party OAuth provider and confirm a tool can use the stored token on a later call, in a later session.
+
+<KnowledgeCheck
+  id="m23-artifact-versioning-and-scopes"
+  question="In Google ADK, what version number is assigned the first time you call await tool_context.save_artifact('user:report.pdf', part), and how is that file scoped?"
+  options={[
+    "Version 0, accessible across all future sessions belonging to the same user",
+    "Version 1, restricted strictly to the current turn and deleted afterward",
+    "Version 0, shared globally across every user of the application",
+    "Version 1, stored directly inside the session.state JSON dictionary"
+  ]}
+  correctIndex={0}
+  hint="Check both the indexing rule for artifact versions and the effect of the 'user:' filename prefix."
+  explanation="ADK artifact versions are 0-indexed (the initial save creates version 0), and prefixing an artifact filename with 'user:' binds it to the user across multiple sessions rather than isolating it to a single session."
+/>
 
 ### Key Takeaways
 - The ADK's **Artifacts** system provides persistent, versioned file storage for agents.
 - **Binary Support:** Unlike simple text memory, Artifacts handle images, PDFs, and audio using `types.Part.from_bytes()`.
 - **Scoping:** Use the `user:` prefix (e.g., `user:settings.json`) to persist files across multiple sessions for the same user.
-- **Versioning and Auditability:** The automatic versioning of artifacts is crucial for production environments. It provides a complete audit trail, allowing you to trace changes, debug errors by reverting to previous states, and ensure compliance by having a verifiable history of all generated files.
-- You must configure an `artifact_service` in your `Runner`, using `InMemoryArtifactService` for development and `GcsArtifactService` for production.
-- Tools interact with artifacts asynchronously using the `ToolContext`, with methods like `save_artifact`, `load_artifact`, and `list_artifacts`.
-- **Asynchronous Operations:** All interactions with the Artifact Service (e.g., `save_artifact`, `load_artifact`) are asynchronous (`async`). This is because file I/O operations, especially with cloud storage services like GCS, can be time-consuming. Using `async` ensures that the main Python thread remains non-blocking, allowing the agent to handle other tasks or requests concurrently while waiting for file operations to complete.
+- **Versioning and Auditability:** Automatic 0-indexed versioning provides an immutable audit trail, allowing you to trace changes and inspect prior file revisions.
+- **Pluggable Storage Backends:** `adk web` uses `FileArtifactService` (`.adk/artifacts/`) locally by default; unit tests use `InMemoryArtifactService`, and cloud deployments use `GcsArtifactService`.
+- Tools interact with artifacts asynchronously using `ToolContext` (`save_artifact`, `load_artifact`, `list_artifacts`).
+- **Asynchronous Operations:** All interactions with the Artifact Service are asynchronous (`async`/`await`) so file and cloud storage I/O never blocks the Python event loop.

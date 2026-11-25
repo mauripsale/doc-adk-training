@@ -30,7 +30,7 @@ Callbacks are registered directly on an `Agent` node. They allow you to intercep
 | `before_model_callback` | Before LLM call. | `(callback_context, llm_request: LlmRequest)` | `Optional[LlmResponse]` |
 | `after_model_callback` | After LLM response. | `(callback_context, llm_response: LlmResponse)` | `Optional[LlmResponse]` |
 | `before_tool_callback` | Before tool execution. | `(tool: BaseTool, args, tool_context: ToolContext)` | `Optional[dict]` |
-| `after_tool_callback` | After tool execution. | `(tool: BaseTool, args, tool_context, response)` | `Optional[dict]` |
+| `after_tool_callback` | After tool execution. | `(tool: BaseTool, args, tool_context, tool_response)` | `Optional[dict]` |
 
 ### Control via Return Values
 
@@ -43,8 +43,8 @@ The power of callbacks lies in their ability to **override** the default framewo
 
 ### Callbacks vs. Plugins: Which one to use?
 
-*   **Callbacks (Granular Control):** Use these when you want to modify the behavior of a **specific node**. They are part of the agent's logic and can block/override operations.
-*   **Plugins (Global Observability):** Use these for cross-cutting concerns that apply to the **entire application** (e.g., logging every request to BigQuery, global RAI moderation, or OpenTelemetry tracing). Plugins generally observe events rather than blocking them.
+*   **`Agent` Callbacks (Node-Scoped Control):** Registered directly on a single `Agent(before_*=..., after_*=...)`. Use callbacks when behavior is specific to **one agent node** (such as per-agent response caching, custom prompt shaping, or single-node tool argument rules).
+*   **`App` Plugins (Fleet-Wide Governance & Telemetry):** Registered once on `App(plugins=[...])` (`BasePlugin`), wrapping **every** agent, sub-agent, and workflow node in the application and executing *before* node-level callbacks. Use plugins for cross-cutting concerns like global OpenTelemetry/BigQuery logging, error recovery (`on_tool_error_callback`), and organization-wide RAI/PII guardrails (Modules 25 & 25.5).
 
 ### Built-in Example: Self-Healing Plugins
 

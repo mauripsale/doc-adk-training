@@ -521,6 +521,43 @@ VAULT_DATA = {
             }
         ]
     },
+    "23": {
+        "questions": [
+            {
+                "question": "What version number is assigned the first time an artifact is saved via await tool_context.save_artifact(), and why are artifact tool methods async?",
+                "options": [
+                    "Version 1; because Python dictionaries require async locks",
+                    "Version 0; because file and cloud object storage I/O (such as Google Cloud Storage) must not block the event loop",
+                    "Version -1; because artifacts are compressed in a background C thread",
+                    "Artifacts do not track versions unless manually numbered in the filename"
+                ],
+                "correctIndex": 1,
+                "hint": "Check the 0-indexed versioning note and async I/O explanation in Module 23 Theory."
+            },
+            {
+                "question": "How do you persist an artifact across all future sessions for a specific user rather than restricting it to the current session?",
+                "options": [
+                    "Prefix the artifact filename with 'user:' (for example, 'user:preferences.json')",
+                    "Save the binary bytes directly inside tool_context.state['temp:file']",
+                    "Pass mime_type='global/persistent' to types.Part.from_bytes()",
+                    "Rename the file extension to '.persistent'"
+                ],
+                "correctIndex": 0,
+                "hint": "Review 'Artifact Scopes: Session vs. User' in Module 23 Theory."
+            },
+            {
+                "question": "Which ArtifactService backend is used by default in local 'adk web' development vs. multi-replica cloud production?",
+                "options": [
+                    "GcsArtifactService locally and InMemoryArtifactService in cloud production",
+                    "SqliteSessionService for both binary images and cloud buckets",
+                    "FileArtifactService (.adk/artifacts/) locally by default, and GcsArtifactService for cloud production",
+                    "Artifacts cannot be persisted outside volatile RAM in ADK 2.0"
+                ],
+                "correctIndex": 2,
+                "hint": "Compare local .adk/artifacts/ storage with Google Cloud Storage in Module 23."
+            }
+        ]
+    },
     "24": {
         "questions": [
             {
@@ -561,20 +598,20 @@ VAULT_DATA = {
     "25": {
         "questions": [
             {
-                "question": "What are the Four Core Pillars of Enterprise AgentOps for autonomous agent fleets?",
+                "question": "What are the Four Pillars of Agent Telemetry presented in Module 25?",
                 "options": [
-                    "Evaluation & Quality Flywheel, Distributed Tracing & Session Lineage, Cost & Token Optimization, and Failure & Anomaly Detection",
                     "HTML Templating, CSS Styling, SQL Indexing, and Disk Formatting",
+                    "Traces, Metrics, Logs, and Events",
                     "Single-turn Chat, Stateless Scripts, Hardcoded RegEx, and Manual Logging",
                     "CPU Overclocking, Liquid Cooling, GPU Flashing, and Power Grid Monitoring"
                 ],
-                "correctIndex": 0,
-                "hint": "Module 25 outlines the 4 pillars: Quality evaluation, Tracing/Lineage, Cost/Tokens, and Anomaly detection."
+                "correctIndex": 1,
+                "hint": "Review the 'Four Pillars of Agent Telemetry' diagram in Module 25 Theory."
             },
             {
                 "question": "What is the main architectural difference between native OpenTelemetry exporters and custom ADK BasePlugins?",
                 "options": [
-                    "OpenTelemetry provides standardized distributed spans to Cloud Trace / Cloud Monitoring, while BasePlugins execute custom in-process interception, alerting, and local metric collection",
+                    "OpenTelemetry provides standardized distributed spans to Cloud Trace and Cloud Monitoring, while BasePlugins execute custom in-process interception, alerting, and error recovery",
                     "OpenTelemetry only runs on Windows, while BasePlugins only run on Linux",
                     "BasePlugins disable all asynchronous Python operations",
                     "OpenTelemetry requires replacing the Gemini model with a local rule engine"
@@ -583,15 +620,15 @@ VAULT_DATA = {
                 "hint": "OTel standardizes export to cloud observability backends, while BasePlugins intercept events and tool errors in-process."
             },
             {
-                "question": "How does ADK 2.0's `node_info` attribute in event metadata enhance distributed tracing in complex multi-agent graphs?",
+                "question": "How does ADK 2.0's 'node_info' attribute in event metadata enhance distributed tracing in complex multi-agent graphs?",
                 "options": [
-                    "It attaches the originating graph node identifier to each event, enabling hierarchical, per-agent span reconstruction in Cloud Trace and Looker Studio",
                     "It encrypts the agent's Python source code into a zip archive",
                     "It automatically bills the end-user per keystroke",
+                    "It attaches the originating graph node identifier to each event, enabling hierarchical per-node span reconstruction in Cloud Trace",
                     "It forces all subagents to run sequentially on a single thread"
                 ],
-                "correctIndex": 0,
-                "hint": "`node_info` allows distributed tracing backends to visualize exactly which node in a graph executed each turn."
+                "correctIndex": 2,
+                "hint": "The 'node_info' metadata lets distributed tracing backends visualize which graph node executed each turn."
             }
         ]
     },
@@ -609,26 +646,63 @@ VAULT_DATA = {
                 "hint": "Fail-Closed prioritizes security and compliance by withholding potentially non-compliant or hazardous outputs."
             },
             {
-                "question": "Which ADK 2.0 lifecycle callback is used by safety plugins to inspect and sanitize or block outbound responses before they reach the user?",
+                "question": "Which ADK 2.0 BasePlugin hook is used by egress safety guardrails to inspect and sanitize or block final responses before delivery?",
                 "options": [
-                    "`on_event_callback` (checking `event.is_final_response()`)",
-                    "`on_app_startup`",
-                    "`before_tool_compilation`",
-                    "`on_socket_disconnect`"
+                    "on_app_startup",
+                    "on_event_callback (checking event.is_final_response())",
+                    "before_tool_compilation",
+                    "on_socket_disconnect"
                 ],
-                "correctIndex": 0,
-                "hint": "`on_event_callback` intercepts all emitted events, allowing the plugin to inspect and mutate `event.content.parts[0].text` before delivery."
+                "correctIndex": 1,
+                "hint": "The on_event_callback hook intercepts emitted events, allowing the plugin to inspect and sanitize event.content.parts[0].text before delivery."
             },
             {
                 "question": "Why should enterprise safety guardrails (like PII masking and prompt injection defense) be implemented as ADK Plugins rather than relying solely on system prompt instructions?",
                 "options": [
-                    "Plugins execute deterministic, out-of-band programmatic code that cannot be bypassed by LLM prompt injection or adversarial jailbreak reasoning",
                     "Plugins run 100x faster than foundational models and eliminate the need for an LLM",
                     "System prompts cannot contain more than 10 words",
+                    "Plugins execute deterministic, out-of-band Python code across the entire App that cannot be bypassed by LLM prompt injection",
                     "Plugins automatically encrypt the developer's laptop hard drive"
                 ],
-                "correctIndex": 0,
+                "correctIndex": 2,
                 "hint": "Deterministic programmatic code provides robust compliance guarantees that stochastic model instructions cannot guarantee."
+            }
+        ]
+    },
+    "26": {
+        "questions": [
+            {
+                "question": "In ADK 2.0, what happens when before_agent_callback returns a types.Content object instead of None?",
+                "options": [
+                    "The agent skips the LLM call and tool execution entirely, returning that Content directly as the turn's response (ideal for caching)",
+                    "The Python runtime raises a CallbackOverrideError and halts",
+                    "The returned Content is appended after the LLM finishes generating its normal answer",
+                    "All session state is permanently cleared"
+                ],
+                "correctIndex": 0,
+                "hint": "Review 'Control via Return Values' in Module 26 Theory."
+            },
+            {
+                "question": "Why should an input guardrail inside before_model_callback inspect callback_context.get_invocation_context().user_content rather than all of llm_request.contents?",
+                "options": [
+                    "Because llm_request.contents is always empty in ADK 2.0",
+                    "Because llm_request.contents holds the entire conversation history, so one blocked word from an earlier turn would refuse every subsequent benign turn forever",
+                    "Because user_content automatically translates all messages into JSON",
+                    "Because before_model_callback only executes after the model finishes responding"
+                ],
+                "correctIndex": 1,
+                "hint": "Think about what happens on Turn 3 if Turn 1 contained a blocked word and stays in conversation history."
+            },
+            {
+                "question": "How do Agent Callbacks differ architecturally from App Plugins (BasePlugin) in Google ADK?",
+                "options": [
+                    "Callbacks only work in the cloud, while Plugins only work in local tests",
+                    "Plugins cannot inspect events or recover from errors",
+                    "Callbacks attach to a single Agent node for per-node control, whereas Plugins register once on App(plugins=[...]) to govern every node across the application",
+                    "They are identical aliases registered on tool_context"
+                ],
+                "correctIndex": 2,
+                "hint": "Compare node-scoped Agent(before_*=...) hooks against app-wide App(plugins=[...]) governance."
             }
         ]
     },

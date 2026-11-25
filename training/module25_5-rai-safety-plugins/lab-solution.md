@@ -3,20 +3,18 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 25.5 Solution: Building Enterprise Multi-Layer Safety Guardrails
-
-## Goal
-
-This file contains the complete, reference implementation for `safety_guardrail/agent.py` and the automated verification suite using Google ADK 2.0 and `gemini-3.8-flash`.
+## Lab 25.5 Solution: Enterprise Multi-Layer Safety Guardrails
 
 ### `safety_guardrail/agent.py`
 
 ```python
 import re
 from google.adk import Agent
-from google.adk.events import Event
 from google.adk.apps import App
+from google.adk.events import Event
+from google.adk.models.llm_response import LlmResponse
 from google.adk.plugins import BasePlugin
+from google.genai import types
 
 # --- 1. Output Guardrail: PII Data Redaction / Block ---
 class PIIGuardrailPlugin(BasePlugin):
@@ -24,7 +22,7 @@ class PIIGuardrailPlugin(BasePlugin):
     Fail-Closed output guardrail: intercepts agent responses and overwrites
     or redacts sensitive financial data (credit cards, PII) before reaching the user.
     """
-    def __init__(self, name: str = 'pii_guardrail', mode: str = 'block'):
+    def __init__(self, name: str = "pii_guardrail", mode: str = "block"):
         super().__init__(name)
         self.mode = mode  # 'block' or 'mask'
         self.cc_pattern = re.compile(r"\b(?:\d{4}[-\s]?){3}\d{4}\b")
@@ -35,24 +33,26 @@ class PIIGuardrailPlugin(BasePlugin):
             response_text = event.content.parts[0].text
             if response_text and self.cc_pattern.search(response_text):
                 self.interventions_count += 1
-                if self.mode == 'block':
-                    # Fail-Closed Intervention: Overwrite output with a safe warning
+                if self.mode == "block":
                     event.content.parts[0].text = (
                         "🛑 [SECURITY BLOCK] This response was withheld because it contained "
                         "sensitive information (PII/Card Data). Please do not share financial details."
                     )
-                elif self.mode == 'mask':
+                elif self.mode == "mask":
                     event.content.parts[0].text = self.cc_pattern.sub("[REDACTED_CARD]", response_text)
-                
-                print(f"🛑 [SAFETY AUDIT] Guardrail triggered in invocation: {getattr(event, 'invocation_id', 'unknown')}")
+
+                print(f"🛑 [SAFETY AUDIT] Egress guardrail triggered in invocation: {getattr(event, 'invocation_id', 'unknown')}")
+                return event
+        return None
+
 
 # --- 2. Input Guardrail: Prompt Injection & Jailbreak Defense ---
 class PromptInjectionDefensePlugin(BasePlugin):
     """
-    Fail-Closed input guardrail: intercepts user input before the model reasons,
-    detecting jailbreak triggers (e.g. 'ignore previous instructions').
+    Fail-Closed input guardrail: inspects the current user turn before the model reasons,
+    returning a safe LlmResponse block without crashing or poisoning future turns.
     """
-    def __init__(self, name: str = 'prompt_injection_defense'):
+    def __init__(self, name: str = "prompt_injection_defense"):
         super().__init__(name)
         self.jailbreak_patterns = [
             re.compile(r"ignore\s+(all\s+)?previous\s+instructions", re.IGNORECASE),
@@ -61,28 +61,46 @@ class PromptInjectionDefensePlugin(BasePlugin):
         ]
         self.blocked_inputs_count = 0
 
-    async def before_model_callback(self, *, agent, request, **kwargs):
-        if hasattr(request, "contents") and request.contents:
-            for content in request.contents:
-                if hasattr(content, "parts") and content.parts:
-                    for part in content.parts:
-                        text = getattr(part, "text", "")
-                        if text:
-                            for pattern in self.jailbreak_patterns:
-                                if pattern.search(text):
-                                    self.blocked_inputs_count += 1
-                                    print(f"⚠️ [INJECTION ALERT] Detected malicious prompt attempt: '{text}'")
-                                    raise PermissionError("Security Policy Violation: Malicious prompt injection detected.")
+    async def before_model_callback(self, *, callback_context, llm_request, **kwargs):
+        # Scope inspection strictly to the current user turn so an earlier blocked message
+        # in session history never poisons subsequent benign questions in the same session!
+        current_contents = []
+        if callback_context is not None:
+            inv_ctx = callback_context.get_invocation_context()
+            if inv_ctx and inv_ctx.user_content:
+                current_contents = [inv_ctx.user_content]
+        elif hasattr(llm_request, "contents") and llm_request.contents:
+            current_contents = [llm_request.contents[-1]]
+
+        for content in current_contents:
+            if hasattr(content, "parts") and content.parts:
+                for part in content.parts:
+                    text = getattr(part, "text", "")
+                    if text and any(p.search(text) for p in self.jailbreak_patterns):
+                        self.blocked_inputs_count += 1
+                        print("⚠️ [INJECTION ALERT] Blocked adversarial prompt injection attempt.")
+                        return LlmResponse(
+                            content=types.Content(
+                                role="model",
+                                parts=[
+                                    types.Part(
+                                        text="🛑 [SECURITY BLOCK] Security Policy Violation: Malicious prompt injection detected."
+                                    )
+                                ],
+                            )
+                        )
+        return None
+
 
 # --- 3. Agent Definition ---
-agent = Agent(
+root_agent = Agent(
     name="secure_enterprise_assistant",
     model="gemini-3.8-flash",
     instruction="""
-    You are a secure corporate assistant. 
+    You are a secure corporate assistant.
     If the user asks for 'mock card', respond with 'Here is your card: 1234-5678-9012-3456'.
     Otherwise, assist the user with professional inquiries.
-    """
+    """,
 )
 
 # --- 4. App Definition ---
@@ -90,9 +108,9 @@ pii_plugin = PIIGuardrailPlugin(mode="block")
 injection_plugin = PromptInjectionDefensePlugin()
 
 app = App(
-    name="rai_safety_app",
-    root_agent=agent,
-    plugins=[pii_plugin, injection_plugin]
+    name="safety_guardrail",
+    root_agent=root_agent,
+    plugins=[pii_plugin, injection_plugin],
 )
 
 if __name__ == "__main__":
@@ -101,14 +119,6 @@ if __name__ == "__main__":
 
 ### Self-Reflection Answers
 
-1. **Why is it better to block the response in a plugin rather than just adding "Don't say credit card numbers" to the agent's instructions?**
-   * **Answer:** LLMs are probabilistic engines vulnerable to prompt injections, role-play jailbreaks, and context overflows. An ADK `BasePlugin` runs deterministic code on the hosting server outside the LLM reasoning loop, providing verifiable mathematical certainty for data loss prevention.
-
-2. **How would you extend this plugin to log all blocked responses to a security database for auditing?**
-   * **Answer:** Inside the `on_event_callback` intervention branch, dispatch an asynchronous task (via `asyncio.create_task`) sending structured telemetry containing `event.invocation_id`, timestamp, agent name, and redacted sample snippet to Cloud Logging, BigQuery, or a SIEM pipeline.
-
-3. **Can you think of other safety use cases for this pattern?**
-   * **Answer:**
-     * **Tool Execution Guardrails:** Using `before_tool_callback` to enforce policy-based access control (e.g., blocking `execute_sql` with `DROP` or `DELETE` statements).
-     * **Toxic Content & Competitor Redaction:** Using regex or lightweight local classification models to filter profane or unauthorized competitor trademarks.
-     * **Error Stack Sanitization:** Using `on_tool_error_callback` to scrub internal SQL connection strings, hostnames, and stack traces before they leak to the user.
+1. **Deterministic vs. Stochastic Defense:** System prompt instructions are probabilistic; jailbreaks or novel token alignments can manipulate the LLM into disregarding instructions. A `BasePlugin` runs deterministic Python code outside the LLM context window, guaranteeing that sensitive patterns are intercepted 100% of the time.
+2. **Performance Impact:** In-process regex checks execute in sub-millisecond time (`< 0.1ms`), introducing negligible latency compared to secondary LLM judge calls (which add 300ms–1500ms and incur API token costs).
+3. **Audit Trail Compliance:** Logging `event.invocation_id`, timestamp, user ID, and redaction metadata provides an immutable compliance trail for regulatory frameworks like SOC 2, HIPAA, and GDPR Article 30 without persisting raw sensitive payload data.

@@ -95,37 +95,53 @@ This file contains the expected output for the `calculator_tests.evalset.json` f
 
 (Some noisy fields, such as `thought_signature`, are trimmed here for readability — the real file includes them.)
 
-### Extra Challenge: `locustfile.py` Template
+### Extra Challenge: `calculator_agent/locustfile.py`
 
-This script simulates concurrent users sending prompts to your ADK Agent API server (`uv run adk API_SERVER_ARGS`) to test system latency and endpoint throughput under load.
+This script simulates concurrent users sending prompts to your ADK API server (`uv run adk api_server`) to test system latency and endpoint throughput under load.
 
 ```python
 import json
+import uuid
 from locust import HttpUser, task, between
 
+
 class ADKAgentUser(HttpUser):
-    # Wait between 1 and 3 seconds between tasks per user
     wait_time = between(1, 3)
+
+    def on_start(self):
+        self.user_id = f"locust_{uuid.uuid4().hex[:8]}"
+        self.session_id = f"sess_{uuid.uuid4().hex[:8]}"
+        self.client.post(
+            f"/apps/calculator_agent/users/{self.user_id}/sessions/{self.session_id}",
+            json={},
+        )
 
     @task
     def ask_calculator_agent(self):
-        # Target the native ADK API Server runner execution endpoint
         headers = {"Content-Type": "application/json"}
         payload = {
-            "session_id": "locust-load-test-session",
-            "prompt": "What is 15 + 27?"
+            "app_name": "calculator_agent",
+            "user_id": self.user_id,
+            "session_id": self.session_id,
+            "new_message": {
+                "role": "user",
+                "parts": [{"text": "What is 15 + 27?"}],
+            },
         }
-        
-        # We hit the standard synchronous runner execution endpoint
+
         with self.client.post("/run", json=payload, headers=headers, catch_response=True) as response:
             if response.status_code == 200:
                 try:
-                    data = response.json()
-                    # Check if final response text contains expected result
-                    if "42" in data.get("response", ""):
+                    events = response.json()
+                    full_text = " ".join(
+                        part.get("text", "")
+                        for ev in events
+                        for part in (ev.get("content") or {}).get("parts", [])
+                    )
+                    if "42" in full_text:
                         response.success()
                     else:
-                        response.failure(f"Incorrect agent response: {data}")
+                        response.failure(f"Expected '42' in agent events, got: {full_text}")
                 except json.JSONDecodeError:
                     response.failure("Malformed JSON response from agent server")
             else:
@@ -145,23 +161,21 @@ class ADKAgentUser(HttpUser):
 
         ```yaml
         jobs:
-          test:
+          eval:
             runs-on: ubuntu-latest
             steps:
-              - uses: actions/checkout@v3
-              - name: Set up Python
-                uses: actions/setup-python@v4
-                with:
-                  python-version: '3.10'
+              - uses: actions/checkout@v4
+              - uses: astral-sh/setup-uv@v5
               - name: Install dependencies
-                run: | 
-                  pip install --upgrade pip
-                  pip install "google-adk[eval]"
-                  # Install any agent-specific dependencies
+                run: uv sync --extra eval
               - name: Run agent evaluations
-                run: PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json
+                env:
+                  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+                run: uv run adk eval calculator_agent calculator_agent/calculator_tests.evalset.json
         ```
-        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed. This provides an automated safety net for agent development.
+        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step fails, preventing regressions from being merged or deployed.
+
+        > **Enterprise AgentOps Tip:** In automated pipelines using the Google Agents CLI suite, you can run `uvx google-agents-cli eval run` to benchmark multiple golden datasets and enforce trajectory quality gates directly before cloud deployments (requires an `agents-cli-manifest.yaml` generated via `uvx google-agents-cli scaffold enhance .`).
 
 4.  **What is the difference between "Golden Path" testing and "User Simulation"?**
     *   **Answer:** "Golden Path" testing (Regression Testing) uses *static*, recorded conversations to ensure the agent performs exactly as it did in the past for known inputs. It verifies correctness and prevents breaking changes. "User Simulation" (Stress/Dynamic Testing) uses a generative model to act as a *dynamic* user. It creates varied, unpredictable conversations based on a scenario, helping to find edge cases, safety issues, or robustness failures that static tests might miss.

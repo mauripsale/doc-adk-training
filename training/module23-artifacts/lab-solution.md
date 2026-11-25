@@ -75,8 +75,12 @@ async def create_report(document_name: str, tool_context: ToolContext) -> str:
     print(f"Creating final report for '{document_name}'...")
     all_artifacts = await tool_context.list_artifacts()
     
-    # Filter for artifacts related to the specific document.
-    doc_artifacts_names = [name for name in all_artifacts if name.startswith(document_name)]
+    # Filter for source/intermediate artifacts (excluding any prior FINAL_REPORT)
+    final_report_name = f"{document_name}_FINAL_REPORT.md"
+    doc_artifacts_names = [
+        name for name in all_artifacts
+        if name.startswith(document_name) and name != final_report_name
+    ]
     
     report = f"# Final Report for: {document_name}\n\n"
     for name in doc_artifacts_names:
@@ -85,13 +89,12 @@ async def create_report(document_name: str, tool_context: ToolContext) -> str:
             # Check if it is text or binary
             if artifact.text:
                 report += f"## Artifact: {name}\n\n```text\n{artifact.text[:500]}...\n```\n\n"
-            else:
-                 # It's binary (like our chart), so we just mention it
+            elif artifact.inline_data:
                 report += f"## Artifact: {name}\n\n*[Binary File Attached: {name} - Type: {artifact.inline_data.mime_type}]*\n\n"
 
     part = types.Part.from_text(text=report)
     version = await tool_context.save_artifact(
-        filename=f"{document_name}_FINAL_REPORT.md", artifact=part
+        filename=final_report_name, artifact=part
     )
     return f"Final report for '{document_name}' created and saved as version {version}."
 
@@ -124,25 +127,28 @@ Workflow:
 
 ### Self-Reflection Answers
 
-1.  **Why is the versioning feature of the Artifacts system important for audibility and debugging in a production environment?**
-    *   **Answer:** Versioning is crucial because it provides an immutable history of every file generated or modified by the agent. For audibility, you can trace exactly what data was used or produced at any point in time. For debugging, if an agent produces an incorrect report, you can easily go back to previous versions of intermediate artifacts (like the extracted text or summary) to pinpoint where the error was introduced. This is invaluable for understanding and rectifying complex agentic workflows.
+1.  **Why is the versioning feature of the Artifacts system important for auditability and debugging in a production environment?**
+    *   **Answer:** Versioning is crucial because it provides an immutable history of every file generated or modified by the agent. For auditability, you can trace exactly what data was used or produced at any point in time. For debugging, if an agent produces an incorrect report, you can inspect previous versions of intermediate artifacts (like the extracted text or summary) to pinpoint where the error was introduced.
 
 2.  **All the tool functions in this lab are `async`. Why is this a requirement for functions that interact with the Artifact Service?**
-    *   **Answer:** Interacting with file storage (especially cloud services like GCS) involves I/O operations that can be slow. If these operations were synchronous (`def` instead of `async def`), they would block the main Python thread, making the agent unresponsive and unable to process other requests or continue its own internal reasoning until the file operation completed. `async` functions, used with `await`, ensure that these I/O-bound tasks run concurrently, keeping the agent efficient and responsive.
+    *   **Answer:** Interacting with file storage (especially cloud services like GCS) involves I/O operations that can take tens or hundreds of milliseconds. Using `async def` with `await` ensures I/O-bound tasks never block the Python event loop, keeping the agent server responsive under concurrent requests.
 
-3.  **The lab uses an `InMemoryArtifactService`. What changes would you need to make to the `Runner` configuration to use the persistent `GcsArtifactService` in a production deployment?**
-    *   **Answer:** You would modify the `Runner` initialization in your main application entry point (e.g., `main.py`). Instead of `InMemoryArtifactService`, you would use `GcsArtifactService` and provide it with a Google Cloud Storage bucket name:
+3.  **Locally, `uv run adk web` uses `FileArtifactService` (`.adk/artifacts/`). How do you configure `GcsArtifactService` for multi-replica cloud production?**
+    *   **Answer:** Either pass `--artifact_service_uri="gs://your-production-bucket-name"` to `adk api_server` / `adk web`, or pass `GcsArtifactService` directly into `Runner`:
 
         ```python
-        from google.adk import Agent
+        from google.adk.agents import Agent
         from google.adk.artifacts import GcsArtifactService
-        from google.adk.apps import App
-        from google.adk.runners import InMemoryRunner
+        from google.adk.runners import Runner
+        from google.adk.sessions import InMemorySessionService
 
         root_agent = Agent(name="document_processor", model="gemini-3.8-flash")
         gcs_artifact_service = GcsArtifactService(bucket_name="your-production-bucket-name")
-        app = App(name="doc_app", root_agent=root_agent)
-        runner = InMemoryRunner(app=app)
-        runner.artifact_service = gcs_artifact_service
+        runner = Runner(
+            app_name="doc_app",
+            agent=root_agent,
+            session_service=InMemorySessionService(),
+            artifact_service=gcs_artifact_service,
+        )
         ```
-        You would also need to ensure your environment has the necessary Google Cloud authentication configured (e.g., via `GOOGLE_APPLICATION_CREDENTIALS` or a service account).
+        Ensure your runtime environment has Google Cloud Application Default Credentials (or a Cloud Run / GKE Workload Identity service account) with Storage Object permissions on the bucket.

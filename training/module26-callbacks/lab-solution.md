@@ -13,9 +13,8 @@ This file contains the complete code for the `agent.py` script in the Content Mo
 
 ```python
 import hashlib
-import os
 import re
-import logging
+from pathlib import Path
 from typing import Dict, Any, Optional
 from google.adk import Agent
 from google.adk.agents.callback_context import CallbackContext
@@ -26,7 +25,7 @@ from google.adk.models.llm_response import LlmResponse
 from google.genai import types
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+load_dotenv(Path(__file__).with_name(".env"), override=True)
 
 # --- Configuration ---
 BLOCKED_WORDS = ['unsafe', 'offensive']
@@ -46,7 +45,7 @@ def _cache_key(callback_context: CallbackContext) -> str:
     subsequent question in the session, regardless of what was asked.
     """
     user_text = _current_user_text(callback_context)
-    digest = hashlib.md5(user_text.strip().lower().encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(user_text.strip().lower().encode("utf-8")).hexdigest()
     return f"cache:{digest}"
 
 # --- Callback 1: Caching (Check) ---
@@ -154,7 +153,7 @@ def after_tool_callback(
             print("🛡️ [AUDIT] Redacted blocked word from tool output.")
             redacted = text
             for word in BLOCKED_WORDS:
-                redacted = redacted.replace(word, '***')
+                redacted = re.sub(re.escape(word), '***', redacted, flags=re.IGNORECASE)
             return {**tool_response, 'text': redacted}
         print(f"📋 [AUDIT] Tool '{tool.name}' executed successfully.")
     return None
@@ -182,7 +181,7 @@ root_agent = Agent(
 ### Self-Reflection Answers
 
 1.  **What is the key difference between a callback and a plugin in the ADK? When would you choose one over the other?**
-    *   **Answer:** The key difference lies in their scope and primary role. **Callbacks** are agent-specific, designed for control, modification, and implementing guardrails *within a single agent's logic*. They can block or alter an agent's execution. **Plugins** are global (registered at the `Runner` level), designed for observation and telemetry (metrics, logging, alerting) *across all agents in an application*. Choose a callback to modify or block an agent's specific operations; choose a plugin to monitor behavior across the entire system without altering its logic.
+    *   **Answer:** The key difference lies in their **scope and registration point**. **Callbacks** are attached to a single `Agent` instance (`before_agent_callback`, `before_tool_callback`, etc.) to customize or guard that specific node's behavior (like per-agent caching or tool limits). **Plugins** (`BasePlugin`) are registered once at the **`App(plugins=[...])` level**, automatically wrapping *every* agent and workflow node in the application—making plugins ideal for fleet-wide observability, error recovery, and organization-wide RAI/DLP policies.
 
 2.  **Why does returning a `types.Content` object from `before_agent_callback` cause the agent to skip the LLM call entirely?**
     *   **Answer:** Returning an object from a callback signals to the ADK framework to *override* the default behavior. Since `before_agent_callback` happens at the very beginning of the agent's lifecycle, returning a final `Content` object tells the framework "I already have the answer, you don't need to do any work." The ADK accepts this `Content` as the final result and skips tool execution and LLM invocation, saving time and tokens. This is the core mechanism behind caching.

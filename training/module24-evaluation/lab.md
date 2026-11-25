@@ -16,24 +16,25 @@ In this lab, you will learn the fundamental workflow of the ADK's evaluation fea
 
 <ChainSetup module={9} project="calculator_agent" />
 
-1.  **Navigate to your Calculator Agent directory:**
+1.  **Stay in your `adk-training` workspace parent directory** (which contains your `calculator_agent/` package from Module 9):
 
     ```shell
-    cd /path/to/your/adk-training/calculator_agent
+    cd /path/to/your/adk-training
     ```
 
-2.  **Ensure your virtual environment is active** and your `.env` file is configured with your API key. Also make sure the evaluation extra is installed — `adk eval` (Step 8) will fail without it:
+2.  **Verify `calculator_agent/.env` is configured** and install the evaluation extra — `adk eval` (Step 8) requires it:
     ```shell
     uv add "google-adk[eval]"
     ```
 
-3.  **Start the web server:**
+3.  **Start the web server from the parent directory:**
 
-    `agent.py` does `from tools.calculator import ...` — a local package that lives inside `calculator_agent/`. Unlike `adk run` (which adds the current directory to Python's import path automatically), `adk web` does not — without `PYTHONPATH=.` you'll hit `ModuleNotFoundError: No module named 'tools'` the moment you try to chat with the agent. The same is true for `adk eval` later (Step 8), so get in the habit of setting it now:
+    Because `calculator_agent/agent.py` uses a clean package-relative import (`from .tools.calculator import ...`), `adk web` discovers `calculator_agent` directly from the parent directory:
 
     ```shell
-    PYTHONPATH=. uv run adk web .
+    uv run adk web
     ```
+    *(Troubleshooting note: if your earlier Module 9 `agent.py` used a non-relative `from tools.calculator import ...`, update it to `from .tools.calculator import ...` so both `adk web` and `adk eval` resolve the package cleanly!)*
 
 ### Step 2: Record the "Golden Path" Conversation
 
@@ -94,9 +95,9 @@ Let's see what a failure looks like.
 
 1.  **Temporarily break the agent:**
     *   Stop the `uv run adk web` server (`Ctrl+C`).
-    *   Open `tools/calculator.py`.
-    *   In the `add` function, change the calculation to `result = a + b + 1`.
-    *   Start the server again: `PYTHONPATH=. uv run adk web`.
+    *   Open `calculator_agent/tools/calculator.py`.
+    *   In the `add` function, change `MathResult(status="success", result=a + b)` to `MathResult(status="success", result=a + b + 1)`.
+    *   Start the server again from `adk-training`: `uv run adk web`.
 
 2.  **Re-run the evaluation:**
     *   Go back to the "Eval" tab.
@@ -109,7 +110,7 @@ Let's see what a failure looks like.
     *   You will see that the **Actual Output** ("...result is 16") did not match the **Expected Output** ("...result is 15"), causing the `response_match_score` to be below the threshold.
     *   This demonstrates how evaluations can catch regressions in your agent's logic.
 
-4.  **Don't forget to fix the bug!** Stop the server, change the `add` function back to `result = a + b`, and restart it.
+4.  **Don't forget to fix the bug!** Stop the server, change `add` back to `result=a + b`, and restart if needed.
 
 ### Step 6: Explore Advanced Metrics (Optional)
 
@@ -210,23 +211,20 @@ The structure looks like this (some noisy fields like `thought_signature` and ge
 While the Dev UI is great for creating and running evaluations interactively, you can also run them from the command line. This is essential for integrating your agent tests into an automated CI/CD pipeline.
 
 1.  **Stop the `uv run adk web` server.**
-2.  **Create an `__init__.py`** in your `calculator_agent` root, if you don't already have one:
+2.  **Verify `calculator_agent/__init__.py` exists** (created automatically by `adk create`, containing `from . import agent`):
     ```shell
-    echo "from . import agent" > __init__.py
+    ls calculator_agent/__init__.py
     ```
-    `adk eval` loads your agent through this file, unlike `adk run`/`adk web`, which discover `agent.py` directly and don't need it.
-3.  **Run the `uv run adk eval` command:**
-    From your `calculator_agent` directory, run the following command:
+3.  **Run the `uv run adk eval` command from `adk-training`:**
 
     ```shell
-    PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json
+    uv run adk eval calculator_agent calculator_agent/calculator_tests.evalset.json
     ```
-    *   **`PYTHONPATH=.`**: Required for the same reason as Step 1 — `adk eval` (like `adk web`) doesn't add the current directory to Python's import path automatically, so without it `agent.py`'s `from tools.calculator import ...` fails to resolve.
-    *   **`uv run adk eval`**: The main command.
-    *   **`.`**: The path to the agent to be tested (the current directory, `calculator_agent`).
-    *   **`calculator_tests.evalset.json`**: The path to the evaluation file to run, relative to the agent directory (this is where the Dev UI actually saved it in Step 3 — not under `eval_results/`).
+    *   **`uv run adk eval`**: The main CLI evaluation runner.
+    *   **`calculator_agent`**: Path to the agent package folder to test.
+    *   **`calculator_agent/calculator_tests.evalset.json`**: Path to the evaluation set saved by the Dev UI in Step 3.
 
-3.  **Analyze the Output:**
+4.  **Analyze the Output:**
     The command will run the evaluation and print the results directly to your terminal.
 
     ```
@@ -242,7 +240,7 @@ While the Dev UI is great for creating and running evaluations interactively, yo
 
 Built-in criteria like `tool_trajectory_avg_score` can't check business-specific logic — for example, whether the calculator's result is actually mathematically correct. For that, you write a custom metric: a Python function matching ADK's expected signature, wired into `EvalConfig.custom_metrics`.
 
-1.  **Create `custom_metrics.py`** in your `calculator_agent` directory:
+1.  **Create `calculator_agent/custom_metrics.py`:**
     ```python
     from google.adk.evaluation.evaluator import EvaluationResult, PerInvocationResult
     from google.adk.evaluation.eval_metrics import EvalStatus
@@ -261,10 +259,12 @@ Built-in criteria like `tool_trajectory_avg_score` can't check business-specific
     ```
     *(This skeleton always passes — as a challenge, make it actually re-compute the expected result from the tool call arguments and compare it against the tool's response.)*
 
-2.  **Create `eval_config.json`** in the same directory. Registering the function under `custom_metrics` is not enough on its own — it must *also* be listed in `criteria` (with a threshold) for ADK to actually run it. Note that `custom_metrics` is a dict keyed by metric name, not a list:
+2.  **Create `calculator_agent/eval_config.json`**. Registering the function under `custom_metrics` is not enough on its own — list both your custom metric and the built-in criteria under `criteria` so they all run together in the same report:
     ```json
     {
       "criteria": {
+        "tool_trajectory_avg_score": 1.0,
+        "response_match_score": 0.8,
         "check_math_is_correct": 0.5
       },
       "custom_metrics": {
@@ -275,9 +275,9 @@ Built-in criteria like `tool_trajectory_avg_score` can't check business-specific
     }
     ```
 
-3.  **Run the evaluation, pointing at your config file:**
+3.  **Run the evaluation, pointing at your config file** (with `PYTHONPATH=calculator_agent` so ADK resolves `custom_metrics.py`):
     ```shell
-    PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json --config_file_path eval_config.json
+    PYTHONPATH=calculator_agent uv run adk eval calculator_agent calculator_agent/calculator_tests.evalset.json --config_file_path calculator_agent/eval_config.json
     ```
     Your custom metric now runs alongside the built-in ones in the same report.
 
@@ -285,7 +285,7 @@ Built-in criteria like `tool_trajectory_avg_score` can't check business-specific
 
 Static "Golden Path" cases are great for regression testing, but they can't test how your agent handles a real, unpredictable user. **User Simulation** lets an LLM play the user instead, following a `conversation_plan` and an optional persona (`NOVICE`, `EXPERT`, `EVALUATOR`).
 
-1.  **Create `scenarios.json`**, a `ConversationScenarios` file, instead of a fixed conversation:
+1.  **Create `calculator_agent/scenarios.json`**, a `ConversationScenarios` file, instead of a fixed conversation:
     ```json
     {
       "scenarios": [
@@ -298,32 +298,31 @@ Static "Golden Path" cases are great for regression testing, but they can't test
     }
     ```
 
-2.  **Create a `session_input.json`** describing which app/user this simulated conversation belongs to:
+2.  **Create `calculator_agent/session_input.json`** describing which app/user this simulated conversation belongs to:
     ```json
     { "app_name": "calculator_agent", "user_id": "test_user" }
     ```
 
-3.  **Create a new eval set and add the scenario to it.** Just like the Dev UI, the `adk eval_set` CLI commands store eval sets directly in your agent's root directory — so this uses a separate eval set (`user_sim_tests`) rather than mixing dynamic scenarios into `calculator_tests`:
+3.  **Create a new eval set and add the scenario to it** from `adk-training`:
     ```shell
-    uv run adk eval_set create . user_sim_tests
-    uv run adk eval_set add_eval_case . user_sim_tests \
-        --scenarios_file scenarios.json \
-        --session_input_file session_input.json
+    uv run adk eval_set create calculator_agent user_sim_tests
+    uv run adk eval_set add_eval_case calculator_agent user_sim_tests \
+        --scenarios_file calculator_agent/scenarios.json \
+        --session_input_file calculator_agent/session_input.json
     ```
 
-4.  **Create a `user_sim_eval_config.json`** pointing at reference-free metrics. There's no single "expected" response for a dynamically generated conversation, so the default criteria (`tool_trajectory_avg_score`, `response_match_score`) don't work here — both require an `expected_invocations` reference, and running them against a user-simulation eval set fails with `expected_invocations is required for this metric`. Use metrics that judge the resulting conversation on its own merits instead, like `safety_v1` and `hallucinations_v1`:
+4.  **Create `calculator_agent/user_sim_eval_config.json`** pointing at reference-free metrics. Because simulated conversations have no fixed `expected_invocations`, use LLM-judged criteria like `hallucinations_v1` *(if you are authenticated to Google Cloud Vertex AI with `GOOGLE_CLOUD_PROJECT`, you can also add `"safety_v1": 0.8`)*:
     ```json
     {
       "criteria": {
-        "safety_v1": 0.8,
         "hallucinations_v1": 0.8
       }
     }
     ```
 
-5.  **Run the evaluation** against the new eval set, pointing at your config file:
+5.  **Run the evaluation** from `adk-training` against the new eval set:
     ```shell
-    PYTHONPATH=. uv run adk eval . user_sim_tests.evalset.json --config_file_path user_sim_eval_config.json
+    uv run adk eval calculator_agent calculator_agent/user_sim_tests.evalset.json --config_file_path calculator_agent/user_sim_eval_config.json
     ```
     Instead of replaying your exact recorded messages, ADK generates the follow-up turns dynamically, simulating how a hesitant, first-time user might actually phrase things — then the `safety_v1` and `hallucinations_v1` judges score the resulting conversation instead of comparing it against a fixed reference.
 
@@ -331,43 +330,44 @@ Static "Golden Path" cases are great for regression testing, but they can't test
 
 In production, evaluations are not just about correctness, but also about **performance and latency**. To test if your asynchronous agent endpoints can scale under concurrent user traffic without blocking the Python event loop, you can use **Locust**.
 
-1. **Install Locust** (inside your virtual environment):
+1. **Install Locust** in your `adk-training` workspace:
    ```shell
-   uv pip install locust
+   uv add --dev locust
    ```
-2. **Create a `locustfile.py`:**
-   Create a file inside your directory and use this skeletal template. Your task is to fill in the **ADK-specific payload** and **validation logic** where marked with `TODO`:
+2. **Create `calculator_agent/locustfile.py`:**
+   Use this skeletal template and fill in ADK's native `RunAgentRequest` `/run` contract where marked with `TODO`:
 
    ```python
    import json
+   import uuid
    from locust import HttpUser, task, between
 
    class ADKAgentUser(HttpUser):
-       # Wait between 1 and 3 seconds between tasks per user
        wait_time = between(1, 3)
+
+       def on_start(self):
+           self.user_id = f"locust_{uuid.uuid4().hex[:8]}"
+           self.session_id = f"sess_{uuid.uuid4().hex[:8]}"
+           # Create the session on the ADK API server before sending /run turns
+           self.client.post(
+               f"/apps/calculator_agent/users/{self.user_id}/sessions/{self.session_id}",
+               json={},
+           )
 
        @task
        def ask_calculator_agent(self):
            headers = {"Content-Type": "application/json"}
-           
-           # TODO: Define the JSON payload matching ADK's native API contract
-           # It must include a session_id and a prompt (e.g. asking the calculator)
-           payload = {
-               # "session_id": "...",
-               # "prompt": "..."
-           }
-           
-           # TODO: Complete the POST request to the API server's execution endpoint (e.g., "/run")
-           # Hint: Use self.client.post(..., json=payload, headers=headers, catch_response=True)
-           with self.client.post(..., json=payload, headers=headers, catch_response=True) as response:
+
+           # TODO: Build the RunAgentRequest payload with app_name, user_id,
+           # session_id, and new_message={"role": "user", "parts": [{"text": "What is 15 + 27?"}]}
+           payload = {}
+
+           # TODO: POST to "/run" and verify the returned JSON list of Event dicts contains "42"
+           with self.client.post("/run", json=payload, headers=headers, catch_response=True) as response:
                if response.status_code == 200:
                    try:
-                       data = response.json()
-                       # TODO: Check if the expected mathematical result is present in the response
-                       # if expected_value_present:
-                       #     response.success()
-                       # else:
-                       #     response.failure(...)
+                       events = response.json()
+                       # TODO: Inspect events (list[dict]) for the final text containing "42"
                        pass
                    except json.JSONDecodeError:
                        response.failure("Malformed JSON response")
@@ -375,11 +375,15 @@ In production, evaluations are not just about correctness, but also about **perf
                    response.failure(f"HTTP error: {response.status_code}")
    ```
 
-3. **Execute the load test:**
+3. **Start the ADK API server in Terminal 1, then execute Locust in Terminal 2** (both from `adk-training`):
    ```shell
-   locust -f locustfile.py
+   # Terminal 1:
+   uv run adk api_server
+
+   # Terminal 2:
+   uv run locust -f calculator_agent/locustfile.py --host http://127.0.0.1:8000
    ```
-   Open `http://localhost:8089` to start the test and observe your agent response latency and success rate under load.
+   Open `http://localhost:8089` to start the load test and observe latency and throughput.
 
 ### Lab Summary
 
@@ -404,7 +408,7 @@ You have learned to:
 
 <SolutionVault moduleNumber="24">
 
-# Lab 24 Solution: Creating an Evaluation Case for the Calculator Agent
+## Lab 24 Solution: Creating an Evaluation Case for the Calculator Agent
 
 ## Goal
 
@@ -496,37 +500,53 @@ This file contains the expected output for the `calculator_tests.evalset.json` f
 
 (Some noisy fields, such as `thought_signature`, are trimmed here for readability — the real file includes them.)
 
-### Extra Challenge: `locustfile.py` Template
+### Extra Challenge: `calculator_agent/locustfile.py`
 
-This script simulates concurrent users sending prompts to your ADK Agent API server (`uv run adk API_SERVER_ARGS`) to test system latency and endpoint throughput under load.
+This script simulates concurrent users sending prompts to your ADK API server (`uv run adk api_server`) to test system latency and endpoint throughput under load.
 
 ```python
 import json
+import uuid
 from locust import HttpUser, task, between
 
+
 class ADKAgentUser(HttpUser):
-    # Wait between 1 and 3 seconds between tasks per user
     wait_time = between(1, 3)
+
+    def on_start(self):
+        self.user_id = f"locust_{uuid.uuid4().hex[:8]}"
+        self.session_id = f"sess_{uuid.uuid4().hex[:8]}"
+        self.client.post(
+            f"/apps/calculator_agent/users/{self.user_id}/sessions/{self.session_id}",
+            json={},
+        )
 
     @task
     def ask_calculator_agent(self):
-        # Target the native ADK API Server runner execution endpoint
         headers = {"Content-Type": "application/json"}
         payload = {
-            "session_id": "locust-load-test-session",
-            "prompt": "What is 15 + 27?"
+            "app_name": "calculator_agent",
+            "user_id": self.user_id,
+            "session_id": self.session_id,
+            "new_message": {
+                "role": "user",
+                "parts": [{"text": "What is 15 + 27?"}],
+            },
         }
-        
-        # We hit the standard synchronous runner execution endpoint
+
         with self.client.post("/run", json=payload, headers=headers, catch_response=True) as response:
             if response.status_code == 200:
                 try:
-                    data = response.json()
-                    # Check if final response text contains expected result
-                    if "42" in data.get("response", ""):
+                    events = response.json()
+                    full_text = " ".join(
+                        part.get("text", "")
+                        for ev in events
+                        for part in (ev.get("content") or {}).get("parts", [])
+                    )
+                    if "42" in full_text:
                         response.success()
                     else:
-                        response.failure(f"Incorrect agent response: {data}")
+                        response.failure(f"Expected '42' in agent events, got: {full_text}")
                 except json.JSONDecodeError:
                     response.failure("Malformed JSON response from agent server")
             else:
@@ -546,23 +566,19 @@ class ADKAgentUser(HttpUser):
 
         ```yaml
         jobs:
-          test:
+          eval:
             runs-on: ubuntu-latest
             steps:
-              - uses: actions/checkout@v3
-              - name: Set up Python
-                uses: actions/setup-python@v4
-                with:
-                  python-version: '3.10'
+              - uses: actions/checkout@v4
+              - uses: astral-sh/setup-uv@v5
               - name: Install dependencies
-                run: | 
-                  pip install --upgrade pip
-                  pip install "google-adk[eval]"
-                  # Install any agent-specific dependencies
+                run: uv sync --extra eval
               - name: Run agent evaluations
-                run: PYTHONPATH=. uv run adk eval . calculator_tests.evalset.json
+                env:
+                  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+                run: uv run adk eval calculator_agent calculator_agent/calculator_tests.evalset.json
         ```
-        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step will fail, preventing regressions from being merged or deployed.
+        If `uv run adk eval` returns a non-zero exit code (indicating test failures), the CI/CD pipeline step fails, preventing regressions from being merged or deployed.
 
         > **Enterprise AgentOps Tip:** In automated pipelines using the Google Agents CLI suite, you can run `uvx google-agents-cli eval run` to benchmark multiple golden datasets and enforce trajectory quality gates directly before cloud deployments (requires an `agents-cli-manifest.yaml` generated via `uvx google-agents-cli scaffold enhance .`).
 

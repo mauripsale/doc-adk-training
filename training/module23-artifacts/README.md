@@ -44,6 +44,7 @@ Before using artifacts, you must configure an `artifact_service` in your `Runner
 ```python
 # Local volatile testing
 from google.adk.artifacts import InMemoryArtifactService, FileArtifactService, GcsArtifactService
+from google.adk.runners import Runner
 artifact_service = InMemoryArtifactService()
 
 # Local filesystem persistence

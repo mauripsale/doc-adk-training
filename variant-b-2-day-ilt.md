@@ -51,7 +51,7 @@ This 2-day Instructor-Led Training (ILT) is the flagship curriculum for engineer
 | **11:50 - 12:40** | [Module 17: Static Workflows (Linear & Parallel)](./training/module17-static-orchestration/) | 50 min | Lab | Deterministic `Workflow` pipelines with parallel fan-out and `JoinNode` fan-in. |
 | **12:40 - 13:40** | *Lunch Break* | 60 min | — | — |
 | **13:40 - 14:40** | [Module 24: Evaluating Agent Performance](./training/module24-evaluation/) | 60 min | Lab | Evaluating agents using `agents-cli eval` / `adk eval`, LLM-as-judge, and evalsets. |
-| **14:40 - 15:30** | [Module 25: Observability & Tracing](./training/module25-observability/) | 50 min | Lab | Cloud Trace, OpenTelemetry plugins, turn logging, and debugging production traffic. |
+| **14:40 - 15:30** | [Module 26: Observability & Tracing](./training/module26-observability/) | 50 min | Lab | Cloud Trace, OpenTelemetry plugins, turn logging, and debugging production traffic. |
 | **15:30 - 15:45** | *Afternoon Break* | 15 min | — | — |
 | **15:45 - 16:35** | [Module 35: Deployment to Agent Runtime & Cloud Run](./training/module35-deployment-agent-runtime/) | 50 min | Lab | Containerization, deployment via `agents-cli deploy`, and Gemini Enterprise publishing. |
 | **16:35 - 17:00** | [Module 38: Production Best Practices & Graduation](./training/module38-best-practices/) | 25 min | Review | Security guardrails, rate limiting, enterprise patterns, and final Q&A. |

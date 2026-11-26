@@ -34,26 +34,26 @@ This module's lab will guide you through both methods.
 ![Agent Runtime Architecture & Authorization Lifecycle (Dark)](img/agent-runtime-auth-lifecycle-dark.webp#gh-dark-mode-only)
 *Figure: Managed execution, OAuth2 authentication, and deployment lifecycle in Vertex AI Agent Runtime.*
 
-The Agents CLI streamlines the path to production into a few simple commands:
+The Agents CLI streamlines the path to production into two core commands:
 
-1.  **Scaffold (`uvx google-agents-cli scaffold enhance`):** This is a one-time command that analyzes your existing ADK agent and adds the necessary deployment files to it. This includes Terraform configurations for infrastructure and Cloud Build YAML files for the CI/CD pipeline.
+1.  **Scaffold (`uvx google-agents-cli scaffold enhance . --adk -d agent_runtime --agent-directory support_agent`):** Analyzes an existing plain ADK directory (passing `--adk` as a shortcut for `--base-template adk` when no `agents-cli-manifest.yaml` exists yet) and adds production deployment files in place—including a `Dockerfile`, FastAPI/A2A entrypoint, Terraform configurations (`deployment/terraform/`), and CI/CD pipelines.
 
-2.  **Deploy (`uvx google-agents-cli deploy`):** This command is the main entry point for deployment. It performs two key stages:
-    *   **Provision:** It runs a Cloud Build pipeline that uses Terraform to create all the necessary cloud infrastructure for your agent (Artifact Registry, Agent Runtime service, service accounts, etc.).
-    *   **Upload & Execute:** It packages your agent code, uploads it to Agent Runtime, and starts the agent.
+2.  **Deploy (`uvx google-agents-cli deploy`):** Packages your project, builds the container image on Agent Runtime in your infrastructure region (e.g., `--region us-central1` while passing `--env-vars "GOOGLE_CLOUD_LOCATION=global"` for `gemini-3.8-flash` Vertex AI inference), and starts or updates the managed `ReasoningEngine` resource:
+    *   **Non-blocking rollouts:** Because Agent Runtime container builds take 5–10 minutes, pass `--no-wait` to start the rollout asynchronously and `--status` to poll progress until completion.
+    *   **Downstream metadata (`deployment_metadata.json`):** Upon completion, `agents-cli deploy` writes `deployment_metadata.json` (recording `remote_agent_runtime_id`, `deployment_target`, `is_a2a`, and `agent_directory`), which feeds directly into Module 36's zero-flag `uvx google-agents-cli publish gemini` registration!
 
 <KnowledgeCheck
   id="m35-agent-runtime-accelerated-deployment"
-  question="When deploying an ADK agent to Vertex AI Agent Runtime using google-agents-cli, which command generates the Infrastructure as Code (Terraform) and Cloud Build CI/CD pipeline assets?"
+  question="When enhancing an existing plain ADK directory (without an existing manifest) for Vertex AI Agent Runtime using google-agents-cli, which command generates the Dockerfile, Terraform IaC, and CI/CD pipeline assets?"
   options={[
-    "uvx google-agents-cli scaffold enhance",
+    "uvx google-agents-cli scaffold enhance . --adk -d agent_runtime --agent-directory support_agent",
     "uv run adk build --docker-only",
     "gcloud compute instances create-with-container",
     "terraform init -backend=agent-platform"
   ]}
   correctIndex={0}
-  hint="Think about the CLI command that adds deployment and CI/CD templates to an existing agent codebase."
-  explanation="The 'google-agents-cli scaffold enhance' command inspects your existing agent code and automatically adds production-ready deployment configurations, including Terraform IaC files and Cloud Build CI/CD pipelines for Agent Runtime."
+  hint="Think about the CLI subcommand that applies the ADK base template ('--adk') and Agent Runtime target ('-d agent_runtime') to an existing directory."
+  explanation="Running 'uvx google-agents-cli scaffold enhance . --adk -d agent_runtime --agent-directory <dir>' applies the ADK base template to an existing folder in place, adding the Dockerfile, FastAPI/A2A adapter, Terraform IaC, and CI/CD workflows without overwriting your agent code."
 />
 
 ### Key Takeaways

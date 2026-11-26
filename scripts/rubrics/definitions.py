@@ -182,9 +182,9 @@ RUBRICS: Dict[str, ModuleRubric] = {
     ),
     "25": ModuleRubric(
         module_id="25",
-        title="Observability: Tracing, Logging, and AgentOps",
+        title="Agent Callbacks & Interceptors",
         required_imports=["google.adk"],
-        theory_ref="Module 25 Theory -> 'Distributed Tracing & Telemetry'",
+        theory_ref="Module 25 Theory -> 'Lifecycle Interceptors & Hook Points'",
     ),
     "25_5": ModuleRubric(
         module_id="25_5",
@@ -194,9 +194,9 @@ RUBRICS: Dict[str, ModuleRubric] = {
     ),
     "26": ModuleRubric(
         module_id="26",
-        title="Agent Callbacks & Interceptors",
+        title="Observability: Tracing, Logging, and AgentOps",
         required_imports=["google.adk"],
-        theory_ref="Module 26 Theory -> 'Lifecycle Interceptors & Hook Points'",
+        theory_ref="Module 26 Theory -> 'Distributed Tracing & Telemetry'",
     ),
     "27": ModuleRubric(
         module_id="27",

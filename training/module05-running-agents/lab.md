@@ -55,6 +55,7 @@ Your task is to run and interact with your **"Support Analyzer"** agent using th
         ```
     *   Verify that you receive a stream of JSON responses containing the structured analysis (category, sentiment, summary).
 4.  **Bonus: `uvx google-agents-cli playground`:**
+    > **🔭 Enterprise Preview (Covered in Depth in Part 6):** `google-agents-cli` and `agents-cli-manifest.yaml` are optional enterprise AgentOps companions that you will master in **Part 6 (Deployment & Enterprise AgentOps)**. You haven't missed an earlier module—feel free to try this quick preview now or skip straight to the reflection questions!
     *   Stop the API server (`Ctrl+C`).
     *   **Prerequisite:** `google-agents-cli` requires an `agents-cli-manifest.yaml` in your project root (unlike `uv run adk web`). If you created your agent with `adk create`, first enhance your project inside the agent folder (`support_analyzer`) or initialize the manifest:
         ```bash

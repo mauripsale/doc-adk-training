@@ -58,9 +58,9 @@ This self-paced track is optimized for individual software developers, AI practi
 | 🧠 [Module 22: State & Memory Management](./training/module22-state-and-memory/) | Medium | 35 min | Session stores, memory rewind, state lifecycle |
 | 📦 [Module 23: Handling Files with Artifacts](./training/module23-artifacts/) | Medium | 40 min | Reading & generating files with agents |
 | 🏭 [Module 24: Evaluating Agent Performance](./training/module24-evaluation/) | Medium-High | 50 min | `agents-cli eval`, trajectory scoring, LLM judge |
-| 🏭 [Module 25: Observability & Tracing Plugins](./training/module25-observability/) | High | 35 min | Cloud Trace, OpenTelemetry & turn logging |
-| 🦺 [Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/) | Medium | 35 min | Safety guardrails & content filters |
-| 🛡️ [Module 26: Callbacks & Safety Guardrails](./training/module26-callbacks/) | High | 40 min | Pre/Post execution interceptors |
+| 🛡️ [Module 25: Callbacks & Node-Level Guardrails](./training/module25-callbacks/) | High | 40 min | Pre/Post execution interceptors & response caching |
+| 🦺 [Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/) | Medium | 35 min | `BasePlugin`, PII redaction & prompt injection guardrails |
+| 🏭 [Module 26: Observability & Tracing Plugins](./training/module26-observability/) | High | 35 min | Cloud Trace, OpenTelemetry & turn logging |
 
 ---
 

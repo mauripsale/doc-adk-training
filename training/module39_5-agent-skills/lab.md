@@ -14,7 +14,7 @@ In this lab, you will create a simple ADK Skill on your file system and configur
 
 ### Step 1: Create the Project
 
-1.  **Create a new agent project:**
+1.  **Create a new agent project** inside your `adk-training/` workspace:
 
     <Setup/>
 
@@ -32,16 +32,9 @@ In this lab, you will create a simple ADK Skill on your file system and configur
 
 We need to create the physical structure for our skill.
 
-1.  Inside `skills_agent`, create a directory called `skills`:
+1.  Inside `skills_agent`, create the `skills/greeting-skill` directory and required `SKILL.md` file:
     ```shell
-    mkdir skills
-    ```
-2.  Inside `skills`, create a directory for our specific skill:
-    ```shell
-    mkdir skills/greeting-skill
-    ```
-3.  Inside `skills/greeting-skill`, create the required `SKILL.md` file:
-    ```shell
+    mkdir -p skills/greeting-skill
     touch skills/greeting-skill/SKILL.md
     ```
 
@@ -69,7 +62,7 @@ This gives the skill a distinctive, made-up phrase ("Nebula-9 Collective") that 
 
 ### Step 4: Configure the Agent
 
-**Exercise:** Open your main `agent.py` file. Your task is to load the skill from the directory and provide it to the agent.
+**Exercise:** Open `skills_agent/agent.py`. Your task is to load the skill from the directory and provide it to the agent.
 
 ```python
 import pathlib
@@ -103,20 +96,22 @@ root_agent = Agent(
 )
 ```
 
-*(Note: The full implementation is available in the `lab-solution.md` if you need a hint.)*
+*(Note: The full implementation is available in the `lab-solution.md` or in the Reference Solution Vault below if you need a hint.)*
 
 ### Step 5: Test the Skill
 
-1.  **Set up your `.env` file.**
-2.  **Navigate to the parent directory** (`cd ..`) and start the Dev UI:
+1.  **Set up your `.env` file** inside `skills_agent/`.
+2.  **Navigate back to the parent `adk-training/` directory** (`cd ..`) and launch the Dev UI:
     ```shell
-    uv run adk web skills_agent
+    cd ..
+    uv run adk web
     ```
+    Select `skills_agent` from the agent dropdown in the Dev UI.
 3.  **Interact with the system:**
     *   Say "Hello there, my name is Alex."
     *   You should receive the exact Nebula-9 Collective greeting template, including the made-up "Nebula-9 Collective" phrase -- proof the agent loaded and followed the `SKILL.md` instructions, not just a generic friendly reply.
 4.  **Examine the Trace View:**
-    *   Look at the trace. You should see the agent making a "tool call" to activate the `greeting-skill` skill. This is progressive disclosure in action!
+    *   Look at the trace. You should see the agent making a `load_skill` tool call to activate `greeting-skill`. This is progressive disclosure in action!
 
 ### Self-Reflection Questions
 - Look at your `SKILL.md` file. Which part of it is loaded into the agent's context *before* the user says hello? Which part is loaded *after*?
@@ -133,7 +128,25 @@ root_agent = Agent(
 
 ## Goal
 
-This file contains the complete code for the `agent.py` script in the Agent Skills lab.
+This file contains the complete `SKILL.md` definition and `agent.py` implementation for the Agent Skills lab.
+
+### `skills_agent/skills/greeting-skill/SKILL.md`
+
+```markdown
+---
+name: greeting-skill
+description: The official Nebula-9 Collective greeting protocol. Use this skill any time the user greets you, says hello, or asks to be greeted.
+---
+
+# Nebula-9 Collective Greeting Protocol
+
+You are now using the official Nebula-9 Collective Greeting Skill!
+
+Step 1: Read the user's input to see if they provided a name.
+Step 2: Respond using EXACTLY this template, replacing [NAME] with their name (or "traveler" if you don't know it):
+"🌌 Greetings, [NAME]! Welcome aboard the Nebula-9 Collective. May your orbit be ever bright. 🚀✨"
+Step 3: Do not deviate from this template under any circumstances -- no extra commentary before or after it.
+```
 
 ### `skills_agent/agent.py`
 
@@ -175,7 +188,7 @@ root_agent = Agent(
         "you or says hello, you MUST call load_skill('greeting-skill') "
         "first, before responding, and then follow its instructions exactly."
     ),
-    tools=[my_skill_toolset]
+    tools=[my_skill_toolset],
 )
 ```
 

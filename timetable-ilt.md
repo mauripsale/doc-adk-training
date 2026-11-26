@@ -58,9 +58,9 @@ This detailed timetable maps out the complete multi-day master track for enterpr
 | 🧠 [Module 22: State & Memory Management](./training/module22-state-and-memory/) | Medium | 45 | Sessions, memory stores, rewind capabilities |
 | 📦 [Module 23: Handling Files with Artifacts](./training/module23-artifacts/) | Medium | 50 | Binary files, CSV/PDF input & outputs |
 | 🏭 [Module 24: Evaluating Agent Performance](./training/module24-evaluation/) | Medium-High | 60 | `agents-cli eval`, LLM-as-judge, test evalsets |
-| 🏭 [Module 25: Observability & Tracing Plugins](./training/module25-observability/) | High | 50 | Cloud Trace, OpenTelemetry, metrics |
-| 🦺 [Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/) | Medium | 45 | Safety policies, toxicity filters, PII masking |
-| 🛡️ [Module 26: Callbacks & Safety Guardrails](./training/module26-callbacks/) | High | 55 | Pre/Post-execution hooks and interceptors |
+| 🛡️ [Module 25: Callbacks & Node-Level Guardrails](./training/module25-callbacks/) | High | 55 | Pre/Post-execution hooks, caching & interceptors |
+| 🦺 [Module 25.5: Responsible AI (RAI) & Safety Plugins](./training/module25_5-rai-safety-plugins/) | Medium | 45 | `BasePlugin`, safety policies, PII & prompt injection defense |
+| 🏭 [Module 26: Observability & Tracing Plugins](./training/module26-observability/) | High | 50 | Cloud Trace, OpenTelemetry & fleet metrics |
 
 ---
 

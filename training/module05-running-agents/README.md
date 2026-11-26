@@ -56,6 +56,8 @@ This mode is essential for moving your agent from a local development tool to a 
 
 ### 4. The Modern Lifecycle Companion: `agents-cli playground` & `run`
 
+> **🔭 Enterprise Preview (Covered in Depth in Part 6):** Don't worry if you haven't seen `google-agents-cli` or `agents-cli-manifest.yaml` yet! Throughout Parts 1–5, your day-to-day commands are `uv run adk web`, `uv run adk run`, and `uv run adk api_server`. We preview **`agents-cli`** (`uvx google-agents-cli ...`) here because it wraps ADK projects with enterprise scaffolding, evaluation gates, and cloud deployment—all of which we cover step-by-step in **Part 6 (Deployment & Enterprise AgentOps)**.
+
 Alongside the native `adk` framework commands, Google's **`agents-cli`** toolset provides a high-level developer workflow:
 
 * **Interactive Playground:** `agents-cli playground` spins up the local developer UI with automatic file-watching and hot-reloading.

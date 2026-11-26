@@ -1,10 +1,10 @@
 ---
-sidebar_position: 25
-title: "Module 25: Observability & AgentOps"
-pagination_label: "Module 25: Observability & AgentOps — 📖 Theory & Overview"
+sidebar_position: 26
+title: "Module 26: Observability & AgentOps"
+pagination_label: "Module 26: Observability & AgentOps — 📖 Theory & Overview"
 ---
 
-# Module 25: Advanced Observability & Enterprise AgentOps
+# Module 26: Advanced Observability & Enterprise AgentOps
 
 ![Enterprise Observability & OpenTelemetry (Light)](img/hero-light.webp#gh-light-mode-only)
 ![Enterprise Observability & OpenTelemetry (Dark)](img/hero-dark.webp#gh-dark-mode-only)
@@ -12,6 +12,8 @@ pagination_label: "Module 25: Observability & AgentOps — 📖 Theory & Overvie
 ## Theory
 
 ### Why AgentOps & Advanced Observability Matter
+
+> **🧭 Completing the Callback & Plugin Triad (Modules 25 → 25.5 → 26):** In **Module 25**, you learned the six node-level lifecycle callbacks; in **Module 25.5**, you elevated them into `App`-level `BasePlugin` guardrails for Responsible AI safety. Here in **Module 26**, we apply that exact same `BasePlugin` architecture—paired with **OpenTelemetry**—to gain deep operational visibility across your entire agent fleet!
 
 In production, agents are non-deterministic, distributed software systems. They execute multi-step reasoning, query external tools, spawn sub-agents, and mutate conversational state across asynchronous sessions. 
 
@@ -45,9 +47,9 @@ A production-grade AgentOps strategy is built on four core pillars:
 
 ---
 
-### The ADK Plugin Architecture
+### The ADK Plugin Architecture for Telemetry & Error Recovery
 
-**Plugins** (`google.adk.plugins.BasePlugin`) are modular, reusable classes that intercept and observe events flowing through an agent's lifecycle without altering business logic or prompt instructions.
+Building on the `BasePlugin` pattern from **Module 25.5** (where plugins intercepted `before_model_callback` and `on_event_callback` to block unsafe content), observability plugins use hooks like **`on_tool_error_callback`** and **`on_event_callback`** to record operational metrics, fire alerts, and gracefully recover from tool exceptions across every agent in `App(plugins=[...])` without cluttering prompt instructions or tool code.
 
 ```python
 from google.adk.plugins import BasePlugin
@@ -110,7 +112,7 @@ except DefaultCredentialsError:
 ### 🧠 Interactive Knowledge Check
 
 <KnowledgeCheck
-  id="m25-plugin-error-recovery"
+  id="m26-plugin-error-recovery"
   question="What happens inside an ADK BasePlugin when on_tool_error_callback returns a recovery dictionary like {'status': 'error', 'message': '...'} instead of None?"
   options={[
     "The unhandled tool exception is caught and converted into a structured tool response so the agent can recover gracefully",
@@ -140,3 +142,11 @@ An agent may emit multiple intermediate events (e.g. tool calls, thinking steps,
 
 It allows business leaders and SRE teams to analyze long-term agent trends: token consumption, cost per user, tool success rates, and user drop-off over thousands of historical sessions.
 </details>
+
+---
+
+### Closing Out Part 4: Ready for External Protocols & UIs (Part 5)
+
+This closes out **Part 4: Production Readiness**! Over Modules 22 through 26, you equipped your agents with persistent sessions and memory (`SessionService` & `MemoryService`), versioned binary/text artifacts (`ArtifactService`), golden-trajectory evaluation (`adk eval`), lifecycle callbacks (`Module 25`), fail-closed RAI safety plugins (`Module 25.5`), and OpenTelemetry AgentOps observability (`Module 26`).
+
+Next, in **Part 5: Ecosystem Protocols & Multimodal Interfaces**, you will connect these hardened, observable agents to external tool servers, remote agent fleets, and live user interfaces—starting in **Module 27** with the **Model Context Protocol (MCP)**!

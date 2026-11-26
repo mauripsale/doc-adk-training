@@ -54,9 +54,20 @@ Now, if another request for the same `session_id` arrives a moment later, Cloud 
 
 When the MCP server is running on a public URL on Cloud Run, our ADK agent can no longer use `StdioConnectionParams`, which is designed for running a local subprocess.
 
-Instead, the agent must be configured to connect to the remote server over the network. The MCP library provides connection types for this, such as `StreamableHTTPConnectionParams`, which allows the ADK `McpToolset` to communicate with the deployed server using standard HTTP requests.
+Instead, configure `McpToolset` (from `google.adk.tools.mcp_tool`) with a network transport parameter class:
 
-In the lab, you will modify the shopping cart server to be stateless, containerize it, and deploy it to Cloud Run. You will then reconfigure your ADK agent to connect to its public URL.
+*   **`StreamableHTTPConnectionParams` (Recommended):** Connects over the modern MCP Streamable HTTP transport (mounted at `/mcp` by default in `FastMCP`).
+*   **`SseConnectionParams` (Legacy HTTP+SSE):** Connects to older MCP servers that expose a separate Server-Sent Events endpoint.
+
+```python
+from google.adk.tools.mcp_tool import (
+    McpToolset,
+    StreamableHTTPConnectionParams,
+    SseConnectionParams,
+)
+```
+
+In the lab, you will modify the shopping cart server to be stateless, containerize it, and deploy it to Cloud Run in `DEPLOY_REGION=us-central1`. You will then configure your local ADK client agent (using `GOOGLE_CLOUD_LOCATION=global` for `gemini-3.8-flash`) to connect to its public `/mcp` endpoint.
 
 ### Production Considerations for MCP
 
@@ -81,6 +92,20 @@ You can implement HITL in the ADK using a `before_tool_callback`. This callback 
 1.  Check if the tool being called is on a list of "destructive" operations.
 2.  If it is, you can block the execution and return a message to the agent indicating that approval is required.
 3.  This allows a user in the UI (or an automated policy) to review the requested operation and approve or deny it before it runs.
+
+<KnowledgeCheck
+  id="m34-stateless-mcp-cloud-run"
+  question="Why must a stateful MCP server externalize its session data (for example, to Memorystore/Redis or Firestore) before being deployed to Cloud Run, and which ADK connection class connects to FastMCP's '/mcp' HTTP endpoint?"
+  options={[
+    "Cloud Run instances are stateless and ephemeral—requests may hit different containers or scale to zero—and the client connects via 'StreamableHTTPConnectionParams'",
+    "Cloud Run blocks all outbound database connections and requires 'StdioConnectionParams' over SSH",
+    "Global Python lists automatically replicate across all Cloud Run instances when 'SseConnectionParams' is used",
+    "FastMCP automatically persists '/tmp' files across container termination without an external store"
+  ]}
+  correctIndex={0}
+  hint="Think about what happens to in-memory or '/tmp' state when Cloud Run scales horizontally or scales down to zero, and how remote HTTP MCP servers are reached."
+  explanation="Cloud Run containers are stateless: consecutive tool calls can land on separate container instances, and scaling to zero wipes container memory and '/tmp'. Externalizing state keyed by 'Mcp-Session-Id' keeps carts consistent across instances, while 'StreamableHTTPConnectionParams' connects 'McpToolset' to the remote '/mcp' endpoint."
+/>
 
 ### Key Takeaways
 - Serverless platforms like Cloud Run are **stateless**, meaning in-memory state is lost between requests.

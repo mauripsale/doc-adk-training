@@ -46,17 +46,40 @@ The `McpToolset` is the bridge. It connects to an MCP server, discovers the tool
 
 ### MCP Connection Types
 
-The ADK supports several ways to connect to an MCP server:
+The ADK exposes `McpToolset` and its transport parameter classes under `google.adk.tools.mcp_tool` (installed via `uv add "google-adk[mcp]"`):
 
-*   **`StdioConnectionParams`**: For running an MCP server as a local subprocess and communicating over standard input/output. This is the most common method for local development.
-*   **`SseConnectionParams`**: For connecting to a remote server that uses Server-Sent Events (SSE) for real-time, streaming communication.
-*   **`StreamableHTTPConnectionParams`**: For connecting to a remote server that supports bidirectional streaming over HTTP.
+*   **`StdioConnectionParams`** (paired with `StdioServerParameters` from `mcp`): Runs an MCP server as a local subprocess and communicates over standard input/output. This is the most common method for local development.
+*   **`SseConnectionParams`**: Connects to a remote MCP server that uses Server-Sent Events (SSE) for streaming communication.
+*   **`StreamableHTTPConnectionParams`**: Connects to a remote MCP server over modern streamable HTTP (ideal for hosted APIs like GitHub's MCP endpoint).
 
-In the lab, you will use the `Stdio` connection to run a local filesystem server and give your agent the ability to interact with your files.
+```python
+from google.adk.tools.mcp_tool import (
+    McpToolset,
+    StdioConnectionParams,
+    StreamableHTTPConnectionParams,
+)
+from mcp import StdioServerParameters
+```
+
+In the lab, you will configure `StdioConnectionParams` to launch a sandboxed local filesystem server and give your agent the ability to inspect files, plus an optional remote HTTP integration.
+
+<KnowledgeCheck
+  id="m27-mcp-toolset-architecture"
+  question="What role does McpToolset play when connecting an ADK Agent to an external MCP server over StdioConnectionParams?"
+  options={[
+    "It launches or connects to the MCP server, dynamically discovers its tool schemas, and proxies tool calls while keeping server state outside the agent",
+    "It compiles external JavaScript or Python server code into static ADK FunctionTool bytecode at build time",
+    "It replaces the ADK SessionService so conversation history is stored inside the MCP server's filesystem",
+    "It automatically sandboxes any subprocess to a read-only container without requiring directory arguments or tool_filter"
+  ]}
+  correctIndex={0}
+  hint="Think about how the 3-tier MCP client-server architecture separates tool discovery/execution from the ADK agent."
+  explanation="McpToolset acts as the MCP client adapter inside your ADK agent: it connects to the external server (launching the subprocess when using StdioConnectionParams), dynamically discovers available tools via the MCP protocol, and forwards tool invocations to the stateful server. You are still responsible for passing an explicit sandbox directory and optional tool_filter."
+/>
 
 ### Key Takeaways
 - Standard function tools are **stateless**, which limits their ability to handle ongoing, multi-turn interactions.
 - The **Model Context Protocol (MCP)** is an open standard that enables agents to connect to **stateful** external tools.
-- The ADK acts as an MCP client, using the `McpToolset` to connect to and consume tools from an MCP server.
+- The ADK acts as an MCP client, using `McpToolset` (`google.adk.tools.mcp_tool`) to connect to and consume tools from an MCP server.
 - **Workflow Integration:** In ADK 2.0, an `Agent` node equipped with an `McpToolset` becomes a powerful interface to external systems within your graph.
-- **Security and Sandboxing:** Launching an MCP server as a subprocess (e.g., via `StdioConnectionParams`) grants the external code operational freedom. Always **sandbox** the server to a specific directory to minimize risk.
+- **Security and Sandboxing:** Launching an MCP server as a subprocess (e.g., via `StdioConnectionParams`) grants the external code operational freedom. Always **sandbox** the server to a specific directory and restrict exposed tools with `tool_filter` to minimize risk.

@@ -1,14 +1,14 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
-pagination_label: "Module 26: Callbacks & Safety Guardrails — 🧪 Challenge Lab"
+pagination_label: "Module 25: Callbacks & Safety Guardrails — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';
 
-# Module 26: Callbacks and Guardrails - Building a Content Moderator
+# Module 25: Callbacks and Guardrails - Building a Content Moderator
 
-## Lab 26: Building a Content Moderation Assistant with Caching
+## Lab 25: Building a Content Moderation Assistant with Caching
 
 ### Goal
 
@@ -193,9 +193,9 @@ uv run adk run content_moderator
 
 ### 🔐 Reference Solution Vault
 
-<SolutionVault moduleNumber="26">
+<SolutionVault moduleNumber="25">
 
-## Lab 26 Solution: Building a Content Moderation Assistant
+## Lab 25 Solution: Building a Content Moderation Assistant
 
 ## Goal
 

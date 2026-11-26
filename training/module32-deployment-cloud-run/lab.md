@@ -86,43 +86,53 @@ The `uv run adk deploy cloud_run` command is a powerful tool that automates most
           - config_path: tech_support_agent.yaml
         ```
 
-4.  **Configure the `.env` file for Vertex AI:**
-    Cloud Run deployments work best with Agent Platform. Open the `.env` file and configure it for your project.
-    ```
-    GOOGLE_GENAI_USE_VERTEXAI=1
+4.  **Configure the `.env` file for Vertex AI / Agent Platform:**
+    Open `support_agent/.env` and configure ADK 2.0's enterprise Vertex AI settings. Notice that `GOOGLE_CLOUD_LOCATION` is set to `global` so `gemini-3.8-flash` resolves against the global Vertex AI endpoint, and `GOOGLE_GENAI_USE_ENTERPRISE=1` enables Vertex AI mode in the underlying `google-genai` SDK (replacing the deprecated `GOOGLE_GENAI_USE_VERTEXAI` variable):
+    ```ini
+    GOOGLE_GENAI_USE_ENTERPRISE=1
     GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-    GOOGLE_CLOUD_LOCATION=us-central1
+    GOOGLE_CLOUD_LOCATION=global
     ```
     Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
 
 ### Step 2: Deploy the Agent to Cloud Run
 
-Now for the main event. We will use a single command to package, containerize, and deploy our agent.
+Now for the main event. We will separate our Cloud Run infrastructure region (`DEPLOY_REGION=us-central1`) from the container's Vertex AI model endpoint (`GOOGLE_CLOUD_LOCATION=global`), then package, containerize, and deploy our agent in a single command.
 
-1.  **Navigate back to the project root:**
-    Make sure you are in the `customer_support_cloud` directory (the parent of `support_agent`).
+1.  **Navigate back to the project root and set shell variables:**
+    Make sure you are in the `customer_support_cloud` directory (the parent of `support_agent`), and export your project ID and deployment region:
 
     ```shell
     cd ..
+    export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+    export DEPLOY_REGION=us-central1
     ```
 
 2.  **Run the deployment command:**
 
-    Execute the following command, replacing `YOUR_PROJECT_ID` with your Google Cloud Project ID.
+    Execute the following command:
 
     ```shell
     uv run adk deploy cloud_run \
-      --project=YOUR_PROJECT_ID \
-      --region=us-central1 \
+      --project="$GOOGLE_CLOUD_PROJECT" \
+      --region="$DEPLOY_REGION" \
+      --env GOOGLE_CLOUD_LOCATION=global \
       --with_ui \
       support_agent/
     ```
     **Command Breakdown:**
-    *   `uv run adk deploy cloud_run`: The main command.
-    *   `--project=YOUR_PROJECT_ID`: Specifies which Google Cloud project to deploy to.
-    *   `--region=us-central1`: Specifies the geographical region for the deployment.
-    *   `--with_ui`: This crucial flag tells the command to include the ADK Developer UI in the deployment, so we can interact with it in a browser.
-    *   `support_agent/`: The path to the directory containing our agent's configuration.
+    *   `uv run adk deploy cloud_run`: Packages the agent, builds the container via Cloud Build, and deploys to Cloud Run (automatically setting `GOOGLE_GENAI_USE_ENTERPRISE=1` and `GOOGLE_CLOUD_PROJECT` inside the container).
+    *   `--project="$GOOGLE_CLOUD_PROJECT"`: Specifies which Google Cloud project to deploy to.
+    *   `--region="$DEPLOY_REGION"`: Deploys the Cloud Run service and Artifact Registry image in `us-central1`.
+    *   `--env GOOGLE_CLOUD_LOCATION=global`: Overrides the container's runtime `GOOGLE_CLOUD_LOCATION` to `global` (otherwise `adk deploy cloud_run` defaults `GOOGLE_CLOUD_LOCATION` to `--region`, which would cause `404 NOT_FOUND` errors when calling `gemini-3.8-flash`).
+    *   `--with_ui`: Includes the ADK Developer UI in the deployment so you can interact with it in a browser during this lab.
+    *   `support_agent/`: Path to the directory containing your agent's configuration.
+
+    > **Production Tip (`google-agents-cli`):** When moving beyond quick single-command rollouts to full Terraform IaC and CI/CD, you can scaffold and deploy this exact directory using:
+    > ```shell
+    > uvx google-agents-cli scaffold enhance . --adk -d cloud_run --agent-directory support_agent
+    > uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --region "$DEPLOY_REGION" --env-vars "GOOGLE_CLOUD_LOCATION=global" --no-confirm-project
+    > ```
 
 3.  **Follow the Prompts:**
     *   The command may ask you to enable certain APIs if they are not already enabled. Type `y` and press Enter to approve.
@@ -208,6 +218,10 @@ The most important part is the **Service URL**.
 *   **`PERMISSION_DENIED` on `cloudbuild.googleapis.com` or `artifactregistry.googleapis.com`:**
     *   **Problem:** The Cloud Build service account, which builds the container, doesn't have permission to push to Artifact Registry or deploy to Cloud Run. The `uv run adk deploy` command attempts to set these permissions automatically, but may fail if your user account lacks sufficient privileges.
     *   **Solution:** Manually grant the `Cloud Build Service Account` the `Artifact Registry Writer` and `Cloud Run Admin` roles in the IAM section of the Google Cloud Console.
+
+*   **`404 NOT_FOUND` when invoking `gemini-3.8-flash` in the deployed service:**
+    *   **Problem:** The Cloud Run container has `GOOGLE_CLOUD_LOCATION=us-central1` instead of `global`. When `--region` is passed to `adk deploy cloud_run`, it defaults `GOOGLE_CLOUD_LOCATION` to the Cloud Run infrastructure region unless explicitly overridden.
+    *   **Solution:** Re-run the deploy command with `--env GOOGLE_CLOUD_LOCATION=global` (or update the running service with `gcloud run services update SERVICE_NAME --region="$DEPLOY_REGION" --update-env-vars="GOOGLE_CLOUD_LOCATION=global"`).
 
 *   **Deployment fails with a generic error:**
     *   **Solution:** Go to the Google Cloud Console, navigate to "Cloud Build", and look at the build history. Find the failed build and inspect its logs. The logs will provide a detailed error message explaining why the container build failed (e.g., a typo in `requirements.txt`, a syntax error in a Python file, etc.).

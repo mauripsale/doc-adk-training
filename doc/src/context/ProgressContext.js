@@ -39,9 +39,9 @@ export const CURRICULUM_MODULES = [
   { id: 'module22-state-and-memory', title: '22: State & Memory Management', part: 4, partTitle: 'Part 4: Production Readiness' },
   { id: 'module23-artifacts', title: '23: Artifacts & Output Handling', part: 4, partTitle: 'Part 4: Production Readiness' },
   { id: 'module24-evaluation', title: '24: Evaluation & LLM-as-a-Judge', part: 4, partTitle: 'Part 4: Production Readiness' },
-  { id: 'module25-observability', title: '25: Observability & Cloud Trace', part: 4, partTitle: 'Part 4: Production Readiness' },
+  { id: 'module25-callbacks', title: '25: Callbacks & Guardrails', part: 4, partTitle: 'Part 4: Production Readiness' },
   { id: 'module25_5-rai-safety-plugins', title: '25.5: RAI Safety & Moderation', part: 4, partTitle: 'Part 4: Production Readiness' },
-  { id: 'module26-callbacks', title: '26: Callbacks & Guardrails', part: 4, partTitle: 'Part 4: Production Readiness' },
+  { id: 'module26-observability', title: '26: Observability & Cloud Trace', part: 4, partTitle: 'Part 4: Production Readiness' },
 
   // Part 5: Advanced Integrations & UI (Modules 27–30)
   { id: 'module27-intro-to-mcp', title: '27: Intro to Model Context Protocol', part: 5, partTitle: 'Part 5: Advanced Integrations & UI' },
@@ -84,6 +84,8 @@ export function ProgressProvider({ children }) {
             'module19-collaborative-teams/': 'module16-collaborative-teams/',
             'module16-static-orchestration/': 'module17-static-orchestration/',
             'module17-structured-routing/': 'module19-structured-routing/',
+            'module26-callbacks/': 'module25-callbacks/',
+            'module25-observability/': 'module26-observability/',
           };
           const validIds = new Set(CURRICULUM_MODULES.map((m) => m.id));
           const migrated = {};

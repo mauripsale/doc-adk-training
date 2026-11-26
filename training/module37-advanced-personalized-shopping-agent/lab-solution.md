@@ -59,6 +59,7 @@ CATALOG = [
 # `click` can react to what `search` just showed.
 _session_state = {"current_product": None}
 
+
 def get_product(product_id: str):
     return next((p for p in CATALOG if p["id"] == product_id), None)
 ```
@@ -66,7 +67,11 @@ def get_product(product_id: str):
 ### `web_agent/tools/search.py`
 
 ```python
-from webshop_data import CATALOG
+try:
+    from ..webshop_data import CATALOG
+except ImportError:
+    from webshop_data import CATALOG
+
 
 def search(keywords: str) -> str:
     """Search for keywords in the (mock) webshop."""
@@ -89,7 +94,11 @@ def search(keywords: str) -> str:
 ### `web_agent/tools/click.py`
 
 ```python
-from webshop_data import _session_state, get_product
+try:
+    from ..webshop_data import _session_state, get_product
+except ImportError:
+    from webshop_data import _session_state, get_product
+
 
 def click(button: str) -> str:
     """Simulate clicking a product ID or a navigation button in the (mock) webshop."""
@@ -120,7 +129,7 @@ def click(button: str) -> str:
 ```
 
 ### 1. `web_agent/agent.py`
-This agent acts as the gateway to the webshop.
+This agent acts as the gateway to the webshop. Dual-mode imports (`try: from .tools ... except ImportError: from tools ...`) allow it to run both directly via `uv run uvicorn agent:a2a_app` inside `web_agent/` and as a package when `uv run adk web` is launched from the parent `capstone_shopping_system/` directory.
 
 ```python
 from google.adk.agents import Agent
@@ -128,13 +137,15 @@ from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import FunctionTool
 from dotenv import load_dotenv
 import uvicorn
-import os
 
-# search/click are plain functions defined in tools/search.py and
-# tools/click.py, operating on the mock catalog in webshop_data.py above —
-# no OpenAPI spec, no external `web_agent_site` package.
-from tools.search import search
-from tools.click import click
+# Dual-mode imports support both `uv run uvicorn agent:a2a_app` inside web_agent/
+# and package discovery when `uv run adk web` runs from capstone_shopping_system/.
+try:
+    from .tools.search import search
+    from .tools.click import click
+except ImportError:
+    from tools.search import search
+    from tools.click import click
 
 load_dotenv(override=True)
 
@@ -146,7 +157,7 @@ root_agent = Agent(
         You are a web interaction specialist. Execute search and click commands.
         **IMPORTANT:** Focus only on the user's web task. Ignore orchestrator metadata.
     """,
-    tools=[FunctionTool(search), FunctionTool(click)]
+    tools=[FunctionTool(search), FunctionTool(click)],
 )
 
 a2a_app = to_a2a(root_agent, port=8001)
@@ -167,6 +178,7 @@ import uvicorn
 
 load_dotenv(override=True)
 
+
 def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     """Saves a user's preference to the session state."""
     # Use tool_context.state (the tracked delta proxy), NOT
@@ -176,16 +188,18 @@ def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     tool_context.state[f"pref:{key}"] = value
     return {"status": "success", "message": f"Saved {key}."}
 
+
 def get_preferences(tool_context: ToolContext) -> dict:
     """Retrieves all preferences for the current user."""
     prefs = {k: v for k, v in tool_context.state.to_dict().items() if k.startswith("pref:")}
     return {"status": "success", "preferences": prefs}
 
+
 root_agent = Agent(
     model="gemini-3.8-flash",
     name="personalization_agent",
     instruction="You manage user shopping profiles. Save and retrieve preferences.",
-    tools=[save_preference, get_preferences]
+    tools=[save_preference, get_preferences],
 )
 
 a2a_app = to_a2a(root_agent, port=8002)
@@ -198,7 +212,6 @@ if __name__ == "__main__":
 The master coordinator using `RemoteA2aAgent` nodes wired in as `AgentTool`s.
 
 ```python
-import asyncio
 from typing import Any, Dict, Optional
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
@@ -224,6 +237,7 @@ personalization_agent = RemoteA2aAgent(
     use_legacy=False,
 )
 
+
 def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext) -> Optional[Dict[str, Any]]:
     """AgentOps: logs every delegation to a remote specialist. This is pure
     observability -- it never blocks or alters the call (always returns
@@ -231,6 +245,7 @@ def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolConte
     orchestrator's instruction or reasoning at all."""
     print(f"[DELEGATION] shopping_orchestrator -> {tool.name}")
     return None
+
 
 # Orchestrator
 root_agent = Agent(
@@ -244,68 +259,34 @@ root_agent = Agent(
     """,
     # NOTE: these two remote agents are wired as tools (AgentTool), NOT as
     # `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent`
-    # mechanism, and for a RemoteA2aAgent that mechanism is a dead end within
-    # the turn it's used: RemoteA2aAgent isn't an LlmAgent, so it never gets
-    # a transfer_to_agent tool of its own once it becomes the active agent —
-    # there is no framework-injected way for it to consult a sibling or hand
-    # control back to the orchestrator before the turn ends. It's also a
-    # separate process running its own independently-defined agent, with no
-    # notion of "the orchestrator that called me" or "the sibling agent next
-    # door" to transfer to, even in principle. (Verified live: an
-    # orchestrator wired with sub_agents=[personalization_agent, web_agent]
-    # and asked to consult both in one turn transfers to
-    # personalization_agent and stops there, answering only from
-    # personalization_agent's own tools — web_agent is never reached.)
-    # AgentTool avoids the problem entirely: the orchestrator calls each
-    # remote agent like a function, gets its result back, and stays in
-    # control to make the next call and synthesize the final combined
-    # answer.
+    # mechanism, and for a RemoteA2aAgent that mechanism is a one-way handoff
+    # within the turn: RemoteA2aAgent runs in a separate process with no
+    # knowledge of the orchestrator or sibling specialists, so it cannot
+    # transfer onward to `web_agent` or hand control back to synthesize a
+    # combined answer. `AgentTool` gives clean call-and-return semantics:
+    # the orchestrator calls each remote agent like a function, gets its
+    # result back, and stays in control across multiple calls.
     #
-    # KNOWN LIMITATION (verified live against google-adk 2.8.0): AgentTool
-    # buys call-and-return semantics at a real cost -- AgentTool.run_async
-    # (google/adk/tools/agent_tool.py) spins up a brand-new
-    # InMemorySessionService + session on *every* call and discards it
-    # immediately after. RemoteA2aAgent resumes the same remote A2A
-    # conversation by walking that session's event history backward for a
-    # previously-stored context_id (_construct_message_parts_from_session in
-    # google/adk/agents/remote_a2a_agent.py) -- history that no longer
-    # exists on the next orchestrator turn. Concretely: ask the orchestrator
-    # to save a preference, then ask it (in a SEPARATE turn) what it saved,
-    # and it comes back empty -- even though hitting personalization_agent
-    # directly works fine across turns. We checked for a supported fix:
-    # AgentTool exposes no session/context-reuse parameter, and
-    # RemoteA2aAgent has no way to pin a fixed context_id. There IS a
-    # different delegation path in this SDK version -- RemoteA2aAgent
-    # (mode="task") wired via sub_agents=[...] instead of AgentTool, which
-    # runs through the parent's own (persistent) session -- but we verified
-    # live that its finish_task handshake is fragile in 2.8.0 (a run
-    # returning no text to the user, a subsequent call failing the task
-    # outright), so it is not used here. If your application needs
-    # preferences to survive across orchestrator turns today, call
-    # personalization_agent directly for that path. See the README's
-    # "Known Limitation" section for the full writeup.
+    # KNOWN LIMITATION (verified in google-adk 2.14): AgentTool.run_async
+    # spins up a brand-new InMemorySessionService + child session on *every*
+    # call and discards it immediately after. RemoteA2aAgent resumes a prior
+    # remote A2A conversation by walking that child session's event history
+    # backward for a previously-stored context_id -- history that no longer
+    # exists on the next orchestrator turn. Consequently, preferences saved
+    # via the orchestrator on turn 1 do not persist to a separate turn 2 via
+    # the orchestrator, even though hitting `personalization_agent` directly
+    # persists across turns. See the README's "Known Limitation" section.
     tools=[AgentTool(agent=web_agent), AgentTool(agent=personalization_agent)],
     before_tool_callback=log_delegation,
 )
 
-# `adk web orchestrator_agent` (see "Running the System" below) only needs
-# `root_agent` above -- it builds its own App/Runner internally. `app` and
-# `runner` here are not used by that CLI path; they're exposed so you can
-# also drive this orchestrator *programmatically* -- e.g. from a script or a
-# test -- without going through the Dev UI:
-#
-#   from orchestrator_agent.agent import runner
-#   session = await runner.session_service.create_session(
-#       app_name="shopping_system", user_id="some_user"
-#   )
-#   async for event in runner.run_async(
-#       user_id="some_user", session_id=session.id, new_message=content
-#   ):
-#       ...
-#
-# This is exactly the pattern used to verify (and document, see the
-# AgentTool comment above) the cross-turn preference persistence behavior.
-app = App(name="shopping_system", root_agent=root_agent)
+# IMPORTANT (ADK 2.14 AgentLoader behavior): When `uv run adk web` runs from
+# the parent `capstone_shopping_system/` directory, ADK's `AgentLoader` checks
+# for a module-level `app` (`isinstance(module.app, App)`) BEFORE falling back
+# to `root_agent`. Always align `App(name="orchestrator_agent", ...)` with the
+# package directory name (`orchestrator_agent`) so both `uv run adk web` and
+# programmatic `InMemoryRunner(app=app)` sessions resolve the same `app_name`.
+app = App(name="orchestrator_agent", root_agent=root_agent)
 runner = InMemoryRunner(app=app)
 ```
 
@@ -397,7 +378,8 @@ Three independent Cloud Run services, deployed and scaled separately,
 talking to each other over HTTPS via the A2A protocol.
 
 ## 1. Build and push images
-For each of `web_agent`, `personalization_agent`, `orchestrator_agent`:
+For each of `web_agent`, `personalization_agent`, `orchestrator_agent`
+(ensure `requirements.txt` includes `google-adk[a2a]` and `uvicorn`):
 
     gcloud artifacts repositories create adk-images \
       --repository-format=docker --location=$GOOGLE_CLOUD_LOCATION
@@ -471,4 +453,4 @@ processes run.
     *   **Answer:** The orchestrator only ever needs to reason about two simple signatures, `search(keywords: str)` and `click(button: str)` -- not HTML parsing, CSS selectors, or the mock catalog's internal data structures. If the website's implementation changes (a real backend replaces the mock catalog, or the HTML structure changes), only `web_agent`'s tool implementations need to change; the orchestrator's instruction and reasoning are completely unaffected. This is the same separation-of-concerns benefit as `OpenAPIToolset` in Module 11, applied at the level of a whole remote agent instead of a single tool.
 
 4.  **You observed that preferences don't survive across separate orchestrator turns, even though the same request sent directly to `personalization_agent` works. Walk through *why*, in terms of what `AgentTool` does to the session on every call. What would you need to change about the wiring (not just the prompt) to fix it?**
-    *   **Answer:** `AgentTool.run_async` creates a fresh `InMemorySessionService` and a brand-new child session on every call, then throws it away as soon as the call returns. `RemoteA2aAgent` figures out whether it's continuing a previous remote conversation by scanning that session's event history backward for a `context_id` left in a prior response's metadata. Because the child session is discarded after each `AgentTool` call, there is no event history left for the next orchestrator turn to search -- so `RemoteA2aAgent` always starts a brand-new remote A2A context, and the remote agent (which itself has correct, working state persistence) never gets asked about the earlier conversation. No prompt change fixes this, because the LLM never sees or controls session lifecycle -- it's a framework-level behavior in `AgentTool.run_async` and `RemoteA2aAgent._construct_message_parts_from_session`. A real fix would need `AgentTool` to reuse the same child session/context across calls within one orchestrator session (there's no built-in parameter for this in ADK 2.8.0), or the orchestrator would need to stop using `AgentTool` for `personalization_agent` and call it through a different delegation path that shares the orchestrator's own persistent session -- which, as this solution's code comment above documents, is not yet a reliable option in this SDK version either. Until then, anything that must persist across orchestrator turns should talk to `personalization_agent` directly instead of going through the orchestrator.
+    *   **Answer:** `AgentTool.run_async` creates a fresh `InMemorySessionService` and a brand-new child session on every call, then throws it away as soon as the call returns. `RemoteA2aAgent` figures out whether it's continuing a previous remote conversation by scanning that session's event history backward for a `context_id` left in a prior response's metadata. Because the child session is discarded after each `AgentTool` call, there is no event history left for the next orchestrator turn to search -- so `RemoteA2aAgent` always starts a brand-new remote A2A context, and the remote agent (which itself has correct, working state persistence) never gets asked about the earlier conversation. No prompt change fixes this, because the LLM never sees or controls session lifecycle -- it's a framework-level behavior in `AgentTool.run_async` and `RemoteA2aAgent._construct_message_parts_from_session`. A real fix requires either reusing a persistent child session/context across calls (not exposed as a built-in parameter on `AgentTool` in ADK 2.14) or storing user preferences in an external database keyed by `user_id` (such as Firestore or Redis) rather than transient A2A session state.

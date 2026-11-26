@@ -26,11 +26,11 @@ In ADK 2.0, every component is a **Node** in a **Workflow Graph**. Choosing the 
 | Pattern | When to use it | Key Characteristics |
 | :--- | :--- | :--- |
 | **`Agent`** | Natural language reasoning and dynamic tool calling. | Non-deterministic, flexible. Best for high-level decision making. |
-| **`Workflow` (Static) ** | Fixed, predictable pipelines (Sequential/Parallel). | Deterministic. Reduced latency and cost by avoiding LLM routing where logic is known. |
+| **`Workflow` (Static)** | Fixed, predictable pipelines (Sequential/Parallel). | Deterministic. Reduced latency and cost by avoiding LLM routing where logic is known. |
 | **`@node` (Dynamic)** | Complex, code-based orchestration (Loops, If/Else). | Maximum control. Allows arbitrary Python logic between agent executions. |
 
 *   **Small, Focused Tools:** Design your tools to follow the single-responsibility principle. A tool should do one thing well.
-*   **Progressive Disclosure with Skills:** Don't overload an agent with 50 tools. Group related tools into **Skills** and only activate them when needed.
+*   **Progressive Disclosure with Skills:** Don't overload an agent with 50 tools. Group related domain workflows and instructions into **Skills** (`SkillToolset`, covered in depth in **Module 39.5**) and only activate them on demand when needed.
 *   **Deterministic Routing:** If you *know* that Step B always follows Step A, don't ask an LLM to decide. Use a `Workflow` or a Dynamic `@node`.
 
 ### 2. Resilience: Framework-Level Error Handling
@@ -38,11 +38,11 @@ In ADK 2.0, every component is a **Node** in a **Workflow Graph**. Choosing the 
 ADK 2.0 changes the way we handle failures. Instead of writing complex `try...except` logic inside every tool, we now leverage the **Workflow Runtime**.
 
 #### The "Let it Fail" Pattern
-In ADK 1.x, you were taught to catch all exceptions in tools. In ADK 2.0, you should **allow standard exceptions to propagate** out of your tools. 
+In ADK 1.x, you were taught to catch all exceptions in tools. In ADK 2.0, you should **allow standard exceptions to propagate** out of your tools and workflow nodes.
 
 **Why?**
-1.  **Automatic Retries:** If a tool fails with an exception, the ADK framework can automatically retry the execution based on a `RetryConfig`.
-2.  **Human-in-the-Loop (HITL):** Broad `except Exception:` blocks can accidentally trap `NodeInterruptedError`, which the framework uses to pause workflows for user input.
+1.  **Automatic Retries:** If a node or tool fails with an exception, the ADK framework can automatically retry the execution based on a `RetryConfig`.
+2.  **Human-in-the-Loop (HITL) Interrupts:** When a workflow pauses for human input, ADK unwinds the node stack using `NodeInterruptedError`. In ADK 2.14, `NodeInterruptedError` inherits directly from Python's `BaseException` (rather than `Exception`) specifically so normal `except Exception:` blocks won't accidentally catch it—however, **never** write a bare `except:` or `except BaseException:` without re-raising, as swallowing `NodeInterruptedError` silently breaks workflow pause and resume!
 
 #### Configuring Retries
 You configure retry logic per-node, on the node itself (either as a constructor argument like `Agent(..., retry_config=...)`, or via `@node(retry_config=...)` for function nodes):
@@ -62,17 +62,19 @@ my_agent_node = Agent(
 ### 3. Performance Optimization
 
 *   **Model Selection Hierarchy:** Use `gemini-3.8-flash` for routing, classification, and simple tool calling. Save `gemini-3.1-pro-preview` for complex multi-step reasoning.
-*   **Caching with `before_agent_callback`:** Implement a caching layer to skip LLM calls entirely if a similar request was recently processed.
-*   **Async Everything:** Always use `async` tool definitions to prevent blocking the event loop during I/O-bound tasks (API calls, DB queries).
+*   **Caching with `before_agent_callback` or Keyed Node Caches:** Implement a caching layer keyed on the normalized user query to skip redundant LLM or backend calls when an identical request was recently processed.
+*   **Async Everything:** Always use `async` tool and node definitions to prevent blocking the event loop during I/O-bound tasks (API calls, DB queries).
 
 ### 4. Security & Safety
 
-*   **Fail-Closed Validation:** Use Pydantic schemas for both `input_schema` and `output_schema`. If validation fails, the node fails immediately (preventing prompt injection or malformed data from propagating).
+*   **Fail-Closed Validation:** Use Pydantic schemas for input and output contracts. If validation fails, the entry node raises immediately, preventing prompt injection or malformed data from propagating downstream.
 *   **Secrets Management:** Use Google Secret Manager or `.env` files. **Never** log sensitive data or return it in an agent response.
-*   **HITL for Side Effects:** Any tool that performs a destructive action (deleting data, making a payment) **must** yield a `RequestInput` for human confirmation.
+*   **HITL for Side Effects:** Any action that performs a destructive or irreversible side effect (deleting data, executing a financial transfer) **must** pause for human approval using the right primitive for your layer:
+    *   **Agent Tools (`FunctionTool`):** Wrap standard Python tool functions with `FunctionTool(my_fn, require_confirmation=True)` (Module 13) so ADK automatically emits a confirmation `RequestInput` event before executing the tool.
+    *   **Workflow Nodes (`@node`):** Inside a generator `@node` function, explicitly `yield RequestInput(...)` (from `google.adk.events`) to pause the workflow graph until the user supplies confirmation or structured input.
 
 ### Key Takeaways
-- **Think in Nodes:** Break logic into discrete, testable nodes orchestrated by a Workflow.
-- **Framework Resilience:** Propagate exceptions to enable ADK 2.0 automatic retries and HITL.
-- **Model Efficiency:** Match the model capability to the task complexity.
-- **Strict Schemas:** Use Pydantic to enforce "fail-closed" security at every node boundary.
+- **Think in Nodes:** Break logic into discrete, testable nodes orchestrated by a Workflow, and pass validated domain payloads cleanly from node to node.
+- **Framework Resilience:** Propagate exceptions to enable ADK 2.0 automatic retries, and never swallow `BaseException` / `NodeInterruptedError`.
+- **Model Efficiency:** Match the model capability to the task complexity, and use Skills (Module 39.5) for progressive context disclosure.
+- **Strict Schemas & HITL:** Use Pydantic to enforce "fail-closed" security at node boundaries and `FunctionTool(..., require_confirmation=True)` or `@node` `yield RequestInput(...)` for destructive side effects.

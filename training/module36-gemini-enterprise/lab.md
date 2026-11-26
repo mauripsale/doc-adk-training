@@ -65,17 +65,29 @@ Finally, think about how you will monitor the system.
 
 ---
 
+### Step 5: Plan Publishing & Fleet Registration Commands
+
+Suppose the **`Lead Qualifier Agent`** is deployed to **Agent Runtime** (producing a `deployment_metadata.json` file, and requiring OAuth user consent for Salesforce), while a lightweight **`Store Inventory Agent`** is deployed to **Cloud Run** alongside a shared Cloud Run **MCP Server**.
+
+**Your Task:**
+*   Write the `uvx google-agents-cli publish gemini` command to register the Agent Runtime `Lead Qualifier Agent` using **ADK Registration** (`--registration-type adk`).
+*   Write the `uvx google-agents-cli publish gemini` command to register the Cloud Run `Store Inventory Agent` using **A2A Registration** (`--registration-type a2a`), and note the IAM role required on Cloud Run for the Discovery Engine service agent.
+*   Write the `gcloud beta agent-registry` command to audit all fleet-registered agents in `us-central1`.
+
+---
+
 ### Lab Summary
 
-You have successfully created a high-level strategic plan for deploying and managing an enterprise-wide agent ecosystem.
+You have successfully created a high-level strategic plan for deploying, publishing, and governing an enterprise-wide agent ecosystem.
 
 You have learned to think about:
 *   Identifying opportunities for specialized agents across a business.
 *   The importance of data connectors for grounding agents in enterprise reality.
 *   Designing governance and access control policies to ensure security.
 *   Planning for monitoring, alerting, and cost management in a production environment.
+*   Selecting between ADK (`--registration-type adk`) and A2A (`--registration-type a2a`) publishing workflows in `uvx google-agents-cli publish gemini` and auditing fleets with Google Cloud Agent Registry.
 
-Check the `lab-solution.md` to see example answers for this exercise.
+Check the **Reference Solution Vault** below to see example answers for this exercise.
 
 ### Self-Reflection Questions
 - Why is a centralized "Agent Gallery" a valuable feature for a large enterprise? What problems does it solve?
@@ -142,6 +154,39 @@ This file contains example answers and thought processes for the conceptual lab 
     *   **Alert:** Set up an alert in Cloud Monitoring that triggers if the agent's "failure rate" (the percentage of queries where it couldn't find an answer) exceeds 15% over a 1-hour period. This could indicate a problem with the SharePoint connector or that the knowledge base is missing critical documents.
 *   **Marketing Team Budget:**
     *   In Gemini Enterprise's cost management dashboard, create a budget for the "Marketing" cost center. Set a monthly limit of $500. Configure an alert to notify the `marketing-manager@company.com` when usage reaches 80% of the budget.
+
+---
+
+### Step 5: Publishing & Fleet Registration Commands (Example Plan)
+
+*   **1. Agent Runtime `Lead Qualifier Agent` (Mode 1 — ADK Registration):**
+    If run from the project root containing `deployment_metadata.json`, `remote_agent_runtime_id` and `--registration-type adk` are auto-detected; in CI/CD, supply the explicit flags:
+    ```bash
+    uvx google-agents-cli publish gemini \
+      --gemini-app-id "projects/123456789/locations/global/collections/default_collection/engines/retail-enterprise-app" \
+      --registration-type adk \
+      --agent-runtime-id "projects/123456789/locations/us-central1/reasoningEngines/987654321" \
+      --display-name "Lead Qualifier Agent" \
+      --description "Scores incoming Salesforce leads for the retail sales organization."
+    ```
+
+*   **2. Cloud Run `Store Inventory Agent` (Mode 2 — A2A Registration):**
+    First grant `roles/run.servicesInvoker` on the Cloud Run service to `service-123456789@gcp-sa-discoveryengine.iam.gserviceaccount.com`, then register via its live Agent Card URL:
+    ```bash
+    uvx google-agents-cli publish gemini \
+      --gemini-app-id "projects/123456789/locations/global/collections/default_collection/engines/retail-enterprise-app" \
+      --registration-type a2a \
+      --agent-card-url "https://store-inventory-xyz-uc.a.run.app/a2a/inventory_agent/.well-known/agent-card.json" \
+      --display-name "Store Inventory Agent" \
+      --description "Checks real-time retail stock levels across regional warehouses."
+    ```
+
+*   **3. Fleet Governance Audit with Google Cloud Agent Registry:**
+    ```bash
+    gcloud beta agent-registry agents list \
+      --project="$GOOGLE_CLOUD_PROJECT" \
+      --location="us-central1"
+    ```
 
 ### Self-Reflection Answers
 

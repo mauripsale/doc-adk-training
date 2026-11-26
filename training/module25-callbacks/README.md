@@ -1,10 +1,10 @@
 ---
-sidebar_position: 26
-title: "Module 26: Callbacks and Guardrails - Agent Safety and Monitoring"
-pagination_label: "Module 26: Callbacks & Safety Guardrails — 📖 Theory & Overview"
+sidebar_position: 25
+title: "Module 25: Callbacks and Guardrails - Agent Safety and Monitoring"
+pagination_label: "Module 25: Callbacks & Safety Guardrails — 📖 Theory & Overview"
 ---
 
-# Module 26: Callbacks and Guardrails - Agent Safety and Monitoring
+# Module 25: Callbacks and Guardrails - Agent Safety and Monitoring
 
 ![Agent Execution Callbacks & Runtime Guardrails (Light)](img/hero-light.webp#gh-light-mode-only)
 ![Agent Execution Callbacks & Runtime Guardrails (Dark)](img/hero-dark.webp#gh-dark-mode-only)
@@ -44,7 +44,29 @@ The power of callbacks lies in their ability to **override** the default framewo
 ### Callbacks vs. Plugins: Which one to use?
 
 *   **`Agent` Callbacks (Node-Scoped Control):** Registered directly on a single `Agent(before_*=..., after_*=...)`. Use callbacks when behavior is specific to **one agent node** (such as per-agent response caching, custom prompt shaping, or single-node tool argument rules).
-*   **`App` Plugins (Fleet-Wide Governance & Telemetry):** Registered once on `App(plugins=[...])` (`BasePlugin`), wrapping **every** agent, sub-agent, and workflow node in the application and executing *before* node-level callbacks. Use plugins for cross-cutting concerns like global OpenTelemetry/BigQuery logging, error recovery (`on_tool_error_callback`), and organization-wide RAI/PII guardrails (Modules 25 & 25.5).
+*   **`App` Plugins (Fleet-Wide Governance & Telemetry):** Registered once on `App(plugins=[...])` by subclassing `BasePlugin` (`from google.adk.plugins import BasePlugin`). Plugins wrap **every** agent, sub-agent, and workflow node in the application and execute *before* node-level callbacks—making them the standard architecture for organization-wide RAI/PII guardrails (**Module 25.5**) and OpenTelemetry/AgentOps observability (**Module 26**).
+
+#### Signature Bridge: `Agent` Function Callbacks vs. `BasePlugin` Methods
+
+Notice one subtle difference you will use immediately in **Modules 25.5 and 26**:
+*   Standalone `Agent` callbacks can be plain `def` (or `async def`) functions taking positional arguments—e.g., `def before_model_callback(callback_context, llm_request):`.
+*   `BasePlugin` lifecycle methods are **`async def`** methods that receive **keyword-only arguments (`*`)**—so include `*, ...` and `**kwargs` for clean forward compatibility:
+
+```python
+from google.adk.apps import App
+from google.adk.plugins import BasePlugin
+
+class MyPlugin(BasePlugin):
+    def __init__(self, name: str = "my_plugin"):
+        super().__init__(name)
+
+    # Note the keyword-only `*` signature used by BasePlugin hooks in Modules 25.5 & 26!
+    async def before_model_callback(self, *, callback_context, llm_request, **kwargs):
+        print(f"[Plugin] Intercepting LLM request for agent: {callback_context.agent_name}")
+        return None  # Return None to continue, or an LlmResponse to short-circuit
+
+app = App(name="my_app", root_agent=root_agent, plugins=[MyPlugin()])
+```
 
 ### Built-in Example: Self-Healing Plugins
 
@@ -72,7 +94,7 @@ Note these operate one level below the `RetryConfig` you'll see in Module 38, wh
 These two plugins *recover* from errors. If you only need to be *notified* of an unrecoverable one — e.g. to page on-call before the app crashes — `BasePlugin` also exposes `on_agent_error_callback` and `on_run_error_callback`, notification-only hooks that always re-raise the original exception.
 
 <KnowledgeCheck
-  id="m26-lifecycle-callback-overrides"
+  id="m25-lifecycle-callback-overrides"
   question="In ADK 2.0, what happens when a before_tool_callback returns a dictionary with an error payload instead of None?"
   options={[
     "The underlying tool execution is intercepted and blocked; the returned dictionary is provided to the agent as the tool result",
@@ -86,9 +108,7 @@ These two plugins *recover* from errors. If you only need to be *notified* of an
 />
 
 ### Key Takeaways
-- **Callbacks** provide programmatic "hooks" into an agent's execution lifecycle.
-- **Node-level scope:** Callbacks are registered on the `Agent` object.
-- **Overriding:** You can bypass expensive LLM calls or risky tool executions by returning a value from a "before" callback.
-- **Type Safety:** ADK 2.0 enforces specific signatures for each callback type to ensure robust data flow.
-
-This closes out **Part 4: Production Readiness** — your agent now has memory, artifacts, evaluation, observability, and guardrails. In Part 5, you'll connect it to external systems and real user interfaces, starting with the **Model Context Protocol (MCP)** — and callbacks like these become even more important once your agent is talking to tools and services outside your own codebase.
+- **Callbacks** provide programmatic "hooks" into an agent's execution lifecycle (`before_agent`, `after_agent`, `before_model`, `after_model`, `before_tool`, `after_tool`).
+- **Node-level scope:** Callbacks are registered directly on an `Agent` object for single-node customization and caching.
+- **Overriding:** You can bypass expensive LLM calls or risky tool executions by returning a replacement object instead of `None` from a "before" callback.
+- **Bridge to `BasePlugin`:** When you need these exact lifecycle hooks applied across *every* agent in an `App`, package them into a `BasePlugin`—which is exactly what we'll build next in **Module 25.5 (Responsible AI & Safety Plugins)** for fail-closed enterprise security and **Module 26 (Observability & AgentOps)** for fleet-wide telemetry!

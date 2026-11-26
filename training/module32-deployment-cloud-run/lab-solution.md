@@ -46,6 +46,10 @@ The most important part is the **Service URL**.
     *   **Problem:** The Cloud Build service account, which builds the container, doesn't have permission to push to Artifact Registry or deploy to Cloud Run. The `uv run adk deploy` command attempts to set these permissions automatically, but may fail if your user account lacks sufficient privileges.
     *   **Solution:** Manually grant the `Cloud Build Service Account` the `Artifact Registry Writer` and `Cloud Run Admin` roles in the IAM section of the Google Cloud Console.
 
+*   **`404 NOT_FOUND` when invoking `gemini-3.8-flash` in the deployed service:**
+    *   **Problem:** The Cloud Run container has `GOOGLE_CLOUD_LOCATION=us-central1` instead of `global`. When `--region` is passed to `adk deploy cloud_run`, it defaults `GOOGLE_CLOUD_LOCATION` to the Cloud Run infrastructure region unless explicitly overridden.
+    *   **Solution:** Re-run the deploy command with `--env GOOGLE_CLOUD_LOCATION=global` (or update the running service with `gcloud run services update SERVICE_NAME --region="$DEPLOY_REGION" --update-env-vars="GOOGLE_CLOUD_LOCATION=global"`).
+
 *   **Deployment fails with a generic error:**
     *   **Solution:** Go to the Google Cloud Console, navigate to "Cloud Build", and look at the build history. Find the failed build and inspect its logs. The logs will provide a detailed error message explaining why the container build failed (e.g., a typo in `requirements.txt`, a syntax error in a Python file, etc.).
 

@@ -13,18 +13,18 @@ This lab is a procedural tutorial. The solution for both parts is a successfully
 
 ### Part 1: Accelerated Deployment Solution
 
-After running `uvx google-agents-cli deploy`, a successful run of the command is the primary indicator of success.
+After running `uvx google-agents-cli scaffold enhance . --adk -d agent_runtime --agent-directory support_agent --region "$DEPLOY_REGION"` followed by `uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --region "$DEPLOY_REGION" --env-vars "GOOGLE_CLOUD_LOCATION=global" --no-confirm-project` (or `--no-wait` + `--status`), a successful completion is the primary indicator of success.
 
 **Expected Outcome:**
-*   The `uvx google-agents-cli deploy` command completes without errors in your terminal.
-*   A new agent with the name you configured appears in the **Agent Platform -> Agent Runtime** section of the Google Cloud Console.
-*   You can copy the **Agent Runtime ID** from the console to use with a client application.
+*   The `uvx google-agents-cli deploy` command completes without errors and writes `deployment_metadata.json` containing `remote_agent_runtime_id`.
+*   A new agent appears in **Agent Platform -> Agent Runtime** in the Google Cloud Console (`us-central1`).
+*   `deployment_metadata.json` is ready to be consumed directly by `uvx google-agents-cli publish gemini` in Module 36.
 
 ---
 
 ### Part 2: Standard Deployment Solution
 
-This section contains the complete code for `support_agent/agent.py`, `deploy.py`, and `interact.py` used in the manual deployment part of the lab.
+This section contains the complete code for `support_agent/agent.py`, `deploy.py`, `interact.py`, and `local_test.py` used in the manual deployment part of the lab.
 
 #### `support_agent/agent.py`
 
@@ -63,7 +63,7 @@ Your job is to understand the user's request and delegate it to the correct spec
 
 #### `deploy.py`
 
-This script uses the Vertex AI SDK to package and deploy the agent.
+This script initializes Vertex AI in `DEPLOY_REGION = "us-central1"` for the Agent Runtime control plane while injecting `GOOGLE_CLOUD_LOCATION=global` into the runtime container so `gemini-3.8-flash` resolves on the global endpoint (Agent Runtime automatically injects `GOOGLE_CLOUD_PROJECT`).
 
 ```python
 import vertexai
@@ -72,24 +72,28 @@ from support_agent.agent import root_agent
 
 # --- CONFIGURATION ---
 PROJECT_ID = "your-gcp-project-id"
-LOCATION = "us-central1"
+DEPLOY_REGION = "us-central1"
 STAGING_BUCKET = "gs://your-unique-bucket-name"
 AGENT_DISPLAY_NAME = "customer-support-agent"
 
 def main():
-    # Initialize Vertex AI SDK
-    vertexai.init(project=PROJECT_ID, location=LOCATION, staging_bucket=STAGING_BUCKET)
+    # Initialize Vertex AI SDK in the infrastructure deployment region
+    vertexai.init(project=PROJECT_ID, location=DEPLOY_REGION, staging_bucket=STAGING_BUCKET)
 
     # 1. Wrap your agent in an AdkApp
     print("Wrapping agent in AdkApp...")
     app = agent_engines.AdkApp(agent=root_agent)
 
-    # 2. Deploy to Agent Runtime
-    print(f"Deploying '{AGENT_DISPLAY_NAME}' to Agent Runtime...")
+    # 2. Deploy to Agent Runtime (separating DEPLOY_REGION from GOOGLE_CLOUD_LOCATION=global)
+    print(f"Deploying '{AGENT_DISPLAY_NAME}' to Agent Runtime in {DEPLOY_REGION}...")
     remote_app = agent_engines.create(
         agent_engine=app,
         display_name=AGENT_DISPLAY_NAME,
-        requirements=["google-cloud-aiplatform[adk,agent_engines]>=1.111"],
+        requirements=["google-cloud-aiplatform[adk,agent_engines]>=1.129.0"],
+        env_vars={
+            "GOOGLE_GENAI_USE_ENTERPRISE": "1",
+            "GOOGLE_CLOUD_LOCATION": "global",
+        },
     )
 
     print(f"Deployment complete. Resource Name: {remote_app.resource_name}")
@@ -99,7 +103,7 @@ if __name__ == "__main__":
     main()
 ```
 
-> **Note:** earlier versions of this lab passed `enable_tracing=True` to `AdkApp`. That parameter is now deprecated — telemetry is controlled via the `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` environment variable or the Cloud Console toggle instead, so it's simply omitted here.
+> **Note:** Earlier versions of this lab passed `enable_tracing=True` to `AdkApp`. That parameter is deprecated — telemetry is controlled via the `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` environment variable or the Cloud Console toggle instead.
 
 #### `interact.py`
 
@@ -109,14 +113,13 @@ import vertexai
 from vertexai import agent_engines
 
 # --- CONFIGURATION ---
-# Note: Replace these with your actual Google Cloud project details.
 PROJECT_ID = "your-gcp-project-id"
-LOCATION = "us-central1"
-# Note: Replace this with the ID output by the deploy.py script.
+DEPLOY_REGION = "us-central1"
+# Replace with the ID printed by `uv run python deploy.py`
 AGENT_ENGINE_ID = "YOUR_AGENT_ENGINE_ID"
 
 async def main():
-    vertexai.init(project=PROJECT_ID, location=LOCATION)
+    vertexai.init(project=PROJECT_ID, location=DEPLOY_REGION)
 
     # Get a reference to the deployed agent
     remote_app = agent_engines.get(AGENT_ENGINE_ID)
@@ -132,6 +135,7 @@ async def main():
 
     final_response = ""
     async for event in remote_app.async_stream_query(
+        user_id="test-user-123",
         session_id=remote_session["id"],
         message=query,
     ):
@@ -154,7 +158,6 @@ This script shows the code for the optional local testing step. Note that `async
 
 ```python
 import asyncio
-import vertexai
 from vertexai import agent_engines
 from support_agent.agent import root_agent
 
@@ -193,6 +196,18 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+```
+
+### Cleanup Commands
+
+If you are not immediately continuing with the Part 1 Agent Runtime instance in Module 36, delete your deployed Agent Runtime resources and staging bucket when finished:
+
+```shell
+# Delete an Agent Runtime instance via Python one-liner (replace PROJECT_ID and ENGINE_ID)
+uv run python -c "import vertexai; from vertexai import agent_engines; vertexai.init(project='YOUR_PROJECT_ID', location='us-central1'); agent_engines.delete('YOUR_AGENT_ENGINE_ID', force=True)"
+
+# Delete the GCS staging bucket used in Part 2
+gcloud storage rm -r gs://YOUR_UNIQUE_BUCKET_NAME
 ```
 
 ### Self-Reflection Answers

@@ -54,7 +54,7 @@ By combining these components, we can create a powerful agent that can navigate 
 
 ### Known Limitation: Preferences Don't Persist Across Orchestrator Turns
 
-This is a genuine, verified architectural constraint of the current ADK 2.8.0 A2A stack — worth understanding rather than hiding, since it's exactly the kind of real-world limitation you'll hit building distributed agent systems.
+This is a genuine, verified architectural constraint of the current ADK 2.14 A2A stack — worth understanding rather than hiding, since it's exactly the kind of real-world limitation you'll hit building distributed agent systems.
 
 **What works:** if you talk to `personalization_agent` directly (bypassing the orchestrator), `save_preference` on one turn and `get_preferences` on a later, separate turn of the *same session* correctly returns the saved value. State persistence itself is fine.
 
@@ -62,12 +62,12 @@ This is a genuine, verified architectural constraint of the current ADK 2.8.0 A2
 
 **Why:** `AgentTool.run_async` (in `google/adk/tools/agent_tool.py`) spins up a brand-new `InMemorySessionService` and a brand-new child session on *every single invocation*, then discards it as soon as the call returns. `RemoteA2aAgent`'s mechanism for resuming the same remote A2A conversation walks that child session's `ctx.session.events` backward looking for a `context_id` stashed in a previous response's metadata (`_construct_message_parts_from_session` in `google/adk/agents/remote_a2a_agent.py`). Because the child session is thrown away after each `AgentTool` call, that event history — and the `context_id` inside it — never survives to the next orchestrator turn. Each new turn's call to `personalization_agent` therefore starts a fresh remote A2A context with no memory of the previous one.
 
-We looked for a supported fix in `google-adk==2.8.0` and didn't find one for this exact architecture:
+We looked for a supported fix in `google-adk 2.14` and didn't find one for this exact architecture:
 - `AgentTool.__init__` takes no session/context-reuse parameter (only `skip_summarization`, `include_plugins`, `propagate_grounding_metadata`).
 - `RemoteA2aAgent.__init__` has no way to pin a fixed `context_id`; it only ever discovers one by reading session event history.
-- The SDK does have a separate, newer "task mode" delegation path (`RemoteA2aAgent(mode="task")` wired via `sub_agents=[...]` instead of `AgentTool`), which runs through the parent's *own* session instead of a throwaway one. We tried it live: it does reach the remote agent through the shared session, but the finish-task handshake it depends on is fragile in this SDK version — one run returned no text to the user at all, and the very next call failed the task outright ("Task failed."). It is not a reliable fix in this version and isn't used in this lab's solution.
+- Executing a remote A2A specialist via bare `sub_agents=[...]` instead of `AgentTool` performs a one-way `transfer_to_agent` handoff rather than returning control to the orchestrator within the same turn, breaking multi-specialist synthesis.
 
-**Bottom line:** if your application genuinely needs preferences to survive across orchestrator turns, don't rely on `AgentTool` + `RemoteA2aAgent` for it today. Either call `personalization_agent` directly for anything that must persist, or track this as a known gap to revisit once ADK's A2A support graduates out of experimental status.
+**Bottom line:** if your application genuinely needs preferences to survive across orchestrator turns, don't rely on `AgentTool` + `RemoteA2aAgent` for it today. Either call `personalization_agent` directly for anything that must persist, or back `personalization_agent`'s tools with an external user-keyed store (such as Firestore or Redis keyed by `user_id`) rather than transient A2A session state.
 
 ### Key Takeaways
 - This advanced challenge project integrates many concepts from the course: distributed multi-agent systems (A2A), state management, and tool abstraction.

@@ -7,7 +7,60 @@ title: "Lab Solution"
 
 ## Goal
 
-This lab is a procedural tutorial. The primary "solution" is a successfully deployed Customer Support agent running on a GKE cluster, accessible via a public IP address.
+This solution provides the complete `support_agent` Python package, container `Dockerfile`, and expected outputs for deploying the Customer Support agent on a GKE Autopilot cluster.
+
+### Agent Package Solution
+
+#### `support_agent/__init__.py`
+
+```python
+from . import agent
+```
+
+#### `support_agent/agent.py`
+
+```python
+from google.adk.agents import Agent
+
+billing_agent = Agent(
+    name="billing_agent",
+    model="gemini-3.8-flash",
+    description="Handles questions about billing, invoices, and payments.",
+    instruction="You are a billing support agent. Politely answer questions about billing and payment issues.",
+)
+
+tech_support_agent = Agent(
+    name="tech_support_agent",
+    model="gemini-3.8-flash",
+    description="Handles technical support questions and troubleshooting.",
+    instruction="You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions.",
+)
+
+root_agent = Agent(
+    name="router_agent",
+    model="gemini-3.8-flash",
+    description="The main customer support router.",
+    instruction="""
+You are the customer support router.
+Your job is to understand the user's request and delegate it to the correct specialist agent.
+- If the user has a question about billing, delegate to the `billing_agent`.
+- If the user has a technical problem, delegate to the `tech_support_agent`.
+""",
+    sub_agents=[billing_agent, tech_support_agent],
+)
+```
+
+#### `Dockerfile`
+
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY support_agent/ /app/support_agent/
+EXPOSE 8080
+CMD ["adk", "api_server", "/app", "--host", "0.0.0.0", "--port", "8080"]
+```
 
 ### Expected Outputs
 

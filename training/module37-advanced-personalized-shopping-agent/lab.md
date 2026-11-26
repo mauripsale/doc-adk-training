@@ -12,16 +12,19 @@ import Setup from '../_setup-snippet.mdx';
 In this advanced challenge lab, you will synthesize concepts from the entire course so far to build a distributed, multi-agent personalized shopping assistant. You will create three separate agents that collaborate using Agent-to-Agent (A2A) communication to provide a stateful, multimodal, and observable shopping experience.
 
 ### Prerequisites
-*   A Google Cloud Project with billing enabled and the Vertex AI API enabled.
-*   `gcloud` CLI installed and authenticated (`gcloud auth application-default login`).
-*   `uvicorn` installed (`pip install uvicorn google-adk[a2a]`).
+*   A Google Cloud Project with billing enabled and the Vertex AI API enabled (or a `GEMINI_API_KEY`).
+*   `gcloud` CLI installed and authenticated (`gcloud auth application-default login`) if using Vertex AI.
+*   **[uv](https://github.com/astral-sh/uv#installation)** installed (`uv add "google-adk[a2a]" uvicorn python-dotenv`).
 
 ### Setup
 
 <Setup/>
 
-1.  Create a main project directory for this lab (e.g., `capstone_shopping_system`).
-2.  Inside it, you will create three separate ADK agent projects: `orchestrator_agent`, `personalization_agent`, and `web_agent`.
+1.  Create and enter the main workspace directory for this lab:
+    ```shell
+    mkdir -p capstone_shopping_system && cd capstone_shopping_system
+    ```
+2.  Inside `capstone_shopping_system`, you will create three sibling ADK agent packages: `web_agent`, `personalization_agent`, and `orchestrator_agent`.
 3.  **A note on the webshop backend:** Google's own `personalized-shopping` ADK sample (under
     [`google/adk-samples`](https://github.com/google/adk-samples/tree/main/python/agents/personalized-shopping))
     talks to a real webshop simulation via a vendored `web_agent_site` module —
@@ -42,19 +45,18 @@ In this advanced challenge lab, you will synthesize concepts from the entire cou
 ### Exercise 1: Build and Expose the Web Agent
 This agent will be the interface to the e-commerce website.
 
-1.  **Create the `web_agent` project** (programmatic).
+1.  **Create the `web_agent` project** from inside `capstone_shopping_system`:
     ```shell
-    cd capstone_shopping_system
     uv run adk create web_agent
     cd web_agent
     ```
 
-2.  **Create `requirements.txt`:**
+2.  **Install A2A dependencies and create `requirements.txt`:**
     ```shell
-    echo "google-adk" > requirements.txt
-    echo "uvicorn" >> requirements.txt
+    uv add "google-adk[a2a]" uvicorn python-dotenv
+    printf "google-adk[a2a]\nuvicorn\npython-dotenv\n" > requirements.txt
     ```
-    (No `web_agent_site` here — see the Setup note above. This lab's webshop is a small mock catalog you write yourself, below.)
+    (Always include the `[a2a]` extra on `google-adk[a2a]` so `to_a2a()` and `RemoteA2aAgent` have their required A2A dependencies.)
 
 3.  **Create `.env` file:**
     ```shell
@@ -62,7 +64,7 @@ This agent will be the interface to the e-commerce website.
     echo "GOOGLE_CLOUD_PROJECT=<your_gcp_project>" >> .env
     echo "GOOGLE_CLOUD_LOCATION=us-central1" >> .env
     ```
-    Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
+    Replace `<your_gcp_project>` with your actual Google Cloud Project ID (or set `GOOGLE_GENAI_USE_VERTEXAI=0` and `GEMINI_API_KEY=<your_key>`).
 
 4.  **Create `webshop_data.py`:** a tiny, dependency-free in-memory product catalog. This is your mock webshop backend.
 
@@ -90,14 +92,19 @@ This agent will be the interface to the e-commerce website.
         return next((p for p in CATALOG if p["id"] == product_id), None)
     ```
 
-5.  **Create `tools/search.py` and `tools/click.py`:**
-    Your task is to implement `search` and `click` as plain Python functions
-    over the mock catalog above — no OpenAPI spec, just two functions you'll
-    wrap in `FunctionTool` in the next step.
+5.  **Create the `tools/` subpackage (`tools/__init__.py`, `tools/search.py`, and `tools/click.py`):**
+    First create the `tools/` package directory:
+    ```shell
+    mkdir -p tools && touch tools/__init__.py
+    ```
+    Your task is to implement `search` and `click` as plain Python functions over the mock catalog above — no OpenAPI spec, just two functions you'll wrap in `FunctionTool` in the next step. Notice the dual-mode `try ... except ImportError` import so `web_agent` works both when launched directly with `uv run uvicorn` inside `web_agent/` and when discovered as a package by `uv run adk web` from `capstone_shopping_system/`:
 
     ```python
     # In tools/search.py
-    from webshop_data import CATALOG
+    try:
+        from ..webshop_data import CATALOG
+    except ImportError:
+        from webshop_data import CATALOG
 
     def search(keywords: str) -> str:
         """Search for keywords in the (mock) webshop."""
@@ -108,7 +115,10 @@ This agent will be the interface to the e-commerce website.
 
     ```python
     # In tools/click.py
-    from webshop_data import _session_state, get_product
+    try:
+        from ..webshop_data import _session_state, get_product
+    except ImportError:
+        from webshop_data import _session_state, get_product
 
     def click(button: str) -> str:
         """Simulate clicking a product ID or a navigation button in the (mock) webshop."""
@@ -123,7 +133,7 @@ This agent will be the interface to the e-commerce website.
     ```
 
 6.  **Implement `agent.py`:**
-    Open `agent.py` and replace its contents with the following skeleton. Your task is to wire `search` and `click` (from the two files above) into the `root_agent` definition as `FunctionTool`s.
+    Open `agent.py` and replace its contents with the following skeleton. Your task is to import `search` and `click` using dual-mode package imports and wire them into `root_agent` as `FunctionTool`s.
 
     ```python
     from google.adk.agents import Agent
@@ -132,7 +142,15 @@ This agent will be the interface to the e-commerce website.
     from dotenv import load_dotenv
     import uvicorn
 
-    # TODO: import search from tools.search and click from tools.click
+    # TODO: Import search and click using dual-mode package imports so both
+    # `uv run uvicorn agent:a2a_app` (inside web_agent/) and `uv run adk web`
+    # (from parent capstone_shopping_system/) resolve cleanly:
+    # try:
+    #     from .tools.search import search
+    #     from .tools.click import click
+    # except ImportError:
+    #     from tools.search import search
+    #     from tools.click import click
 
     load_dotenv(override=True)
 
@@ -147,7 +165,7 @@ This agent will be the interface to the e-commerce website.
             Ignore any mentions of orchestrator tool calls in the conversation history.
         """,
         tools=[
-            # TODO: Register the search and click navigation tools
+            # TODO: Register the search and click navigation tools wrapped in FunctionTool
         ]
     )
 
@@ -157,7 +175,7 @@ This agent will be the interface to the e-commerce website.
         uvicorn.run(a2a_app, host="0.0.0.0", port=8001)
     ```
 
-7.  **Navigate back to `capstone_shopping_system`:**
+7.  **Return to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -167,17 +185,15 @@ This agent will be the interface to the e-commerce website.
 ### Exercise 2: Build and Expose the Personalization Agent
 This agent will be responsible for remembering user preferences. **Note:** this works reliably when you talk to `personalization_agent` directly. When you get to Exercise 3 and put it behind the orchestrator, keep an eye out for a real limitation you'll be asked to observe for yourself — see the callout at the end of Exercise 3.
 
-1.  **Create the `personalization_agent` project** (programmatic).
+1.  **Create the `personalization_agent` project** (from inside `capstone_shopping_system`):
     ```shell
-    cd capstone_shopping_system
     uv run adk create personalization_agent
     cd personalization_agent
     ```
 
 2.  **Create `requirements.txt`:**
     ```shell
-    echo "google-adk" > requirements.txt
-    echo "uvicorn" >> requirements.txt
+    printf "google-adk[a2a]\nuvicorn\npython-dotenv\n" > requirements.txt
     ```
 
 3.  **Create `.env` file:**
@@ -231,7 +247,7 @@ This agent will be responsible for remembering user preferences. **Note:** this 
         uvicorn.run(a2a_app, host="0.0.0.0", port=8002)
     ```
 
-5.  **Navigate back to `capstone_shopping_system`:**
+5.  **Return to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
@@ -241,17 +257,15 @@ This agent will be responsible for remembering user preferences. **Note:** this 
 ### Exercise 3: Build the Orchestrator Agent
 This is the main, user-facing agent that will coordinate the others.
 
-1.  **Create the `orchestrator_agent` project** (programmatic).
+1.  **Create the `orchestrator_agent` project** (from inside `capstone_shopping_system`):
     ```shell
-    cd capstone_shopping_system
     uv run adk create orchestrator_agent
     cd orchestrator_agent
     ```
 
 2.  **Create `requirements.txt`:**
     ```shell
-    echo "google-adk" > requirements.txt
-    echo "uvicorn" >> requirements.txt
+    printf "google-adk[a2a]\nuvicorn\npython-dotenv\n" > requirements.txt
     ```
 
 3.  **Create `.env` file:**
@@ -271,12 +285,18 @@ This is the main, user-facing agent that will coordinate the others.
     from typing import Any, Dict, Optional
     from google.adk.agents import Agent
     from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
+    from google.adk.apps import App
+    from google.adk.runners import InMemoryRunner
     from google.adk.tools import ToolContext
     from google.adk.tools.agent_tool import AgentTool
     from google.adk.tools.base_tool import BaseTool
+    from dotenv import load_dotenv
+
+    load_dotenv(override=True)
 
     # TODO: 1. Define remote specialist nodes
     # Instantiate RemoteA2aAgent for web_specialist (port 8001) and personalization_specialist (port 8002)
+    # Pass use_legacy=False on both!
     web_specialist = ...
 
     personalization_specialist = ...
@@ -298,14 +318,19 @@ This is the main, user-facing agent that will coordinate the others.
         before_tool_callback=...,
         tools=[...]
     )
+
+    # Align App.name with the package directory name ("orchestrator_agent")
+    # because ADK 2.14's AgentLoader loads module.app before module.root_agent.
+    app = App(name="orchestrator_agent", root_agent=root_agent)
+    runner = InMemoryRunner(app=app)
     ```
 
-5.  **Navigate back to `capstone_shopping_system`:**
+5.  **Return to `capstone_shopping_system`:**
     ```shell
     cd ..
     ```
 
-> **Known limitation to observe:** once you get to "Running the System" below, try this: ask the orchestrator to save a preference, then — in a **separate follow-up message of the same conversation** — ask it what preferences it has saved for you. You'll find it comes back empty, even though the exact same request sent straight to `personalization_agent` (bypassing the orchestrator) works fine across turns. This is a real, verified limitation of the current ADK 2.8.0 A2A stack, not a bug in your code: `AgentTool` creates and discards a brand-new session on every single call, which breaks `RemoteA2aAgent`'s mechanism for resuming the same remote conversation (it looks for context left behind in session history that no longer exists by the next turn). See the README's "Known Limitation" section for the full technical explanation and what we checked for a fix. It's worth understanding this kind of constraint — distributed multi-agent systems have real seams like this one.
+> **Known limitation to observe:** once you get to "Running the System" below, try this: ask the orchestrator to save a preference, then — in a **separate follow-up message of the same conversation** — ask it what preferences it has saved for you. You'll find it comes back empty, even though the exact same request sent straight to `personalization_agent` (bypassing the orchestrator) works fine across turns. This is a real, verified limitation of the current ADK 2.14 A2A stack, not a bug in your code: `AgentTool` creates and discards a brand-new session on every single call, which breaks `RemoteA2aAgent`'s mechanism for resuming the same remote conversation (it looks for context left behind in session history that no longer exists by the next turn). See the README's "Known Limitation" section for the full technical explanation. It's worth understanding this kind of constraint — distributed multi-agent systems have real seams like this one.
 
 ---
 
@@ -325,12 +350,12 @@ Plan how you would deploy this distributed system.
 2.  **Create a `deployment_plan.md` file.** In this file, briefly explain the steps you would take to deploy the `orchestrator_agent`, `web_agent`, and `personalization_agent` as separate services on Google Cloud Run.
 
 ### Running the System
-To test your full system, you will need to run all three agents in separate terminals:
-*   **Terminal 1 (`web_agent`):** `uvicorn agent:a2a_app --host localhost --port 8001`
-*   **Terminal 2 (`personalization_agent`):** `uvicorn agent:a2a_app --host localhost --port 8002`
-*   **Terminal 3 (`orchestrator_agent`):** `uv run adk web orchestrator_agent`
+To test your full system, run the two remote A2A servers and launch the ADK Dev UI from the parent `capstone_shopping_system` directory in three separate terminals:
+*   **Terminal 1 (`web_agent`):** `cd capstone_shopping_system/web_agent && uv run uvicorn agent:a2a_app --host localhost --port 8001`
+*   **Terminal 2 (`personalization_agent`):** `cd capstone_shopping_system/personalization_agent && uv run uvicorn agent:a2a_app --host localhost --port 8002`
+*   **Terminal 3 (`orchestrator_agent`, from parent directory):** `cd capstone_shopping_system && uv run adk web`
 
-Interact with the Orchestrator in the Dev UI and use the Trace view to observe the A2A communication and delegation.
+Select `orchestrator_agent` in the Dev UI dropdown, interact with the Orchestrator, and use the Trace view to observe the A2A communication and delegation.
 
 ### Cleanup (Important!)
 
@@ -425,6 +450,7 @@ CATALOG = [
 # `click` can react to what `search` just showed.
 _session_state = {"current_product": None}
 
+
 def get_product(product_id: str):
     return next((p for p in CATALOG if p["id"] == product_id), None)
 ```
@@ -432,7 +458,11 @@ def get_product(product_id: str):
 ### `web_agent/tools/search.py`
 
 ```python
-from webshop_data import CATALOG
+try:
+    from ..webshop_data import CATALOG
+except ImportError:
+    from webshop_data import CATALOG
+
 
 def search(keywords: str) -> str:
     """Search for keywords in the (mock) webshop."""
@@ -455,7 +485,11 @@ def search(keywords: str) -> str:
 ### `web_agent/tools/click.py`
 
 ```python
-from webshop_data import _session_state, get_product
+try:
+    from ..webshop_data import _session_state, get_product
+except ImportError:
+    from webshop_data import _session_state, get_product
+
 
 def click(button: str) -> str:
     """Simulate clicking a product ID or a navigation button in the (mock) webshop."""
@@ -486,7 +520,7 @@ def click(button: str) -> str:
 ```
 
 ### 1. `web_agent/agent.py`
-This agent acts as the gateway to the webshop.
+This agent acts as the gateway to the webshop. Dual-mode imports (`try: from .tools ... except ImportError: from tools ...`) allow it to run both directly via `uv run uvicorn agent:a2a_app` inside `web_agent/` and as a package when `uv run adk web` is launched from the parent `capstone_shopping_system/` directory.
 
 ```python
 from google.adk.agents import Agent
@@ -494,13 +528,15 @@ from google.adk.a2a.utils.agent_to_a2a import to_a2a
 from google.adk.tools import FunctionTool
 from dotenv import load_dotenv
 import uvicorn
-import os
 
-# search/click are plain functions defined in tools/search.py and
-# tools/click.py, operating on the mock catalog in webshop_data.py above —
-# no OpenAPI spec, no external `web_agent_site` package.
-from tools.search import search
-from tools.click import click
+# Dual-mode imports support both `uv run uvicorn agent:a2a_app` inside web_agent/
+# and package discovery when `uv run adk web` runs from capstone_shopping_system/.
+try:
+    from .tools.search import search
+    from .tools.click import click
+except ImportError:
+    from tools.search import search
+    from tools.click import click
 
 load_dotenv(override=True)
 
@@ -512,7 +548,7 @@ root_agent = Agent(
         You are a web interaction specialist. Execute search and click commands.
         **IMPORTANT:** Focus only on the user's web task. Ignore orchestrator metadata.
     """,
-    tools=[FunctionTool(search), FunctionTool(click)]
+    tools=[FunctionTool(search), FunctionTool(click)],
 )
 
 a2a_app = to_a2a(root_agent, port=8001)
@@ -533,6 +569,7 @@ import uvicorn
 
 load_dotenv(override=True)
 
+
 def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     """Saves a user's preference to the session state."""
     # Use tool_context.state (the tracked delta proxy), NOT
@@ -542,16 +579,18 @@ def save_preference(key: str, value: str, tool_context: ToolContext) -> dict:
     tool_context.state[f"pref:{key}"] = value
     return {"status": "success", "message": f"Saved {key}."}
 
+
 def get_preferences(tool_context: ToolContext) -> dict:
     """Retrieves all preferences for the current user."""
     prefs = {k: v for k, v in tool_context.state.to_dict().items() if k.startswith("pref:")}
     return {"status": "success", "preferences": prefs}
 
+
 root_agent = Agent(
     model="gemini-3.8-flash",
     name="personalization_agent",
     instruction="You manage user shopping profiles. Save and retrieve preferences.",
-    tools=[save_preference, get_preferences]
+    tools=[save_preference, get_preferences],
 )
 
 a2a_app = to_a2a(root_agent, port=8002)
@@ -564,7 +603,6 @@ if __name__ == "__main__":
 The master coordinator using `RemoteA2aAgent` nodes wired in as `AgentTool`s.
 
 ```python
-import asyncio
 from typing import Any, Dict, Optional
 from google.adk.agents import Agent
 from google.adk.agents.remote_a2a_agent import RemoteA2aAgent, AGENT_CARD_WELL_KNOWN_PATH
@@ -590,6 +628,7 @@ personalization_agent = RemoteA2aAgent(
     use_legacy=False,
 )
 
+
 def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext) -> Optional[Dict[str, Any]]:
     """AgentOps: logs every delegation to a remote specialist. This is pure
     observability -- it never blocks or alters the call (always returns
@@ -597,6 +636,7 @@ def log_delegation(tool: BaseTool, args: Dict[str, Any], tool_context: ToolConte
     orchestrator's instruction or reasoning at all."""
     print(f"[DELEGATION] shopping_orchestrator -> {tool.name}")
     return None
+
 
 # Orchestrator
 root_agent = Agent(
@@ -610,68 +650,34 @@ root_agent = Agent(
     """,
     # NOTE: these two remote agents are wired as tools (AgentTool), NOT as
     # `sub_agents=[...]`. `sub_agents` wires ADK's `transfer_to_agent`
-    # mechanism, and for a RemoteA2aAgent that mechanism is a dead end within
-    # the turn it's used: RemoteA2aAgent isn't an LlmAgent, so it never gets
-    # a transfer_to_agent tool of its own once it becomes the active agent —
-    # there is no framework-injected way for it to consult a sibling or hand
-    # control back to the orchestrator before the turn ends. It's also a
-    # separate process running its own independently-defined agent, with no
-    # notion of "the orchestrator that called me" or "the sibling agent next
-    # door" to transfer to, even in principle. (Verified live: an
-    # orchestrator wired with sub_agents=[personalization_agent, web_agent]
-    # and asked to consult both in one turn transfers to
-    # personalization_agent and stops there, answering only from
-    # personalization_agent's own tools — web_agent is never reached.)
-    # AgentTool avoids the problem entirely: the orchestrator calls each
-    # remote agent like a function, gets its result back, and stays in
-    # control to make the next call and synthesize the final combined
-    # answer.
+    # mechanism, and for a RemoteA2aAgent that mechanism is a one-way handoff
+    # within the turn: RemoteA2aAgent runs in a separate process with no
+    # knowledge of the orchestrator or sibling specialists, so it cannot
+    # transfer onward to `web_agent` or hand control back to synthesize a
+    # combined answer. `AgentTool` gives clean call-and-return semantics:
+    # the orchestrator calls each remote agent like a function, gets its
+    # result back, and stays in control across multiple calls.
     #
-    # KNOWN LIMITATION (verified live against google-adk 2.8.0): AgentTool
-    # buys call-and-return semantics at a real cost -- AgentTool.run_async
-    # (google/adk/tools/agent_tool.py) spins up a brand-new
-    # InMemorySessionService + session on *every* call and discards it
-    # immediately after. RemoteA2aAgent resumes the same remote A2A
-    # conversation by walking that session's event history backward for a
-    # previously-stored context_id (_construct_message_parts_from_session in
-    # google/adk/agents/remote_a2a_agent.py) -- history that no longer
-    # exists on the next orchestrator turn. Concretely: ask the orchestrator
-    # to save a preference, then ask it (in a SEPARATE turn) what it saved,
-    # and it comes back empty -- even though hitting personalization_agent
-    # directly works fine across turns. We checked for a supported fix:
-    # AgentTool exposes no session/context-reuse parameter, and
-    # RemoteA2aAgent has no way to pin a fixed context_id. There IS a
-    # different delegation path in this SDK version -- RemoteA2aAgent
-    # (mode="task") wired via sub_agents=[...] instead of AgentTool, which
-    # runs through the parent's own (persistent) session -- but we verified
-    # live that its finish_task handshake is fragile in 2.8.0 (a run
-    # returning no text to the user, a subsequent call failing the task
-    # outright), so it is not used here. If your application needs
-    # preferences to survive across orchestrator turns today, call
-    # personalization_agent directly for that path. See the README's
-    # "Known Limitation" section for the full writeup.
+    # KNOWN LIMITATION (verified in google-adk 2.14): AgentTool.run_async
+    # spins up a brand-new InMemorySessionService + child session on *every*
+    # call and discards it immediately after. RemoteA2aAgent resumes a prior
+    # remote A2A conversation by walking that child session's event history
+    # backward for a previously-stored context_id -- history that no longer
+    # exists on the next orchestrator turn. Consequently, preferences saved
+    # via the orchestrator on turn 1 do not persist to a separate turn 2 via
+    # the orchestrator, even though hitting `personalization_agent` directly
+    # persists across turns. See the README's "Known Limitation" section.
     tools=[AgentTool(agent=web_agent), AgentTool(agent=personalization_agent)],
     before_tool_callback=log_delegation,
 )
 
-# `adk web orchestrator_agent` (see "Running the System" below) only needs
-# `root_agent` above -- it builds its own App/Runner internally. `app` and
-# `runner` here are not used by that CLI path; they're exposed so you can
-# also drive this orchestrator *programmatically* -- e.g. from a script or a
-# test -- without going through the Dev UI:
-#
-#   from orchestrator_agent.agent import runner
-#   session = await runner.session_service.create_session(
-#       app_name="shopping_system", user_id="some_user"
-#   )
-#   async for event in runner.run_async(
-#       user_id="some_user", session_id=session.id, new_message=content
-#   ):
-#       ...
-#
-# This is exactly the pattern used to verify (and document, see the
-# AgentTool comment above) the cross-turn preference persistence behavior.
-app = App(name="shopping_system", root_agent=root_agent)
+# IMPORTANT (ADK 2.14 AgentLoader behavior): When `uv run adk web` runs from
+# the parent `capstone_shopping_system/` directory, ADK's `AgentLoader` checks
+# for a module-level `app` (`isinstance(module.app, App)`) BEFORE falling back
+# to `root_agent`. Always align `App(name="orchestrator_agent", ...)` with the
+# package directory name (`orchestrator_agent`) so both `uv run adk web` and
+# programmatic `InMemoryRunner(app=app)` sessions resolve the same `app_name`.
+app = App(name="orchestrator_agent", root_agent=root_agent)
 runner = InMemoryRunner(app=app)
 ```
 
@@ -763,7 +769,8 @@ Three independent Cloud Run services, deployed and scaled separately,
 talking to each other over HTTPS via the A2A protocol.
 
 ## 1. Build and push images
-For each of `web_agent`, `personalization_agent`, `orchestrator_agent`:
+For each of `web_agent`, `personalization_agent`, `orchestrator_agent`
+(ensure `requirements.txt` includes `google-adk[a2a]` and `uvicorn`):
 
     gcloud artifacts repositories create adk-images \
       --repository-format=docker --location=$GOOGLE_CLOUD_LOCATION
@@ -837,6 +844,6 @@ processes run.
     *   **Answer:** The orchestrator only ever needs to reason about two simple signatures, `search(keywords: str)` and `click(button: str)` -- not HTML parsing, CSS selectors, or the mock catalog's internal data structures. If the website's implementation changes (a real backend replaces the mock catalog, or the HTML structure changes), only `web_agent`'s tool implementations need to change; the orchestrator's instruction and reasoning are completely unaffected. This is the same separation-of-concerns benefit as `OpenAPIToolset` in Module 11, applied at the level of a whole remote agent instead of a single tool.
 
 4.  **You observed that preferences don't survive across separate orchestrator turns, even though the same request sent directly to `personalization_agent` works. Walk through *why*, in terms of what `AgentTool` does to the session on every call. What would you need to change about the wiring (not just the prompt) to fix it?**
-    *   **Answer:** `AgentTool.run_async` creates a fresh `InMemorySessionService` and a brand-new child session on every call, then throws it away as soon as the call returns. `RemoteA2aAgent` figures out whether it's continuing a previous remote conversation by scanning that session's event history backward for a `context_id` left in a prior response's metadata. Because the child session is discarded after each `AgentTool` call, there is no event history left for the next orchestrator turn to search -- so `RemoteA2aAgent` always starts a brand-new remote A2A context, and the remote agent (which itself has correct, working state persistence) never gets asked about the earlier conversation. No prompt change fixes this, because the LLM never sees or controls session lifecycle -- it's a framework-level behavior in `AgentTool.run_async` and `RemoteA2aAgent._construct_message_parts_from_session`. A real fix would need `AgentTool` to reuse the same child session/context across calls within one orchestrator session (there's no built-in parameter for this in ADK 2.8.0), or the orchestrator would need to stop using `AgentTool` for `personalization_agent` and call it through a different delegation path that shares the orchestrator's own persistent session -- which, as this solution's code comment above documents, is not yet a reliable option in this SDK version either. Until then, anything that must persist across orchestrator turns should talk to `personalization_agent` directly instead of going through the orchestrator.
+    *   **Answer:** `AgentTool.run_async` creates a fresh `InMemorySessionService` and a brand-new child session on every call, then throws it away as soon as the call returns. `RemoteA2aAgent` figures out whether it's continuing a previous remote conversation by scanning that session's event history backward for a `context_id` left in a prior response's metadata. Because the child session is discarded after each `AgentTool` call, there is no event history left for the next orchestrator turn to search -- so `RemoteA2aAgent` always starts a brand-new remote A2A context, and the remote agent (which itself has correct, working state persistence) never gets asked about the earlier conversation. No prompt change fixes this, because the LLM never sees or controls session lifecycle -- it's a framework-level behavior in `AgentTool.run_async` and `RemoteA2aAgent._construct_message_parts_from_session`. A real fix requires either reusing a persistent child session/context across calls (not exposed as a built-in parameter on `AgentTool` in ADK 2.14) or storing user preferences in an external database keyed by `user_id` (such as Firestore or Redis) rather than transient A2A session state.
 
 </SolutionVault>

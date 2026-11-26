@@ -67,21 +67,40 @@ While the ADK provides the `uv run adk deploy gke` command to automate some of t
 
 ### GKE Kubernetes Manifest Generation with `agents-cli`
 
-For enterprise Kubernetes engineering, writing raw Helm charts and Kube manifests from scratch is error-prone. The **Google Agents CLI (`google-agents-cli`)** can automatically generate production-ready Kubernetes deployment manifests tailored for ADK agents:
+For enterprise Kubernetes engineering, writing raw Kubernetes manifests and networking resources from scratch is error-prone. The **Google Agents CLI (`google-agents-cli`)** automatically scaffolds production-ready GKE Autopilot and Terraform definitions tailored for ADK agents:
 
 ```bash
-# 1. Enhance your agent project with complete GKE manifests and Terraform setup
-uvx google-agents-cli scaffold enhance . --deployment-target gke
+export GOOGLE_CLOUD_PROJECT="your-project-id"
+export DEPLOY_REGION="us-central1"
 
-# 2. Deploy your agent to the configured GKE Autopilot / Standard cluster
-uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --no-confirm-project
+# 1. Enhance an existing plain ADK directory with GKE manifests and Terraform IaC
+uvx google-agents-cli scaffold enhance . --adk -d gke --agent-directory support_agent
+
+# 2. Deploy your agent to GKE (cluster in us-central1, Gemini 3.8 Flash on global endpoint)
+uvx google-agents-cli deploy \
+  --project "$GOOGLE_CLOUD_PROJECT" \
+  --region "$DEPLOY_REGION" \
+  --env-vars "GOOGLE_CLOUD_LOCATION=global" \
+  --no-confirm-project
 ```
 
 #### Assets Scaffolded for GKE:
-- **`k8s/deployment.yaml`**: Kubernetes Deployment with readiness/liveness probes, resource requests/limits, and Workload Identity annotation.
-- **`k8s/service.yaml`**: Internal or Ingress-backed Service routing traffic to agent pods on port 8000.
-- **`k8s/kustomization.yaml`**: Kustomize overlays for separating `dev`, `staging`, and `prod` environments.
-- **`terraform/gke/`**: Terraform IaC module provisioning GKE Autopilot clusters with VPC-native networking.
+- **`Dockerfile`**: Single-stage Python container build using `uv` serving `uvicorn app.fast_api_app:app` on port `8080` (exposing `/run_sse`, `/apps/...`, and A2A routes).
+- **`deployment/terraform/`**: Terraform modules (`single-project/service.tf` and `cicd/service.tf`) provisioning a private VPC/Cloud NAT stack, GKE Autopilot cluster, `kubernetes_deployment_v1`, `kubernetes_service_v1`, `kubernetes_horizontal_pod_autoscaler_v2` (HPA), `kubernetes_pod_disruption_budget_v1` (PDB), and Workload Identity IAM bindings.
+
+<KnowledgeCheck
+  id="m33-gke-api-server-routing"
+  question="When containerizing an ADK agent named 'support_agent' for GKE using 'adk api_server /app --port 8080', how must the agent files be structured inside '/app' so that HTTP requests to '/apps/support_agent/...' succeed instead of returning 404 Not Found?"
+  options={[
+    "Place 'agent.py' directly at the filesystem root '/' and omit '__init__.py'",
+    "Place the agent package inside a subdirectory '/app/support_agent/' (containing '__init__.py' and 'agent.py') and pass the parent directory '/app' to 'adk api_server'",
+    "Rename the Kubernetes Service to 'support_agent_service' with underscores",
+    "Run 'adk web' instead of 'adk api_server' in production"
+  ]}
+  correctIndex={1}
+  hint="Recall how 'adk api_server <AGENTS_DIR>' discovers application names from subdirectories."
+  explanation="When passed '/app', 'adk api_server' registers each valid agent subdirectory inside '/app' by its folder name. Copying your package to '/app/support_agent/' (with '__init__.py' and 'agent.py') mounts the agent under '/apps/support_agent/...', whereas copying files flat into '/app' mounts the app as '/apps/app/...' and causes '/apps/support_agent/...' requests to 404."
+/>
 
 ### Key Takeaways
 - **Google Kubernetes Engine (GKE)** is a managed container orchestration platform that provides more control and flexibility than serverless options like Cloud Run.

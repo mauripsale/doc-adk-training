@@ -11,7 +11,9 @@ pagination_label: "Module 25.5: Responsible AI (RAI) & Safety Plugins — 📖 T
 
 ## Theory
 
-Observability (Module 25) lets you see what your agent is doing. **Responsible AI (RAI) & Safety Plugins** let you *govern and control* what your agent is allowed to process and output. In enterprise environments, you cannot rely solely on the model's internal prompt alignment; you need a programmatic, deterministic **Defense-in-Depth Guardrail System** that enforces organizational security, privacy, and compliance policies.
+> **🧭 Building on Module 25 (From Node Callbacks to `App` Plugins):** In **Module 25**, you mastered ADK's six lifecycle callbacks (`before_agent`, `after_agent`, `before_model`, `after_model`, `before_tool`, `after_tool`) attached to a single `Agent`. In multi-agent enterprise systems, copy-pasting safety callbacks onto every sub-agent is error-prone—one forgotten specialist creates a compliance gap! By packaging those exact lifecycle hooks (plus stream-level hooks like `on_event_callback`) into a **`BasePlugin`** registered once on **`App(plugins=[...])`**, ADK enforces **Responsible AI (RAI)** policies across every agent, sub-agent, and workflow node automatically.
+
+In enterprise environments, you cannot rely solely on a model's internal prompt alignment; you need a programmatic, deterministic **Defense-in-Depth Guardrail System** that governs what your entire application is allowed to process and output.
 
 ### The Four Guardrail Layers of Enterprise AI
 
@@ -71,6 +73,15 @@ class PIIGuardrailPlugin(BasePlugin):
                     "sensitive financial information (PII)."
                 )
                 print(f"🛑 [SAFETY AUDIT] Blocked PII in invocation: {getattr(event, 'invocation_id', 'unknown')}")
+
+# Register once on App -- wraps root_agent and every downstream sub-agent!
+from google.adk.apps import App
+
+app = App(
+    name="enterprise_app",
+    root_agent=root_agent,
+    plugins=[PIIGuardrailPlugin()],
+)
 ```
 
 ### Why use a Plugin for Responsible AI?

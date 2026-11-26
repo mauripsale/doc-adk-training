@@ -1,12 +1,12 @@
 ---
 sidebar_position: 2
 title: "Challenge Lab"
-pagination_label: "Module 25: Observability & Tracing Plugins — 🧪 Challenge Lab"
+pagination_label: "Module 26: Observability & Tracing Plugins — 🧪 Challenge Lab"
 ---
 
 import Setup from '../_setup-snippet.mdx';
 
-# Lab 25: Building an Observability System with Plugins Challenge
+# Lab 26: Building an Observability System with Plugins Challenge
 
 ## Goal
 
@@ -136,9 +136,9 @@ You have successfully built a modular observability system using the ADK's Plugi
 
 ### 🔐 Reference Solution Vault
 
-<SolutionVault moduleNumber="25">
+<SolutionVault moduleNumber="26">
 
-## Lab 25 Solution: Building an Observability System with Plugins
+## Lab 26 Solution: Building an Observability System with Plugins
 
 ## Goal
 

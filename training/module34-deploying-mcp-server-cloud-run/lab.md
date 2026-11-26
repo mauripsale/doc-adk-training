@@ -132,88 +132,81 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 
 ### Step 3: Build and Deploy the Server to Cloud Run
 
-1.  **Set environment variables:**
+1.  **Set environment variables (separating infrastructure deployment region):**
+    Use `DEPLOY_REGION=us-central1` for Artifact Registry and Cloud Run infrastructure, keeping it separate from the `GOOGLE_CLOUD_LOCATION=global` setting your ADK client agent will use for `gemini-3.8-flash`:
 
     ```shell
     export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
-    export GOOGLE_CLOUD_LOCATION=us-central1
+    export DEPLOY_REGION=us-central1
     ```
 
 2.  **Build and push the image:**
 
     ```shell
     gcloud builds submit \
-        --tag ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1
+        --tag ${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1
     ```
-    *(If you completed Module 33's cleanup, the `adk-images` repository no longer exists -- create it first with `gcloud artifacts repositories create adk-images --repository-format=docker --location=$GOOGLE_CLOUD_LOCATION`.)*
+    *(If you completed Module 33's cleanup, the `adk-images` repository no longer exists — create it first with `gcloud artifacts repositories create adk-images --repository-format=docker --location=$DEPLOY_REGION`.)*
 
 3.  **Deploy to Cloud Run:**
 
     ```shell
     gcloud run deploy mcp-cart-server \
-        --image=${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1 \
-        --region=$GOOGLE_CLOUD_LOCATION \
+        --image=${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1 \
+        --region=$DEPLOY_REGION \
         --allow-unauthenticated
     ```
     This command will deploy your server and give you a public **Service URL**. Copy this URL.
 
 ### Step 4: Configure the ADK Client Agent
 
-Now, create an ADK agent that connects to your newly deployed server.
+Now, create an ADK agent package in `cloud_mcp_server/` that connects to your newly deployed server.
 
-1.  **Install the MCP client extra.** The `McpToolset` you're about to import needs the `mcp` package installed in *this* project too, not just in the server's container `requirements.txt`:
+1.  **Install the MCP client extra:** The `McpToolset` you're about to import needs the `mcp` package installed in your local `adk-training` environment too, not just in the server's container `requirements.txt`:
     ```shell
     uv add "google-adk[mcp]"
     ```
-2.  **Create an `agent.py` file** in the same `cloud_mcp_server` directory.
-3.  **Add the following code**, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied. Note the `/mcp` suffix -- that's where `FastMCP` mounted the endpoint in Step 1, and the client needs to hit that exact path, not just the bare service URL.
+2.  **Create `agent.py`** inside `cloud_mcp_server/` and complete the `# TODO` sections below, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied. Note the `/mcp` suffix — that's where `FastMCP` mounted the endpoint in Step 1, and `StreamableHTTPConnectionParams` needs that exact path:
 
     ```python
     # Filename: agent.py
-    from google.adk import Agent
-    from google.adk.tools.mcp_tool import McpToolset
-    from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+    from google.adk.agents import Agent
+    from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 
     # The URL of your deployed MCP server -- note the /mcp path suffix
     MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL/mcp"
 
-    root_agent = Agent(
-        model='gemini-3.8-flash',
-        name='cloud_shopping_agent',
-        instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
-        tools=[
-            McpToolset(
-                # Use StreamableHTTPConnectionParams for remote servers
-                connection_params=StreamableHTTPConnectionParams(
-                    url=MCP_SERVER_URL,
-                ),
-            )
-        ],
-    )
+    # TODO: Define `root_agent` (name="cloud_shopping_agent", model="gemini-3.8-flash")
+    # with an `McpToolset` configured with `StreamableHTTPConnectionParams(url=MCP_SERVER_URL)`.
+    root_agent = None
     ```
-4.  **Create `__init__.py` and `.env` files:**
-    Create an empty `__init__.py` file in the `cloud_mcp_server` directory.
-    Create a `.env` file in the `cloud_mcp_server` directory with your Vertex AI configuration:
+3.  **Create `__init__.py` and `.env` files inside `cloud_mcp_server/`:**
+    Export `agent` in `cloud_mcp_server/__init__.py`:
+    ```python
+    from . import agent
     ```
-    GOOGLE_GENAI_USE_VERTEXAI=1
+    Create `cloud_mcp_server/.env` with ADK 2.0's Vertex AI / Agent Platform configuration, setting `GOOGLE_CLOUD_LOCATION=global` so `gemini-3.8-flash` resolves against the global endpoint:
+    ```ini
+    GOOGLE_GENAI_USE_ENTERPRISE=1
     GOOGLE_CLOUD_PROJECT=<your_gcp_project>
-    GOOGLE_CLOUD_LOCATION=us-central1
+    GOOGLE_CLOUD_LOCATION=global
     ```
     Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
 
 ### Step 5: Test the Full Cloud-Based System
 
-1.  **Start the ADK web server locally:**
-    This will run your *client* agent from the parent directory.
+1.  **Navigate to the parent `adk-training/` directory and start the ADK web server:**
+    `adk web` must always be launched from the parent directory containing your agent subfolder (`adk-training/`):
 
     ```shell
-    uv run adk web cloud_mcp_server
+    cd ..
+    uv run adk web
     ```
 
 2.  **Interact with the agent:**
-    *   Open the Dev UI.
-    *   Have the same conversation as in the previous lab: add 'apples', then add 'bread', then view the cart.
-    *   It should work exactly the same! But this time, the state is being managed by your serverless application running on Cloud Run.
+    *   Open the Dev UI in your browser and select **`cloud_mcp_server`** from the agent dropdown.
+    *   Have the same conversation as in Module 28: add `'apples'`, then add `'bread'`, then view the cart.
+    *   Stop the local server with `Ctrl+C` when finished.
 
 ### Lab Summary
 
@@ -222,8 +215,8 @@ You have successfully deployed a stateful service to a stateless platform by ext
 You have learned to:
 *   Modify an application to be stateless by moving its state to an external store (simulated with the filesystem).
 *   Containerize a Python application with a `Dockerfile`.
-*   Deploy a custom server to Google Cloud Run.
-*   Configure the `McpToolset` to connect to a remote HTTP-based MCP server using `StreamableHTTPConnectionParams`.
+*   Deploy a custom MCP server to Google Cloud Run in `DEPLOY_REGION=us-central1` while running `gemini-3.8-flash` against `GOOGLE_CLOUD_LOCATION=global`.
+*   Configure `McpToolset` with `StreamableHTTPConnectionParams` from `google.adk.tools.mcp_tool` and launch `uv run adk web` from the parent `adk-training/` directory.
 
 ### Cleanup (Important!)
 
@@ -232,20 +225,19 @@ Cloud Run services and Artifact Registry repositories can incur costs if left ru
 1.  **Delete the Cloud Run Service:**
     ```shell
     gcloud run services delete mcp-cart-server \
-        --region=$GOOGLE_CLOUD_LOCATION \
+        --region=$DEPLOY_REGION \
         --async # Runs in background
     ```
 
 2.  **Delete the Artifact Registry Repository:**
     ```shell
     gcloud artifacts repositories delete adk-images \
-        --location=$GOOGLE_CLOUD_LOCATION \
+        --location=$DEPLOY_REGION \
         --async # Runs in background
     ```
 
-3.  **Delete the `cloud_mcp_server` directory:**
+3.  **Delete the `cloud_mcp_server` directory (from `adk-training/`):**
     ```shell
-    cd ..
     rm -rf cloud_mcp_server
     ```
 
@@ -329,21 +321,20 @@ app = mcp.streamable_http_app()
 
 ```python
 # Filename: agent.py
-from google.adk import Agent
-from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
-from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+from google.adk.agents import Agent
+from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 
 # The URL of your deployed MCP server, including the /mcp path FastMCP mounts at.
 # Replace this with the URL from your `gcloud run deploy` output.
 MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL/mcp"
 
 root_agent = Agent(
-    model='gemini-3.8-flash',
-    name='cloud_shopping_agent',
-    instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
+    model="gemini-3.8-flash",
+    name="cloud_shopping_agent",
+    instruction="You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.",
     tools=[
         McpToolset(
-            # Use StreamableHTTPConnectionParams for remote servers
+            # Use StreamableHTTPConnectionParams for remote Streamable HTTP MCP servers
             connection_params=StreamableHTTPConnectionParams(
                 url=MCP_SERVER_URL,
             ),

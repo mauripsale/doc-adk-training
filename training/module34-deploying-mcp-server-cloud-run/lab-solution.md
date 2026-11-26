@@ -72,21 +72,20 @@ app = mcp.streamable_http_app()
 
 ```python
 # Filename: agent.py
-from google.adk import Agent
-from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
-from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
+from google.adk.agents import Agent
+from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 
 # The URL of your deployed MCP server, including the /mcp path FastMCP mounts at.
 # Replace this with the URL from your `gcloud run deploy` output.
 MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL/mcp"
 
 root_agent = Agent(
-    model='gemini-3.8-flash',
-    name='cloud_shopping_agent',
-    instruction='You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.',
+    model="gemini-3.8-flash",
+    name="cloud_shopping_agent",
+    instruction="You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.",
     tools=[
         McpToolset(
-            # Use StreamableHTTPConnectionParams for remote servers
+            # Use StreamableHTTPConnectionParams for remote Streamable HTTP MCP servers
             connection_params=StreamableHTTPConnectionParams(
                 url=MCP_SERVER_URL,
             ),

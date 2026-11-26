@@ -58,6 +58,39 @@ This file contains example answers and thought processes for the conceptual lab 
 *   **Marketing Team Budget:**
     *   In Gemini Enterprise's cost management dashboard, create a budget for the "Marketing" cost center. Set a monthly limit of $500. Configure an alert to notify the `marketing-manager@company.com` when usage reaches 80% of the budget.
 
+---
+
+### Step 5: Publishing & Fleet Registration Commands (Example Plan)
+
+*   **1. Agent Runtime `Lead Qualifier Agent` (Mode 1 — ADK Registration):**
+    If run from the project root containing `deployment_metadata.json`, `remote_agent_runtime_id` and `--registration-type adk` are auto-detected; in CI/CD, supply the explicit flags:
+    ```bash
+    uvx google-agents-cli publish gemini \
+      --gemini-app-id "projects/123456789/locations/global/collections/default_collection/engines/retail-enterprise-app" \
+      --registration-type adk \
+      --agent-runtime-id "projects/123456789/locations/us-central1/reasoningEngines/987654321" \
+      --display-name "Lead Qualifier Agent" \
+      --description "Scores incoming Salesforce leads for the retail sales organization."
+    ```
+
+*   **2. Cloud Run `Store Inventory Agent` (Mode 2 — A2A Registration):**
+    First grant `roles/run.servicesInvoker` on the Cloud Run service to `service-123456789@gcp-sa-discoveryengine.iam.gserviceaccount.com`, then register via its live Agent Card URL:
+    ```bash
+    uvx google-agents-cli publish gemini \
+      --gemini-app-id "projects/123456789/locations/global/collections/default_collection/engines/retail-enterprise-app" \
+      --registration-type a2a \
+      --agent-card-url "https://store-inventory-xyz-uc.a.run.app/a2a/inventory_agent/.well-known/agent-card.json" \
+      --display-name "Store Inventory Agent" \
+      --description "Checks real-time retail stock levels across regional warehouses."
+    ```
+
+*   **3. Fleet Governance Audit with Google Cloud Agent Registry:**
+    ```bash
+    gcloud beta agent-registry agents list \
+      --project="$GOOGLE_CLOUD_PROJECT" \
+      --location="us-central1"
+    ```
+
 ### Self-Reflection Answers
 
 1.  **Why is a centralized "Agent Gallery" a valuable feature for a large enterprise? What problems does it solve?**

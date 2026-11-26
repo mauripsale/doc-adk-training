@@ -155,6 +155,11 @@ const config = {
           { from: ['/docs/module16-static-orchestration/lab', '/module16-static-orchestration/lab'], to: '/docs/module17-static-orchestration/lab' },
           { from: ['/docs/module17-structured-routing/', '/module17-structured-routing/'], to: '/docs/module19-structured-routing/' },
           { from: ['/docs/module17-structured-routing/lab', '/module17-structured-routing/lab'], to: '/docs/module19-structured-routing/lab' },
+          // Part 4 monotonic prerequisite swap (Callbacks 26->25, Observability 25->26)
+          { from: ['/docs/module26-callbacks/', '/module26-callbacks/'], to: '/docs/module25-callbacks/' },
+          { from: ['/docs/module26-callbacks/lab', '/module26-callbacks/lab'], to: '/docs/module25-callbacks/lab' },
+          { from: ['/docs/module25-observability/', '/module25-observability/'], to: '/docs/module26-observability/' },
+          { from: ['/docs/module25-observability/lab', '/module25-observability/lab'], to: '/docs/module26-observability/lab' },
         ],
         // Every doc used to live at the site root (routeBasePath: '/').
         // Now docs live under /docs — redirect every old bare URL to its

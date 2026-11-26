@@ -34,14 +34,16 @@ When a `task`-mode sub-agent pauses to ask the user a question and resumes on th
 
 ```python
 from google.adk import Agent
+from google.adk.tools import google_search
 
-# Specialist in 'task' mode: can ask the user questions, then returns control automatically
+# Specialist in 'task' mode: can ask the user questions, ground answers via Search, and return control automatically
 researcher = Agent(
     name="researcher",
     model="gemini-3.8-flash",
     mode="task",
     rerun_on_resume=True,
-    instruction="Research the topic, ask clarifying questions if needed, and summarize.",
+    tools=[google_search],
+    instruction="Research the topic using google_search, ask clarifying questions if needed, and summarize.",
 )
 
 # Coordinator: delegates to researcher and automatically regains control afterward
@@ -53,6 +55,8 @@ root_agent = Agent(
     instruction="Delegate research to the specialist, then write a final conclusion.",
 )
 ```
+
+> **Note (`google_search` Grounding):** Equipping specialists with ADK's built-in `google_search` tool lets `single_turn` and `task` sub-agents retrieve live real-world facts (such as current weather forecasts or flight schedules) before handing control back to the coordinator. Using `google_search` requires a valid `GOOGLE_API_KEY` or an authenticated Vertex AI Google Cloud project.
 
 ### 3. How Hand-offs Work Under the Hood
 

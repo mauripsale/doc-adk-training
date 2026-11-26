@@ -3,7 +3,7 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 25 Solution: Building an Observability System with Plugins
+# Lab 26 Solution: Building an Observability System with Plugins
 
 ## Goal
 

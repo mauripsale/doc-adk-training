@@ -13,69 +13,84 @@ This file contains the complete code for the `agent.py` script using the ADK 2.0
 
 ```python
 from __future__ import annotations
+from pydantic import BaseModel, Field
 from google.adk import Agent, Context, Workflow
 from google.adk.workflow import node
 
-# 1. Specialist Agents (Nodes)
-# Note: these instructions describe the input in plain language rather than
-# using {template} placeholders -- ctx.run_node()'s second argument becomes
-# the node's input content directly, it does NOT populate {key} placeholders
-# in the instruction (those are only filled from session state).
+# 1. Structured Critique Schema
+class CritiqueResult(BaseModel):
+    approved: bool = Field(
+        description="True ONLY when the draft satisfies all criteria and needs no further edits."
+    )
+    feedback: str = Field(
+        description="Specific actionable revision notes if not approved, or brief praise if approved."
+    )
+
+# 2. Specialist Agents (Nodes)
+# - Every child Agent invoked via ctx.run_node() inside @node(rerun_on_resume=True)
+#   must also set rerun_on_resume=True!
+# - Instructions describe the input in plain language rather than {template}
+#   placeholders because ctx.run_node()'s second argument is passed directly
+#   as node input content (not session state).
 writer = Agent(
     name="writer",
     model="gemini-3.8-flash",
-    instruction="Write a 2-sentence story based on the topic you're given."
+    rerun_on_resume=True,
+    instruction="Write a 2-sentence story based on the topic you're given.",
 )
 
 critic = Agent(
     name="critic",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
+    output_schema=CritiqueResult,
     instruction="""
-    You are a strict literary critic. Review the story you are given.
-    If it is good, respond with exactly the word 'APPROVED' and nothing else.
-    Otherwise, provide brief, actionable feedback on how to improve it.
-    """
+    You are a strict literary critic. Review the story you are given for vivid
+    imagery, narrative arc, and conciseness (2-3 sentences).
+    Set approved=True ONLY when the story satisfies every criterion and needs no edits;
+    otherwise set approved=False and provide specific, actionable feedback.
+    """,
 )
 
 refiner = Agent(
     name="refiner",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction="""
     You are a writer revising a story based on feedback. You will be given
     the current story and the feedback on it. Rewrite the story addressing
     the feedback. Return ONLY the revised story, with no extra commentary.
-    """
+    """,
 )
 
-# 2. Dynamic Workflow Orchestrator
-# rerun_on_resume=True is required on every @node used with ctx.run_node().
+# 3. Dynamic Workflow Orchestrator
+# rerun_on_resume=True is required on both @node and every child Agent called via ctx.run_node().
 @node(rerun_on_resume=True)
 async def refinement_orchestrator(ctx: Context, node_input: str):
-    # Phase 1: Initial Creation
-    # ctx.run_node()'s second argument is positional -- there's no `input=`
-    # keyword.
+    # Phase 1: Initial Creation (second argument to ctx.run_node is positional)
     current_story = await ctx.run_node(writer, f"Topic: {node_input}")
 
-    # Phase 2: Iterative Refinement Loop
+    # Phase 2: Iterative Refinement Loop (bounded to at most 3 passes)
     for i in range(3):
-        # A. Call the critic node
-        feedback = await ctx.run_node(critic, current_story)
-        
-        # B. Termination Condition (exact match avoids misfiring on "NOT APPROVED")
-        if feedback.strip().upper() == "APPROVED":
+        # A. Call the critic node -- output_schema returns a validated Python dict!
+        review = await ctx.run_node(critic, current_story)
+
+        # B. Structured boolean termination condition
+        if review.get("approved"):
             break
-            
-        # C. Refinement
+
+        # C. Refinement using structured feedback
+        feedback_notes = review.get("feedback", "")
         current_story = await ctx.run_node(
-            refiner, f"STORY:\n{current_story}\n\nFEEDBACK:\n{feedback}"
+            refiner, f"STORY:\n{current_story}\n\nFEEDBACK:\n{feedback_notes}"
         )
-        
+
     return current_story
 
-# 3. Root Workflow Definition
+# 4. Root Workflow Definition
 root_agent = Workflow(
     name="EssayRefiner",
-    edges=[("START", refinement_orchestrator)]
+    edges=[("START", refinement_orchestrator)],
 )
 ```
 

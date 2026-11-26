@@ -4,37 +4,117 @@ title: "Challenge Lab"
 pagination_label: "Module 24: Evaluating Agent Performance — 🧪 Challenge Lab"
 ---
 
-import { ChainSetup } from '../_chain-setup-snippet.mdx';
+import Setup from '../_setup-snippet.mdx';
 
 # Lab 24: Creating an Evaluation Case for the Calculator Agent Challenge
 
 ## Goal
 
-In this lab, you will learn the fundamental workflow of the ADK's evaluation feature. You will use the ADK Developer UI to have a "golden path" conversation with the Calculator agent you built in Module 9. Then, you will save that conversation as an evaluation case and re-run it to validate the agent's behavior.
+In this lab, you will learn the fundamental workflow of the ADK's evaluation feature. You will use the ADK Developer UI to have a "golden path" conversation with the Calculator agent (`calculator_agent`), save that conversation as an evaluation case, and re-run it from both the UI and CLI to validate the agent's behavior.
 
 ### Step 1: Prepare the Agent
 
-<ChainSetup module={9} project="calculator_agent" />
+<Setup/>
 
-1.  **Stay in your `adk-training` workspace parent directory** (which contains your `calculator_agent/` package from Module 9):
+1.  **Set up `calculator_agent/` in your `adk-training` workspace directory:**
 
-    ```shell
-    cd /path/to/your/adk-training
-    ```
+    *   **Option A — Already completed Module 9:** Stay in your `adk-training` parent directory and reuse your existing `calculator_agent/` folder directly! *(Just verify `calculator_agent/agent.py` uses a package-relative import `from .tools.calculator import add, subtract, multiply, divide` and `model="gemini-3.8-flash"`.)*
+    *   **Option B — Starting fresh in Part 4 (10-second setup):** Run this 1-liner from `adk-training` to scaffold `calculator_agent/` with the exact Module 9 calculator tools:
+        ```shell
+        mkdir -p calculator_agent/tools && printf 'from . import agent\n' > calculator_agent/__init__.py && : > calculator_agent/tools/__init__.py && curl -fsSL https://mauripsale.github.io/doc-adk-training/samples/module24/calculator.py -o calculator_agent/tools/calculator.py && curl -fsSL https://mauripsale.github.io/doc-adk-training/samples/module24/agent.py -o calculator_agent/agent.py
+        ```
+        *(On Windows / manual IDE setup, you can also download <a href="/doc-adk-training/samples/module24/calculator.py" download="calculator.py"><strong>📥 calculator.py</strong></a> into `calculator_agent/tools/` and <a href="/doc-adk-training/samples/module24/agent.py" download="agent.py"><strong>📥 agent.py</strong></a> into `calculator_agent/`, or expand the manual copy-paste block below.)*
 
-2.  **Verify `calculator_agent/.env` is configured** and install the evaluation extra — `adk eval` (Step 8) requires it:
+<details>
+<summary>📄 View raw <code>calculator_agent</code> files (optional manual copy-paste)</summary>
+
+Create `calculator_agent/__init__.py`:
+
+```text
+from . import agent
+```
+
+Create an empty `calculator_agent/tools/__init__.py`, then create `calculator_agent/tools/calculator.py`:
+
+```text
+from pydantic import BaseModel
+
+
+class MathResult(BaseModel):
+    status: str
+    result: float = 0
+    message: str | None = None
+
+
+def add(a: int, b: int) -> MathResult:
+    """
+    Adds two numbers together.
+    Use this tool when the user asks to find the sum of two numbers.
+    """
+    return MathResult(status="success", result=a + b)
+
+
+def subtract(a: int, b: int) -> MathResult:
+    """
+    Subtracts the second number from the first number.
+    """
+    return MathResult(status="success", result=a - b)
+
+
+def multiply(a: int, b: int) -> MathResult:
+    """
+    Multiplies two numbers together.
+    """
+    return MathResult(status="success", result=a * b)
+
+
+def divide(a: int, b: int) -> MathResult:
+    """
+    Divides the first number by the second number.
+    """
+    if b == 0:
+        return MathResult(status="error", message="Cannot divide by zero.")
+    return MathResult(status="success", result=a / b)
+```
+
+Create `calculator_agent/agent.py`:
+
+```text
+from pathlib import Path
+from dotenv import load_dotenv
+from google.adk import Agent
+from .tools.calculator import add, subtract, multiply, divide
+
+load_dotenv(Path(__file__).with_name(".env"), override=True)
+
+root_agent = Agent(
+    name="calculator_agent",
+    model="gemini-3.8-flash",
+    description="An agent node that can perform arithmetic calculations.",
+    instruction="""
+You are a helpful calculator assistant.
+When the user asks you to perform a calculation, you MUST use the appropriate tool.
+Clearly state the result to the user.
+If the user asks something else, politely decline.
+""",
+    tools=[add, subtract, multiply, divide],
+)
+```
+
+</details>
+
+2.  **Verify `calculator_agent/.env` is configured** (containing `GOOGLE_API_KEY="your-api-key"` or your Vertex AI `GOOGLE_GENAI_USE_VERTEXAI=TRUE` + `GOOGLE_CLOUD_PROJECT` settings) and install the evaluation extra — `adk eval` (Step 8) requires it:
     ```shell
     uv add "google-adk[eval]"
     ```
 
-3.  **Start the web server from the parent directory:**
+3.  **Start the web server from your `adk-training` parent directory:**
 
     Because `calculator_agent/agent.py` uses a clean package-relative import (`from .tools.calculator import ...`), `adk web` discovers `calculator_agent` directly from the parent directory:
 
     ```shell
     uv run adk web
     ```
-    *(Troubleshooting note: if your earlier Module 9 `agent.py` used a non-relative `from tools.calculator import ...`, update it to `from .tools.calculator import ...` so both `adk web` and `adk eval` resolve the package cleanly!)*
 
 ### Step 2: Record the "Golden Path" Conversation
 

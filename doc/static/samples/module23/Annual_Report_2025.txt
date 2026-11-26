@@ -1,0 +1,24 @@
+ACME CLOUD ROBOTICS INC.   —   ANNUAL EXECUTIVE REPORT (FY 2025)
+====================================================================
+
+
+1. EXECUTIVE SUMMARY
+Acme Cloud Robotics closed   fiscal year 2025   with record enterprise adoption
+across North America and EMEA.   Autonomous warehouse orchestration   drove the
+majority of net-new multi-year contracts.
+
+
+
+2. KEY FINANCIAL & OPERATIONAL METRICS
+- Total Revenue:    $48.6M   (+34% YoY growth vs. FY 2024)
+- Annual Recurring Revenue (ARR):   $52.1M
+- Net Dollar Retention (NDR):    118%
+- Gross Margin:   74.2%    (up 310 bps YoY)
+- Global Headcount:   215 full-time employees across 4 engineering hubs
+
+
+
+3. STRATEGIC HIGHLIGHTS & FY 2026 OUTLOOK
+In Q3 2025,   Acme launched   the Aegis Fleet Controller 2.0 powered by Google ADK,
+reducing customer incident resolution latency by   62%.
+For FY 2026, management targets   $68.0M in ARR   and expansion into APAC logistics.

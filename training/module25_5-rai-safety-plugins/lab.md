@@ -10,7 +10,7 @@ import Setup from '../_setup-snippet.mdx';
 
 ## Goal
 
-In this challenge lab, you will engineer a production-grade, multi-layer **Responsible AI (RAI) Guardrail Plugin Suite** for Google ADK 2.0. You will build deterministic, out-of-band defense mechanisms that intercept both:
+Building directly on the six lifecycle callbacks from **Module 25**, you will now package your guardrails into a reusable **`BasePlugin`** suite registered globally on `App(plugins=[...])`. In this challenge lab, you will engineer a production-grade, multi-layer **Responsible AI (RAI) Guardrail Plugin Suite** for Google ADK 2.0 that intercepts both:
 1. **Input Vectors:** Defending against adversarial prompt injections and jailbreak attempts before the LLM generates reasoning (`before_model_callback`).
 2. **Output Vectors:** Enforcing strict **Fail-Closed** data loss prevention (DLP) by intercepting and redacting / withholding Personally Identifiable Information (PII) and sensitive financial records (PCI-DSS credit card patterns) before events reach the user (`on_event_callback`).
 

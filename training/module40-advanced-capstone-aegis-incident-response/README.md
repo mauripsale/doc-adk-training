@@ -24,39 +24,48 @@ To solve this, you will implement an advanced, distributed multi-agent system ca
 **A note on scope:** this capstone runs entirely on your local machine — no GCP project or billing required. Model Armor, Vertex AI Search (RAG), the GCS upload, and the AgentOps telemetry export are represented with **simplified, simulated implementations**, clearly marked as such in the code. What's real and fully functional is the part this capstone is actually testing: three independent ADK agents cooperating correctly over A2A, backed by a real MCP server and real AgentOps callback hooks. The diagram below shows the target production architecture this design is modeled on; see "Going Further" at the end for how to wire the simulated pieces up to the real services.
 
 ```mermaid
-graph TD
-    User([SOC Analyst - Gemini Enterprise UI]) <--> Orchestrator[Aegis Orchestrator Agent<br/>Agent Runtime]
-    
-    subgraph Services [Google Cloud Infrastructure]
-        ModelArmor[Model Armor Service]
-        BigQueryData[(BigQuery Audit Logs)]
-        GCSBucket[(GCS Security Briefs Bucket)]
-        GCSReference[(GCS CIS Playbooks)]
-        Logging[Cloud Logging]
-        Trace[Cloud Trace]
+flowchart TD
+    User(["SOC Analyst (Gemini Enterprise UI)"])
+    Orchestrator["2. Aegis Orchestrator Agent (Agent Runtime)"]
+
+    subgraph Services ["Google Cloud Infrastructure"]
+        ModelArmor["Model Armor Service"]
+        BigQueryData[("BigQuery Audit Logs")]
+        GCSBucket[("GCS Security Briefs Bucket")]
+        GCSReference[("GCS CIS / NIST Playbooks")]
+        Logging["Cloud Logging"]
+        Trace["Cloud Trace"]
     end
 
-    subgraph Agent1 [1. Threat Intelligence Agent - Cloud Run]
-        Orchestrator <-->|A2A| ThreatIntelAgent[Threat Intel Agent]
-        ThreatIntelAgent <--> BQMCP[BigQuery MCP Server]
-        BQMCP <--> BigQueryData
-        ThreatIntelAgent <--> ModelArmor
+    subgraph Agent1 ["1. Threat Intelligence Agent (Cloud Run)"]
+        ThreatIntelAgent["Threat Intel Agent"]
+        BQMCP["BigQuery MCP Server"]
+        ThreatIntelAgent <--> BQMCP
     end
 
-    subgraph Agent3 [3. Mitigation & Patching Agent - Cloud Run]
-        Orchestrator <-->|A2A| MitigationAgent[Mitigation & Patching Agent]
-        MitigationAgent <--> RAG[Vertex AI Search RAG]
-        RAG <--> GCSReference
-        MitigationAgent <--> GCS_MCP[GCS MCP Server]
-        GCS_MCP <--> GCSBucket
+    subgraph Agent3 ["3. Mitigation & Patching Agent (Cloud Run)"]
+        MitigationAgent["Mitigation & Patching Agent"]
+        RAG["Vertex AI Search (RAG)"]
+        GCS_MCP["GCS MCP Server"]
+        MitigationAgent <--> RAG
+        MitigationAgent <--> GCS_MCP
     end
 
-    ThreatIntelAgent -.->|AgentOps OpenTelemetry| Logging
-    Orchestrator -.->|AgentOps OpenTelemetry| Logging
-    MitigationAgent -.->|AgentOps OpenTelemetry| Logging
-    ThreatIntelAgent -.->|AgentOps OpenTelemetry| Trace
-    Orchestrator -.->|AgentOps OpenTelemetry| Trace
-    MitigationAgent -.->|AgentOps OpenTelemetry| Trace
+    User <--> Orchestrator
+    Orchestrator <-->|"A2A"| ThreatIntelAgent
+    Orchestrator <-->|"A2A"| MitigationAgent
+
+    BQMCP <--> BigQueryData
+    ThreatIntelAgent <--> ModelArmor
+    RAG <--> GCSReference
+    GCS_MCP <--> GCSBucket
+
+    ThreatIntelAgent -.->|"AgentOps OpenTelemetry"| Logging
+    Orchestrator -.->|"AgentOps OpenTelemetry"| Logging
+    MitigationAgent -.->|"AgentOps OpenTelemetry"| Logging
+    ThreatIntelAgent -.->|"AgentOps OpenTelemetry"| Trace
+    Orchestrator -.->|"AgentOps OpenTelemetry"| Trace
+    MitigationAgent -.->|"AgentOps OpenTelemetry"| Trace
 ```
 
 ---
@@ -65,7 +74,7 @@ graph TD
 
 ### 1. Threat Intelligence Agent (A2A Server, runs locally)
 Acts as an automated log investigator and threat hunter.
-*   **MCP Log Hunting:** Connects to a real local **MCP server** — a lightweight stand-in for a hosted BigQuery MCP server — to query simulated security audit logs, login attempts, and injection attempts. You built a server just like it in Module 28.
+*   **MCP Log Hunting:** Connects to a real local **MCP server** (spawned with `sys.executable` so it runs inside your active virtual environment) — a lightweight stand-in for a hosted BigQuery MCP server — to query simulated security audit logs, login attempts, and injection attempts. You built a server just like it in Module 28.
 *   **Data Masking (simulated Model Armor):** Prior to outputting threat details, it masks sensitive internal IP addresses using a local regex, standing in for a call to the real **Model Armor** API.
 *   **AgentOps Metrics (real hooks, simulated export):**
     *   Real `before_model_callback`/`after_model_callback` hooks measure model-call latency.
@@ -77,7 +86,7 @@ The central dispatch system for SOC analysts.
 *   **Command Scope:** Understands commands like:
     *   *"Detect any brute-force attacks on our billing databases and generate patching plans."*
     *   *"Remediate recent SQL injection risks in the mid-market segment logs."*
-*   **Reliability:** Uses `RemoteA2aAgent(..., use_legacy=False)` to opt into ADK's reliability-fixed A2A executor (see Module 21), avoiding known streaming-mode message-duplication bugs.
+*   **Reliability:** Uses `RemoteA2aAgent(..., use_legacy=False)` to opt into ADK's reliability-fixed A2A executor (see Module 21), avoiding known streaming-mode message-duplication bugs, and sets `App(name="orchestrator_agent", root_agent=root_agent)` to match the package directory name expected by `uv run adk web`.
 
 ### 3. Mitigation & Patching Agent (A2A Server, runs locally)
 Compiles security advisories and automated patch scripts.
@@ -93,18 +102,35 @@ Implementing multi-agent systems in production requires robust **AgentOps** prac
 1.  **Distributed Trace Propagation:**
     A2A agents communicate over HTTP. To see a unified timeline of a request, a production system propagates trace contexts across agent boundaries using standard W3C Trace Context headers. This links the user chat span to every downstream tool call and remote agent hop in a single trace tree. (This lab doesn't wire up real trace export — see "Going Further" below.)
 2.  **Telemetry Hooks:**
-    ADK 2.0's real hook mechanism is `before_model_callback` and `after_model_callback`, passed as constructor arguments to `Agent(...)` (the same pattern you used in Module 26). This lab uses them to measure and print:
+    ADK 2.0's real node-level hook mechanism is `before_model_callback` and `after_model_callback`, passed as constructor arguments to `Agent(...)` (the same pattern you used in **Module 25**). This lab uses them to measure and print:
     *   **LLM Latency:** Time taken by the model to generate responses.
     *   **AgentOps events:** A line simulating what a real export to Cloud Logging/Cloud Trace would send.
 
-    A production system would keep the exact same callback signatures and replace the `print()` calls with real OpenTelemetry SDK calls.
+    A production system would keep the exact same callback signatures and replace the `print()` calls with real OpenTelemetry SDK calls (as taught in **Module 26**).
 
-### Going Further: Wiring Up the Real Services
+### Going Further: Wiring Up the Real Services & Cloud Deployment
 
 Every simulated piece in this lab is a drop-in replacement point:
 *   **Model Armor:** replace `mask_security_secrets`'s regex with a call to the real Model Armor API — the function signature doesn't need to change.
 *   **Vertex AI Search (RAG):** replace `search_remediation_playbooks`'s fixed string with a real Vertex AI Search query, or an MCP server wrapping one, following the same `McpToolset` pattern already used for BigQuery.
 *   **GCS Upload:** replace the simulated URL in `build_and_upload_mitigation_brief` with a real PDF render and a Cloud Storage upload (directly, or via another local MCP server built the same way as `bigquery_mock_server.py`).
-*   **Real observability:** replace the `print()` calls in the AgentOps hooks with real OpenTelemetry spans and metrics, exported to Cloud Trace and Cloud Logging — Module 25 covers this pattern in depth.
-*   **Real deployment:** once the pieces above are real, deploy the three agents the same way you learned in Modules 32-35 (Cloud Run for the two A2A servers, Agent Runtime for the orchestrator).
+*   **Real observability:** replace the `print()` calls in the AgentOps hooks with real OpenTelemetry spans and metrics, exported to Cloud Trace and Cloud Logging — **Module 26** covers this pattern in depth.
+*   **Production Cloud Deployment (`google-agents-cli`):** once the pieces above are real, scaffold Terraform IaC and deploy the two remote A2A specialists to **Google Cloud Run** and the master orchestrator to **Vertex AI Agent Runtime** (Modules 32, 35, and 36):
+    ```bash
+    # 1. Deploy Threat Intel & Mitigation A2A services to Cloud Run
+    cd threat_intel_agent
+    uvx google-agents-cli scaffold enhance . --deployment-target cloud_run
+    uvx google-agents-cli deploy
+
+    cd ../mitigation_agent
+    uvx google-agents-cli scaffold enhance . --deployment-target cloud_run
+    uvx google-agents-cli deploy
+
+    # 2. Point orchestrator_agent's RemoteA2aAgent URLs at the Cloud Run HTTPS URLs,
+    #    then deploy the orchestrator to Vertex AI Agent Runtime & publish to Gemini
+    cd ../orchestrator_agent
+    uvx google-agents-cli scaffold enhance . --deployment-target agent_runtime
+    uvx google-agents-cli deploy
+    uvx google-agents-cli publish gemini --gemini-app-id "$GEMINI_APP_ID"
+    ```
 *   **Agent Skills for the playbooks:** `search_remediation_playbooks` is currently a plain function returning a fixed string. Module 39.5's Skills pattern (`SkillToolset` + `load_skill_from_dir`) is arguably a better fit than a hand-written RAG query for this: bundle each CIS/NIST playbook as its own Skill, with the remediation steps living in the Skill's `references/` folder, loaded via Progressive Disclosure only when the Mitigation Agent actually needs that specific playbook instead of always in context.

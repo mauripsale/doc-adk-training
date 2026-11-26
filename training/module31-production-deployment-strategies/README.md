@@ -49,7 +49,40 @@ A key design philosophy of the ADK is to leverage the security features of the u
 | **Audit Logging** | ✅ Auto | ✅ Auto | ✅ Manual |
 | **Compliance** | HIPAA, PCI | **FedRAMP** | All |
 
-**Bottom Line:** For most use cases, deploying with `uv run adk deploy cloud_run` or `uv run adk deploy agent_engine` provides a secure, production-ready agent with zero custom security code required.
+**Bottom Line:** For most use cases, deploying with `uv run adk deploy cloud_run` or `uvx google-agents-cli deploy` provides a secure, production-ready agent with zero custom security code required.
+
+### The End-to-End Agent Lifecycle with `google-agents-cli`
+
+Throughout Part 6, you will pair the core ADK CLI (`uv run adk`) with the **Google Agents CLI (`google-agents-cli`)**—the unified operational toolchain for taking an agent from a local prototype to an enterprise-governed production service. Invoked directly via `uvx google-agents-cli` (or installed globally with `uv tool install google-agents-cli`), it standardizes five lifecycle stages across **Agent Runtime**, **Cloud Run**, and **GKE**:
+
+1. **Scaffold (`scaffold create` / `scaffold enhance`):**
+   * Start a greenfield repository with `uvx google-agents-cli scaffold create my-agent`, or layer production deployment templates onto an existing ADK directory in place without overwriting your agent logic:
+     ```bash
+     uvx google-agents-cli scaffold enhance . --adk -d agent_runtime
+     ```
+   * Generates a hardened `Dockerfile`, FastAPI/A2A runtime harness, modular Terraform Infrastructure-as-Code (`deployment/terraform/`), CI/CD pipelines (Cloud Build or GitHub Actions), and load-testing suites.
+2. **Local Playground (`playground`):**
+   * Run `uvx google-agents-cli playground` to test your scaffolded agent locally with live agent reload (`--reload_agents`) and optional OpenTelemetry export to Google Cloud (`--otel-to-cloud`).
+3. **Evaluation Gate (`eval run`):**
+   * Execute `uvx google-agents-cli eval run` to chain trace generation and automated metric grading before promoting changes to staging or production.
+4. **Cloud Rollout (`deploy`):**
+   * Run `uvx google-agents-cli deploy` to package, build, and roll out your container to the target configured in `agents-cli-manifest.yaml` (`agent_runtime`, `cloud_run`, or `gke`). On Agent Runtime, successful deployments automatically write `deployment_metadata.json` for downstream publishing.
+5. **Enterprise Registration (`publish gemini`):**
+   * Register your deployed agent into a **Gemini Enterprise** app using `uvx google-agents-cli publish gemini`—either natively via ADK `:streamQuery` on Agent Runtime (`--registration-type adk`) or over the Agent-to-Agent protocol on Cloud Run and GKE (`--registration-type a2a`).
+
+<KnowledgeCheck
+  id="m31-deployment-strategy-choice"
+  question="A healthcare enterprise needs a fully managed, FedRAMP-auditable deployment target with reproducible Terraform IaC, automated evaluation gates, and native Gemini Enterprise registration. Which target and toolchain combination fits best?"
+  options={[
+    "Deploy to a local Docker container using 'uv run adk web --host 0.0.0.0'",
+    "Scaffold and deploy to Agent Runtime using 'uvx google-agents-cli scaffold enhance . --adk -d agent_runtime' followed by 'eval run', 'deploy', and 'publish gemini'",
+    "Write custom TLS termination and DDoS middleware inside a standalone Python script on an unmanaged VM",
+    "Deploy a stateful stdio process directly to Cloud Functions without containerization"
+  ]}
+  correctIndex={1}
+  hint="Match the strict compliance requirement (FedRAMP + zero server management) with the canonical Part 6 lifecycle CLI."
+  explanation="Agent Runtime is the managed Gemini platform target offering built-in FedRAMP compliance and managed sessions, while 'google-agents-cli' provides the end-to-end production workflow: 'scaffold enhance', 'playground', 'eval run', 'deploy', and 'publish gemini'."
+/>
 
 ### Key Takeaways
 - Choosing the right deployment platform depends on your project's specific needs for speed, cost, compliance, and control.

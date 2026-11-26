@@ -75,7 +75,7 @@ You have now practiced applying a strategic framework to real-world deployment d
 *   Prioritize factors like speed, cost, compliance, and control.
 *   Understand the specific use cases for Cloud Run, Agent Runtime, GKE, and custom server deployments.
 
-Check the `lab-solution.md` to see the recommended answers for each scenario.
+Check the **Reference Solution Vault** below to see the recommended answers for each scenario.
 
 ### Self-Reflection Questions
 - For the Startup MVP, what are the potential downsides of choosing Cloud Run? At what point might they need to consider migrating to a different platform like GKE?
@@ -99,14 +99,14 @@ This file contains the recommended solutions and reasoning for the scenario-base
 #### **Scenario 1: The Startup MVP**
 
 *   **Recommendation:** ✅ **Cloud Run**
-*   **Justification:** This scenario is the primary use case for Cloud Run. The key drivers are **speed** and **low cost**. The `uv run adk deploy cloud_run` command allows the team to deploy in minutes without any DevOps expertise. The serverless, pay-per-use model is perfect for a startup managing its burn rate, and the platform's automatic security (HTTPS, DDoS, IAM) is more than sufficient for an MVP.
+*   **Justification:** This scenario is the primary use case for Cloud Run. The key drivers are **speed** and **low cost**. The `uv run adk deploy cloud_run` command (or `uvx google-agents-cli scaffold enhance . --adk -d cloud_run` followed by `uvx google-agents-cli deploy`) allows the team to deploy in minutes without dedicated DevOps staff. The serverless, pay-per-use model is ideal for a startup managing its burn rate, and the platform's automatic security (HTTPS, DDoS, IAM) is more than sufficient for an MVP.
 
 ---
 
 #### **Scenario 2: The Government Contractor**
 
 *   **Recommendation:** ✅✅ **Agent Runtime**
-*   **Justification:** The non-negotiable requirement is **FedRAMP compliance**. Agent Runtime is the only platform listed that provides this out of the box as a managed service. This eliminates a massive amount of complex and expensive compliance work the contractor would otherwise have to do themselves. The automatic audit logging and sandboxed execution are also critical features for this use case.
+*   **Justification:** The non-negotiable requirement is **FedRAMP compliance**. Agent Runtime is the only platform listed that provides this out of the box as a managed service. Using `uvx google-agents-cli scaffold enhance . --adk -d agent_runtime` and `uvx google-agents-cli deploy` eliminates a massive amount of complex compliance and infrastructure engineering the contractor would otherwise build manually. Automatic audit logging and managed execution are also critical features for this use case.
 
 ---
 

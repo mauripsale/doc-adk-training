@@ -75,9 +75,9 @@ const sidebars = {
         moduleCategory('module22-state-and-memory', 'Module 22: State & Memory Management'),
         moduleCategory('module23-artifacts', 'Module 23: Handling Files with Artifacts'),
         moduleCategory('module24-evaluation', 'Module 24: Evaluating Agent Performance'),
-        moduleCategory('module25-observability', 'Module 25: Observability & Tracing Plugins'),
+        moduleCategory('module25-callbacks', 'Module 25: Callbacks & Node-Level Guardrails'),
         moduleCategory('module25_5-rai-safety-plugins', 'Module 25.5: Responsible AI (RAI) & Safety Plugins'),
-        moduleCategory('module26-callbacks', 'Module 26: Callbacks & Safety Guardrails'),
+        moduleCategory('module26-observability', 'Module 26: Observability & Tracing Plugins'),
       ],
     },
     {

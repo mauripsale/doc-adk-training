@@ -130,6 +130,8 @@ This allows you to "stress test" your agent against hundreds of diverse, generat
 
 ### The Modern AgentOps Quality Flywheel with `agents-cli`
 
+> **🔭 Enterprise Preview (Covered in Depth in Part 6):** In Lab 24, you will run evaluations directly with ADK's built-in Dev UI and `uv run adk eval`—no extra manifest files required! Below is an architectural preview of **`google-agents-cli`** (`uvx google-agents-cli ...` and `agents-cli-manifest.yaml`), the enterprise CI/CD and deployment companion covered in full detail in **Part 6 (Deployment & Enterprise AgentOps)**, so you can see how your `.evalset.json` habits scale into production pipelines.
+
 In modern enterprise agent engineering, evaluation is not an isolated one-time test; it forms a continuous loop known as the **Quality Flywheel**:
 
 ```mermaid

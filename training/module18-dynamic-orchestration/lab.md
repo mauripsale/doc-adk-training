@@ -50,7 +50,8 @@ from typing import Literal
 # ===== Specialist Agent Nodes =====
 
 # TODO: Define ai_support (name="ai_support_bot") and human_escalation (name="human_escalation_team") agents.
-# Hint: One answers technical questions clearly; the other apologizes to frustrated customers and includes any provided technical steps.
+# Hint: Set model="gemini-3.8-flash" and rerun_on_resume=True on EVERY child Agent called via ctx.run_node()!
+# One answers technical questions clearly; the other apologizes to frustrated customers and includes any provided technical steps.
 ai_support = ...
 human_escalation = ...
 
@@ -60,7 +61,7 @@ human_escalation = ...
 class SentimentClassification(BaseModel):
     sentiment: Literal["angry", "neutral", "happy"]
 
-# TODO: Create the classifier agent node using the schema above.
+# TODO: Create the classifier agent node using the schema above (remember rerun_on_resume=True!).
 classifier = ...
 
 # ===== 2. Build the Dynamic Workflow =====
@@ -143,21 +144,25 @@ from google.adk.workflow import node
 from typing import Literal
 
 # ===== 1. Specialist Agent Nodes =====
+# Every child Agent invoked via ctx.run_node() inside @node(rerun_on_resume=True)
+# must also set rerun_on_resume=True so multi-turn sessions re-run cleanly.
 
 ai_support = Agent(
     name="ai_support_bot",
     model="gemini-3.8-flash",
-    instruction="You are a helpful customer support AI. Answer technical questions clearly."
+    rerun_on_resume=True,
+    instruction="You are a helpful customer support AI. Answer technical questions clearly.",
 )
 
 human_escalation = Agent(
     name="human_escalation_team",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction=(
         "You are a senior human escalation rep handling a frustrated customer. "
         "Apologize sincerely, promise a follow-up call, and include any preliminary "
         "technical troubleshooting steps provided to you."
-    )
+    ),
 )
 
 # ===== 2. Classifier Agent Node =====
@@ -168,8 +173,9 @@ class SentimentClassification(BaseModel):
 classifier = Agent(
     name="classifier",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction="Classify the sentiment of the user's latest message.",
-    output_schema=SentimentClassification
+    output_schema=SentimentClassification,
 )
 
 # ===== 3. Build the Dynamic Workflow (The Orchestrator) =====
@@ -206,8 +212,8 @@ root_agent = Workflow(
 1.  **How does passing data with `ctx.run_node()` in a Dynamic Workflow differ from passing data with `output_key` in Static Edges (Module 17)?**
     *   **Answer:** With Static Edges (Module 17), you save results into `session.state` via `output_key` and reference them via `{placeholders}` inside static instruction strings. In a Dynamic Workflow, `ctx.run_node()` returns the agent's output directly into a normal Python variable (a string, or a plain `dict` when using `output_schema`), so you can inspect, combine, or transform outputs in pure Python before passing them to the next node.
 
-2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node?**
-    *   **Answer:** Dynamic workflows are **resumable**. If a workflow is paused (e.g., waiting for human input inside a sub-node), the orchestrator itself might be stopped. By setting `rerun_on_resume=True`, you ensure that when the workflow starts again, the orchestrator logic re-evaluates which branch to take based on the saved state of its sub-nodes.
+2.  **Why is it important to set `rerun_on_resume=True` for the orchestrator node (and its dynamically invoked child agents)?**
+    *   **Answer:** Dynamic workflows are **resumable** across conversational turns. In ADK 2.0, setting `rerun_on_resume=True` on both the `@node` orchestrator and every child `Agent` called via `await ctx.run_node(...)` ensures that on subsequent user turns in the same session, both the orchestrator and its specialist sub-nodes re-execute cleanly instead of raising `ValueError: A node must have rerun_on_resume=True`.
 
 3.  **Can a dynamic workflow call another dynamic workflow?**
     *   **Answer:** Yes! In ADK 2.0, every `Workflow` and every `@node` function is just a **Node**. This allows for deep nesting and modularity: you can build complex systems by composing many small, testable dynamic workflows together.

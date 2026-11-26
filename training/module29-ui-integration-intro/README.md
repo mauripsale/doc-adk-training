@@ -23,8 +23,8 @@ The ADK is flexible and supports several approaches for UI integration, each sui
 | Approach | Best For | Key Features |
 | :--- | :--- | :--- |
 | **AG-UI Protocol** | Modern web apps (React/Next.js) | Pre-built components, official support |
-| **Native ADK API** | Custom frameworks (Vue, Angular) | Full control, no dependencies |
-| **Direct Python** | Data apps (Streamlit) | In-process, no HTTP overhead |
+| **Native ADK API** | Custom frameworks (Vue, Angular, Vanilla JS) | Full control, zero frontend SDK lock-in |
+| **Direct Python** | Data apps (Streamlit, Gradio) | In-process, no HTTP overhead |
 | **Messaging Platforms**| Team bots (Slack, Teams) | Native platform UX |
 | **Event-Driven** | High-scale, async workflows | Decoupled, scalable (Pub/Sub) |
 
@@ -40,13 +40,35 @@ The ADK is flexible and supports several approaches for UI integration, each sui
 
 By using the AG-UI protocol and the associated libraries, you can quickly build a production-ready chat interface with minimal front-end code, as the pre-built components handle the complexities of state management and streaming.
 
-**A note on this module's scope:** the lab below builds against the **Native ADK API** instead of AG-UI — on purpose. Writing the raw `fetch`/SSE client by hand is more code than AG-UI would require, but it's what actually teaches you the underlying request/response and streaming mechanics that AG-UI's components abstract away for you. Once you understand what's happening under the hood, adopting AG-UI for a real React/Next.js project is a matter of swapping in `@copilotkit/react-core` and its adapter — see the [CopilotKit + ADK docs](https://docs.copilotkit.ai/adk) if you want to try that path hands-on.
+### Under the Hood: Native ADK API & `/run_sse` Streaming
+
+**A note on this module's scope:** the lab in this module builds directly against the **Native ADK API** (`uv run adk api_server`) instead of AG-UI — on purpose. Writing a raw `fetch` + Server-Sent Events (SSE) client by hand teaches you the exact wire mechanics that higher-level frameworks like AG-UI and CopilotKit abstract away:
+
+1.  **Explicit Session Creation (`POST /apps/{app_name}/users/{user_id}/sessions`):** Before calling `/run_sse`, the client creates a session via REST, passing `{"session_id": "..."}` in the request body (or `{}` to let the server generate one).
+2.  **Enabling Token Streaming (`"streaming": true`):** In ADK's `RunAgentRequest` schema, `streaming` defaults to `false`. Including `"streaming": true` in your `/run_sse` JSON payload activates `StreamingMode.SSE` so tokens arrive incrementally as the model generates them rather than in a single block at the end of the turn.
+3.  **Partial Chunks vs. Final Aggregated Event (`event.partial`):** During an active SSE stream, ADK emits incremental `Event` objects with `"partial": true`, followed at the end of the turn by one final **aggregated** `Event` (where `partial` is omitted/`false`) containing the full accumulated response text. A well-behaved UI appends `partial === true` chunks live and skips re-appending the final aggregated text so responses are never duplicated!
+4.  **Line Buffering Across TCP Chunks:** `ReadableStreamDefaultReader.read()` yields arbitrary network byte slices that can split a `data: {...}\n\n` line mid-JSON. Buffering incomplete trailing text across `reader.read()` iterations prevents `JSON.parse` crashes on large events.
+
+Once you understand these mechanics, adopting AG-UI for a production React/Next.js project is as simple as dropping in `@copilotkit/react-core` — see the [CopilotKit + ADK docs](https://docs.copilotkit.ai/adk) to explore that path.
+
+<KnowledgeCheck
+  id="m29-sse-streaming-deduplication"
+  question="When consuming ADK's /run_sse endpoint with 'streaming': true, why must a custom frontend inspect eventData.partial before appending text?"
+  options={[
+    "ADK streams incremental token chunks with partial: true and then emits a final non-partial aggregated event containing the full text, which would duplicate the message if appended blindly",
+    "Events with partial: true contain encrypted binary audio rather than UTF-8 text",
+    "ADK requires the browser to send an HTTP ACK for every partial: true event before emitting the next token",
+    "Events without partial: true are system errors that must always be discarded"
+  ]}
+  correctIndex={0}
+  hint="Recall what ADK's StreamingResponseAggregator emits when a streamed model turn finishes."
+  explanation="With 'streaming': true, ADK yields incremental token chunks marked with partial: true for low-latency rendering, and then yields a final non-partial aggregated Event containing the complete accumulated turn text. Tracking partial events ensures your UI renders tokens live without duplicating the full reply at the end of the stream."
+/>
 
 ### Key Takeaways
 - Integrating an agent with a UI makes it accessible to a wider audience and enables richer interactions.
 - The ADK supports multiple UI integration strategies, including the official **AG-UI Protocol**, the native ADK API, direct Python integration, and messaging platforms.
 - The **AG-UI Protocol**, developed in partnership with CopilotKit, is Google's officially supported path for production React/Next.js applications, providing pre-built components that handle streaming and state for you.
-- For other frameworks, custom needs, or to understand what AG-UI abstracts away, you can use the ADK's native API server (`uv run adk api_server`) and its `/run_sse` endpoint to build your own client — which is exactly what this module's lab does.
-- **Benefits of Higher-Level Frameworks:** For complex, production-ready applications, higher-level frameworks like the AG-UI Protocol and CopilotKit offer significant benefits over the native ADK API. They reduce boilerplate code by providing pre-built UI components that automatically handle stream parsing, state management, and tool interactions. They also offer more advanced tool integration and are the officially supported, standardized path for building modern web UIs with the ADK.
-- **Session ID Persistence:** Generating a new `sessionId` on every page load, as done in the simple lab, would cause a loss of conversational memory in a real application. The agent would forget the message history and any state associated with the previous session. The correct solution is to persist the `sessionId` on the client-side using `localStorage` or a cookie, ensuring that the same session is used across page reloads.
-- **Advantages of SSE for Chat:** Server-Sent Events (SSE) are highly advantageous for chat applications because they enable low-latency streaming. The text generated by the LLM can be sent to the client in real-time as it's generated, providing a much more responsive user experience compared to a traditional request-response model where the user would have to wait for the entire response to be completed. SSE is also more efficient for this one-way streaming scenario than bidirectional protocols like WebSockets.
+- When building custom clients against `uv run adk api_server` and `/run_sse`, pass `"streaming": true`, buffer SSE lines across network chunks, and distinguish `partial: true` deltas from the final aggregated `Event`.
+- **Static Asset Isolation:** Never run a static file server (like `python3 -m http.server`) inside your agent package directory, or it will expose `.env` credentials over HTTP. Keep frontend files in a separate `frontend/` directory.
+- **Session ID Persistence:** Generating a new `sessionId` on every page load loses conversational memory on refresh; persist `sessionId` in `localStorage` or an HTTP-only session cookie in real apps.

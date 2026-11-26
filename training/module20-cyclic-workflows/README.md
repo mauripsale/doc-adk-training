@@ -39,15 +39,19 @@ class AuditResult(BaseModel):
     issues: str
 
 # 1. Define the specialist agents
+# Every child Agent invoked dynamically via ctx.run_node() inside
+# @node(rerun_on_resume=True) must also set rerun_on_resume=True!
 code_auditor = Agent(
     name="code_auditor",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction="Check the Python snippet for bugs or security issues. Set passed=True only if clean.",
     output_schema=AuditResult,
 )
 code_fixer = Agent(
     name="code_fixer",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction="Fix the provided Python snippet based on the listed issues. Return only the corrected code.",
 )
 
@@ -81,7 +85,7 @@ root_agent = Workflow(
 )
 ```
 
-> **Pro Tip — Avoid Fragile Substring Checks:** If you use a plain-text evaluator instead of a Pydantic `output_schema`, avoid loose substring checks like `if "APPROVED" in feedback:` — if the model replies `"NOT APPROVED: needs more detail"`, `"APPROVED" in feedback` evaluates to `True` and exits early on a failed draft! Prefer either a boolean `output_schema` field (as above) or an exact check like `feedback.strip().upper() == "APPROVED"`.
+> **Pro Tip — Prefer Structured Pydantic `output_schema` Over String Matching:** Notice how `code_auditor` uses `output_schema=AuditResult` and `await ctx.run_node(code_auditor, current_code)` returns a validated Python **`dict`** (`audit["passed"]`, `audit["issues"]`)—not a raw JSON string or a `BaseModel` instance! Avoid plain-text substring checks like `if "APPROVED" in feedback:`—if the model replies `"NOT APPROVED: needs more detail"`, `"APPROVED" in feedback` evaluates to `True` and exits early on a failed draft! Always prefer a boolean field on a Pydantic `output_schema` (as you will build in Lab 20).
 
 ### Why Use Python Loops in `@node` Workflows?
 

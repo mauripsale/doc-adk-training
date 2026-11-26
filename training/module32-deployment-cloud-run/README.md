@@ -56,22 +56,68 @@ The result is a publicly accessible HTTPS endpoint for your agent, all from a si
 
 In the lab for this module, you will use the `uv run adk deploy cloud_run` command to deploy the multi-agent customer support system you'll build in this lab.
 
+### Separating Infrastructure Region from Vertex AI Model Location
+
+When deploying containers to Google Cloud, always separate two distinct location concepts:
+
+*   **`DEPLOY_REGION` (e.g., `us-central1`):** The regional control plane where Cloud Run services, Artifact Registry repositories, and Cloud Build jobs are provisioned.
+*   **`GOOGLE_CLOUD_LOCATION=global`:** The Vertex AI inference endpoint passed **into the container** as an environment variable, together with `GOOGLE_GENAI_USE_ENTERPRISE=1` (ADK 2.0's canonical Vertex AI / Agent Platform flag for the `google-genai` SDK) and `GOOGLE_CLOUD_PROJECT`. Because `gemini-3.8-flash` is served via the `global` Vertex AI endpoint, injecting `GOOGLE_CLOUD_LOCATION=global` prevents runtime `404 NOT_FOUND` model region errors inside deployed containers.
+
+For example, when deploying with `adk deploy cloud_run` or directly with `gcloud run deploy`:
+
+```bash
+export GOOGLE_CLOUD_PROJECT="your-project-id"
+export DEPLOY_REGION="us-central1"
+
+# Option A: Automated ADK CLI deployment
+uv run adk deploy cloud_run \
+  --project="$GOOGLE_CLOUD_PROJECT" \
+  --region="$DEPLOY_REGION" \
+  --env GOOGLE_CLOUD_LOCATION=global \
+  support_agent/
+
+# Option B: Explicit gcloud run deploy from a pre-built image or source
+gcloud run deploy customer-support \
+  --source . \
+  --project="$GOOGLE_CLOUD_PROJECT" \
+  --region="$DEPLOY_REGION" \
+  --set-env-vars="GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_PROJECT=$GOOGLE_CLOUD_PROJECT,GOOGLE_CLOUD_LOCATION=global"
+```
+
 ### Production GitOps & Infrastructure Scaffolding with `agents-cli`
 
 For enterprise teams requiring reproducible Infrastructure-as-Code (IaC) and CI/CD pipelines, the **Google Agents CLI (`google-agents-cli`)** complements `adk deploy` by scaffolding production-grade deployment assets into your repository:
 
 ```bash
-# 1. Enhance your existing agent with Cloud Run deployment assets
-uvx google-agents-cli scaffold enhance . --deployment-target cloud_run
+# 1. Enhance an existing plain ADK directory with Cloud Run deployment assets
+uvx google-agents-cli scaffold enhance . --adk -d cloud_run --agent-directory support_agent
 
 # 2. Deploy directly using the managed CLI workflow
-uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --no-confirm-project
+uvx google-agents-cli deploy \
+  --project "$GOOGLE_CLOUD_PROJECT" \
+  --region "$DEPLOY_REGION" \
+  --env-vars "GOOGLE_CLOUD_LOCATION=global" \
+  --no-confirm-project
 ```
 
-#### What `agents-cli scaffold enhance --deployment-target cloud_run` Generates:
-- **`Dockerfile`**: Hardened, multi-stage production container definition optimized for Python ADK workloads.
-- **`cloudbuild.yaml`**: Google Cloud Build pipeline configuration with automated build, test, and container registry caching.
-- **`terraform/`**: Modular Terraform IaC scripts provisioning the Cloud Run v2 service, Artifact Registry repository, and least-privilege IAM service account bindings.
+#### What `agents-cli scaffold enhance . --adk -d cloud_run` Generates:
+- **`Dockerfile`**: Single-stage Python container build using `uv` that serves `uvicorn app.fast_api_app:app` on port `8080` (exposing both the ADK HTTP surface and the `/a2a/{app_name}/.well-known/agent-card.json` endpoint).
+- **`deployment/terraform/`**: Modular Terraform IaC (`single-project/` and `cicd/` configurations) provisioning the Cloud Run v2 service, Artifact Registry repository, optional Cloud SQL session storage, and least-privilege `app_sa` / `cicd_runner_sa` IAM bindings.
+- **CI/CD & Load Tests**: Automated Cloud Build or GitHub Actions deployment pipelines plus `tests/load_test/` suites for tuning concurrency and memory limits.
+
+<KnowledgeCheck
+  id="m32-cloud-run-region-and-ui"
+  question="When deploying a 'gemini-3.8-flash' ADK agent to Cloud Run in 'us-central1' using 'uv run adk deploy cloud_run', why should you pass '--env GOOGLE_CLOUD_LOCATION=global' alongside '--region=us-central1'?"
+  options={[
+    "Cloud Run services can only be created in a region literally named 'global'",
+    "Without '--env GOOGLE_CLOUD_LOCATION=global', the deployer defaults GOOGLE_CLOUD_LOCATION to the Cloud Run '--region' ('us-central1'), causing Vertex AI calls to 'gemini-3.8-flash' to fail with 404 model region errors",
+    "It disables HTTPS/TLS encryption so the container starts faster",
+    "It automatically converts the Cloud Run service into a GKE cluster"
+  ]}
+  correctIndex={1}
+  hint="Consider the difference between where the Cloud Run container infrastructure runs ('DEPLOY_REGION') and where 'gemini-3.8-flash' is hosted on Vertex AI."
+  explanation="Cloud Run infrastructure requires a concrete GCP region such as 'us-central1' ('--region'), whereas 'gemini-3.8-flash' on Vertex AI is served on the 'global' endpoint. Passing '--env GOOGLE_CLOUD_LOCATION=global' overrides the container's runtime model location so inference calls succeed."
+/>
 
 ### Key Takeaways
 - **Deployment** is the process of packaging an agent into a **container** and running it on a production server.

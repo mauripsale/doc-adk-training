@@ -23,56 +23,47 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
 
 <Setup/>
 
-1.  **Re-create the Customer Support Agent:**
-    We'll use the same multi-agent Customer Support system from Module 32. Let's create a fresh copy in its own directory.
+1.  **Create the Customer Support Agent Package:**
+    We'll deploy the same multi-agent Customer Support architecture (`router_agent` delegating to `billing_agent` and `tech_support_agent`) inside a dedicated `support_agent/` Python package subdirectory. Placing the agent inside `support_agent/` ensures that when `adk api_server /app` runs in the container, it discovers the subdirectory name and mounts routes at `/apps/support_agent/...`:
     ```shell
-    mkdir gke_support_agent
+    mkdir -p gke_support_agent/support_agent
     cd gke_support_agent
     ```
 
-    Create three YAML files, exactly as in Module 32:
-
-    *   **`billing_agent.yaml`:**
-        ```yaml
-        name: billing_agent
-        model: gemini-3.8-flash
-        description: "Handles questions about billing, invoices, and payments."
-        instruction: "You are a billing support agent. Politely answer questions about billing and payment issues."
+    *   **`support_agent/__init__.py`:**
+        ```python
+        from . import agent
         ```
 
-    *   **`tech_support_agent.yaml`:**
-        ```yaml
-        name: tech_support_agent
-        model: gemini-3.8-flash
-        description: "Handles technical support questions and troubleshooting."
-        instruction: "You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions."
+    *   **`support_agent/agent.py`:** Complete the `# TODO` sections below to define the two specialist agents and the root router agent using `gemini-3.8-flash`:
+        ```python
+        from google.adk.agents import Agent
+
+        # TODO: 1. Define `billing_agent` (name="billing_agent", model="gemini-3.8-flash")
+        # to politely handle questions about billing, invoices, and payments.
+        billing_agent = None
+
+        # TODO: 2. Define `tech_support_agent` (name="tech_support_agent", model="gemini-3.8-flash")
+        # to troubleshoot technical issues and provide clear solutions.
+        tech_support_agent = None
+
+        # TODO: 3. Define `root_agent` (name="router_agent", model="gemini-3.8-flash")
+        # that delegates billing questions to `billing_agent` and technical problems
+        # to `tech_support_agent` via `sub_agents=[billing_agent, tech_support_agent]`.
+        root_agent = None
         ```
 
-    *   **`root_agent.yaml`:**
-        ```yaml
-        name: router_agent
-        model: gemini-3.8-flash
-        description: "The main customer support router."
-        instruction: |
-          You are the customer support router.
-          Your job is to understand the user's request and delegate it to the correct specialist agent.
-          - If the user has a question about billing, delegate to the `billing_agent`.
-          - If the user has a technical problem, delegate to the `tech_support_agent`.
-        sub_agents:
-          - config_path: billing_agent.yaml
-          - config_path: tech_support_agent.yaml
-        ```
-
-2.  **Set Environment Variables:**
-    In your terminal, set these variables. **Replace `YOUR_PROJECT_ID` with your actual GCP Project ID.**
+2.  **Set Environment Variables (Separating Infrastructure Region from Model Location):**
+    In your terminal, export your project ID and `DEPLOY_REGION=us-central1` for Artifact Registry and the GKE cluster. Inside the Kubernetes pod manifest later, we will separately set `GOOGLE_CLOUD_LOCATION=global` so Vertex AI calls to `gemini-3.8-flash` hit the global endpoint instead of 404ing in `us-central1`. **Replace `YOUR_PROJECT_ID` with your actual GCP Project ID.**
     ```shell
     export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
-    export GOOGLE_CLOUD_LOCATION=us-central1
+    export DEPLOY_REGION=us-central1
     ```
 
 3.  **Enable APIs:**
     ```shell
     gcloud services enable \
+        aiplatform.googleapis.com \
         container.googleapis.com \
         artifactregistry.googleapis.com \
         cloudbuild.googleapis.com
@@ -86,15 +77,15 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     ```
 
 2.  **Create the `Dockerfile`:**
-    Create a file named `Dockerfile` and add the following. Note that `.` is passed as the agent directory — since the YAML files are copied directly into `/app`, `/app` itself *is* the agent folder (there's no `support_agent/` subdirectory inside the image).
+    Create a file named `Dockerfile` in `gke_support_agent/`. Notice how we copy `support_agent/` into `/app/support_agent/` (preserving `/app/support_agent/__init__.py` and `/app/support_agent/agent.py`) and pass `/app` as the `AGENTS_DIR` to `adk api_server`. If you copied files flat into `/app`, `adk api_server` would register the app name as `app` (`/apps/app/...`) instead of `support_agent` (`/apps/support_agent/...`)!
     ```dockerfile
     FROM python:3.11-slim
     WORKDIR /app
     COPY requirements.txt .
     RUN pip install --no-cache-dir -r requirements.txt
-    COPY . .
+    COPY support_agent/ /app/support_agent/
     EXPOSE 8080
-    CMD ["adk", "api_server", "--host", "0.0.0.0", "--port=8080", "."]
+    CMD ["adk", "api_server", "/app", "--host", "0.0.0.0", "--port", "8080"]
     ```
 
 ### Step 3: Build and Push the Container Image
@@ -103,13 +94,13 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     ```shell
     gcloud artifacts repositories create adk-images \
         --repository-format=docker \
-        --location=$GOOGLE_CLOUD_LOCATION
+        --location=$DEPLOY_REGION
     ```
 
 2.  **Build and Push with Cloud Build:**
     ```shell
     gcloud builds submit \
-        --tag ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/support-agent:v1
+        --tag ${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/support-agent:v1
     ```
 
 ### Step 4: Create and Deploy to a GKE Cluster
@@ -117,17 +108,17 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
 1.  **Create a GKE Autopilot Cluster:** (This may take 5-10 minutes)
     ```shell
     gcloud container clusters create-auto adk-cluster \
-        --location=$GOOGLE_CLOUD_LOCATION
+        --location=$DEPLOY_REGION
     ```
 
 2.  **Get Cluster Credentials:**
     ```shell
     gcloud container clusters get-credentials adk-cluster \
-        --location=$GOOGLE_CLOUD_LOCATION
+        --location=$DEPLOY_REGION
     ```
 
 3.  **Create the Kubernetes Manifest (`deployment.yaml`):**
-    Create a file named `deployment.yaml`. **Note the use of shell variables (`GOOGLE_CLOUD_LOCATION`, `GOOGLE_CLOUD_PROJECT`)**, which we will substitute in the next step. Kubernetes resource names can't contain underscores, which is why these use hyphens even though the container image and agent names use underscores.
+    Create a file named `deployment.yaml`. **Note the region separation:** the container image comes from `${DEPLOY_REGION}-docker.pkg.dev/...`, while inside the container `GOOGLE_GENAI_USE_ENTERPRISE="1"` and `GOOGLE_CLOUD_LOCATION="global"` ensure ADK 2.0's `google-genai` client routes `gemini-3.8-flash` requests to the global Vertex AI endpoint. Kubernetes resource names can't contain underscores, which is why `metadata.name` uses hyphens even though the Python package (`support_agent`) uses underscores.
     ```yaml
     apiVersion: apps/v1
     kind: Deployment
@@ -145,16 +136,16 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
         spec:
           containers:
           - name: support-agent
-            image: ${GOOGLE_CLOUD_LOCATION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/support-agent:v1
+            image: ${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/support-agent:v1
             ports:
             - containerPort: 8080
             env:
-              - name: GOOGLE_GENAI_USE_VERTEXAI
+              - name: GOOGLE_GENAI_USE_ENTERPRISE
                 value: "1"
               - name: GOOGLE_CLOUD_PROJECT
                 value: "${GOOGLE_CLOUD_PROJECT}"
               - name: GOOGLE_CLOUD_LOCATION
-                value: "${GOOGLE_CLOUD_LOCATION}"
+                value: "global"
     ---
     apiVersion: v1
     kind: Service
@@ -171,45 +162,66 @@ In this lab, you will learn the fundamental process of deploying an ADK agent to
     ```
 
 4.  **Deploy the application:**
-    This command substitutes the variables in your manifest and applies it to your cluster.
+    This command substitutes `${DEPLOY_REGION}` and `${GOOGLE_CLOUD_PROJECT}` in your manifest and applies it to your cluster.
     ```shell
     envsubst < deployment.yaml | kubectl apply -f -
     ```
-    *   **Note on `envsubst`:** This command is used to substitute the shell environment variables (like `GOOGLE_CLOUD_PROJECT`) directly into your `deployment.yaml` file before `kubectl` applies it.
+    *   **Note on `envsubst`:** This command substitutes shell environment variables (`DEPLOY_REGION`, `GOOGLE_CLOUD_PROJECT`) directly into `deployment.yaml` before `kubectl` applies it, while keeping `GOOGLE_CLOUD_LOCATION` pinned to `"global"`.
 
 ### Step 5: Test Your Deployed Agent
 
 1.  **Get the External IP Address:**
-    Run this command and wait until an "EXTERNAL-IP" is displayed. This can take a few minutes.
+    Run this command and wait until an `EXTERNAL-IP` is displayed. This can take a few minutes.
     ```shell
     kubectl get service support-agent-service --watch
     ```
-    Once you see an IP, press `Ctrl+C` to exit.
+    Once you see an IP, press `Ctrl+C` to exit and store it in a shell variable:
+    ```shell
+    export EXTERNAL_IP=$(kubectl get service support-agent-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+    ```
 
-2.  **Access the Agent:**
-    Unlike Module 32's `--with_ui` deployment, this container's `Dockerfile` runs `adk api_server` with no UI flag -- opening the external IP in a browser shows a bare `{"detail":"Not Found"}`, not a UI, exactly as intended for a production service (see this module's Key Takeaways). Test the same routing logic with `curl` instead: create a session against `/apps/support_agent/users/u1/sessions/s1`, then send a message via `/run_sse` -- a billing question should route to `billing_agent`, and a technical question should route to `tech_support_agent`.
+2.  **Access the Agent via `curl`:**
+    Unlike Module 32's `--with_ui` deployment, this container's `Dockerfile` runs `adk api_server` with no UI flag — opening `http://$EXTERNAL_IP` in a browser shows a bare `{"detail":"Not Found"}`, exactly as intended for a headless production service. Test the routing logic with `curl` against `/apps/support_agent/...`:
+    ```shell
+    # 1. Create session s1 for user u1 on support_agent
+    curl -X POST "http://${EXTERNAL_IP}/apps/support_agent/users/u1/sessions/s1" \
+      -H "Content-Type: application/json" \
+      -d '{}'
+
+    # 2. Send a billing inquiry via SSE streaming (routes to billing_agent)
+    curl -X POST "http://${EXTERNAL_IP}/run_sse" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "app_name": "support_agent",
+        "user_id": "u1",
+        "session_id": "s1",
+        "new_message": {
+          "role": "user",
+          "parts": [{"text": "I have a question about my invoice."}]
+        }
+      }'
+    ```
+    Repeat step 2 with `"My app keeps crashing."` to verify delegation to `tech_support_agent`.
 
 ### Lab Summary
 You have successfully deployed the same multi-agent Customer Support system to GKE that you deployed to Cloud Run in Module 32. You learned to:
-*   Write a `Dockerfile` to containerize an ADK agent.
-*   Build and push a container image using Cloud Build.
-*   Create a GKE cluster.
-*   Write Kubernetes `Deployment` and `Service` manifests — and why their resource names can't use underscores.
-*   Use `envsubst` and `kubectl` to deploy your application.
+*   Package an ADK agent inside `/app/support_agent/` and serve `/app` with `adk api_server` so `/apps/support_agent/...` routes resolve cleanly.
+*   Separate infrastructure region (`DEPLOY_REGION=us-central1`) from Vertex AI model inference location (`GOOGLE_CLOUD_LOCATION=global`).
+*   Build and push a container image using Cloud Build and Artifact Registry.
+*   Write Kubernetes `Deployment` and `Service` manifests and apply them with `envsubst` and `kubectl`.
 
 ### Bonus: The Automated Way
 
 Now that you understand what happens under the hood, compare it to the ADK CLI shortcut that automates Steps 2-4 (containerization, push to Artifact Registry, manifest generation, and `kubectl apply`) in a single command:
 ```shell
 uv run adk deploy gke \
-    --project $GOOGLE_CLOUD_PROJECT \
+    --project "$GOOGLE_CLOUD_PROJECT" \
     --cluster_name adk-cluster \
-    --region $GOOGLE_CLOUD_LOCATION \
+    --region "$DEPLOY_REGION" \
     --service_type=LoadBalancer \
-    --with_ui \
-    .
+    support_agent/
 ```
-You won't run this in the lab (you already deployed manually above), but knowing it exists — and now understanding exactly what it does for you — is valuable once you move past learning and into daily production work.
+*(Or use `uvx google-agents-cli scaffold enhance . --adk -d gke --agent-directory support_agent` followed by `uvx google-agents-cli deploy` for full Terraform-managed Autopilot infrastructure.)*
 
 ### Cleanup (Important!)
 
@@ -218,14 +230,14 @@ GKE clusters can incur significant costs if left running. It is crucial to delet
 1.  **Delete the GKE Cluster:**
     ```shell
     gcloud container clusters delete adk-cluster \
-        --location=$GOOGLE_CLOUD_LOCATION \
+        --location=$DEPLOY_REGION \
         --async # Runs in background
     ```
 
 2.  **Delete the Artifact Registry Repository:**
     ```shell
     gcloud artifacts repositories delete adk-images \
-        --location=$GOOGLE_CLOUD_LOCATION \
+        --location=$DEPLOY_REGION \
         --async # Runs in background
     ```
 
@@ -250,7 +262,60 @@ GKE clusters can incur significant costs if left running. It is crucial to delet
 
 ## Goal
 
-This lab is a procedural tutorial. The primary "solution" is a successfully deployed Customer Support agent running on a GKE cluster, accessible via a public IP address.
+This solution provides the complete `support_agent` Python package, container `Dockerfile`, and expected outputs for deploying the Customer Support agent on a GKE Autopilot cluster.
+
+### Agent Package Solution
+
+#### `support_agent/__init__.py`
+
+```python
+from . import agent
+```
+
+#### `support_agent/agent.py`
+
+```python
+from google.adk.agents import Agent
+
+billing_agent = Agent(
+    name="billing_agent",
+    model="gemini-3.8-flash",
+    description="Handles questions about billing, invoices, and payments.",
+    instruction="You are a billing support agent. Politely answer questions about billing and payment issues.",
+)
+
+tech_support_agent = Agent(
+    name="tech_support_agent",
+    model="gemini-3.8-flash",
+    description="Handles technical support questions and troubleshooting.",
+    instruction="You are a technical support agent. Help users troubleshoot technical issues and provide clear solutions.",
+)
+
+root_agent = Agent(
+    name="router_agent",
+    model="gemini-3.8-flash",
+    description="The main customer support router.",
+    instruction="""
+You are the customer support router.
+Your job is to understand the user's request and delegate it to the correct specialist agent.
+- If the user has a question about billing, delegate to the `billing_agent`.
+- If the user has a technical problem, delegate to the `tech_support_agent`.
+""",
+    sub_agents=[billing_agent, tech_support_agent],
+)
+```
+
+#### `Dockerfile`
+
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY support_agent/ /app/support_agent/
+EXPOSE 8080
+CMD ["adk", "api_server", "/app", "--host", "0.0.0.0", "--port", "8080"]
+```
 
 ### Expected Outputs
 

@@ -14,7 +14,7 @@ pagination_label: "Module 28: Building Custom MCP Tools — 📖 Theory & Overvi
 
 ### Becoming a Tool Provider
 
-In the previous module, you acted as a **consumer** of an MCP tool. Your ADK agent was the client connecting to a pre-built server. Now, we flip the roles. You will become a **provider** by building your own simple, standalone MCP server from scratch.
+In the previous module, you acted as a **consumer** of an MCP tool. Your ADK agent was the client connecting to a pre-built server. Now, we flip the roles. You will become a **provider** by building your own standalone MCP server from scratch.
 
 By exposing your application's capabilities via the Model Context Protocol, you are making them available not just to your own ADK agents, but to *any* MCP-compliant client. It turns your service into a reusable, AI-addressable component in a larger ecosystem.
 
@@ -30,7 +30,7 @@ An MCP server is an application that listens for connections from clients and re
 When a client first connects, it calls `list_tools()`. The server's job is to respond with a "menu" of all the tools it provides. For each tool, it must provide a detailed schema, including:
 *   The tool's `name`.
 *   A `description` of what it does.
-*   An `inputSchema` that defines the arguments the tool expects (names, types, etc.).
+*   An `inputSchema` (JSON Schema) that defines the arguments the tool expects (names, types, required fields).
 
 The client's LLM uses this menu to decide which tool to call.
 
@@ -40,30 +40,65 @@ Once the client's LLM decides to use a tool, it sends a `call_tool()` request co
 The server's `call_tool()` handler is responsible for:
 *   Receiving the request.
 *   Executing the corresponding logic for the requested tool.
-*   Managing any state the tool needs (e.g. an in-memory cart, a database row).
-*   Returning a result to the client.
+*   Managing any state the tool needs (e.g., an in-memory shopping cart or a database row).
+*   Returning a list of MCP content blocks (such as `mcp_types.TextContent`) to the client.
 
 ### Building an MCP Server in Python
 
-The `mcp` Python library provides a `Server` class and decorators to simplify this process.
+The `mcp` Python SDK provides a low-level `Server` class and decorators to wire up protocol handlers directly:
 
 1.  **Install the library (via ADK's compatible extra):** `uv add "google-adk[mcp]"`
-2.  **Instantiate the Server:** `app = Server("my_mcp_server")`
-3.  **Implement Handlers with Decorators:** You write `async` functions and use decorators to register them as handlers.
-    *   `@app.list_tools()`: This decorates the function that will handle the `list_tools` request. It should return a list of `mcp.types.Tool` objects.
-    *   `@app.call_tool()`: This decorates the function that will handle the `call_tool` request. It receives the tool name and arguments.
-4.  **Run the Server:** You use a runner function (e.g., `mcp.server.stdio.stdio_server`) to start the server and listen for connections.
+2.  **Import the low-level `Server` and protocol types:**
+    Note that `Server` is imported from `mcp.server.lowlevel` (not top-level `mcp`):
+    ```python
+    import sys
+    from mcp import types as mcp_types
+    from mcp.server.lowlevel import Server, NotificationOptions
+    from mcp.server.models import InitializationOptions
+    import mcp.server.stdio
 
-In the lab, you will build a simple MCP server that exposes a stateful "shopping cart" tool, learning the fundamentals of implementing these handlers.
+    app = Server("my_mcp_server")
+    ```
+3.  **Implement Handlers with Decorators:** Write `async` functions and register them on `app`:
+    *   `@app.list_tools()`: Returns a `list[mcp_types.Tool]` describing every exposed tool and its JSON Schema.
+    *   `@app.call_tool()`: Receives `(name: str, arguments: dict)` and returns `list[mcp_types.Content]` (for example, `[mcp_types.TextContent(type="text", text=...)]`).
+4.  **Run Over `stdio` Safely (Never Print to `stdout`!):**
+    When you start a server with `mcp.server.stdio.stdio_server()`, **standard output (`stdout`) IS the JSON-RPC wire transport** between your server and the ADK client. Calling a plain `print("...")` writes raw text into `stdout`, which corrupts the JSON-RPC stream and causes the MCP client to fail with JSON parse errors! Always send server logs to **`sys.stderr`**:
+    ```python
+    print("[Server]: Tool called", file=sys.stderr, flush=True)
+    ```
+    Similarly, when launching a Python MCP server from `StdioServerParameters` on the client side, always pass `command=sys.executable` (rather than a hardcoded `'python3'`) so the subprocess runs inside the exact same `.venv` where `mcp` is installed.
 
-### Why build an MCP Server?
+In the lab, you will build a stateful "shopping cart" MCP server and connect an ADK `Agent` to it.
 
-Building an MCP server decouples your tool's logic from the agent, which provides significant benefits:
-1.  **Independent Scalability:** You can scale the agent and the tool server separately.
+### Why Build an MCP Server?
+
+Building an MCP server decouples your tool's logic from the agent, providing major architectural benefits:
+1.  **Independent Scalability:** Scale the agent and the tool server independently.
 2.  **Modular Maintenance:** Update tool logic without redeploying the agent.
 3.  **Reusability:** Your MCP server can be consumed by *any* MCP-compliant client.
-4.  **Workflow Integration:** In ADK 2.0, you can equip any `Agent` node with your custom MCP server, allowing for complex, distributed graph execution.
+4.  **Workflow Integration:** In ADK 2.0, you can equip any `Agent` node with your custom MCP server across complex graph workflows.
 
 ### Going Further: Exposing a Whole Agent as an MCP Tool (Experimental)
 
-This module built a hand-written MCP server exposing granular tools (`add_item_to_cart`, `view_cart`) — no agent involved on the server side. ADK also offers the opposite direction: `to_mcp_server(agent)` (from `google.adk.tools.mcp_tool`, requires the `[mcp]` extra) wraps an *entire* ADK agent — its model loop and all of its own tools — as a single MCP tool that any MCP host can call, hiding the whole conversation behind one request/response. It's the MCP counterpart of `to_a2a`, which you used in Module 21 to expose an agent over A2A instead. It's still marked `@experimental` in ADK's source, so treat it as a preview rather than a pattern to build on yet.
+This module builds a hand-written MCP server exposing granular tools (`add_item_to_cart`, `view_cart`) — no agent involved on the server side. ADK also offers the opposite direction: `to_mcp_server(agent)` (from `google.adk.tools.mcp_tool`, requires the `[mcp]` extra) wraps an *entire* ADK agent — its model loop and all of its own tools — as a single MCP tool that any MCP host can call, hiding the whole conversation behind one request/response. It is the MCP counterpart of `to_a2a` from Module 21, and is currently marked `@experimental` in ADK's source.
+
+<KnowledgeCheck
+  id="m28-stdio-jsonrpc-safety"
+  question="Why must a Python MCP server running over mcp.server.stdio.stdio_server() write diagnostic logs to sys.stderr instead of calling standard print()?"
+  options={[
+    "Because stdio_server() uses stdout exclusively for JSON-RPC protocol frames, so plain print() output corrupts the MCP message stream",
+    "Because Python disables stdout automatically inside async context managers",
+    "Because ADK's McpToolset deletes any subprocess that writes to stderr",
+    "Because mcp_types.TextContent automatically captures stdout instead of return values"
+  ]}
+  correctIndex={0}
+  hint="Consider which file descriptors carry MCP protocol messages when using the stdio transport."
+  explanation="Over the stdio transport, the MCP client reads JSON-RPC messages directly from the server subprocess's stdout stream. Writing plain log lines to stdout mixes non-JSON text into the protocol channel and breaks frame parsing, whereas stderr is left free for diagnostic logging."
+/>
+
+### Key Takeaways
+- A custom Python MCP server uses `from mcp.server.lowlevel import Server` and implements `@app.list_tools()` (discovery) and `@app.call_tool()` (execution).
+- Over `stdio_server()`, **`stdout` is reserved strictly for JSON-RPC frames** — always log with `print(..., file=sys.stderr, flush=True)`.
+- When spawning a local Python MCP server from ADK via `StdioServerParameters`, use `command=sys.executable` so the child process inherits the active virtual environment's Python interpreter and installed `mcp` package.
+- Decoupling stateful tools into standalone MCP servers makes capabilities reusable across any MCP-compliant host or agent framework.

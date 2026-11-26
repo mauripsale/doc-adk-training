@@ -343,6 +343,47 @@ runner = Runner(
 )
 ```
 
+#### From Local Dev to Google Cloud (`VertexAiSessionService` + `VertexAiMemoryBankService`)
+
+Because `Agent` definitions depend only on abstract `Session` state and memory tools—never on the underlying storage engine—promoting your prototype from local RAM/SQLite (`InMemorySessionService` / `DatabaseSessionService` + `InMemoryMemoryService`) to managed **Vertex AI Agent Engine** requires **zero changes to your `Agent` code**. You only swap the service instances passed into `Runner`:
+
+```python
+from google.adk.memory import VertexAiMemoryBankService
+from google.adk.runners import Runner
+from google.adk.sessions import VertexAiSessionService
+from google.adk.tools import load_memory, preload_memory
+
+PROJECT_ID = "your-gcp-project-id"
+LOCATION = "us-central1"
+AGENT_ENGINE_ID = "1234567890123456789"  # Provisioned Reasoning / Agent Engine resource ID
+
+# Swap local services for managed Google Cloud services — tutor_with_recall stays 100% unchanged!
+cloud_session_service = VertexAiSessionService(
+    project=PROJECT_ID,
+    location=LOCATION,
+    agent_engine_id=AGENT_ENGINE_ID,
+)
+cloud_memory_service = VertexAiMemoryBankService(
+    project=PROJECT_ID,
+    location=LOCATION,
+    agent_engine_id=AGENT_ENGINE_ID,
+)
+
+cloud_runner = Runner(
+    app_name="tutor_app",
+    agent=tutor_with_recall,  # Exact same Agent definition!
+    session_service=cloud_session_service,
+    memory_service=cloud_memory_service,
+)
+```
+
+#### Choosing Between `load_memory` and `preload_memory`
+
+ADK ships two built-in memory retrieval tools in `google.adk.tools` that work identically across `InMemoryMemoryService`, `SqliteMemoryService`, and `VertexAiMemoryBankService`:
+
+* **`load_memory` (On-Demand Tool Call):** Registers a standard function tool that the LLM invokes **only when it decides past context is needed** (e.g., *"What topic did I struggle with last week?"*). This minimizes latency and token usage on routine turns that don't require historical recall.
+* **`preload_memory` (Automatic Turn-by-Turn Injection):** Automatically queries `MemoryService` **before every LLM call** using the current user turn and injects matching memories straight into the system instructions—guaranteeing personalization even when the user doesn't explicitly ask the agent to "remember," at the cost of one memory search per turn.
+
 ---
 
 ### Interactive Knowledge Checks

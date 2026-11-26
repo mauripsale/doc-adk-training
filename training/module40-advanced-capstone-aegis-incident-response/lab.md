@@ -16,23 +16,24 @@ This lab runs entirely on your local machine — no billing, no GCP project requ
 ### Prerequisites
 *   **Python 3.10+** and **[uv](https://github.com/astral-sh/uv#installation)**.
 *   A `GEMINI_API_KEY` (or Agent Platform credentials) — same as every other module.
-*   No GCP project, billing, or Google Cloud APIs are required for this lab.
+*   No GCP project, billing, or Google Cloud APIs are required for local execution.
 
 ### Step 0: Project Setup
 
 <Setup/>
 
-1.  **Create three sibling agent projects:**
+1.  **Create a dedicated parent workspace and three sibling agent projects:**
     ```shell
+    mkdir -p aegis_capstone && cd aegis_capstone
     uv run adk create threat_intel_agent
     uv run adk create orchestrator_agent
     uv run adk create mitigation_agent
     ```
-2.  **Install dependencies** in each of the three directories:
+2.  **Install dependencies** in the workspace virtual environment:
     ```shell
     uv add "google-adk[a2a,mcp]" uvicorn mcp python-dotenv
     ```
-3.  **Add your API key** to a `.env` file in each of the three directories.
+3.  **Add your API key** (or Vertex AI configuration) to a `.env` file in each of the three agent directories (`threat_intel_agent/.env`, `orchestrator_agent/.env`, `mitigation_agent/.env`).
 
 ---
 
@@ -99,11 +100,12 @@ The **Threat Intelligence Agent** must expose a natural language interface to a 
     ```
 
 2.  **Skeleton for `threat_intel_agent/agent.py`:**
-    Complete the `TODO` placeholders in the agent script below.
+    Complete the `TODO` placeholders in the agent script below. Notice we pass `command=sys.executable` to `StdioServerParameters` so the MCP subprocess always runs inside the exact active virtual environment where `mcp` is installed.
 
 ```python
 import os
 import re
+import sys
 import time
 from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
@@ -119,13 +121,12 @@ import uvicorn
 
 load_dotenv(override=True)
 
-# Launches bigquery_mock_server.py as a local subprocess (same pattern as
-# Module 27/28's StdioConnectionParams) — standing in for a real hosted
-# BigQuery MCP server.
+# Launches bigquery_mock_server.py as a local subprocess using sys.executable
+# (ensuring the active .venv interpreter is used rather than global python3).
 mcp_toolset = McpToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
-            command="python3",
+            command=sys.executable,
             args=[os.path.join(os.path.dirname(os.path.abspath(__file__)), "bigquery_mock_server.py")],
         ),
     ),
@@ -188,7 +189,7 @@ if __name__ == "__main__":
 The **Orchestrator** coordinates the Threat Intelligence and Mitigation agents to run complete automated incident mitigation cycles.
 
 1.  **Skeleton for `orchestrator_agent/agent.py`:**
-    Complete the `TODO` placeholders to consume the two remote A2A services.
+    Complete the `TODO` placeholders to consume the two remote A2A services. Notice `App(name="orchestrator_agent", root_agent=root_agent)` matches the package directory name `orchestrator_agent` so `uv run adk web` (launched from the parent `aegis_capstone/` directory) resolves sessions cleanly.
 
 ```python
 from google.adk.agents import Agent
@@ -237,7 +238,8 @@ root_agent = Agent(
     tools=[...],  # TODO: Register remote services wrapped as agent tools
 )
 
-app = App(name="aegis_incident_response_system", root_agent=root_agent)
+# Match App.name to the package directory name ("orchestrator_agent")
+app = App(name="orchestrator_agent", root_agent=root_agent)
 runner = InMemoryRunner(app=app)
 ```
 
@@ -287,22 +289,43 @@ if __name__ == "__main__":
 
 ---
 
-### Running the System
-This requires three separate terminals.
+### Running the System Locally
+This requires three separate terminals starting from your `aegis_capstone` workspace:
 
 1.  **Terminal 1 (Threat Intelligence Agent):**
     ```shell
-    cd threat_intel_agent && uv run python agent.py
+    cd aegis_capstone/threat_intel_agent && uv run python agent.py
     ```
 2.  **Terminal 2 (Mitigation Agent):**
     ```shell
-    cd mitigation_agent && uv run python agent.py
+    cd aegis_capstone/mitigation_agent && uv run python agent.py
     ```
-3.  **Terminal 3 (Orchestrator):**
+3.  **Terminal 3 (Orchestrator — launched from parent workspace):**
     ```shell
-    cd orchestrator_agent && uv run adk web .
+    cd aegis_capstone && uv run adk web
     ```
-4.  **Interact with the system:** open the Dev UI and try: *"Detect any brute-force attacks on our billing databases and generate a patching plan."* Watch the Trace View to see the orchestrator hand off to both remote agents in turn.
+4.  **Interact with the system:** select `orchestrator_agent` in the Dev UI dropdown and try: *"Detect any brute-force attacks on our billing databases and generate a patching plan."* Watch the Trace View to see the orchestrator invoke both remote A2A agents in sequence and mask internal IP addresses (`192.168.1.***`).
+
+### Optional Bonus: Production Cloud Deployment with `google-agents-cli`
+If you have a Google Cloud project and want to promote this capstone to Cloud Run and Vertex AI Agent Runtime (Modules 32, 35, and 36), use the official `google-agents-cli` workflow:
+
+```shell
+# 1. Scaffold & deploy the two remote A2A servers to Google Cloud Run
+cd aegis_capstone/threat_intel_agent
+uvx google-agents-cli scaffold enhance . --deployment-target cloud_run
+uvx google-agents-cli deploy
+
+cd ../mitigation_agent
+uvx google-agents-cli scaffold enhance . --deployment-target cloud_run
+uvx google-agents-cli deploy
+
+# 2. Update orchestrator_agent/agent.py with the deployed Cloud Run agent_card URLs,
+#    then deploy the orchestrator to Vertex AI Agent Runtime and publish to Gemini:
+cd ../orchestrator_agent
+uvx google-agents-cli scaffold enhance . --deployment-target agent_runtime
+uvx google-agents-cli deploy
+uvx google-agents-cli publish gemini --gemini-app-id "$GEMINI_APP_ID"
+```
 
 ### Self-Reflection Questions
 - In AgentOps, why is trace context propagation critical for debugging multi-agent HTTP calls?
@@ -338,6 +361,7 @@ FAKE_AUDIT_LOGS = [
     {"timestamp": "2026-08-20T03:15:01Z", "source_ip": "192.168.1.45", "event": "sql_injection_attempt", "target": "mid_market_segment_logs", "query_snippet": "' OR '1'='1"},
 ]
 
+
 @app.list_tools()
 async def list_mcp_tools() -> list[mcp_types.Tool]:
     return [
@@ -354,6 +378,7 @@ async def list_mcp_tools() -> list[mcp_types.Tool]:
         )
     ]
 
+
 @app.call_tool()
 async def call_mcp_tool(name: str, arguments: dict) -> list[mcp_types.Content]:
     if name == "query_security_audit_logs":
@@ -361,6 +386,7 @@ async def call_mcp_tool(name: str, arguments: dict) -> list[mcp_types.Content]:
         return [mcp_types.TextContent(type="text", text=response_text)]
     response_text = json.dumps({"status": "error", "message": f"Tool '{name}' not found."})
     return [mcp_types.TextContent(type="text", text=response_text)]
+
 
 async def run_mcp_stdio_server():
     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
@@ -374,6 +400,7 @@ async def run_mcp_stdio_server():
             ),
         )
 
+
 if __name__ == "__main__":
     asyncio.run(run_mcp_stdio_server())
 ```
@@ -383,13 +410,14 @@ if __name__ == "__main__":
 ```python
 import os
 import re
+import sys
 import time
 from google.adk.agents import Agent
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models.llm_request import LlmRequest
 from google.adk.models.llm_response import LlmResponse
 from google.adk.a2a.utils.agent_to_a2a import to_a2a
-from google.adk.tools.mcp_tool.mcp_toolset import McpToolset
+from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 from google.genai import types
@@ -398,14 +426,18 @@ import uvicorn
 
 load_dotenv(override=True)
 
+# Always use sys.executable rather than a bare "python3" string so the MCP
+# stdio subprocess inherits the exact active virtual environment (.venv)
+# where `mcp` and `google-adk` are installed.
 mcp_toolset = McpToolset(
     connection_params=StdioConnectionParams(
         server_params=StdioServerParameters(
-            command="python3",
+            command=sys.executable,
             args=[os.path.join(os.path.dirname(os.path.abspath(__file__)), "bigquery_mock_server.py")],
         ),
     ),
 )
+
 
 def mask_security_secrets(text: str) -> str:
     """
@@ -415,10 +447,12 @@ def mask_security_secrets(text: str) -> str:
     ip_regex = r"\b(192\.168\.\d+)\.(\d+)\b"
     return re.sub(ip_regex, r"\1.***", text)
 
+
 def start_timer(callback_context: CallbackContext, llm_request: LlmRequest) -> None:
     """AgentOps: mark the start of a model call to measure latency."""
     callback_context.state["start_time"] = time.time()
     print("[AgentOps] Starting query generation span...")
+
 
 def end_timer_and_sanitize(callback_context: CallbackContext, llm_response: LlmResponse):
     """AgentOps: mask secrets in the response and log (simulated) telemetry export."""
@@ -444,6 +478,7 @@ def end_timer_and_sanitize(callback_context: CallbackContext, llm_response: LlmR
     return llm_response.model_copy(update={
         "content": types.Content(parts=[types.Part(text=redacted_text)], role="model")
     })
+
 
 threat_agent = Agent(
     model="gemini-3.8-flash",
@@ -516,7 +551,10 @@ root_agent = Agent(
     tools=[AgentTool(agent=threat_intel_service), AgentTool(agent=mitigation_service)],
 )
 
-app = App(name="aegis_incident_response_system", root_agent=root_agent)
+# IMPORTANT: Align App(name="orchestrator_agent", ...) with the package
+# directory name (`orchestrator_agent`) because ADK 2.14's AgentLoader checks
+# `module.app` first when `uv run adk web` runs from the parent workspace.
+app = App(name="orchestrator_agent", root_agent=root_agent)
 runner = InMemoryRunner(app=app)
 ```
 
@@ -533,12 +571,14 @@ import uvicorn
 
 load_dotenv(override=True)
 
+
 def search_remediation_playbooks(vulnerability_type: str) -> str:
     """
     Simulated Vertex AI Search (RAG) lookup over CIS/NIST playbooks.
     A production system would query a real Vertex AI Search app here.
     """
     return "Remediation Playbook #40: For database log attacks, isolate port 3306, enable VPC Service Controls, and rotate target IAM passwords."
+
 
 async def build_and_upload_mitigation_brief(target_node: str, incident_type: str, tool_context: ToolContext) -> dict:
     """
@@ -550,14 +590,15 @@ async def build_and_upload_mitigation_brief(target_node: str, incident_type: str
     return {
         "status": "success",
         "brief_url": gcs_dest_url,
-        "message": f"Successfully generated security patch script and uploaded executive brief to {gcs_dest_url}"
+        "message": f"Successfully generated security patch script and uploaded executive brief to {gcs_dest_url}",
     }
+
 
 mitigation_agent = Agent(
     model="gemini-3.8-flash",
     name="mitigation_agent",
     instruction="You generate patch scripts and executive briefings. Use the playbook search and brief-upload tools.",
-    tools=[search_remediation_playbooks, build_and_upload_mitigation_brief]
+    tools=[search_remediation_playbooks, build_and_upload_mitigation_brief],
 )
 
 a2a_app = to_a2a(mitigation_agent, port=8003)
@@ -577,16 +618,16 @@ if __name__ == "__main__":
     *   **Answer:** Local token logging (like the `print()` calls in this lab) is useful for instant console debugging, but it doesn't scale or persist. Real OpenTelemetry metrics export these values as structured, queryable time-series data. That lets a platform team build dashboards tracking token cost across every agent and team, trigger alerts on anomalous spikes, and analyze trends over weeks or months — none of which is possible from a print statement in one terminal.
 
 3.  **This lab simulates Model Armor, RAG, and the GCS upload with plain Python functions. What would have to change in `threat_intel_agent`, `mitigation_agent`, and their AgentOps hooks to call the real Google Cloud services instead?**
-    *   **Answer:** `mask_security_secrets` would call the real Model Armor API instead of a local regex — same function signature, different implementation. `search_remediation_playbooks` would query a real Vertex AI Search app (via its client library or an MCP wrapper around it) instead of returning a fixed string. `build_and_upload_mitigation_brief` would actually render a PDF and call the Cloud Storage API (or a real GCS MCP server, following the same `McpToolset`/`StdioConnectionParams` or `StreamableHTTPConnectionParams` pattern already used for the BigQuery mock) to get a real signed URL. In the AgentOps hooks, the `print()` calls simulating telemetry export would be replaced with real OpenTelemetry SDK calls (spans and metrics), matching the pattern taught in Module 25 — the callback *signatures* (`before_model_callback`/`after_model_callback`) wouldn't need to change at all, only what happens inside them.
+    *   **Answer:** `mask_security_secrets` would call the real Model Armor API instead of a local regex — same function signature, different implementation. `search_remediation_playbooks` would query a real Vertex AI Search app (via its client library or an MCP wrapper around it) instead of returning a fixed string. `build_and_upload_mitigation_brief` would actually render a PDF and call the Cloud Storage API (or a real GCS MCP server, following the same `McpToolset`/`StdioConnectionParams` or `StreamableHTTPConnectionParams` pattern already used for the BigQuery mock) to get a real signed URL. In the AgentOps hooks, the `print()` calls simulating telemetry export would be replaced with real OpenTelemetry SDK calls (spans and metrics), matching the pattern taught in Module 26 — the callback *signatures* (`before_model_callback`/`after_model_callback` from Module 25) wouldn't need to change at all, only what happens inside them.
 
 ---
 
 ## You've Reached the End
 
-Take a moment with that — forty modules ago, Module 1 was a "scavenger hunt" through documentation with no code at all. Here, you just got three independent agents talking to each other over A2A, backed by a real MCP server, with production-shaped observability hooks, to hunt down a simulated security incident end to end. Every concept in between — tools, state, multi-agent orchestration, evaluation, callbacks, MCP, streaming UIs, deployment — was a real building block for this, not a detour.
+Take a moment with that — forty modules ago, Module 1 was a "scavenger hunt" through documentation with no code at all. Here, you just got three independent agents talking to each other over A2A, backed by a real MCP server, with production-shaped observability hooks, to hunt down a simulated security incident end to end. Every concept in between — tools, state, multi-agent orchestration, evaluation, callbacks, observability, MCP, streaming UIs, deployment — was a real building block for this, not a detour.
 
 A few honest notes on what "done" means here:
-*   **You know what's real and what's simulated in this capstone**, and — more usefully — exactly how to flip each simulated piece to real, because you've now built the real version of each one in an earlier module (Model Armor-style masking in Module 26, Vertex AI Search patterns throughout Part 5, GCS/MCP servers in Module 28, OpenTelemetry in Module 25, deployment in Part 6).
+*   **You know what's real and what's simulated in this capstone**, and — more usefully — exactly how to flip each simulated piece to real, because you've now built the real version of each one in an earlier module (Model Armor-style masking via Callbacks in Module 25, OpenTelemetry in Module 26, GCS/MCP servers in Module 28, Vertex AI Search patterns throughout Part 5, and `google-agents-cli` deployment in Part 6).
 *   **The course itself keeps evolving.** ADK is under active development, and this repository gets updated as the framework changes — if something here ever looks off against a newer ADK release, that's worth an issue or a PR, not silent confusion.
 
 If you're looking for where to go next:

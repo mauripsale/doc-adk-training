@@ -31,14 +31,18 @@ from google.adk import Agent, Workflow, Context
 from google.adk.workflow import node
 
 # 1. Define specialist agents as usual
+# IMPORTANT: Every child Agent invoked dynamically via ctx.run_node() inside
+# a @node(rerun_on_resume=True) orchestrator MUST also set rerun_on_resume=True!
 researcher = Agent(
     name="researcher",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction="Research key facts about the user's topic.",
 )
 writer = Agent(
     name="writer",
     model="gemini-3.8-flash",
+    rerun_on_resume=True,
     instruction="Turn the provided research notes into a short, engaging article.",
 )
 
@@ -65,7 +69,7 @@ root_agent = Workflow(
 
 #### Line-by-Line Breakdown of the New Primitives
 
-*   **`@node(rerun_on_resume=True)`**: Registers `newsletter_workflow` as a workflow node. Setting `rerun_on_resume=True` ensures that in a multi-turn conversation, this orchestrator runs fresh on every new message the user sends rather than being skipped.
+*   **`@node(rerun_on_resume=True)` & Child `Agent(..., rerun_on_resume=True)`**: Registers `newsletter_workflow` as a workflow node. In ADK 2.0, **both** the `@node(rerun_on_resume=True)` orchestrator **and** every child `Agent` invoked dynamically via `await ctx.run_node(child, ...)` must set `rerun_on_resume=True` so multi-turn conversations re-execute cleanly on subsequent user messages without raising `ValueError: A node must have rerun_on_resume=True`.
 *   **`async def newsletter_workflow(ctx: Context, node_input: str):`**:
     *   `ctx: Context` is ADK's runtime control object (giving you `ctx.run_node(...)` and `ctx.session.state`).
     *   `node_input: str` is the incoming user message (because `"START"` connects to this function).

@@ -210,10 +210,41 @@ root_agent = None
    ```shell
    uv run adk web
    ```
-3. Select **`personal_tutor`** from the agent dropdown and test the 4 state scopes:
-   * In the chat input bar, click the **Actions (`+`)** button → **Update state**, enter `{"app:course_version": "2.1"}`, and send: *"Set my preferred language to Italian at intermediate level, and start a session on Python Decorators."*
-   * Open the **State** tab in the left panel to inspect the live merged dictionary, and check the **Events / Trace** view to see `EventActions(state_delta=...)` emitted by your tools!
-   * Click **+ New Session** in the top bar and ask: *"What is my progress and what topic are we studying right now?"* Notice how `user:language` (`Italian`) and `app:course_version` (`2.1`) carried over into the new `session_id`, while `current_topic` started clean!
+3. Select **`personal_tutor`** from the agent dropdown and walk through this **5-step copy-paste sequence** to test all 6 tools and all 4 state scopes (`app:`, `user:`, unprefixed session state, and `temp:`):
+
+   * **3.1 Seed Global `app:` State (Before Sending Your First Message):**
+     In the bottom chat input bar, click **More options (`+`)** → **Update state** and paste:
+     ```json
+     {"app:course_version": "2.1"}
+     ```
+
+   * **3.2 Test `user:` State + Session State (`current_topic`) + `{app:course_version?}`:**
+     Send:
+     ```text
+     Set my preferred language to Italian at intermediate level, and start a session on Python Decorators.
+     ```
+     *(Open the **State** tab in the left panel: you will see `app:course_version`, `user:language`, `user:difficulty_level`, `current_topic`, `session_start_time`, and `last_tutor_response`, plus `EventActions(state_delta=...)` inside **Events / Trace**.)*
+
+   * **3.3 Test `temp:` Scratchpad State + Persistent Completion in `user:`:**
+     Send:
+     ```text
+     I finished the quiz on Python Decorators with 9 correct answers out of 10. Grade my quiz and record the completion.
+     ```
+     *(Notice how `calculate_quiz_grade` uses `temp:raw_score` and `temp:quiz_percentage` in memory during the turn to compute `90.0% (A)`, while `SessionService` automatically strips every `temp:*` key before committing—so neither **State** nor persisted **Events** are polluted by `temp:*`, whereas `user:topics_covered` and `user:quiz_scores` remain durably saved!)*
+
+   * **3.4 Test Past Lesson Search (`user:topics_covered`):**
+     Send:
+     ```text
+     Search my past lessons for Decorators.
+     ```
+
+   * **3.5 Test Cross-Session Persistence (`+ New Session`):**
+     Click **`+ New Session`** in the top bar and send:
+     ```text
+     What is my progress and what topic are we studying right now?
+     ```
+     *(Observe that `user:language`, `user:difficulty_level`, `user:topics_covered`, `user:quiz_scores`, and `app:course_version` all carried over into the brand-new `session_id`, while `current_topic` started clean!)*
+
    * **Local Storage Under the Hood:** Stop (`Ctrl+C`) and restart `uv run adk web`. Because ADK 2.0+ enables `--use_local_storage` by default (`personal_tutor/.adk/session.db`), your sessions and `user:`/`app:` state survive server restarts! Try `uv run adk web --no_use_local_storage` whenever you want volatile RAM-only testing instead.
 
 ---

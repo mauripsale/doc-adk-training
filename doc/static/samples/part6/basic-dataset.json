@@ -1,0 +1,37 @@
+{
+  "eval_cases": [
+    {
+      "eval_case_id": "p1_ticket_triage_and_escalation",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Investigate ticket TCK-1042, check its SLA target, and escalate if required."
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "standard_ticket_sla_lookup",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "What is the current status and applicable SLA response target for ticket TCK-2088?"
+          }
+        ]
+      }
+    },
+    {
+      "eval_case_id": "unknown_ticket_graceful_handling",
+      "prompt": {
+        "role": "user",
+        "parts": [
+          {
+            "text": "Please check the status of ticket TCK-9999."
+          }
+        ]
+      }
+    }
+  ]
+}

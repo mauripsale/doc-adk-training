@@ -6,36 +6,37 @@ pagination_label: "Module 34: Deploying MCP Server to Cloud Run — 🧪 Challen
 
 import Setup from '../_setup-snippet.mdx';
 
-# Lab 34: Deploying the "Shopping Cart" Server Challenge
+# Lab 34: Deploying a Stateless MCP Server to Cloud Run & Connecting `agents-cli`
 
 ## Goal
 
-In this lab, you will take the "Shopping Cart" MCP server from Module 28, re-architect it to be stateless, containerize it with a `Dockerfile`, and deploy it to Google Cloud Run. You will then configure an ADK agent to connect to this live, cloud-hosted tool.
+In this lab, you will take the stateful MCP server pattern from Module 28, re-architect it into a **stateless FastMCP HTTP server**, containerize it with a `Dockerfile`, and deploy it to **Google Cloud Run**. Then, in Steps 4 and 5, you will connect to your live Cloud Run `/mcp` endpoint in **two ways**:
 
-**Note:** This is an advanced lab. For simplicity, we will simulate an external state store with a file written to a temporary directory. In a real production system, you would replace this with a connection to a service like Redis or Memorystore.
+1.  **Standalone ADK Package (`cloud_mcp_server/agent.py`):** Launch `uv run adk web` from the parent `adk-training/` directory to test the remote MCP server interactively.
+2.  **Enterprise `agents-cli` Project (`support-ops-agent/app/agent.py`):** Equip the canonical Part 6 `support_ops_agent` with `McpToolset(connection_params=StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp", headers=...))` and test it immediately via `agents-cli run` and `agents-cli playground`.
+
+**Note:** For lab simplicity, our server simulates externalized state using per-session JSON files in `/tmp/carts` keyed by the `Mcp-Session-Id` HTTP header. In production, you replace those two helper functions (`get_cart` / `save_cart`) with Google Cloud Memorystore (Redis) or Firestore.
 
 ### Prerequisites
 
 *   A Google Cloud Project with billing enabled.
-*   Google Cloud CLI installed and authenticated.
-*   Docker running on your local machine.
-*   **Required APIs:** Ensure the following APIs are enabled in your project:
-    *   Cloud Run API
-    *   Cloud Build API
-    *   Artifact Registry API
-    *   Vertex AI API
-*   **Set GCP Project:** Before starting, ensure your `gcloud` CLI is configured to the correct project:
+*   Google Cloud CLI (`gcloud`) installed and authenticated.
+*   `uv` and `google-agents-cli` installed (`uv tool install google-agents-cli`).
+*   **Required APIs:** Cloud Run, Cloud Build, Artifact Registry, and Vertex AI:
     ```shell
-    gcloud config set project YOUR_PROJECT_ID
+    export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+    export DEPLOY_REGION=us-central1
+    gcloud config set project "$GOOGLE_CLOUD_PROJECT"
+    gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com aiplatform.googleapis.com
     ```
 
-### Step 1: Create the Stateless MCP Server
+---
 
-We need to modify our server so it doesn't store the shopping carts in memory.
+### Step 1: Create the Stateless FastMCP Server
 
 <Setup/>
 
-1.  **Create a new project directory:**
+1.  **Create a new `cloud_mcp_server` directory inside your `adk-training` workspace:**
 
     ```shell
     cd /path/to/your/adk-training
@@ -43,10 +44,8 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     cd cloud_mcp_server
     ```
 
-2.  **Create the `stateless_cart_server.py` file:**
-    This is the modified server code, using `mcp.server.fastmcp.FastMCP` -- the MCP SDK's high-level API for building HTTP-based servers (much less boilerplate than the low-level `Server` class from Module 28, which is stdio-only). Instead of a single global list shared by everyone, it reads and writes each session's cart to its own separate JSON file in a `/tmp/carts` directory. This simulates an external persistence layer.
-
-    A real MCP session is still tracked over the wire (via the `Mcp-Session-Id` HTTP header) -- what's "stateless" here is the *server process*, not the protocol: any container instance can handle any request, because the actual cart data lives outside the process.
+2.  **Create `stateless_cart_server.py`:**
+    Using `mcp.server.fastmcp.FastMCP`, each tool call extracts the `mcp-session-id` HTTP header managed by the Streamable HTTP transport and reads/writes that session's isolated cart outside Python process globals:
 
     ```python
     # Filename: stateless_cart_server.py
@@ -55,9 +54,8 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     from mcp.server.fastmcp import FastMCP, Context
 
     # --- Configuration ---
-    # In a serverless environment, we can use the temporary filesystem for a simple demo.
-    # In a real production system, this would be a connection to a dedicated external
-    # persistence service like Redis or Memorystore.
+    # In a serverless environment, we use /tmp/carts to simulate an external store.
+    # In production, replace get_cart/save_cart with Memorystore (Redis) or Firestore.
     STATE_STORAGE_PATH = "/tmp/carts"
     if not os.path.exists(STATE_STORAGE_PATH):
         os.makedirs(STATE_STORAGE_PATH)
@@ -66,27 +64,24 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     mcp = FastMCP("stateless_shopping_cart_server")
 
     def get_session_id(ctx: Context) -> str:
-        # The MCP session ID arrives as a standard HTTP header, tracked by the
-        # transport itself -- this is what ties requests to the same cart,
-        # regardless of which container instance handles each one.
+        # The MCP session ID arrives as a standard HTTP header tracked by the transport.
         return ctx.request_context.request.headers.get("mcp-session-id", "unknown")
 
-    # Helper functions to simulate external state
     def get_cart(session_id: str) -> list:
         cart_file = os.path.join(STATE_STORAGE_PATH, f"{session_id}.json")
         if os.path.exists(cart_file):
-            with open(cart_file, 'r') as f:
+            with open(cart_file, "r") as f:
                 return json.load(f)
         return []
 
-    def save_cart(session_id: str, cart: list):
+    def save_cart(session_id: str, cart: list) -> None:
         cart_file = os.path.join(STATE_STORAGE_PATH, f"{session_id}.json")
-        with open(cart_file, 'w') as f:
+        with open(cart_file, "w") as f:
             json.dump(cart, f)
 
     @mcp.tool()
     def add_item_to_cart(item: str, ctx: Context) -> dict:
-        """Adds an item to the cart."""
+        """Adds an item to the session cart."""
         session_id = get_session_id(ctx)
         print(f"[Server]: Handling add_item_to_cart for session '{session_id}'")
         cart = get_cart(session_id)
@@ -96,27 +91,27 @@ We need to modify our server so it doesn't store the shopping carts in memory.
 
     @mcp.tool()
     def view_cart(ctx: Context) -> dict:
-        """Views items in the cart."""
+        """Views all items currently in the session cart."""
         session_id = get_session_id(ctx)
         print(f"[Server]: Handling view_cart for session '{session_id}'")
         cart = get_cart(session_id)
         return {"status": "success", "cart": cart}
 
     # --- ASGI app for HTTP, suitable for Cloud Run ---
-    # FastMCP mounts the MCP endpoint at /mcp by default.
+    # FastMCP mounts the Streamable HTTP MCP endpoint at /mcp by default.
     app = mcp.streamable_http_app()
     ```
 
 ### Step 2: Containerize the MCP Server
 
-1.  **Create a `requirements.txt` file:**
-    Our server needs the `mcp` library and `uvicorn` to actually serve the ASGI app it produces. Pin `mcp` to a `1.x` release: `mcp>=2.0` renamed `FastMCP` to `MCPServer` and removed the `mcp.server.fastmcp` module entirely, which breaks both this server's `from mcp.server.fastmcp import FastMCP` import and `google-adk`'s own `McpToolset` client code (it targets the pre-2.0 API too).
+1.  **Create `requirements.txt`:**
+    Pin `mcp<2` alongside `uvicorn` so `mcp.server.fastmcp.FastMCP` and `google-adk`'s `McpToolset` client stay aligned on the 1.x MCP SDK surface:
 
     ```shell
     printf "mcp<2\nuvicorn\n" > requirements.txt
     ```
 
-2.  **Create the `Dockerfile`:**
+2.  **Create `Dockerfile`:**
 
     ```dockerfile
     FROM python:3.11-slim
@@ -124,127 +119,206 @@ We need to modify our server so it doesn't store the shopping carts in memory.
     COPY requirements.txt .
     RUN pip install --no-cache-dir -r requirements.txt
     COPY stateless_cart_server.py .
-    
-    # Cloud Run provides the PORT env var (defaults to 8080 locally).
-    # Shell form (not exec/JSON-array form) is required here so $PORT expands.
+
+    # Cloud Run injects PORT (defaults to 8080 locally).
+    # Shell form is used so ${PORT:-8080} expands at container startup.
     CMD python -m uvicorn stateless_cart_server:app --host 0.0.0.0 --port ${PORT:-8080}
     ```
 
-### Step 3: Build and Deploy the Server to Cloud Run
+### Step 3: Build and Deploy the MCP Server to Cloud Run
 
-1.  **Set environment variables (separating infrastructure deployment region):**
-    Use `DEPLOY_REGION=us-central1` for Artifact Registry and Cloud Run infrastructure, keeping it separate from the `GOOGLE_CLOUD_LOCATION=global` setting your ADK client agent will use for `gemini-3.8-flash`:
-
-    ```shell
-    export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
-    export DEPLOY_REGION=us-central1
-    ```
-
-2.  **Build and push the image:**
+1.  **Ensure an Artifact Registry Docker repository exists and submit the build:**
 
     ```shell
+    gcloud artifacts repositories describe adk-images --location="$DEPLOY_REGION" >/dev/null 2>&1 || \
+      gcloud artifacts repositories create adk-images \
+        --repository-format=docker \
+        --location="$DEPLOY_REGION"
+
     gcloud builds submit \
-        --tag ${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1
+        --tag "${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1"
     ```
-    *(If you completed Module 33's cleanup, the `adk-images` repository no longer exists — create it first with `gcloud artifacts repositories create adk-images --repository-format=docker --location=$DEPLOY_REGION`.)*
 
-3.  **Deploy to Cloud Run:**
+2.  **Deploy `mcp-cart-server` to Cloud Run and store `MCP_SERVER_URL`:**
 
     ```shell
     gcloud run deploy mcp-cart-server \
-        --image=${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1 \
-        --region=$DEPLOY_REGION \
+        --image="${DEPLOY_REGION}-docker.pkg.dev/${GOOGLE_CLOUD_PROJECT}/adk-images/mcp-cart-server:v1" \
+        --region="$DEPLOY_REGION" \
         --allow-unauthenticated
+
+    export MCP_SERVER_URL=$(gcloud run services describe mcp-cart-server \
+        --region="$DEPLOY_REGION" \
+        --format='value(status.url)')
+    echo "Deployed MCP Server Base URL: $MCP_SERVER_URL"
     ```
-    This command will deploy your server and give you a public **Service URL**. Copy this URL.
 
-### Step 4: Configure the ADK Client Agent
+---
 
-Now, create an ADK agent package in `cloud_mcp_server/` that connects to your newly deployed server.
+### Step 4: Connect Both a Standalone ADK Agent and Your `agents-cli` Project
 
-1.  **Install the MCP client extra:** The `McpToolset` you're about to import needs the `mcp` package installed in your local `adk-training` environment too, not just in the server's container `requirements.txt`:
+#### Step 4A: Configure the Standalone ADK Client (`cloud_mcp_server/agent.py`)
+
+1.  **Install the MCP client extra in your `adk-training` environment:**
     ```shell
     uv add "google-adk[mcp]"
     ```
-2.  **Create `agent.py`** inside `cloud_mcp_server/` and complete the `# TODO` sections below, replacing `YOUR_CLOUD_RUN_SERVICE_URL` with the URL you copied. Note the `/mcp` suffix — that's where `FastMCP` mounted the endpoint in Step 1, and `StreamableHTTPConnectionParams` needs that exact path:
+
+2.  **Create `cloud_mcp_server/agent.py` and complete the `# TODO` block:**
+    Notice that `MCP_SERVER_URL` holds the Cloud Run base URL, while `FastMCP` serves the Streamable HTTP endpoint at `f"{MCP_SERVER_URL}/mcp"`:
 
     ```python
-    # Filename: agent.py
+    # Filename: cloud_mcp_server/agent.py
+    import os
     from google.adk.agents import Agent
     from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 
-    # The URL of your deployed MCP server -- note the /mcp path suffix
-    MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL/mcp"
+    MCP_SERVER_URL = os.environ.get(
+        "MCP_SERVER_URL",
+        "https://YOUR_CLOUD_RUN_SERVICE_URL",
+    ).rstrip("/")
 
     # TODO: Define `root_agent` (name="cloud_shopping_agent", model="gemini-3.8-flash")
-    # with an `McpToolset` configured with `StreamableHTTPConnectionParams(url=MCP_SERVER_URL)`.
+    # equipped with `McpToolset(connection_params=StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp"))`.
     root_agent = None
     ```
-3.  **Create `__init__.py` and `.env` files inside `cloud_mcp_server/`:**
-    Export `agent` in `cloud_mcp_server/__init__.py`:
+
+3.  **Create `cloud_mcp_server/__init__.py` and `cloud_mcp_server/.env`:**
     ```python
     from . import agent
     ```
-    Create `cloud_mcp_server/.env` with ADK 2.0's Vertex AI / Agent Platform configuration, setting `GOOGLE_CLOUD_LOCATION=global` so `gemini-3.8-flash` resolves against the global endpoint:
+    Create `cloud_mcp_server/.env` (separating Cloud Run's `us-central1` region from `GOOGLE_CLOUD_LOCATION=global` for `gemini-3.8-flash`):
     ```ini
     GOOGLE_GENAI_USE_ENTERPRISE=1
-    GOOGLE_CLOUD_PROJECT=<your_gcp_project>
+    GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
     GOOGLE_CLOUD_LOCATION=global
+    MCP_SERVER_URL=https://YOUR_CLOUD_RUN_SERVICE_URL
     ```
-    Replace `<your_gcp_project>` with your actual Google Cloud Project ID.
 
-### Step 5: Test the Full Cloud-Based System
+#### Step 4B: Equip Your `agents-cli` Project (`support-ops-agent/app/agent.py`)
 
-1.  **Navigate to the parent `adk-training/` directory and start the ADK web server:**
-    `adk web` must always be launched from the parent directory containing your agent subfolder (`adk-training/`):
+Now connect the exact same Cloud Run MCP server into the canonical Part 6 **`agents-cli`** `support-ops-agent` project so your enterprise support agent can both triage tickets (`lookup_ticket`, `check_sla_policy`, `escalate_ticket`) and stage incident follow-up items in the remote Cloud Run MCP cart!
 
+1.  **Open (or scaffold) `support-ops-agent` and add `google-adk[mcp]`:**
     ```shell
-    cd ..
-    uv run adk web
+    cd /path/to/your/adk-training
+
+    # If you don't already have support-ops-agent from earlier Part 6 modules, scaffold it now:
+    if [ ! -d "support-ops-agent" ]; then
+      agents-cli scaffold create support-ops-agent \
+        --agent adk \
+        --prototype \
+        --region "$DEPLOY_REGION" \
+        --agent-guidance-filename GEMINI.md
+      curl -fsSL https://mauripsale.github.io/doc-adk-training/samples/part6/agent.py -o support-ops-agent/app/agent.py
+    fi
+
+    cd support-ops-agent
+    uv add "google-adk[mcp]"
+    agents-cli install
     ```
 
-2.  **Interact with the agent:**
-    *   Open the Dev UI in your browser and select **`cloud_mcp_server`** from the agent dropdown.
-    *   Have the same conversation as in Module 28: add `'apples'`, then add `'bread'`, then view the cart.
-    *   Stop the local server with `Ctrl+C` when finished.
+2.  **Update `support-ops-agent/app/agent.py` (complete the `# TODO` section):**
+    Equip `support_ops_agent` with `McpToolset` using `StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp", headers=mcp_headers)` (supporting an optional `MCP_AUTH_TOKEN` Bearer header when your Cloud Run MCP service uses `--no-allow-unauthenticated`), while keeping `app = App(root_agent=root_agent, name="app")` intact:
 
-### Lab Summary
+    ```python
+    # Filename: support-ops-agent/app/agent.py
+    import os
+    from typing import Any, Dict
 
-You have successfully deployed a stateful service to a stateless platform by externalizing the state, and connected your ADK agent to it.
+    from google.adk.agents import Agent
+    from google.adk.agents.callback_context import CallbackContext
+    from google.adk.apps import App
+    from google.adk.models import Gemini
+    from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
+    from google.adk.tools.tool_context import ToolContext
+    from google.genai import types
 
-You have learned to:
-*   Modify an application to be stateless by moving its state to an external store (simulated with the filesystem).
-*   Containerize a Python application with a `Dockerfile`.
-*   Deploy a custom MCP server to Google Cloud Run in `DEPLOY_REGION=us-central1` while running `gemini-3.8-flash` against `GOOGLE_CLOUD_LOCATION=global`.
-*   Configure `McpToolset` with `StreamableHTTPConnectionParams` from `google.adk.tools.mcp_tool` and launch `uv run adk web` from the parent `adk-training/` directory.
+    MODEL = "gemini-3.8-flash"
+
+    MCP_SERVER_URL = os.environ.get(
+        "MCP_SERVER_URL",
+        "https://YOUR_CLOUD_RUN_SERVICE_URL",
+    ).rstrip("/")
+    MCP_AUTH_TOKEN = os.environ.get("MCP_AUTH_TOKEN", "")
+    mcp_headers = {"Authorization": f"Bearer {MCP_AUTH_TOKEN}"} if MCP_AUTH_TOKEN else None
+
+    # ... (keep TICKET_DB, SLA_POLICIES, initialize_support_state,
+    #      lookup_ticket, check_sla_policy, and escalate_ticket from Part 6 agent.py) ...
+
+    # TODO: Instantiate `remote_cart_toolset` using `McpToolset` and
+    # `StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp", headers=mcp_headers)`,
+    # and attach it to `root_agent` alongside `[lookup_ticket, check_sla_policy, escalate_ticket]`.
+    remote_cart_toolset = None
+    ```
+
+---
+
+### Step 5: Test End-to-End with `adk web`, `agents-cli run`, and `agents-cli playground`
+
+#### 5A: Test the Standalone ADK Package via `uv run adk web`
+
+`adk web` must always be launched from the **parent directory** (`adk-training/`) containing `cloud_mcp_server/`:
+
+```shell
+cd /path/to/your/adk-training
+export MCP_SERVER_URL=$(gcloud run services describe mcp-cart-server --region="$DEPLOY_REGION" --format='value(status.url)')
+uv run adk web
+```
+
+*   Open `http://127.0.0.1:8000` in your browser and select **`cloud_mcp_server`** from the dropdown.
+*   Ask the agent to add `'apples'` and `'bread'`, then ask `"What is in my cart?"` to confirm state persists across remote Cloud Run HTTP calls.
+*   Press `Ctrl+C` when finished.
+
+#### 5B: Test the `agents-cli` Project via `agents-cli run` and `agents-cli playground`
+
+Switch into `support-ops-agent/` and verify the Cloud Run MCP toolset directly through `agents-cli`:
+
+```shell
+cd /path/to/your/adk-training/support-ops-agent
+export GOOGLE_GENAI_USE_ENTERPRISE=1
+export GOOGLE_CLOUD_LOCATION=global
+export MCP_SERVER_URL=$(gcloud run services describe mcp-cart-server --region="$DEPLOY_REGION" --format='value(status.url)')
+# Optional if mcp-cart-server was deployed privately without --allow-unauthenticated:
+# export MCP_AUTH_TOKEN=$(gcloud auth print-identity-token)
+
+# 1. Terminal smoke test across two turns on the same session (--start-server + --session-id)
+agents-cli run "Investigate ticket TCK-1042, check enterprise SLA, and add 'P1-Pager-Bridge' to my cart." \
+  --start-server \
+  --session-id ops-mcp-demo
+
+agents-cli run "View my cart and confirm which tickets were escalated." \
+  --session-id ops-mcp-demo
+
+# 2. Interactive visual debugging via agents-cli playground
+agents-cli playground
+```
+
+Notice how seamlessly `support_ops_agent` combines local stateful Python tools (`lookup_ticket`, `check_sla_policy`, `escalate_ticket`) with remote Cloud Run MCP tools (`add_item_to_cart`, `view_cart`)!
+
+---
 
 ### Cleanup (Important!)
 
-Cloud Run services and Artifact Registry repositories can incur costs if left running. It is crucial to delete the resources you created after completing the lab.
+Delete the Cloud Run service and Artifact Registry repository when finished to avoid ongoing storage or compute charges:
 
-1.  **Delete the Cloud Run Service:**
-    ```shell
-    gcloud run services delete mcp-cart-server \
-        --region=$DEPLOY_REGION \
-        --async # Runs in background
-    ```
+```shell
+gcloud run services delete mcp-cart-server \
+    --region="$DEPLOY_REGION" \
+    --async
 
-2.  **Delete the Artifact Registry Repository:**
-    ```shell
-    gcloud artifacts repositories delete adk-images \
-        --location=$DEPLOY_REGION \
-        --async # Runs in background
-    ```
+gcloud artifacts repositories delete adk-images \
+    --location="$DEPLOY_REGION" \
+    --async
 
-3.  **Delete the `cloud_mcp_server` directory (from `adk-training/`):**
-    ```shell
-    rm -rf cloud_mcp_server
-    ```
+cd /path/to/your/adk-training
+rm -rf cloud_mcp_server
+```
 
 ### Self-Reflection Questions
-- Our stateless server uses the `/tmp` directory for storage. Why is this approach not truly persistent, and what could happen to a user's shopping cart if the Cloud Run service scales down and then back up?
-- What are the advantages of using a managed service like Google Cloud Memorystore (Redis) for storing session state compared to the file-based approach used in this lab?
-- The `McpToolset` on the client side doesn't need to know *how* the server is storing its state. Why is this separation of concerns a key benefit of the MCP architecture?
+- Our demo MCP server writes session files under `/tmp/carts`. Why is `/tmp` volatile on Cloud Run, and what happens to a user's cart when Cloud Run scales down to zero?
+- What advantages does Google Cloud Memorystore (Redis) provide over `/tmp` files for storing MCP session state?
+- How does `StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp", headers=...)` decouple `support-ops-agent` from the MCP server's internal storage implementation and authentication topology?
 
 <hr/>
 
@@ -252,13 +326,16 @@ Cloud Run services and Artifact Registry repositories can incur costs if left ru
 
 <SolutionVault moduleNumber="34">
 
-# Lab 34 Solution: Deploying the "Shopping Cart" Server
+# Lab 34 Solution: Deploying a Stateless MCP Server to Cloud Run & Connecting `agents-cli`
 
 ## Goal
 
-This file contains the complete code for the `stateless_cart_server.py` and the `agent.py` client for the lab.
+This solution provides the complete runnable Python files for:
+1.  `cloud_mcp_server/stateless_cart_server.py` (FastMCP Streamable HTTP server for Cloud Run)
+2.  `cloud_mcp_server/agent.py` (Standalone ADK client agent tested via `uv run adk web`)
+3.  `support-ops-agent/app/agent.py` (Canonical Part 6 `agents-cli` agent equipped with `McpToolset` + `StreamableHTTPConnectionParams`, tested via `agents-cli run` and `agents-cli playground`)
 
-### `cloud_mcp_server/stateless_cart_server.py`
+### 1. `cloud_mcp_server/stateless_cart_server.py`
 
 ```python
 # Filename: stateless_cart_server.py
@@ -267,8 +344,8 @@ import os
 from mcp.server.fastmcp import FastMCP, Context
 
 # --- Configuration ---
-# In a serverless environment, we can use the temporary filesystem for a simple demo.
-# In a real app, this would be a Redis or database connection.
+# In a serverless environment, we use /tmp/carts to simulate an external store.
+# In production, replace get_cart/save_cart with Memorystore (Redis) or Firestore.
 STATE_STORAGE_PATH = "/tmp/carts"
 if not os.path.exists(STATE_STORAGE_PATH):
     os.makedirs(STATE_STORAGE_PATH)
@@ -276,27 +353,29 @@ if not os.path.exists(STATE_STORAGE_PATH):
 # --- MCP Server Setup ---
 mcp = FastMCP("stateless_shopping_cart_server")
 
+
 def get_session_id(ctx: Context) -> str:
-    # The MCP session ID arrives as a standard HTTP header, tracked by the
-    # transport itself.
+    # The MCP session ID arrives as a standard HTTP header tracked by the transport.
     return ctx.request_context.request.headers.get("mcp-session-id", "unknown")
 
-# Helper functions to simulate an external state store
+
 def get_cart(session_id: str) -> list:
     cart_file = os.path.join(STATE_STORAGE_PATH, f"{session_id}.json")
     if os.path.exists(cart_file):
-        with open(cart_file, 'r') as f:
+        with open(cart_file, "r") as f:
             return json.load(f)
     return []
 
-def save_cart(session_id: str, cart: list):
+
+def save_cart(session_id: str, cart: list) -> None:
     cart_file = os.path.join(STATE_STORAGE_PATH, f"{session_id}.json")
-    with open(cart_file, 'w') as f:
+    with open(cart_file, "w") as f:
         json.dump(cart, f)
+
 
 @mcp.tool()
 def add_item_to_cart(item: str, ctx: Context) -> dict:
-    """Adds an item to the cart."""
+    """Adds an item to the session cart."""
     session_id = get_session_id(ctx)
     print(f"[Server]: Handling add_item_to_cart for session '{session_id}'")
     cart = get_cart(session_id)
@@ -304,58 +383,230 @@ def add_item_to_cart(item: str, ctx: Context) -> dict:
     save_cart(session_id, cart)
     return {"status": "success", "message": f"Added '{item}'."}
 
+
 @mcp.tool()
 def view_cart(ctx: Context) -> dict:
-    """Views items in the cart."""
+    """Views all items currently in the session cart."""
     session_id = get_session_id(ctx)
     print(f"[Server]: Handling view_cart for session '{session_id}'")
     cart = get_cart(session_id)
     return {"status": "success", "cart": cart}
 
+
 # --- ASGI app for HTTP, suitable for Cloud Run ---
-# FastMCP mounts the MCP endpoint at /mcp by default.
+# FastMCP mounts the Streamable HTTP MCP endpoint at /mcp by default.
 app = mcp.streamable_http_app()
 ```
 
-### `cloud_mcp_server/agent.py`
+### 2. Standalone ADK Client (`cloud_mcp_server/agent.py`)
 
 ```python
-# Filename: agent.py
+# Filename: cloud_mcp_server/agent.py
+import os
 from google.adk.agents import Agent
 from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 
-# The URL of your deployed MCP server, including the /mcp path FastMCP mounts at.
-# Replace this with the URL from your `gcloud run deploy` output.
-MCP_SERVER_URL = "YOUR_CLOUD_RUN_SERVICE_URL/mcp"
+# Base URL of your deployed Cloud Run MCP service (FastMCP mounts Streamable HTTP at /mcp)
+MCP_SERVER_URL = os.environ.get(
+    "MCP_SERVER_URL",
+    "https://YOUR_CLOUD_RUN_SERVICE_URL",
+).rstrip("/")
 
 root_agent = Agent(
     model="gemini-3.8-flash",
     name="cloud_shopping_agent",
-    instruction="You are a shopping assistant. Help the user by adding items to their cart and showing them their cart contents.",
+    instruction=(
+        "You are a helpful shopping assistant. Add requested items to the user's cart "
+        "and display current cart contents accurately using your remote MCP tools."
+    ),
     tools=[
         McpToolset(
-            # Use StreamableHTTPConnectionParams for remote Streamable HTTP MCP servers
             connection_params=StreamableHTTPConnectionParams(
-                url=MCP_SERVER_URL,
+                url=f"{MCP_SERVER_URL}/mcp",
             ),
         )
     ],
 )
 ```
 
+### 3. `agents-cli` Enterprise Project (`support-ops-agent/app/agent.py`)
+
+```python
+"""
+Enterprise Support Operations Agent equipped with Remote Cloud Run MCP Toolset (`agents-cli`).
+Built with Google ADK 2.0 (`gemini-3.8-flash`), stateful tools, MCP Streamable HTTP, and A2A serving.
+"""
+
+import os
+from typing import Any, Dict
+
+from google.adk.agents import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.apps import App
+from google.adk.models import Gemini
+from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
+from google.adk.tools.tool_context import ToolContext
+from google.genai import types
+
+MODEL = "gemini-3.8-flash"
+
+MCP_SERVER_URL = os.environ.get(
+    "MCP_SERVER_URL",
+    "https://YOUR_CLOUD_RUN_SERVICE_URL",
+).rstrip("/")
+MCP_AUTH_TOKEN = os.environ.get("MCP_AUTH_TOKEN", "")
+mcp_headers = {"Authorization": f"Bearer {MCP_AUTH_TOKEN}"} if MCP_AUTH_TOKEN else None
+
+TICKET_DB: Dict[str, Dict[str, Any]] = {
+    "TCK-1042": {
+        "customer": "Acme Cloud Robotics",
+        "tier": "enterprise",
+        "severity": "P1",
+        "status": "open",
+        "summary": "Production payment webhook returning HTTP 503 timeouts in eu-west1.",
+    },
+    "TCK-2088": {
+        "customer": "Northwind Retail",
+        "tier": "standard",
+        "severity": "P3",
+        "status": "investigating",
+        "summary": "CSV invoice export omits localized tax column.",
+    },
+}
+
+SLA_POLICIES: Dict[str, Dict[str, str]] = {
+    "enterprise": {
+        "P1_response": "15 minutes",
+        "P2_response": "1 hour",
+        "P3_response": "4 hours",
+        "dedicated_oncall": "Yes (24/7 SRE pager)",
+    },
+    "standard": {
+        "P1_response": "2 hours",
+        "P2_response": "8 hours",
+        "P3_response": "24 business hours",
+        "dedicated_oncall": "No (business-hours queue)",
+    },
+}
+
+
+def initialize_support_state(callback_context: CallbackContext) -> None:
+    """Initializes default session and user state keys before the first turn."""
+    if "user:customer_tier" not in callback_context.state:
+        callback_context.state["user:customer_tier"] = "standard"
+    if "escalated_tickets" not in callback_context.state:
+        callback_context.state["escalated_tickets"] = []
+
+
+def lookup_ticket(ticket_id: str, tool_context: ToolContext) -> Dict[str, Any]:
+    """Looks up an enterprise support ticket by ID and syncs customer tier into state.
+
+    Args:
+        ticket_id: Ticket identifier such as 'TCK-1042' or 'TCK-2088'.
+    """
+    norm_id = ticket_id.strip().upper()
+    record = TICKET_DB.get(norm_id)
+    if not record:
+        return {
+            "status": "not_found",
+            "ticket_id": norm_id,
+            "available_sample_tickets": sorted(TICKET_DB.keys()),
+            "message": f"Ticket '{norm_id}' was not found.",
+        }
+
+    tool_context.state["user:customer_tier"] = record["tier"]
+    tool_context.state["active_ticket_id"] = norm_id
+    return {"status": "found", "ticket_id": norm_id, **record}
+
+
+def check_sla_policy(tier: str) -> Dict[str, Any]:
+    """Returns response-time SLA targets for a customer tier ('enterprise' or 'standard').
+
+    Args:
+        tier: Customer support tier ('enterprise' or 'standard').
+    """
+    norm_tier = tier.strip().lower()
+    policy = SLA_POLICIES.get(norm_tier)
+    if not policy:
+        return {
+            "status": "error",
+            "message": f"Unknown tier '{tier}'. Valid tiers: enterprise, standard.",
+        }
+    return {"status": "success", "tier": norm_tier, "sla_targets": policy}
+
+
+def escalate_ticket(
+    ticket_id: str,
+    reason: str,
+    tool_context: ToolContext,
+) -> Dict[str, Any]:
+    """Escalates a high-severity support ticket to the incident engineering queue.
+
+    Args:
+        ticket_id: Ticket identifier to escalate (e.g., 'TCK-1042').
+        reason: Concise technical justification for the escalation.
+    """
+    norm_id = ticket_id.strip().upper()
+    if norm_id not in TICKET_DB:
+        return {"status": "error", "message": f"Cannot escalate unknown ticket '{norm_id}'."}
+
+    escalated = list(tool_context.state.get("escalated_tickets", []))
+    if norm_id not in escalated:
+        escalated.append(norm_id)
+    tool_context.state["escalated_tickets"] = escalated
+
+    tier = tool_context.state.get("user:customer_tier", TICKET_DB[norm_id]["tier"])
+    queue = "24/7 P1 SRE Oncall" if tier == "enterprise" else "Tier-2 Engineering Queue"
+    return {
+        "status": "escalated",
+        "ticket_id": norm_id,
+        "assigned_queue": queue,
+        "reason": reason.strip(),
+        "session_escalated_tickets": escalated,
+    }
+
+
+remote_cart_toolset = McpToolset(
+    connection_params=StreamableHTTPConnectionParams(
+        url=f"{MCP_SERVER_URL}/mcp",
+        headers=mcp_headers,
+    ),
+)
+
+# Keep name="support_ops_agent" in sync with root_agent_name in agents-cli-manifest.yaml
+root_agent = Agent(
+    name="support_ops_agent",
+    model=Gemini(
+        model=MODEL,
+        retry_options=types.HttpRetryOptions(attempts=3),
+    ),
+    before_agent_callback=initialize_support_state,
+    instruction=(
+        "You are the Support Operations Agent (active customer tier: {user:customer_tier?}).\n"
+        "Follow this exact operational workflow:\n"
+        "1. When given a ticket ID, ALWAYS call `lookup_ticket` first.\n"
+        "2. Call `check_sla_policy` for the ticket's customer tier so your answer cites exact SLA response times.\n"
+        "3. If a ticket has P1 severity OR the user requests escalation, call `escalate_ticket` with a concise technical reason.\n"
+        "4. Use `add_item_to_cart` and `view_cart` from your remote Cloud Run MCP toolset whenever the user asks to stage or inspect items in their cart.\n"
+        "5. Summarize ticket status, SLA targets, escalations, and cart contents clearly."
+    ),
+    tools=[lookup_ticket, check_sla_policy, escalate_ticket, remote_cart_toolset],
+)
+
+# CRITICAL for agents-cli: App `name` MUST match `agent_directory: "app"` in agents-cli-manifest.yaml
+app = App(
+    root_agent=root_agent,
+    name="app",
+)
+```
+
 ### Self-Reflection Answers
 
-1.  **Our stateless server uses the `/tmp` directory for storage. Why is this approach not truly persistent, and what could happen to a user's shopping cart if the Cloud Run service scales down and then back up?**
-    *   **Answer:** Using the `/tmp` directory for storage in a Cloud Run container is not truly persistent because `/tmp` is part of the container's volatile filesystem. When Cloud Run scales a service to zero due to inactivity or recycles an instance, the container is terminated, and all data in `/tmp` is permanently lost. If a user's shopping cart were stored this way, and the service scaled down and then back up, their cart would be erased. This demonstrates the critical need for externalized state in serverless environments.
-
-2.  **What are the advantages of using a managed service like Google Cloud Memorystore (Redis) for storing session state compared to the file-based approach used in this lab?**
-    *   **Answer:** A managed in-memory service like Google Cloud Memorystore (Redis) offers several advantages over a file-based approach for production session state:
-        *   **True Persistence:** Data survives container restarts and scales to zero.
-        *   **High Performance:** In-memory key-value stores are extremely fast, providing low-latency access to session data.
-        *   **Scalability & Consistency:** All Cloud Run instances connect to the same central data source, ensuring state consistency across a horizontally scaled service.
-        *   **Operational Simplicity:** Managed services handle patching, backups, and scaling, reducing operational overhead.
-
-3.  **The `MCPToolset` on the client side doesn't need to know *how* the server is storing its state. Why is this separation of concerns a key benefit of the MCP architecture?**
-    *   **Answer:** This separation of concerns is a key benefit of the MCP architecture because it decouples the client (the ADK agent using `MCPToolset`) from the server's internal implementation details. The agent only needs to know the server's URL and the tool's schema (its name, description, and input arguments). It doesn't care whether the server stores state in memory, a file, Redis, or a database. This allows the server's backend to be changed or upgraded (e.g., migrating from file-based state to Redis) without requiring any changes or redeployment of the client agent, promoting modular maintenance, independent evolution, and system robustness.
+1.  **Our demo MCP server writes session files under `/tmp/carts`. Why is `/tmp` volatile on Cloud Run, and what happens to a user's cart when Cloud Run scales down to zero?**
+    *   **Answer:** On Cloud Run, `/tmp` is an in-memory filesystem local to each individual container instance. If consecutive requests hit different horizontally scaled instances — or if Cloud Run scales the service down to zero during idle periods — the container's `/tmp` directory is destroyed and the user's cart disappears.
+2.  **What advantages does Google Cloud Memorystore (Redis) provide over `/tmp` files for storing MCP session state?**
+    *   **Answer:** Memorystore (Redis) provides true out-of-process persistence across container restarts and scale-to-zero events, sub-millisecond read/write latency for fast tool execution, and strong consistency across every Cloud Run container replica reading the same `Mcp-Session-Id`.
+3.  **How does `StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp", headers=...)` decouple `support-ops-agent` from the MCP server's internal storage implementation and authentication topology?**
+    *   **Answer:** `McpToolset` communicates strictly over the standardized MCP `/mcp` HTTP protocol and JSON-RPC tool schemas while injecting authentication headers transparently at the transport layer. Platform teams can migrate the Cloud Run MCP backend from `/tmp` to Memorystore or enforce IAM/Bearer authentication without altering `support_ops_agent`'s reasoning or tool-calling logic.
 
 </SolutionVault>

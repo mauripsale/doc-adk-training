@@ -50,24 +50,42 @@ With externalized state, the interaction flow for our MCP server on Cloud Run lo
 
 Now, if another request for the same `session_id` arrives a moment later, Cloud Run can send it to a completely different container instance. This new instance will follow the same process, connect to the same external store, and retrieve the correct, up-to-date shopping cart. The state is preserved.
 
-### Connecting the ADK Agent
+### Connecting Standalone ADK Agents and `agents-cli` Projects
 
-When the MCP server is running on a public URL on Cloud Run, our ADK agent can no longer use `StdioConnectionParams`, which is designed for running a local subprocess.
+When an MCP server runs on Cloud Run over HTTP, your ADK agent replaces local `StdioConnectionParams` with a network transport parameter class from `google.adk.tools.mcp_tool`:
 
-Instead, configure `McpToolset` (from `google.adk.tools.mcp_tool`) with a network transport parameter class:
-
-*   **`StreamableHTTPConnectionParams` (Recommended):** Connects over the modern MCP Streamable HTTP transport (mounted at `/mcp` by default in `FastMCP`).
+*   **`StreamableHTTPConnectionParams` (Recommended):** Connects over the modern MCP Streamable HTTP transport (mounted at `/mcp` by default in `FastMCP`), with optional `headers` (for Bearer tokens or API keys) and configurable timeouts.
 *   **`SseConnectionParams` (Legacy HTTP+SSE):** Connects to older MCP servers that expose a separate Server-Sent Events endpoint.
 
+Because `McpToolset` is a standard ADK toolset, the exact same wiring works both in standalone ADK packages (`uv run adk web`) and inside enterprise **`agents-cli`** projects (`support-ops-agent/app/agent.py`):
+
 ```python
-from google.adk.tools.mcp_tool import (
-    McpToolset,
-    StreamableHTTPConnectionParams,
-    SseConnectionParams,
+import os
+from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
+
+MCP_SERVER_URL = os.environ.get("MCP_SERVER_URL", "https://mcp-cart-server-xyz.a.run.app").rstrip("/")
+MCP_AUTH_TOKEN = os.environ.get("MCP_AUTH_TOKEN", "")
+
+mcp_headers = {"Authorization": f"Bearer {MCP_AUTH_TOKEN}"} if MCP_AUTH_TOKEN else None
+
+remote_mcp_toolset = McpToolset(
+    connection_params=StreamableHTTPConnectionParams(
+        url=f"{MCP_SERVER_URL}/mcp",
+        headers=mcp_headers,
+    )
 )
 ```
 
-In the lab, you will modify the shopping cart server to be stateless, containerize it, and deploy it to Cloud Run in `DEPLOY_REGION=us-central1`. You will then configure your local ADK client agent (using `GOOGLE_CLOUD_LOCATION=global` for `gemini-3.8-flash`) to connect to its public `/mcp` endpoint.
+Inside an `agents-cli` project, once `remote_mcp_toolset` is added to `root_agent.tools` in `app/agent.py` (with `app = App(root_agent=root_agent, name="app")` preserved), you can smoke-test remote Cloud Run MCP tool execution immediately from your terminal or browser before redeploying:
+
+```bash
+# Rapid CLI smoke test (with --start-server + --session-id to verify multi-turn MCP state)
+agents-cli run "Add 'p1-incident-runbook' to my cart and inspect ticket TCK-1042." \
+  --start-server --session-id ops-1
+
+# Interactive web playground
+agents-cli playground
+```
 
 ### Production Considerations for MCP
 
@@ -75,23 +93,19 @@ When deploying MCP servers to production, security and safety become paramount. 
 
 #### Authentication
 
-You must secure your MCP server to ensure that only authorized agents can access its tools. The `McpToolset` supports several authentication methods:
+You must secure your MCP server (for example, deploying Cloud Run with `--no-allow-unauthenticated` or behind an API gateway) so only authorized agents can invoke its tools. `McpToolset` and `StreamableHTTPConnectionParams` support multiple authentication patterns:
 
-*   **OAuth2 (Recommended):** The most secure, standard method for production systems. The ADK handles the client credentials flow, automatically requesting and refreshing access tokens.
-*   **HTTP Bearer Token:** For services that use a simple static bearer token for authentication.
-*   **HTTP Basic Authentication:** For legacy systems or internal tools that use a simple username and password.
-*   **API Key:** For services that require an API key to be passed in a specific header.
-
-You configure the chosen method via the `credential` parameter in the `McpToolset`, and the ADK handles the rest.
+*   **OAuth2 (`auth_scheme` + `auth_credential`):** Standard method for user-delegated or service-to-service production flows. ADK manages token acquisition and refresh automatically.
+*   **HTTP Bearer / Cloud Run Identity Tokens (`headers` or `header_provider`):** Pass static headers via `StreamableHTTPConnectionParams(url=..., headers={"Authorization": "Bearer ..."})` or per-request dynamic tokens via `McpToolset(..., header_provider=...)`.
+*   **API Keys & HTTP Basic Auth:** Supported via `auth_scheme` / `auth_credential` or custom HTTP headers.
 
 #### Human-in-the-Loop (HITL)
 
-When an MCP server provides powerful or destructive tools (e.g., `write_file`, `delete_database_entry`), it's crucial to have a human approval step to prevent accidental data loss or misuse. This is known as a "Human-in-the-Loop" (HITL) workflow.
+When an MCP server provides powerful or destructive tools (e.g., `write_file`, `delete_database_entry`), it's crucial to have a human approval step to prevent accidental data loss or misuse.
 
-You can implement HITL in the ADK using a `before_tool_callback`. This callback function is triggered *before* any tool is executed. Inside the callback, you can:
-1.  Check if the tool being called is on a list of "destructive" operations.
-2.  If it is, you can block the execution and return a message to the agent indicating that approval is required.
-3.  This allows a user in the UI (or an automated policy) to review the requested operation and approve or deny it before it runs.
+You can enforce HITL in ADK either via `McpToolset(..., require_confirmation=True)` or by implementing a `before_tool_callback` on your `Agent`:
+1.  Check if the tool being called is on a list of high-impact or destructive operations.
+2.  Block or pause execution and prompt for explicit human approval before allowing the remote MCP call to proceed.
 
 <KnowledgeCheck
   id="m34-stateless-mcp-cloud-run"
@@ -108,10 +122,8 @@ You can implement HITL in the ADK using a `before_tool_callback`. This callback 
 />
 
 ### Key Takeaways
-- Serverless platforms like Cloud Run are **stateless**, meaning in-memory state is lost between requests.
-- To deploy a stateful service (like an MCP server) to a stateless platform, you must **externalize the state** using a persistent storage service like Redis or Firestore.
-- When connecting an ADK agent to a remote MCP server, you must use a network-based connection type, such as `StreamableHTTPConnectionParams`.
-- For production, it is critical to secure your MCP server with authentication (e.g., OAuth2) and implement Human-in-the-Loop (HITL) workflows for destructive tools.
-- **Separation of Concerns in MCP:** A key benefit of the MCP architecture is that the client (`McpToolset`) is completely decoupled from the server's state management implementation. The agent only needs to know the server's URL and the tool schema. This allows the server's backend to be changed (e.g., migrating from a file-based system to Redis) without requiring any changes to the agent client, promoting modular maintenance and reducing the client's complexity.
-- **Advantages of Memorystore (Redis):** For production session state, a managed in-memory service like Google Cloud Memorystore (Redis) is far superior to a file-based approach. It offers true persistence (data survives container restarts), low-latency performance (ideal for fast tool access), and scalability (all Cloud Run instances connect to the same central data source, ensuring state consistency).
-- **Persistence in Cloud Run:** Using the `/tmp` directory for storage in a Cloud Run container is not truly persistent. The `/tmp` directory is part of the container's volatile filesystem. When Cloud Run scales a service to zero due to inactivity or recycles an instance, the container is terminated, and all data in `/tmp` is permanently lost. This means any state (like a shopping cart) stored there would be erased.
+- Serverless platforms like Cloud Run are **stateless**, meaning in-memory state is lost across horizontal scaling and scale-to-zero events.
+- To deploy a stateful MCP server to Cloud Run, **externalize session state** (keyed by `Mcp-Session-Id`) into a shared backing store like **Memorystore (Redis)**, **Firestore**, or **Cloud SQL**.
+- Connect both standalone ADK agents (`uv run adk web`) and enterprise **`agents-cli`** projects (`support-ops-agent/app/agent.py`) to remote FastMCP servers using `McpToolset(connection_params=StreamableHTTPConnectionParams(url=f"{MCP_SERVER_URL}/mcp", headers=...))`, verifying behavior rapidly with `agents-cli run` and `agents-cli playground`.
+- **Separation of Concerns in MCP:** Because `McpToolset` only depends on the remote `/mcp` URL and tool schemas, you can upgrade the MCP server's persistence layer from a `/tmp` demo store to Redis or Firestore without changing a single line of agent code.
+- **Persistence Caveat for `/tmp`:** Container `/tmp` storage lives in volatile memory on Cloud Run and disappears whenever an instance is recycled or scales down to zero — always use a managed external store in production.

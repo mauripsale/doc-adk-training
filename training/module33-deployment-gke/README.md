@@ -12,81 +12,95 @@ pagination_label: "Module 33: Deployment to GKE — 📖 Theory & Overview"
 ![Enterprise Container Orchestration on GKE (Dark)](img/hero-dark.webp#gh-dark-mode-only)
 *Figure: Enterprise agent container orchestration on Google Kubernetes Engine (GKE) with private VPC networking and multi-pod replica management.*
 
-### When You Need More Control
+### When You Need Full Cluster Control
 
-In the previous module, you learned how to deploy your agent to Google Cloud Run, a serverless platform that is incredibly simple and cost-effective. For many use cases, Cloud Run is the perfect deployment target.
+In Module 32, you deployed an agent to Google Cloud Run — a serverless container platform that scales down to zero and abstracts away cluster management. For stateless or bursty HTTP agents, Cloud Run or Vertex AI Agent Runtime are ideal starting points.
 
-However, as your applications become more complex, you may find you need more control and flexibility than a serverless platform can offer. You might need to:
-*   Deploy agents that have specific hardware requirements (like GPUs).
-*   Have fine-grained control over networking and security policies.
-*   Run other services alongside your agent in the same private network.
-*   Manage complex, stateful workloads.
+However, enterprise platform teams choose **Google Kubernetes Engine (GKE)** when workloads demand deeper infrastructure control:
+*   **Custom Compute & Accelerators:** Running co-located GPU/TPU inference sidecars, custom compute classes, or memory-intensive pods alongside your ADK agent.
+*   **Private Zero-Trust Networking:** Enforcing Kubernetes `NetworkPolicy` rules, service meshes, internal VPC-only LoadBalancers for pod-to-pod A2A traffic, and custom Cloud NAT egress gateways.
+*   **Sidecar Architectures:** Pairing agent containers with dedicated proxy sidecars (such as the Cloud SQL Auth Proxy for persistent session state or OpenTelemetry collectors).
+*   **Unified Platform Standardization:** Operating agents inside an organization's existing Kubernetes GitOps, Prometheus, and fleet governance ecosystem.
 
-For these scenarios, the industry-standard solution is **Kubernetes**.
+### Cloud Run vs. GKE Autopilot: Architectural Trade-Offs
 
-### What is Kubernetes?
+**Google Kubernetes Engine (GKE) Autopilot** manages the Kubernetes control plane, node provisioning, and security hardening while preserving the full Kubernetes API (`Deployment`, `Service`, `HorizontalPodAutoscaler`, `PodDisruptionBudget`, and Workload Identity).
 
-Kubernetes (often abbreviated as K8s) is an open-source **container orchestration** platform. While a container platform like Docker runs a single container on a single machine, Kubernetes allows you to manage and run thousands of containers across a whole fleet of machines, known as a **cluster**.
-
-It automates the deployment, scaling, and management of containerized applications. You tell Kubernetes the desired state of your application (e.g., "I want three copies of my agent container running at all times"), and Kubernetes works to maintain that state, automatically handling things like machine failures and load balancing.
-
-### Google Kubernetes Engine (GKE)
-
-Running and managing a Kubernetes cluster yourself can be incredibly complex. **Google Kubernetes Engine (GKE)** is a managed Kubernetes service provided by Google Cloud. It takes care of the heavy lifting of managing the cluster's infrastructure—like provisioning machines, managing the Kubernetes control plane, and handling upgrades—so you can focus on deploying your applications.
-
-### Cloud Run vs. GKE: A Quick Comparison
-
-| Feature | Google Cloud Run | Google Kubernetes Engine (GKE) |
+| Criteria | Google Cloud Run | GKE Autopilot (`--deployment-target gke`) |
 | :--- | :--- | :--- |
-| **Abstraction Level** | High (Serverless) | Medium (Managed Kubernetes) |
-| **Control** | Less control, more automation | Full control over cluster configuration |
-| **Use Case** | Stateless web apps, APIs, simple agents | Complex microservices, stateful apps, custom hardware |
-| **Scaling** | Automatic, including scale-to-zero | Highly configurable auto-scaling |
-| **Complexity** | Very low | Moderate to high |
+| **Abstraction Level** | High (Serverless container revisions) | Medium (Managed Kubernetes cluster & pods) |
+| **Scaling Mechanism** | Revision concurrency + instance auto-scaling (including scale-to-zero) | Declarative `HorizontalPodAutoscaler` (HPA), VPA, and node auto-provisioning |
+| **Sizing Configuration** | Imperative `agents-cli deploy` flags (`--cpu`, `--memory`, `--concurrency`) or Terraform | **Declarative Terraform only** (`deployment/terraform/`); CLI sizing flags are rejected |
+| **Networking** | Public HTTPS URL with IAM auth (`--no-allow-unauthenticated`) or VPC egress | Private VPC + Cloud NAT + **Internal LoadBalancer** by default (`kubectl port-forward` for dev) |
+| **Persistent Sessions** | Cloud SQL via Unix socket volume mount or Agent Platform Sessions | Cloud SQL via **Auth Proxy sidecar container** in the pod or Agent Platform Sessions |
+| **Rollback Mechanism** | Cloud Run revision traffic shifting (`gcloud run services update-traffic`) | Kubernetes rollout history (`kubectl rollout undo deployment/...`) or GitOps |
 
-In essence, Cloud Run prioritizes simplicity and ease of use, while GKE prioritizes flexibility and control.
+---
 
-### The Deployment Process to GKE
+### Part 1: The Enterprise Golden Path — GKE Autopilot with `agents-cli`
 
 ![GKE Enterprise Agent Cluster Topology (Light)](img/gke-cluster-topology-light.webp#gh-light-mode-only)
 ![GKE Enterprise Agent Cluster Topology (Dark)](img/gke-cluster-topology-dark.webp#gh-dark-mode-only)
-*Figure: Multi-tier GKE cluster topology showing Cloud Ingress load balancer, replica Agent Pods, private VPC services, and GPU acceleration nodes.*
+*Figure: Multi-tier GKE cluster topology showing load balancer ingress, replica Agent Pods governed by HPA and PDB, private VPC services, and Workload Identity.*
 
-Deploying to GKE is a more involved process than deploying to Cloud Run, as it requires you to define your application's components using Kubernetes' own configuration language (which also uses YAML).
+Hand-writing VPC subnets, Cloud NAT routers, Artifact Registry repositories, IAM bindings, and multi-object Kubernetes manifests from scratch is error-prone. **`agents-cli`** (`google-agents-cli`) codifies Google Cloud's production GKE Autopilot golden path into a repeatable scaffold-and-deploy workflow.
 
-The general steps are:
-1.  **Containerize your application:** Create a `Dockerfile` that specifies how to build a container image for your agent.
-2.  **Build and Push the Image:** Build the container image and push it to a container registry (like Google Artifact Registry).
-3.  **Create a GKE Cluster:** Provision a GKE cluster in your Google Cloud project.
-4.  **Write Kubernetes Manifests:** Create YAML files that describe the desired state of your application to Kubernetes. This typically involves:
-    *   A **Deployment:** Specifies which container image to run and how many replicas (copies) to maintain.
-    *   A **Service:** Exposes your application to the internet by creating a public IP address and a load balancer.
-5.  **Apply the Manifests:** Use the `kubectl` command-line tool to apply your manifest files to the GKE cluster, which triggers the deployment.
-
-While the ADK provides the `uv run adk deploy gke` command to automate some of these steps, understanding the underlying concepts is crucial for managing a production deployment on Kubernetes. In the lab, you will walk through the manual process to gain a deeper understanding of how GKE works.
-
-### GKE Kubernetes Manifest Generation with `agents-cli`
-
-For enterprise Kubernetes engineering, writing raw Kubernetes manifests and networking resources from scratch is error-prone. The **Google Agents CLI (`google-agents-cli`)** automatically scaffolds production-ready GKE Autopilot and Terraform definitions tailored for ADK agents:
+Whether you create a new GKE project or upgrade an existing prototype (`support-ops-agent`) in place, `agents-cli` generates the complete container and Terraform stack automatically:
 
 ```bash
 export GOOGLE_CLOUD_PROJECT="your-project-id"
 export DEPLOY_REGION="us-central1"
 
-# 1. Enhance an existing plain ADK directory with GKE manifests and Terraform IaC
-uvx google-agents-cli scaffold enhance . --adk -d gke --agent-directory support_agent
+# Option A: Create a new GKE-targeted ADK project with GitHub Actions CI/CD
+agents-cli scaffold create support-ops-gke \
+  --agent adk \
+  --deployment-target gke \
+  --cicd-runner github_actions \
+  --region "$DEPLOY_REGION" \
+  --agent-guidance-filename GEMINI.md
 
-# 2. Deploy your agent to GKE (cluster in us-central1, Gemini 3.8 Flash on global endpoint)
-uvx google-agents-cli deploy \
+# Option B: Upgrade an existing prototype directory in place
+# agents-cli scaffold enhance . --deployment-target gke --cicd-runner github_actions
+```
+
+#### What `agents-cli` Automates Under `deployment/terraform/`
+
+When you select `--deployment-target gke`, `agents-cli` generates two Terraform layouts — `deployment/terraform/single-project/` (for single-project environments and `agents-cli deploy`) and `deployment/terraform/cicd/` (for staging/production CI/CD pipelines):
+
+1.  **GKE Autopilot & Private Networking (`service.tf`):** Provisions a dedicated VPC, subnet, Cloud Router + Cloud NAT (so private Autopilot nodes can reach Vertex AI endpoints without public node IPs), Artifact Registry, and a GKE Autopilot cluster.
+2.  **Keyless Workload Identity (`iam.tf` & `kubernetes_service_account_v1`):** Creates a least-privilege GCP runtime service account (`app_sa`) and binds it to the Kubernetes ServiceAccount via `roles/iam.workloadIdentityUser`. Pods authenticate to Vertex AI, Cloud Trace, and Secret Manager automatically — zero service account JSON keys are ever created or mounted.
+3.  **Declarative Kubernetes Workloads & Autoscaling (`service.tf`):**
+    *   **`kubernetes_deployment_v1`:** Runs your single-stage `uv`-built `Dockerfile` (`uvicorn app.fast_api_app:app` on port `8080`, exposing both `/run_sse` and `/a2a/app`), configured with startup, readiness, and liveness probes, resource requests/limits, and an optional Cloud SQL Auth Proxy sidecar when `--session-type cloud_sql` is used.
+    *   **`kubernetes_horizontal_pod_autoscaler_v2` (HPA):** Automatically scales pod replicas (default `2` to `10` replicas at `70%` CPU utilization).
+    *   **`kubernetes_pod_disruption_budget_v1` (PDB):** Enforces `minAvailable: 1` so GKE node maintenance never takes all agent pods offline simultaneously.
+    *   **`kubernetes_service_v1`:** Exposes port `8080` via an **Internal LoadBalancer** (`cloud.google.com/load-balancer-type: "Internal"`) by default for private intra-VPC and A2A traffic. During development, you tunnel from your laptop with `kubectl port-forward` and test directly via `agents-cli run --url ... --mode a2a` or `--mode adk`.
+
+> **Critical `agents-cli` Rule for GKE Sizing:** Unlike Cloud Run and Agent Runtime — where you can pass `--cpu`, `--memory`, `--concurrency`, `--min-instances`, `--max-instances`, or `--service-name` directly on `agents-cli deploy` — **those sizing and naming flags are rejected on GKE**. Why? Because on GKE, pod resource requests/limits, service names, and `HorizontalPodAutoscaler` bounds are owned **declaratively in `deployment/terraform/single-project/service.tf` (and `cicd/service.tf`)**. Rejecting imperative CLI sizing flags prevents ad-hoc deployments from drifting out of sync with Terraform and HPA rules.
+
+When deploying `gemini-3.8-flash` to a regional GKE cluster (such as `DEPLOY_REGION=us-central1`), pass `GOOGLE_GENAI_USE_ENTERPRISE=1` and `GOOGLE_CLOUD_LOCATION=global` via `--env-vars` so the container routes model inference to the global Vertex AI endpoint:
+
+```bash
+agents-cli deploy \
   --project "$GOOGLE_CLOUD_PROJECT" \
   --region "$DEPLOY_REGION" \
-  --env-vars "GOOGLE_CLOUD_LOCATION=global" \
+  --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_LOCATION=global" \
   --no-confirm-project
 ```
 
-#### Assets Scaffolded for GKE:
-- **`Dockerfile`**: Single-stage Python container build using `uv` serving `uvicorn app.fast_api_app:app` on port `8080` (exposing `/run_sse`, `/apps/...`, and A2A routes).
-- **`deployment/terraform/`**: Terraform modules (`single-project/service.tf` and `cicd/service.tf`) provisioning a private VPC/Cloud NAT stack, GKE Autopilot cluster, `kubernetes_deployment_v1`, `kubernetes_service_v1`, `kubernetes_horizontal_pod_autoscaler_v2` (HPA), `kubernetes_pod_disruption_budget_v1` (PDB), and Workload Identity IAM bindings.
+---
+
+### Part 2: Under the Hood — Raw Kubernetes Primitives (`Dockerfile`, `deployment.yaml` & `kubectl`)
+
+While `agents-cli` automates cluster creation, Terraform state, and FastAPI/A2A packaging, understanding the raw Kubernetes primitives underneath makes you far more effective when debugging pod rollouts or customizing cluster topologies.
+
+When deploying an ADK agent manually without `agents-cli`, five core steps occur beneath the surface:
+1.  **Containerize with Headless `adk api_server`:** Package your agent subdirectory inside `/app/<agent_name>/` (containing `__init__.py` and `agent.py`) and run `adk api_server /app --host 0.0.0.0 --port 8080` — never `adk web`, which exposes debug traces and UI overhead in production.
+2.  **Build & Push to Artifact Registry:** Submit the container build via Cloud Build (`gcloud builds submit`) to a regional Docker repository (`${DEPLOY_REGION}-docker.pkg.dev/...`).
+3.  **Provision GKE Autopilot:** Create a cluster (`gcloud container clusters create-auto`) and fetch `kubeconfig` credentials (`get-credentials`).
+4.  **Author Kubernetes Manifests (`deployment.yaml`):**
+    *   A **`Deployment`** defines *execution*: which container image to pull, how many pod replicas to run, and container environment variables (`GOOGLE_GENAI_USE_ENTERPRISE="1"`, `GOOGLE_CLOUD_LOCATION="global"`).
+    *   A **`Service`** defines *network access*: a stable IP address and load balancer routing traffic to ephemeral pod IPs selected by label (`app: support-agent`).
+5.  **Apply & Operate with `kubectl`:** Apply manifests via `kubectl apply -f`, inspect logs via `kubectl logs`, and recover from bad image pushes instantaneously via `kubectl rollout undo deployment/<name>`.
 
 <KnowledgeCheck
   id="m33-gke-api-server-routing"
@@ -103,11 +117,8 @@ uvx google-agents-cli deploy \
 />
 
 ### Key Takeaways
-- **Google Kubernetes Engine (GKE)** is a managed container orchestration platform that provides more control and flexibility than serverless options like Cloud Run.
-- GKE is the preferred choice for complex applications with specific hardware needs (like GPUs), fine-grained networking requirements, or for organizations already invested in the Kubernetes ecosystem.
-- The deployment process to GKE is more involved, requiring you to containerize your application with a `Dockerfile` and define its desired state using Kubernetes **Manifests** (YAML files).
-- Key Kubernetes objects include the **Deployment** (manages your application's running instances) and the **Service** (exposes your application to the network).
-- You interact with a GKE cluster using the `kubectl` command-line tool.
-- **`api_server` vs. `web` in Production:** It is critical to use `uv run adk api_server` in a production `Dockerfile` instead of `uv run adk web`. The `api_server` command exposes a pure, headless REST API for programmatic consumption, which is what's needed for a backend service. In contrast, `uv run adk web` also includes the debug UI, which exposes sensitive internal information (like the agent's full instruction and reasoning trace) and adds unnecessary resource overhead, making it insecure and inefficient for production.
-- **Deployment vs. Service Objects:** In Kubernetes, the `Deployment` and `Service` objects have distinct roles. The **Deployment** is responsible for the *execution* of the application; it defines which container image to run and how many replicas (Pods) to maintain, ensuring the agent is always running. The **Service** is responsible for *access*; it provides a stable network endpoint (like a public IP address) to the application, routing external traffic to the ephemeral Pods managed by the Deployment. You need both to run and expose an application.
-- **GKE vs. Cloud Run Trade-off:** The primary trade-off between GKE and Cloud Run is **Control vs. Complexity**. GKE offers maximum control over nodes, networking, and hardware (like GPUs) but comes with higher operational complexity and slower deployment times. Cloud Run offers simplicity, rapid deployment, and a cost-effective pay-per-use model but provides less control. GKE is the right choice when the need for granular control outweighs the benefits of serverless simplicity.
+- **`agents-cli` Golden Path (`--deployment-target gke`):** `agents-cli scaffold create` / `enhance` automates private VPC + Cloud NAT networking, GKE Autopilot cluster provisioning, Artifact Registry, keyless **Workload Identity (`app_sa`)**, **HorizontalPodAutoscaler (HPA)**, and **PodDisruptionBudget (PDB)** via `deployment/terraform/`.
+- **Declarative GKE Sizing Rule:** Runtime sizing flags (`--cpu`, `--memory`, `--concurrency`, `--min-instances`, `--max-instances`) on `agents-cli deploy` are **rejected for GKE** because pod resource requests/limits and HPA scaling live declaratively in `deployment/terraform/`.
+- **Dual-Protocol Verification:** Every `agents-cli` Python container serves `uvicorn app.fast_api_app:app` on port `8080`, allowing you to test live GKE pods over both **A2A** (`--mode a2a`) and **ADK SSE** (`--mode adk --app-name app`) via `agents-cli run --url`.
+- **`Deployment` vs. `Service` Objects:** Under the hood, a Kubernetes **`Deployment`** manages pod execution, replicas, and rolling updates (`kubectl rollout undo`), while a **`Service`** provides a stable network endpoint routing traffic across ephemeral pod IPs.
+- **`adk api_server` vs. `adk web` in Production:** Always serve headless API containers (`uvicorn app.fast_api_app:app` in `agents-cli` or `adk api_server` in raw Dockerfiles) rather than `adk web`, which exposes internal instructions, tool schemas, and reasoning traces.

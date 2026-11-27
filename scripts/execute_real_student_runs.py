@@ -239,6 +239,7 @@ try:
     vertexai.init = lambda *args, **kwargs: None
     agent_engines.create = lambda *args, **kwargs: MockRemoteApp()
     agent_engines.get = lambda *args, **kwargs: MockRemoteApp()
+    agent_engines.delete = lambda *args, **kwargs: None
 except Exception:
     pass
 

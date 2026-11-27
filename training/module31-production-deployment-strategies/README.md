@@ -10,86 +10,135 @@ pagination_label: "Module 31: Production Deployment Strategies — 📖 Theory &
 
 ![Enterprise Production Deployment Framework (Light)](img/hero-light.webp#gh-light-mode-only)
 ![Enterprise Production Deployment Framework (Dark)](img/hero-dark.webp#gh-dark-mode-only)
-*Figure: Enterprise deployment framework evaluating speed, compliance, cost, and architectural control.*
+*Figure: Enterprise AgentOps lifecycle and deployment framework evaluating speed, compliance, session persistence, cost, and architectural control.*
 
-### Choosing Your Deployment Platform
+### Welcome to Part 6: Enterprise AgentOps with `google-agents-cli`
 
-Deploying an agent to production involves more than just running a command; it requires choosing the right platform based on your specific needs for speed, cost, security, and control. The ADK is designed to be flexible, supporting several deployment targets.
+Building an agent that works in a local script is only the halfway mark. Shipping an **enterprise-grade agent** requires deterministic dependency management, built-in Agent-to-Agent (A2A) interoperability, systematic LLM-as-judge evaluation gates, Infrastructure-as-Code (Terraform), CI/CD promotion pipelines, and zero-trust runtime governance.
 
-### The Decision Framework
+Throughout Part 6, you will build, evaluate, containerize, deploy, and govern a single canonical Python agent — **`support-ops-agent`** powered by **`gemini-3.8-flash`** — using the **Google Agents CLI (`google-agents-cli`)**. Installed once via `uv tool install google-agents-cli`, `agents-cli` provides a unified operational toolchain across every Google Cloud runtime target.
+
+---
+
+### The 7-Phase `agents-cli` Lifecycle
+
+Rather than bolting on Dockerfiles, A2A routers, evaluation harnesses, and Terraform modules manually at the end of a project, `agents-cli` guides every agent through a disciplined **prototype-first, eval-gated 7-phase lifecycle**:
+
+```mermaid
+flowchart LR
+    P1["1. Setup (agents-cli setup)"] --> P2["2. Prototype Scaffold (scaffold create --prototype)"]
+    P2 --> P3["3. Local Iteration (run / playground)"]
+    P3 --> P4["4. Quality Flywheel (eval run & eval compare)"]
+    P4 -->|"Refine prompts & tools"| P3
+    P4 -->|"Metrics pass bar"| P5["5. Enhance & IaC (scaffold enhance & infra)"]
+    P5 --> P6["6. Cloud Rollout (agents-cli deploy)"]
+    P6 --> P7["7. Enterprise Registration (publish gemini)"]
+```
+
+| Phase | Core `agents-cli` Commands | Purpose & Engineering Deliverable |
+| :--- | :--- | :--- |
+| **1. Setup** | `uv tool install google-agents-cli`<br/>`agents-cli setup --skip-auth` | Installs the `agents-cli` binary globally and syncs the official AgentOps workflow skills into your coding agent environment. |
+| **2. Prototype Scaffold** | `agents-cli scaffold create support-ops-agent --agent adk --prototype` | Generates the standardized ADK project layout, FastAPI + A2A serving harness, and evaluation suite **without** premature cloud Terraform clutter. |
+| **3. Local Iteration** | `agents-cli install` · `agents-cli lint`<br/>`agents-cli run "..." --start-server`<br/>`agents-cli playground` | Syncs dependencies with `uv`, runs `ruff`/type checks, executes fast multi-turn CLI smoke tests against a warm local server, and launches the browser playground. |
+| **4. Quality Flywheel** | `agents-cli eval run`<br/>`agents-cli eval compare <base> <cand>` | Generates traces over `tests/eval/datasets/`, grades tool trajectories and response quality into `artifacts/grade_results/`, and diffs runs to prevent regressions. |
+| **5. Enhance & IaC** | `agents-cli scaffold enhance . --deployment-target <target>`<br/>`agents-cli infra single-project` / `infra cicd` | Upgrades the prototype **in place** (preserving `app/agent.py` and `.env`) with modular Terraform (`deployment/terraform/`), CI/CD pipelines, and Locust load tests. |
+| **6. Deploy** | `agents-cli deploy` | Packages, builds, and rolls out the container to **Agent Runtime**, **Cloud Run**, or **GKE Autopilot**, writing `deployment_metadata.json` when applicable. |
+| **7. Publish & Observe** | `agents-cli publish gemini` | Registers the live agent with **Gemini Enterprise** (native ADK `:streamQuery` or A2A protocol) with Cloud Trace and BigQuery Agent Analytics telemetry. |
+
+---
+
+### Scaffolded Project Anatomy
+
+Running `agents-cli scaffold create support-ops-agent --agent adk --prototype --agent-guidance-filename GEMINI.md` produces a clean, production-ready repository layout:
+
+```text
+support-ops-agent/
+├── agents-cli-manifest.yaml      # Canonical project manifest (target, root_agent_name, agent_directory)
+├── GEMINI.md                     # Coding-agent guidance & repository architecture conventions
+├── pyproject.toml                # Managed dependencies (google-adk, fastapi, uvicorn, a2a-sdk)
+├── Dockerfile                    # Single-stage uv container serving uvicorn app.fast_api_app:app
+├── .env                          # Local AI Studio key OR Gemini Enterprise / Vertex AI config
+├── app/
+│   ├── __init__.py
+│   ├── agent.py                  # YOUR CODE: root_agent + App(root_agent=root_agent, name="app")
+│   ├── fast_api_app.py           # Unified FastAPI entrypoint (/run_sse, /apps/..., and /a2a/app)
+│   └── app_utils/
+│       ├── a2a.py                # Built-in A2A AgentCard & JSON-RPC endpoint wiring
+│       └── services.py           # Session backend resolver (in_memory, cloud_sql, agent_platform_sessions)
+└── tests/
+    └── eval/
+        ├── eval_config.yaml      # Built-in & custom metric selection (metrics_to_run)
+        └── datasets/
+            └── basic-dataset.json # Inference prompts for agents-cli eval run
+```
+
+* **`agents-cli-manifest.yaml`:** Records your project configuration (`agent_directory: "app"`, `root_agent_name`, `deployment_target`, `session_type`) so `agents-cli info`, `scaffold enhance`, `deploy`, and `scaffold upgrade` stay synchronized.
+* **`GEMINI.md`:** Context file automatically tailored to your IDE/coding agent (`GEMINI.md`, `CLAUDE.md`, or `AGENTS.md`) documenting exact commands and safe-edit boundaries.
+* **`app/agent.py`:** The primary file you author. Defines tools, callbacks, `root_agent`, and `app = App(root_agent=root_agent, name="app")`.
+* **`app/fast_api_app.py` & `app/app_utils/a2a.py`:** Every Python ADK project scaffolded by `agents-cli` ships with **Agent-to-Agent (A2A) protocol support built in** under `/a2a/{app_name}` (including `/.well-known/agent-card.json` and JSON-RPC task execution) alongside ADK's native `/run_sse` routes. Never hand-write A2A server boilerplate from scratch.
+* **`tests/eval/`:** Pre-wired evaluation suite consumed by `agents-cli eval run`, writing timestamped HTML and JSON scorecards to `artifacts/grade_results/`.
+
+#### The 4 Critical `agents-cli` Rules
+
+Violating any of these four invariants is the #1 cause of scaffolding or runtime session errors:
+
+1. **Project name `<= 26` characters:** Must contain **only** lowercase letters (`a-z`), digits (`0-9`), and hyphens (`-`) — for example, `support-ops-agent` (17 chars). Service accounts and Terraform resource IDs derive from this name and hit GCP length caps above 26 characters.
+2. **NEVER `mkdir` before `agents-cli scaffold create`:** Run `scaffold create` from the parent workspace directory. The CLI creates `support-ops-agent/` itself; pre-creating an empty folder causes `create` to fail or misdetect an existing directory.
+3. **Keep `App(root_agent=root_agent, name="app")` matching `agent_directory: "app"`:** ADK's HTTP server and `agents-cli eval` route sessions by directory name. Changing `name="app"` to `name="support_ops_agent"` while code lives in `app/` causes `"Session not found"` errors.
+4. **Keep `Agent(name="support_ops_agent")` synchronized with `root_agent_name` in `agents-cli-manifest.yaml`:** Ensures trace attribution, evaluation harnesses, and generated A2A `AgentCard` metadata reference the exact root agent identifier.
+
+---
+
+### The Deployment Target Decision Matrix
 
 ![Production Deployment Decision Matrix (Light)](img/deployment-decision-matrix-light.webp#gh-light-mode-only)
 ![Production Deployment Decision Matrix (Dark)](img/deployment-decision-matrix-dark.webp#gh-dark-mode-only)
-*Figure: Architecture comparison matrix across Google Cloud Run (Serverless), Vertex AI Agent Runtime (Managed Compliance), and Google Kubernetes Engine (Orchestration & Hardware Control).*
+*Figure: Architecture comparison matrix across Agent Runtime (Managed Compliance & Sessions), Google Cloud Run (Serverless Container Control), and Google Kubernetes Engine Autopilot (Cluster & Hardware Control).*
 
-Here's a quick framework to help you choose the best platform for your situation:
+When your prototype passes its evaluation bar in Phase 4, you promote it with `agents-cli scaffold enhance . --deployment-target <target>`. All three targets build and run the **exact same `Dockerfile`**, differing in operational control, session management, networking, and compliance:
 
-*   **🚀 Quick MVP / Moving Fast? → Use Cloud Run.**
-    *   **Why:** Fastest time-to-market (5-minute deployment), secure by default (HTTPS, DDoS, IAM), and cost-effective pay-per-use model. Ideal for startups, MVPs, and most standard production applications.
-
-*   **🛡️ Need Compliance (FedRAMP, HIPAA)? → Use Agent Runtime.**
-    *   **Why:** This is the only platform with built-in FedRAMP compliance, making it the best choice for enterprise, government, and highly regulated industries. It provides a fully managed, secure, and auditable environment with zero configuration.
-
-*   **⚙️ Have Kubernetes / Need Full Control? → Use GKE.**
-    *   **Why:** If your organization already uses Kubernetes, or if you need fine-grained control over networking, hardware (like GPUs), and security policies, GKE is the right choice. It offers maximum flexibility but requires more operational overhead.
-
-*   **🔑 Need Custom Authentication (LDAP, etc.)? → Use a Custom FastAPI Server on Cloud Run.**
-    *   **Why:** If you have specific authentication requirements not natively supported by the cloud platforms, you'll need to build a custom server. Deploying this custom server on Cloud Run gives you the best of both worlds: platform security and application-level flexibility. This is an advanced and less common scenario.
-
-### Security is Platform-First
-
-A key design philosophy of the ADK is to leverage the security features of the underlying deployment platform. The ADK's built-in server is intentionally minimal because platforms like Cloud Run and Agent Runtime provide production-ready security "out of the box."
-
-| Security Feature | Cloud Run | Agent Runtime | GKE |
+| Criteria | Agent Runtime (`agent_runtime`) | Cloud Run (`cloud_run`) | GKE Autopilot (`gke`) |
 | :--- | :--- | :--- | :--- |
-| **HTTPS/TLS** | ✅ Auto | ✅ Auto | ⚙️ Manual |
-| **DDoS Protection** | ✅ Auto | ✅ Auto | ❌ Manual |
-| **Authentication** | ✅ Auto (IAM) | ✅ Auto (OAuth) | ⚙️ Manual |
-| **Encryption at Rest**| ✅ Auto | ✅ Auto | ✅ Manual |
-| **Audit Logging** | ✅ Auto | ✅ Auto | ✅ Manual |
-| **Compliance** | HIPAA, PCI | **FedRAMP** | All |
+| **Operational Model** | Fully managed agent runtime in Gemini platform (no `gcloud` service plumbing; managed via `agents-cli deploy`) | Managed serverless containers with instant revision traffic splitting & scale-to-zero | Full Kubernetes cluster orchestration (Pods, HPA, Deployments, Workload Identity) |
+| **Session Backends (`--session-type`)** | **Managed automatically** (`VertexAiSessionService` wired by platform; omit/clear `session_type` in code) | `in_memory` (dev), `cloud_sql` (managed Postgres 15 w/ IAM auth), or `agent_platform_sessions` | `in_memory` (dev), `cloud_sql` (Postgres 15 w/ IAM auth), or `agent_platform_sessions` |
+| **Networking & Ingress** | VPC Service Controls (VPC-SC), Private Service Connect interfaces (`--network-attachment`), Agent Gateway (`--agent-gateway-ingress` / `--agent-gateway-egress`) | Public HTTPS, Direct VPC Egress, Identity-Aware Proxy (`--iap`), internal/GCLB ingress | Kubernetes `NetworkPolicy`, Gateway API, private clusters, multi-service mesh |
+| **Cost Model** | vCPU-hours + memory-hours (**not billed when idle** when `min-instances=0`) | Per-instance-second + optional `--min-instances` warm capacity | Autopilot Pod resource requests (or Standard node pools / GPU nodes) |
+| **Compliance & Security** | **FedRAMP**, HIPAA, PCI, CMEK (`--key`), Agent Identity (`--agent-identity`) | HIPAA, PCI, IAM / IAP authentication, Secret Manager (`--secrets`) | Customizable for HIPAA/PCI/sovereign controls (higher DevOps responsibility) |
+| **OAuth / Live / Eventarc Specifics** | **Required for managed OAuth 2.0 user consent** in Gemini Enterprise; Live needs `--min-instances 1`; Eventarc/Pub/Sub via `/api` passthrough | **Simplest for Eventarc & Pub/Sub** (`/apps/{app}/trigger/*`); Live voice agents need `--timeout 3600 --min-instances 1`; no managed user OAuth consent | Custom GPU hardware acceleration, sidecars, high-density microservices, and K8s Jobs |
 
-**Bottom Line:** For most use cases, deploying with `uv run adk deploy cloud_run` or `uvx google-agents-cli deploy` provides a secure, production-ready agent with zero custom security code required.
+#### Quick Architectural Heuristics
+* **🚀 Rapid Serverless APIs, Webhooks, A2A Microservices, or Eventarc Triggers → `cloud_run`:** Fastest container iteration (Module 32), revision-based instant traffic rollback, Identity-Aware Proxy (`--iap`), and pay-per-request scaling.
+* **☸️ Kubernetes Standardization, Fine-Grained `NetworkPolicy`, or GPUs → `gke`:** Full Kubernetes control over pod topology, custom hardware, and cluster-internal service meshes (Module 33).
+* **🛡️ FedRAMP Compliance, Managed Sessions, Agent Identity, or OAuth User Consent → `agent_runtime`:** Zero-ops managed infrastructure with automatic `VertexAiSessionService`, CMEK encryption, and native Gemini Enterprise OAuth delegation (Module 35).
 
-### The End-to-End Agent Lifecycle with `google-agents-cli`
+### Platform-First Security
 
-Throughout Part 6, you will pair the core ADK CLI (`uv run adk`) with the **Google Agents CLI (`google-agents-cli`)**—the unified operational toolchain for taking an agent from a local prototype to an enterprise-governed production service. Invoked directly via `uvx google-agents-cli` (or installed globally with `uv tool install google-agents-cli`), it standardizes five lifecycle stages across **Agent Runtime**, **Cloud Run**, and **GKE**:
+ADK and `agents-cli` follow a **platform-first security model**: rather than writing brittle TLS, DDoS, or token verification middleware inside `app/agent.py`, you delegate transport and identity enforcement to the cloud runtime and least-privilege Terraform service accounts (`app_sa` for runtime execution, `cicd_runner_sa` for CI/CD).
 
-1. **Scaffold (`scaffold create` / `scaffold enhance`):**
-   * Start a greenfield repository with `uvx google-agents-cli scaffold create my-agent`, or layer production deployment templates onto an existing ADK directory in place without overwriting your agent logic:
-     ```bash
-     uvx google-agents-cli scaffold enhance . --adk -d agent_runtime
-     ```
-   * Generates a hardened `Dockerfile`, FastAPI/A2A runtime harness, modular Terraform Infrastructure-as-Code (`deployment/terraform/`), CI/CD pipelines (Cloud Build or GitHub Actions), and load-testing suites.
-2. **Local Playground (`playground`):**
-   * Run `uvx google-agents-cli playground` to test your scaffolded agent locally with live agent reload (`--reload_agents`) and optional OpenTelemetry export to Google Cloud (`--otel-to-cloud`).
-3. **Evaluation Gate (`eval run`):**
-   * Execute `uvx google-agents-cli eval run` to chain trace generation and automated metric grading before promoting changes to staging or production.
-4. **Cloud Rollout (`deploy`):**
-   * Run `uvx google-agents-cli deploy` to package, build, and roll out your container to the target configured in `agents-cli-manifest.yaml` (`agent_runtime`, `cloud_run`, or `gke`). On Agent Runtime, successful deployments automatically write `deployment_metadata.json` for downstream publishing.
-5. **Enterprise Registration (`publish gemini`):**
-   * Register your deployed agent into a **Gemini Enterprise** app using `uvx google-agents-cli publish gemini`—either natively via ADK `:streamQuery` on Agent Runtime (`--registration-type adk`) or over the Agent-to-Agent protocol on Cloud Run and GKE (`--registration-type a2a`).
+| Security Capability | Agent Runtime | Cloud Run | GKE Autopilot |
+| :--- | :--- | :--- | :--- |
+| **HTTPS / Managed TLS** | ✅ Automatic | ✅ Automatic | ⚙️ Ingress / Gateway config |
+| **DDoS Protection** | ✅ Automatic | ✅ Automatic | ⚙️ Cloud Armor via GCLB |
+| **Caller Authentication** | ✅ IAM & OAuth 2.0 | ✅ IAM & IAP (`--iap`) | ⚙️ Workload Identity / Istio |
+| **Customer-Managed Keys (CMEK)** | ✅ `--key` / Terraform | ✅ Service CMEK | ✅ Node & PV CMEK |
+| **Audit Logging** | ✅ Cloud Audit Logs | ✅ Cloud Audit Logs | ✅ Cloud Audit + K8s Audit |
 
 <KnowledgeCheck
   id="m31-deployment-strategy-choice"
-  question="A healthcare enterprise needs a fully managed, FedRAMP-auditable deployment target with reproducible Terraform IaC, automated evaluation gates, and native Gemini Enterprise registration. Which target and toolchain combination fits best?"
+  question="You are kicking off an enterprise ADK agent project that must iterate quickly as a local prototype, pass automated trajectory and quality evaluations before any cloud infrastructure is added, and ultimately deploy to a FedRAMP-compliant runtime supporting managed OAuth 2.0 user consent. Which workflow and target combination is correct?"
   options={[
-    "Deploy to a local Docker container using 'uv run adk web --host 0.0.0.0'",
-    "Scaffold and deploy to Agent Runtime using 'uvx google-agents-cli scaffold enhance . --adk -d agent_runtime' followed by 'eval run', 'deploy', and 'publish gemini'",
-    "Write custom TLS termination and DDoS middleware inside a standalone Python script on an unmanaged VM",
-    "Deploy a stateful stdio process directly to Cloud Functions without containerization"
+    "Run 'mkdir my_enterprise_agent_project_with_very_long_name' first, skip evaluation, and run 'adk web --host 0.0.0.0' on an unmanaged VM",
+    "Run 'agents-cli scaffold create support-ops-agent --agent adk --prototype', iterate with 'agents-cli run' and 'agents-cli eval run' / 'eval compare', then upgrade in place with 'agents-cli scaffold enhance . --deployment-target agent_runtime' and 'agents-cli deploy'",
+    "Set 'App(root_agent=root_agent, name=\"custom_name\")' inside 'app/agent.py' and hand-write a custom A2A JSON-RPC server from scratch",
+    "Deploy directly to Cloud Run because Cloud Run is the only target with built-in FedRAMP certification and managed Gemini OAuth user consent"
   ]}
   correctIndex={1}
-  hint="Match the strict compliance requirement (FedRAMP + zero server management) with the canonical Part 6 lifecycle CLI."
-  explanation="Agent Runtime is the managed Gemini platform target offering built-in FedRAMP compliance and managed sessions, while 'google-agents-cli' provides the end-to-end production workflow: 'scaffold enhance', 'playground', 'eval run', 'deploy', and 'publish gemini'."
+  hint="Combine the prototype-first 'agents-cli' Quality Flywheel (<= 26 char name, no pre-mkdir, eval gate) with the only target offering FedRAMP + managed OAuth user consent."
+  explanation="Starting with 'agents-cli scaffold create <name> --agent adk --prototype' lets you validate behavior locally via 'agents-cli run' and the 'eval run' / 'eval compare' Quality Flywheel before adding Terraform/CI/CD via 'scaffold enhance . --deployment-target agent_runtime' — the managed Gemini platform target that supports FedRAMP compliance, automatic sessions, and OAuth 2.0 user consent."
 />
 
 ### Key Takeaways
-- Choosing the right deployment platform depends on your project's specific needs for speed, cost, compliance, and control.
-- **Cloud Run** is ideal for rapid development and cost-effective, serverless deployments.
-- **Agent Runtime** is the best choice for enterprise and government use cases requiring high compliance standards like FedRAMP.
-- **GKE** offers maximum control and flexibility for complex systems already integrated with Kubernetes.
-- The ADK follows a "platform-first" security model, leveraging the built-in security features of the deployment environment.
-- **Impact of Compliance Requirements:** A new compliance requirement like PCI would heavily influence the deployment choice. While platforms like GKE and Cloud Run can be made PCI compliant, the burden of implementing and maintaining all necessary controls falls on the development team. A managed platform like Agent Runtime, if certified for the specific compliance standard, would be the simplest choice as the compliance is built-in. In the absence of a certified managed platform, the decision would depend on whether the agent itself handles sensitive data, with a common pattern being to delegate that responsibility to a separate, compliant service.
-- **Benefits of Platform-First Security:** A "platform-first" security model is superior because it reduces operational overhead by offloading complex tasks like TLS certificate rotation, DDoS protection, and IAM authentication to the platform. This leverages the robust, battle-tested, and certified security features of the cloud provider, ensuring a consistent and auditable security posture across all services while minimizing the risk of human error in application-level code.
-- **Cloud Run Limitations & Migration:** While ideal for MVPs, Cloud Run's potential downsides include cold start latency and limited network control. A migration to GKE should be considered when the system evolves into a complex microservices architecture requiring private networking, critical performance that cannot tolerate cold starts, or specialized hardware like GPUs.
+* **7-Phase `agents-cli` Lifecycle:** Standardizes enterprise AgentOps from `setup` and `scaffold create --prototype` through local `run`/`playground`, the `eval run` & `eval compare` Quality Flywheel, `scaffold enhance`, `deploy`, and `publish gemini`.
+* **Built-In A2A & Clean Separation:** Scaffolded Python ADK apps automatically serve both ADK SSE (`/run_sse`) and A2A (`/a2a/{app_name}/.well-known/agent-card.json`) via `app/fast_api_app.py` while isolating your business logic in `app/agent.py`.
+* **4 Non-Negotiable Rules:** Keep project names `<= 26` lowercase alphanumeric/hyphen characters, never `mkdir` before `scaffold create`, keep `App(..., name="app")` aligned with `agent_directory: "app"`, and keep `Agent(name=...)` aligned with `root_agent_name` in `agents-cli-manifest.yaml`.
+* **Target Selection:** Choose **Cloud Run** for fast serverless containers, A2A APIs, and Eventarc triggers; **Agent Runtime** for FedRAMP compliance, zero-ops managed sessions, Agent Gateway, and OAuth user consent; and **GKE Autopilot** for Kubernetes standardization, custom `NetworkPolicy`, and GPU workloads.

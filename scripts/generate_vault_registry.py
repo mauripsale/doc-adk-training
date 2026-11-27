@@ -1266,111 +1266,111 @@ VAULT_DATA = {
     "31": {
         "questions": [
             {
-                "question": "According to the Module 31 Deployment Decision Matrix, which Google Cloud target is uniquely suited when built-in FedRAMP compliance and zero-config managed operations are required?",
+                "question": "When bootstrapping an ADK Python project with 'agents-cli scaffold create support-ops-agent --agent adk --prototype', what rule governs App(name=...) in app/agent.py?",
                 "options": [
-                    "Local 'uv run adk web' on a developer laptop",
-                    "Vertex AI Agent Runtime",
-                    "Static GitHub Pages hosting",
-                    "Self-managed bare-metal servers without TLS"
+                    "App(name=...) must be a random UUID regenerated on every startup",
+                    "App(name='app') MUST match agent_directory ('app') in agents-cli-manifest.yaml, otherwise local runs, evaluations, and cloud deployments fail with 'Session not found' errors",
+                    "App(name=...) must always include spaces and uppercase characters",
+                    "Do not create an App object when using agents-cli"
                 ],
                 "correctIndex": 1,
-                "hint": "Check the 'Need Compliance (FedRAMP, HIPAA)? -> Use Agent Runtime' rule and security table in Module 31 Theory."
+                "hint": "Check the App name matching rule in Module 31 and app/agent.py: App.name must match the containing agent_directory ('app')."
             },
             {
-                "question": "When is Google Cloud Run the recommended choice over Google Kubernetes Engine (GKE) for deploying an ADK agent?",
+                "question": "Before running 'agents-cli scaffold enhance' and deploying a prototype to production, how does the 'agents-cli' Quality Flywheel verify behavioral changes without regressions?",
                 "options": [
-                    "When you want the fastest serverless time-to-market, automatic HTTPS/IAM security, and scale-to-zero pay-per-use efficiency without managing Kubernetes clusters",
-                    "When your agent requires dedicated multi-node NVIDIA H100 GPU scheduling and custom CNI kernel networking",
-                    "When you want to disable TLS encryption in production",
-                    "When your application cannot run inside a container"
+                    "Run 'agents-cli eval run' to generate and grade traces into artifacts/grade_results/, then run 'agents-cli eval compare <baseline>.json <candidate>.json' after fixes (inspecting actual metric scores since eval run exits 0 regardless)",
+                    "Write pytest unit tests that assert exact word-for-word LLM prose strings",
+                    "Skip evaluation if a single 'agents-cli run' prompt looks reasonable",
+                    "Pre-create the project directory with mkdir before running scaffold create"
                 ],
                 "correctIndex": 0,
-                "hint": "Compare 'Quick MVP / Moving Fast -> Cloud Run' with 'Have Kubernetes / Need Full Control -> GKE' in Module 31 Theory."
+                "hint": "Review the Quality Flywheel pre-deploy gate: 'agents-cli eval run' paired with 'agents-cli eval compare'."
             },
             {
-                "question": "What does ADK's 'Platform-First Security' design philosophy mean in practice?",
+                "question": "According to the Module 31 Deployment Target Decision Matrix, how do Agent Runtime, Cloud Run, and GKE Autopilot compare when choosing a target for 'support-ops-agent'?",
                 "options": [
-                    "Every developer must write custom C++ TLS handshake and DDoS mitigation middleware inside agent.py",
-                    "Security is optional for internal enterprise agents",
-                    "ADK keeps its built-in server minimal and delegates TLS termination, DDoS protection, IAM/OAuth authentication, and audit logging to battle-tested cloud platforms like Cloud Run and Agent Runtime",
-                    "Agents can only authenticate using plaintext Basic Auth query parameters"
+                    "Only GKE supports Python containers, while Agent Runtime only runs YAML files",
+                    "Cloud Run natively manages OAuth 2.0 user consent flows without any extra setup, whereas Agent Runtime cannot run Dockerfiles",
+                    "All three run your project's Dockerfile container: Agent Runtime provides lowest-ops managed VertexAiSessionService and OAuth user consent, Cloud Run provides serverless VPC/HTTP control and scale-to-zero, and GKE provides full Kubernetes pod/HPA control",
+                    "Agent Runtime bills per node pool 24/7 even when idle"
                 ],
                 "correctIndex": 2,
-                "hint": "Review 'Security is Platform-First' in Module 31 Theory."
+                "hint": "Compare Session state, Networking, Cost model, and Best-for trade-offs across Agent Runtime, Cloud Run, and GKE."
             }
         ]
     },
     "32": {
         "questions": [
             {
-                "question": "Which google-agents-cli command generates production-ready Dockerfiles, Terraform IaC, and Cloud Build CI/CD pipelines for Google Cloud Run?",
+                "question": "After enhancing 'support-ops-agent' with 'agents-cli scaffold enhance . --deployment-target cloud_run', why should 'agents-cli deploy' separate '--region us-central1' from '--env-vars GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_LOCATION=global'?",
                 "options": [
-                    "uvx google-agents-cli scaffold enhance . --deployment-target cloud_run",
-                    "adk build --cloud-run-all",
-                    "gcloud run deploy --generate-terraform",
-                    "docker init --template=adk-agent"
+                    "Because Cloud Run provisions regional container infrastructure in us-central1, while gemini-3.8-flash on Vertex AI is served from the global endpoint—preventing 404 model region errors at runtime",
+                    "Because Cloud Run services can only be deployed to a region literally named 'global'",
+                    "Because setting GOOGLE_CLOUD_LOCATION=global disables IAM authentication on Cloud Run",
+                    "Because Cloud Run ignores Dockerfiles unless GOOGLE_CLOUD_LOCATION is set"
                 ],
                 "correctIndex": 0,
-                "hint": "The scaffold enhance command with --deployment-target cloud_run creates full infrastructure and CI/CD assets."
+                "hint": "Distinguish the regional Cloud Run control plane (--region) from the global Vertex AI model endpoint (GOOGLE_CLOUD_LOCATION=global)."
             },
             {
-                "question": "Why is Google Cloud Run an ideal deployment target for serverless ADK agents?",
+                "question": "Cloud Run services deployed by 'agents-cli deploy' enforce '--no-allow-unauthenticated' by default. What is the fastest built-in CLI command to test the live service over A2A or ADK streaming?",
                 "options": [
-                    "It only runs on quantum computers",
-                    "It offers automatic scaling (including scale-to-zero), managed TLS endpoints, and pay-per-use efficiency without managing VM infrastructure",
-                    "It disables HTTPS encryption for lower latency",
-                    "It requires manual operating system kernel patching"
-                ],
-                "correctIndex": 1,
-                "hint": "Cloud Run manages container provisioning, concurrency, and automatic scaling to zero when idle."
-            },
-            {
-                "question": "Why should the Developer UI (--with_ui / adk web) be omitted when deploying headless ADK agents to production Cloud Run environments?",
-                "options": [
-                    "Because Cloud Run cannot serve HTTP traffic",
-                    "Because browsers cannot connect to Google Cloud",
-                    "For security and efficiency: the Dev UI exposes internal system prompts, traces, and state while increasing attack surface",
-                    "Because Python web servers are prohibited in containers"
+                    "Open the raw service URL in an incognito browser tab with no credentials",
+                    "SSH directly into the Cloud Run container via gcloud compute ssh",
+                    "Run 'agents-cli run \"Investigate ticket TCK-1042\" --url \"$SERVICE_URL\" --mode a2a' (or '--mode adk'), which mints the IAM identity token, manages sessions, and streams responses automatically",
+                    "Pass '/a2a/app/.well-known/agent-card.json' as '--url' without a '--mode' flag"
                 ],
                 "correctIndex": 2,
-                "hint": "Omitting the Dev UI prevents exposing internal agent prompt details and traces to end users."
+                "hint": "Pass the base service URL to 'agents-cli run --url <service-url> --mode a2a|adk'; the CLI handles IAM auth tokens and session setup automatically."
+            },
+            {
+                "question": "When tuning Cloud Run container capacity with 'agents-cli deploy' ('--cpu', '--memory', '--concurrency', '--max-instances'), why must '--memory' scale alongside '--concurrency'?",
+                "options": [
+                    "Cloud Run rejects any deployment unless CPU equals concurrency",
+                    "Each concurrent request holds its working set (conversation history, tool state, response buffers) in RAM while waiting on Gemini, so raising '--concurrency' without raising '--memory' is the primary cause of OOM restarts",
+                    "Raising concurrency spawns multiple OS kernel virtual machines inside the container",
+                    "Memory is unused while an async Python agent awaits an LLM API response"
+                ],
+                "correctIndex": 1,
+                "hint": "Review 'Sizing a deployment': one server process handles concurrent requests asynchronously, so peak RAM scales with base + concurrency * per-request memory."
             }
         ]
     },
     "33": {
         "questions": [
             {
-                "question": "When deploying ADK agents to Google Kubernetes Engine (GKE), what is the difference between Kubernetes Deployment and Service resources?",
+                "question": "What infrastructure and Kubernetes assets does 'agents-cli scaffold enhance . --deployment-target gke' generate for 'support-ops-agent'?",
                 "options": [
-                    "The Service compiles Python code, while the Deployment manages user billing",
-                    "The Deployment manages pod replicas and container rollouts, while the Service provides stable networking and load-balanced routing across pods",
-                    "The Deployment is for databases only, while the Service is for static HTML files",
-                    "There is no difference; they are interchangeable synonyms"
+                    "A static HTML website hosted on Firebase Hosting",
+                    "A unified Dockerfile plus Terraform modules under deployment/terraform/ provisioning a GKE Autopilot cluster, private VPC/Cloud NAT, Kubernetes Deployment, Service, HPA, PDB, and Workload Identity IAM bindings",
+                    "A single bash script that installs minikube on a developer laptop",
+                    "Only an empty kubeconfig file with no container build definition"
                 ],
                 "correctIndex": 1,
-                "hint": "Deployments manage running container instances (Pods); Services expose stable network endpoints and load balancing."
+                "hint": "Check the GKE scaffold architecture in Module 33: Dockerfile + Terraform GKE Autopilot, Deployment, Service, HPA, PDB, and Workload Identity."
             },
             {
-                "question": "Which google-agents-cli command scaffolds Kubernetes manifests and Terraform Autopilot modules for GKE?",
+                "question": "What happens if you pass CLI sizing flags such as '--cpu 4 --memory 16Gi --concurrency 16' (or '--service-name') to 'agents-cli deploy' when targeting GKE?",
                 "options": [
-                    "uvx google-agents-cli scaffold enhance . --deployment-target gke",
-                    "kubectl autogenerate --agent adk",
-                    "gcloud gke scaffold --all",
-                    "adk kubernetes init"
-                ],
-                "correctIndex": 0,
-                "hint": "The 'scaffold enhance . --deployment-target gke' command generates GKE deployment manifests and infrastructure modules."
-            },
-            {
-                "question": "When is GKE preferred over Google Cloud Run for hosting ADK agents?",
-                "options": [
-                    "When the agent has zero users and must never run",
-                    "When the developer does not have a Google Cloud account",
-                    "When running simple stateless single-file scripts",
-                    "When workloads require dedicated GPU hardware, custom private VPC topologies, zero cold-start pod pools, or deep integration into an existing Kubernetes fleet"
+                    "GKE automatically converts the cluster into a serverless Cloud Run revision",
+                    "The flags override kube-proxy kernel parameters on every node",
+                    "They only apply for 60 seconds and then reset to zero pods",
+                    "Those CLI sizing flags are rejected on GKE—pod CPU/memory requests, replica counts, and scaling on GKE must be configured declaratively in the Terraform manifests and HorizontalPodAutoscaler under deployment/terraform/"
                 ],
                 "correctIndex": 3,
-                "hint": "GKE provides granular control over accelerators (GPUs/TPUs), custom networking, and multi-pod cluster topology."
+                "hint": "Contrast Cloud Run / Agent Runtime CLI sizing flags with GKE's declarative Terraform + HPA sizing ownership."
+            },
+            {
+                "question": "On GKE, how do Kubernetes Deployment and Service resources divide responsibilities, and which command performs an immediate pod revision rollback?",
+                "options": [
+                    "The Deployment manages pod replicas and rolling updates (rolled back via 'kubectl rollout undo deployment/<name> -n <namespace>'), while the Service provides stable load-balanced networking to healthy pods",
+                    "The Service compiles Dockerfiles, while the Deployment manages Cloud DNS billing",
+                    "Both resources do the exact same thing; rollback requires deleting the entire GCP project",
+                    "GKE Autopilot pods cannot be rolled back without rewriting app/agent.py"
+                ],
+                "correctIndex": 0,
+                "hint": "Review Kubernetes Deployment vs. Service responsibilities and 'kubectl rollout undo' recovery."
             }
         ]
     },
@@ -1414,74 +1414,74 @@ VAULT_DATA = {
     "35": {
         "questions": [
             {
-                "question": "What is Google Cloud Vertex AI Agent Runtime?",
+                "question": "When enhancing 'support-ops-agent' for '--deployment-target agent_runtime', why must you omit or clear any custom 'session_type' setting?",
                 "options": [
-                    "A desktop IDE application for editing Python code",
-                    "A fully managed, enterprise serverless execution environment purpose-built for hosting, scaling, and securing ADK agents",
-                    "A legacy hardware rack server",
-                    "A replacement for the Gemini foundational model"
-                ],
-                "correctIndex": 1,
-                "hint": "Agent Runtime provides managed execution, autoscaling, OAuth2 authorization, and session isolation for ADK agents."
-            },
-            {
-                "question": "Which Agents CLI workflow scaffolds and deploys an ADK agent directly to Vertex AI Agent Runtime?",
-                "options": [
-                    "uvx google-agents-cli scaffold enhance . --deployment-target agent_runtime && uvx google-agents-cli deploy",
-                    "adk cloud execute --runtime=agent",
-                    "gcloud vertex agents create-manual",
-                    "npm run deploy:agent-runtime"
-                ],
-                "correctIndex": 0,
-                "hint": "The standard Accelerated deployment path uses scaffold enhance with --deployment-target agent_runtime followed by deploy."
-            },
-            {
-                "question": "What is the key advantage of the Accelerated Deployment path over writing one-off imperative deployment scripts?",
-                "options": [
-                    "It bypasses Google Cloud IAM permissions",
-                    "It converts Python agents to C++",
-                    "It generates repeatable Terraform Infrastructure-as-Code, least-privilege IAM, and Cloud Build CI/CD pipelines",
-                    "It makes all agent endpoints public without authentication"
+                    "Because Agent Runtime does not support multi-turn conversations",
+                    "Because Agent Runtime stores sessions in browser cookies only",
+                    "Because Agent Runtime builds your project's Dockerfile and automatically upgrades 'shared://session' in app_utils/services.py to managed VertexAiSessionService when GOOGLE_CLOUD_AGENT_ENGINE_ID is injected",
+                    "Because setting session_type deletes your Dockerfile"
                 ],
                 "correctIndex": 2,
-                "hint": "Accelerated deployment establishes reproducible Terraform IaC and Cloud Build pipelines automatically."
+                "hint": "Review 'Managed Sessions (VertexAiSessionService)' in Module 35 Theory: Agent Runtime manages sessions automatically."
+            },
+            {
+                "question": "Agent Runtime container builds and rollouts typically take 5-10 minutes. Which non-blocking 'agents-cli' workflow starts the deployment, polls completion to write deployment_metadata.json, and tests the live endpoint?",
+                "options": [
+                    "Start with 'agents-cli deploy --no-wait', poll with 'agents-cli deploy --status' (which writes deployment_metadata.json with agent_directory: 'app'), and test via 'agents-cli run \"...\" --url \"$AGENT_RUNTIME_URL\" --mode adk' (or '--mode a2a')",
+                    "Run 'gcloud run revisions update-traffic' and test over Telnet",
+                    "Kill the terminal after 10 seconds because server-side builds cancel when the CLI exits",
+                    "Manually copy pickle files to Cloud DNS"
+                ],
+                "correctIndex": 0,
+                "hint": "Check Step 3 and Step 4 of Lab 35: '--no-wait' + '--status' + 'agents-cli run --url ... --mode adk|a2a'."
+            },
+            {
+                "question": "Which combination of 'agents-cli' flags enables Agent Identity, outbound Agent Gateway TLS inspection, and Customer-Managed Encryption Keys (CMEK) on Agent Runtime?",
+                "options": [
+                    "Pass '--iap' and '--allow-unauthenticated' to 'gcloud app deploy'",
+                    "Scaffold/enhance with '--agent-gateway' (so the Dockerfile trusts AGENT_GATEWAY_ROOT_CERTIFICATES) and deploy with '--agent-identity', '--agent-gateway-egress <gateway_resource>', and '--key <kms_crypto_key>' (at creation time)",
+                    "Set 'CMEK=true' inside app/agent.py's docstring after deployment",
+                    "Agent Runtime does not support KMS encryption or Agent Gateways"
+                ],
+                "correctIndex": 1,
+                "hint": "Review the Enterprise Security & Governance Controls table in Module 35 Theory."
             }
         ]
     },
     "36": {
         "questions": [
             {
-                "question": "Which official CLI command registers a deployed ADK agent on Agent Runtime with a Gemini Enterprise app using native ':streamQuery' invocation?",
+                "question": "When Module 35's deployment_metadata.json is present in 'support-ops-agent/', how does 'agents-cli publish gemini --gemini-app-id \"$GEMINI_APP_ID\"' register the agent, and how do you debug invocation errors?",
                 "options": [
-                    "uv run adk share --public-internet",
-                    "uvx google-agents-cli publish gemini --registration-type adk --agent-runtime-id <reasoning_engine_id> --gemini-app-id <app_resource_name>",
-                    "gcloud marketplace publish --all-agents",
-                    "kubectl apply -f gemini-catalog.yaml"
+                    "It uploads raw Python source files to Google Drive and logs errors to /var/log/syslog",
+                    "It auto-detects remote_agent_runtime_id and defaults to Mode 1 ('--registration-type adk'), invoking the ReasoningEngine natively via ':streamQuery' ('streaming_agent_run_with_events' in Cloud Logging's 'reasoning_engine_stderr')",
+                    "It converts the agent into a Live '/run_live' voice bot",
+                    "It deletes deployment_metadata.json and requires redeploying to GKE"
                 ],
                 "correctIndex": 1,
-                "hint": "Check the google-agents-cli publish gemini flag reference: --registration-type adk pairs --agent-runtime-id (or auto-detected deployment_metadata.json) with --gemini-app-id."
+                "hint": "Check Mode 1 (ADK Native ':streamQuery' Registration) and the 'streaming_agent_run_with_events' debugging note in Module 36."
             },
             {
-                "question": "How does publishing an agent hosted on Cloud Run or GKE to Gemini Enterprise differ from publishing an ADK agent hosted on Agent Runtime?",
+                "question": "How do you publish Module 32's Python 'support-ops-agent' (where agent_directory is 'app') from Cloud Run to Gemini Enterprise?",
                 "options": [
-                    "Cloud Run and GKE have no reasoning engine resource, so they register via '--registration-type a2a' passing '--agent-card-url' and '--gemini-app-id' (and grant roles/run.servicesInvoker to the Discovery Engine service account)",
-                    "Cloud Run agents cannot be published to Gemini Enterprise under any circumstances",
-                    "GKE agents must use local StdioConnectionParams",
-                    "Agent Runtime only supports unauthenticated HTTP/1.0"
+                    "Grant 'roles/run.servicesInvoker' to 'service-${PROJECT_NUMBER}@gcp-sa-discoveryengine.iam.gserviceaccount.com', then run 'agents-cli publish gemini --registration-type a2a --agent-card-url \"${SERVICE_URL}/a2a/app/.well-known/agent-card.json\" --gemini-app-id \"$GEMINI_APP_ID\"'",
+                    "Pass '--registration-type adk' with the Cloud Run URL as '--agent-runtime-id'",
+                    "Use '/.well-known/agent-card.json' at the root without '/a2a/app' and skip IAM bindings",
+                    "Cloud Run services cannot be registered with Gemini Enterprise"
                 ],
                 "correctIndex": 0,
-                "hint": "Review 'A2A Registration' vs. 'ADK Registration (default on Agent Runtime)' for agents-cli publish gemini."
+                "hint": "Cloud Run requires Discovery Engine invoker IAM plus '--registration-type a2a' pointing to '${SERVICE_URL}/a2a/app/.well-known/agent-card.json'."
             },
             {
-                "question": "Why are Live bidirectional voice agents (`/run_live` bidi streaming) unsupported for registration in the Gemini Enterprise app, and what fleet catalog tracks agents and MCP servers across GCP?",
+                "question": "How does Google Cloud Agent Registry ('gcloud agent-registry') handle Module 35's Agent Runtime agent vs. Module 34's Cloud Run MCP server, and why are Live voice agents excluded from Gemini Enterprise?",
                 "options": [
-                    "Because Gemini Enterprise only runs on mobile phones; Docker Hub tracks MCP servers",
-                    "Because Python asyncio is disabled in GCP; PyPI tracks MCP servers",
-                    "Because the Gemini app has no '/run_live' voice transport (register a text-based agent instead), while Google Cloud Agent Registry ('gcloud agent-registry') catalogs fleet-wide agents and MCP servers",
-                    "Because A2A cards only support audio files"
+                    "Both require manual CSV uploads; Live voice agents are supported via '--mode adk_live' in publish gemini",
+                    "Agent Registry only tracks GKE clusters; MCP servers cannot be registered in GCP",
+                    "Agent Runtime agents are auto-registered ('gcloud agent-registry agents list'), external MCP servers register via 'gcloud agent-registry services create ... --mcp-server-spec-type=tool-spec --mcp-server-spec-content=toolspec.json', and Live '/run_live' agents cannot publish because the Gemini app has no '/run_live' transport",
+                    "MCP servers auto-register while Agent Runtime agents must be registered via kubectl"
                 ],
                 "correctIndex": 2,
-                "hint": "Recall the text-based agent prerequisite for Gemini Enterprise registration and Google Cloud Agent Registry fleet governance."
+                "hint": "Compare auto-registered Agent Runtime agents vs. 'toolspec.json' MCP service registration in 'gcloud agent-registry', and recall the text-based agent rule."
             }
         ]
     },

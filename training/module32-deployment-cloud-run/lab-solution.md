@@ -3,72 +3,236 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 32 Solution: Deploying the Customer Support Agent
+# Lab 32 Solution: Deploying Support Ops Agent to Cloud Run with Google Agents CLI
 
 ## Goal
 
-This lab is a procedural tutorial. The primary "solution" is a successfully deployed agent and a public URL.
+This reference solution provides the canonical `app/agent.py` implementation alongside the complete `agents-cli` Cloud Run enhancement, deployment, dual-protocol verification, remote evaluation, and troubleshooting reference for Module 32.
 
-### Expected Output
+---
 
-After running the `uv run adk deploy cloud_run` command and waiting for the build and deployment process to complete, you should see output in your terminal that looks similar to this:
+### `app/agent.py`
 
+```python
+"""
+Enterprise Support Operations Agent — Canonical Part 6 End-to-End Agent (`agents-cli`).
+Built with Google ADK 2.0 (`gemini-3.8-flash`), stateful tools, and built-in A2A serving.
+"""
+
+from typing import Any, Dict
+
+from google.adk.agents import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.apps import App
+from google.adk.models import Gemini
+from google.adk.tools.tool_context import ToolContext
+from google.genai import types
+
+MODEL = "gemini-3.8-flash"
+
+TICKET_DB: Dict[str, Dict[str, Any]] = {
+    "TCK-1042": {
+        "customer": "Acme Cloud Robotics",
+        "tier": "enterprise",
+        "severity": "P1",
+        "status": "open",
+        "summary": "Production payment webhook returning HTTP 503 timeouts in eu-west1.",
+    },
+    "TCK-2088": {
+        "customer": "Northwind Retail",
+        "tier": "standard",
+        "severity": "P3",
+        "status": "investigating",
+        "summary": "CSV invoice export omits localized tax column.",
+    },
+}
+
+SLA_POLICIES: Dict[str, Dict[str, str]] = {
+    "enterprise": {
+        "P1_response": "15 minutes",
+        "P2_response": "1 hour",
+        "P3_response": "4 hours",
+        "dedicated_oncall": "Yes (24/7 SRE pager)",
+    },
+    "standard": {
+        "P1_response": "2 hours",
+        "P2_response": "8 hours",
+        "P3_response": "24 business hours",
+        "dedicated_oncall": "No (business-hours queue)",
+    },
+}
+
+
+def initialize_support_state(callback_context: CallbackContext) -> None:
+    """Initializes default session and user state keys before the first turn."""
+    if "user:customer_tier" not in callback_context.state:
+        callback_context.state["user:customer_tier"] = "standard"
+    if "escalated_tickets" not in callback_context.state:
+        callback_context.state["escalated_tickets"] = []
+
+
+def lookup_ticket(ticket_id: str, tool_context: ToolContext) -> Dict[str, Any]:
+    """Looks up an enterprise support ticket by ID and syncs customer tier into state.
+
+    Args:
+        ticket_id: Ticket identifier such as 'TCK-1042' or 'TCK-2088'.
+    """
+    norm_id = ticket_id.strip().upper()
+    record = TICKET_DB.get(norm_id)
+    if not record:
+        return {
+            "status": "not_found",
+            "ticket_id": norm_id,
+            "available_sample_tickets": sorted(TICKET_DB.keys()),
+            "message": f"Ticket '{norm_id}' was not found.",
+        }
+
+    tool_context.state["user:customer_tier"] = record["tier"]
+    tool_context.state["active_ticket_id"] = norm_id
+    return {"status": "found", "ticket_id": norm_id, **record}
+
+
+def check_sla_policy(tier: str) -> Dict[str, Any]:
+    """Returns response-time SLA targets for a customer tier ('enterprise' or 'standard').
+
+    Args:
+        tier: Customer support tier ('enterprise' or 'standard').
+    """
+    norm_tier = tier.strip().lower()
+    policy = SLA_POLICIES.get(norm_tier)
+    if not policy:
+        return {
+            "status": "error",
+            "message": f"Unknown tier '{tier}'. Valid tiers: enterprise, standard.",
+        }
+    return {"status": "success", "tier": norm_tier, "sla_targets": policy}
+
+
+def escalate_ticket(
+    ticket_id: str,
+    reason: str,
+    tool_context: ToolContext,
+) -> Dict[str, Any]:
+    """Escalates a high-severity support ticket to the incident engineering queue.
+
+    Args:
+        ticket_id: Ticket identifier to escalate (e.g., 'TCK-1042').
+        reason: Concise technical justification for the escalation.
+    """
+    norm_id = ticket_id.strip().upper()
+    if norm_id not in TICKET_DB:
+        return {"status": "error", "message": f"Cannot escalate unknown ticket '{norm_id}'."}
+
+    escalated = list(tool_context.state.get("escalated_tickets", []))
+    if norm_id not in escalated:
+        escalated.append(norm_id)
+    tool_context.state["escalated_tickets"] = escalated
+
+    tier = tool_context.state.get("user:customer_tier", TICKET_DB[norm_id]["tier"])
+    queue = "24/7 P1 SRE Oncall" if tier == "enterprise" else "Tier-2 Engineering Queue"
+    return {
+        "status": "escalated",
+        "ticket_id": norm_id,
+        "assigned_queue": queue,
+        "reason": reason.strip(),
+        "session_escalated_tickets": escalated,
+    }
+
+
+# Keep name="support_ops_agent" in sync with root_agent_name in agents-cli-manifest.yaml
+root_agent = Agent(
+    name="support_ops_agent",
+    model=Gemini(
+        model=MODEL,
+        retry_options=types.HttpRetryOptions(attempts=3),
+    ),
+    before_agent_callback=initialize_support_state,
+    instruction=(
+        "You are the Support Operations Agent (active customer tier: {user:customer_tier?}).\n"
+        "Follow this exact operational workflow:\n"
+        "1. When given a ticket ID, ALWAYS call `lookup_ticket` first.\n"
+        "2. Call `check_sla_policy` for the ticket's customer tier so your answer cites exact SLA response times.\n"
+        "3. If a ticket has P1 severity OR the user requests escalation, call `escalate_ticket` with a concise technical reason.\n"
+        "4. Summarize the ticket status, applicable SLA target, and any escalation queue clearly."
+    ),
+    tools=[lookup_ticket, check_sla_policy, escalate_ticket],
+)
+
+# CRITICAL for agents-cli: App `name` MUST match `agent_directory: "app"` in agents-cli-manifest.yaml
+app = App(
+    root_agent=root_agent,
+    name="app",
+)
 ```
-...
-✓ Deploying new service... Done.
-  ✓ Creating new revision...
-  ✓ Routing traffic...
-  ✓ Setting IAM Policy...
-Done.
-Service [customer_support_cloud] revision [customer_support_cloud-00001-...] has been deployed and is serving 100 percent of traffic.
-Service URL: https://customer_support_cloud-xxxxxxxxxx-uc.a.run.app
+
+---
+
+### Complete End-to-End Cloud Run Commands (Steps 1–4)
+
+```shell
+# Step 1: Fast-bootstrap (if not reusing Module 31 directory)
+agents-cli scaffold create support-ops-agent --agent adk --prototype --agent-guidance-filename GEMINI.md
+curl -fsSL https://mauripsale.github.io/doc-adk-training/samples/part6/agent.py -o support-ops-agent/app/agent.py
+curl -fsSL https://mauripsale.github.io/doc-adk-training/samples/part6/basic-dataset.json -o support-ops-agent/tests/eval/datasets/basic-dataset.json
+cd support-ops-agent
+
+# Step 2: Enhance in place for Cloud Run
+export GOOGLE_CLOUD_PROJECT=YOUR_PROJECT_ID
+export DEPLOY_REGION=us-central1
+
+agents-cli scaffold enhance . \
+  --deployment-target cloud_run \
+  --cicd-runner github_actions \
+  --region "$DEPLOY_REGION"
+agents-cli install
+
+# Step 3: Dry-run preview & live deploy
+agents-cli deploy \
+  --project "$GOOGLE_CLOUD_PROJECT" \
+  --region "$DEPLOY_REGION" \
+  --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_LOCATION=global" \
+  --no-confirm-project \
+  --dry-run
+
+agents-cli deploy \
+  --project "$GOOGLE_CLOUD_PROJECT" \
+  --region "$DEPLOY_REGION" \
+  --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_LOCATION=global" \
+  --no-confirm-project
+
+# Step 4: Live A2A test, ADK SSE test, and remote evaluation
+SERVICE_URL=$(gcloud run services describe support-ops-agent \
+  --region="$DEPLOY_REGION" \
+  --project="$GOOGLE_CLOUD_PROJECT" \
+  --format='value(status.url)')
+
+agents-cli run "Investigate ticket TCK-1042 and check SLA." --url "$SERVICE_URL" --mode a2a
+agents-cli run "Check ticket TCK-2088." --url "$SERVICE_URL" --mode adk --app-name app
+agents-cli eval generate --url "$SERVICE_URL" --app-name app && agents-cli eval grade
 ```
 
-The most important part is the **Service URL**.
+---
 
-### Expected Behavior
+### Troubleshooting Common Cloud Run Errors
 
-1.  When you open the **Service URL** in your browser, you should see the ADK Developer UI, identical to the one you have been using locally.
+* **`404 NOT_FOUND` calling `gemini-3.8-flash` at runtime:**
+  * **Cause:** `GOOGLE_CLOUD_LOCATION` defaulted to `us-central1` instead of `global`.
+  * **Fix:** Redeploy with `--env-vars "GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_LOCATION=global"`.
+* **`403 Forbidden` when testing with raw `curl`:**
+  * **Cause:** Cloud Run services deployed by `agents-cli` require IAM authentication (`roles/run.invoker`) by default.
+  * **Fix:** Test via `agents-cli run --url "$SERVICE_URL" --mode a2a` (which attaches credentials automatically) or pass `-H "Authorization: Bearer $(gcloud auth print-identity-token)"` to `curl`.
+* **`PERMISSION_DENIED` on Cloud Build or Artifact Registry:**
+  * **Fix:** Ensure `run.googleapis.com`, `cloudbuild.googleapis.com`, `artifactregistry.googleapis.com`, and `aiplatform.googleapis.com` are enabled and your account holds `Editor`/`Owner` or Cloud Run/Cloud Build admin roles.
+* **Inspecting container crash logs:**
+  * **Fix:** Run `gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=support-ops-agent" --project="$GOOGLE_CLOUD_PROJECT" --limit=50 --format="table(timestamp,severity,textPayload)"`.
 
-2.  When you interact with the agent, it should correctly route your requests to the appropriate sub-agent:
-    *   **You:** "I have a question about my invoice."
-    *   **Agent (billing_agent):** "I can help with that. What is your question about your invoice?"
-    *   **You:** "My app is not loading."
-    *   **Agent (tech_support_agent):** "I understand you're having trouble with the app. Can you tell me what error message you are seeing?"
-
-### Troubleshooting Common Errors
-
-*   **`PERMISSION_DENIED` on `iam.googleapis.com`:**
-    *   **Problem:** Your user account does not have permission to set IAM policies, which is required to make the Cloud Run service public.
-    *   **Solution:** Ensure your Google Cloud user account has the `Owner` or `Editor` role in the project.
-
-*   **`PERMISSION_DENIED` on `cloudbuild.googleapis.com` or `artifactregistry.googleapis.com`:**
-    *   **Problem:** The Cloud Build service account, which builds the container, doesn't have permission to push to Artifact Registry or deploy to Cloud Run. The `uv run adk deploy` command attempts to set these permissions automatically, but may fail if your user account lacks sufficient privileges.
-    *   **Solution:** Manually grant the `Cloud Build Service Account` the `Artifact Registry Writer` and `Cloud Run Admin` roles in the IAM section of the Google Cloud Console.
-
-*   **`404 NOT_FOUND` when invoking `gemini-3.8-flash` in the deployed service:**
-    *   **Problem:** The Cloud Run container has `GOOGLE_CLOUD_LOCATION=us-central1` instead of `global`. When `--region` is passed to `adk deploy cloud_run`, it defaults `GOOGLE_CLOUD_LOCATION` to the Cloud Run infrastructure region unless explicitly overridden.
-    *   **Solution:** Re-run the deploy command with `--env GOOGLE_CLOUD_LOCATION=global` (or update the running service with `gcloud run services update SERVICE_NAME --region="$DEPLOY_REGION" --update-env-vars="GOOGLE_CLOUD_LOCATION=global"`).
-
-*   **Deployment fails with a generic error:**
-    *   **Solution:** Go to the Google Cloud Console, navigate to "Cloud Build", and look at the build history. Find the failed build and inspect its logs. The logs will provide a detailed error message explaining why the container build failed (e.g., a typo in `requirements.txt`, a syntax error in a Python file, etc.).
+---
 
 ### Self-Reflection Answers
 
-1.  **The `uv run adk deploy cloud_run` command automates many steps. What are these steps, and what would you have to do manually if this command didn't exist?**
-    *   **Answer:** The `uv run adk deploy cloud_run` command automates the entire process of taking your agent from local code to a deployed Cloud Run service. Manually, this would involve:
-        1.  **Containerization:** Writing a `Dockerfile` to package your agent code and its dependencies into a Docker image.
-        2.  **Image Build:** Running `docker build` (or `gcloud builds submit`) to create the container image.
-        3.  **Image Push:** Pushing the container image to a container registry (like Google Artifact Registry or Docker Hub) using `docker push` or `gcloud artifacts docker push`.
-        4.  **Service Creation/Update:** Creating or updating a Cloud Run service, specifying the container image, environment variables, region, and IAM permissions, typically using `gcloud run deploy`.
-        The `uv run adk deploy` command abstracts away all these complex, multi-step cloud infrastructure commands.
-
-2.  **We deployed with the `--with_ui` flag. In a real production scenario where your agent is being called by another application (not a human in a browser), why would you omit this flag?**
-    *   **Answer:** In a headless production scenario, the `--with_ui` flag should be omitted for two main reasons:
-        1.  **Security:** The ADK Dev UI exposes internal agent details like the full instruction, tool definitions, and detailed execution traces. Exposing this information publicly can be a security risk, potentially revealing sensitive business logic or internal workings that should not be accessible to external applications or unauthorized users.
-        2.  **Efficiency/Cost:** The UI adds unnecessary overhead to the container image size and consumes additional memory and CPU resources when running. Omitting it results in a smaller, faster, and more cost-effective deployment, as the agent only needs to serve its API endpoint without the additional burden of rendering a UI.
-
-3.  **Cloud Run can scale down to zero instances. What are the cost and performance implications of this feature for an agent that receives infrequent traffic?**
-    *   **Answer:**
-        *   **Cost Implications:** Scaling to zero is highly cost-effective for agents with infrequent traffic because you are **not billed for idle time**. When no requests are being processed, Cloud Run gracefully shuts down all instances, and you only pay for the compute resources consumed *during active request processing*. This makes it very economical for agents that are used sporadically.
-        *   **Performance Implications:** The trade-off for scaling to zero is **"cold start" latency**. The very first request to a service that has scaled down to zero instances will experience a higher latency as Cloud Run needs to provision and initialize a new container instance. This can take several seconds. Subsequent requests to the active instance(s) will be fast, but if traffic remains low and instances scale down again, the cold start penalty will recur.
+1. **Why does `agents-cli deploy` default to `--no-allow-unauthenticated` on Cloud Run, and how would you expose a browser-accessible internal tool safely to employees without writing custom login code?**
+   * **Answer:** Leaving an LLM-backed endpoint unauthenticated on the public internet risks quota exhaustion (denial-of-wallet) and unauthorized tool execution. Requiring Cloud Run IAM authentication protects machine-to-machine callers, while passing `agents-cli deploy --iap` enables **Identity-Aware Proxy (IAP)** so authorized Google Workspace users can sign in through Google's zero-trust proxy with zero application auth code.
+2. **If load testing with `tests/load_test/load_test.py` triggers container OOM restarts when you raise `--concurrency` from `8` to `32`, which flag should you scale alongside `--concurrency` and why?**
+   * **Answer:** Scale **`--memory`** (e.g., `--memory 16Gi` alongside `--cpu 4 --concurrency 32`). Because Uvicorn serves concurrent requests inside a single async Python process while awaiting Gemini responses, every in-flight request holds its conversation state, tool outputs, and streaming buffers in memory simultaneously.
+3. **What happens to active conversation history in `support-ops-agent` when a Cloud Run instance scales down to zero under the default `in_memory` session configuration, and which `scaffold enhance` flag solves this for stateful production apps?**
+   * **Answer:** With `in_memory` sessions, scaling to zero (or landing on a different container replica) loses prior session state. Passing `--session-type cloud_sql` (managed PostgreSQL 15 with IAM authentication) or `--session-type agent_platform_sessions` to `agents-cli scaffold enhance` persists sessions durably across container restarts and horizontal autoscaling.

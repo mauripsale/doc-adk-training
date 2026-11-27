@@ -224,21 +224,21 @@ RUBRICS: Dict[str, ModuleRubric] = {
     ),
     "31": ModuleRubric(
         module_id="31",
-        title="Production Deployment Strategies",
-        theory_ref="Module 31 Theory -> 'Serverless vs Containerized Workloads'",
-        has_code=False,
+        title="Enterprise AgentOps Lifecycle with Google Agents CLI",
+        required_imports=["google.adk"],
+        theory_ref="Module 31 Theory -> 'The End-to-End Agent Lifecycle with google-agents-cli'",
     ),
     "32": ModuleRubric(
         module_id="32",
-        title="Deploying Agents to Google Cloud Run",
+        title="Deploying Agents to Google Cloud Run with agents-cli",
+        required_imports=["google.adk"],
         theory_ref="Module 32 Theory -> 'Containerizing ADK Services for Cloud Run'",
-        has_code=False,
     ),
     "33": ModuleRubric(
         module_id="33",
-        title="Enterprise Deployment on Google Kubernetes Engine (GKE)",
+        title="Enterprise Deployment on GKE Autopilot with agents-cli",
+        required_imports=["google.adk"],
         theory_ref="Module 33 Theory -> 'Kubernetes Deployment Topology'",
-        has_code=False,
     ),
     "34": ModuleRubric(
         module_id="34",

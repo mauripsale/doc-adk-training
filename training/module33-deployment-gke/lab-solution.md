@@ -3,13 +3,169 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 33 Solution: Manually Deploying an Agent to GKE
+# Lab 33 Solution: Deploying Enterprise Agents to GKE Autopilot
 
 ## Goal
 
-This solution provides the complete `support_agent` Python package, container `Dockerfile`, and expected outputs for deploying the Customer Support agent on a GKE Autopilot cluster.
+This solution provides the complete runnable Python code for **Part 1** (`support-ops-gke/app/agent.py` deployed via `agents-cli --deployment-target gke`) and **Part 2** (`gke_support_agent/support_agent/` deployed manually via `Dockerfile` + `deployment.yaml` + `kubectl`), along with expected outputs and troubleshooting guidance.
 
-### Agent Package Solution
+### Part 1 Solution: `support-ops-gke/app/agent.py` (`agents-cli` Golden Path)
+
+```python
+"""
+Enterprise Support Operations Agent — Canonical Part 6 End-to-End Agent (`agents-cli`).
+Built with Google ADK 2.0 (`gemini-3.8-flash`), stateful tools, and built-in A2A serving.
+"""
+
+from typing import Any, Dict
+
+from google.adk.agents import Agent
+from google.adk.agents.callback_context import CallbackContext
+from google.adk.apps import App
+from google.adk.models import Gemini
+from google.adk.tools.tool_context import ToolContext
+from google.genai import types
+
+MODEL = "gemini-3.8-flash"
+
+TICKET_DB: Dict[str, Dict[str, Any]] = {
+    "TCK-1042": {
+        "customer": "Acme Cloud Robotics",
+        "tier": "enterprise",
+        "severity": "P1",
+        "status": "open",
+        "summary": "Production payment webhook returning HTTP 503 timeouts in eu-west1.",
+    },
+    "TCK-2088": {
+        "customer": "Northwind Retail",
+        "tier": "standard",
+        "severity": "P3",
+        "status": "investigating",
+        "summary": "CSV invoice export omits localized tax column.",
+    },
+}
+
+SLA_POLICIES: Dict[str, Dict[str, str]] = {
+    "enterprise": {
+        "P1_response": "15 minutes",
+        "P2_response": "1 hour",
+        "P3_response": "4 hours",
+        "dedicated_oncall": "Yes (24/7 SRE pager)",
+    },
+    "standard": {
+        "P1_response": "2 hours",
+        "P2_response": "8 hours",
+        "P3_response": "24 business hours",
+        "dedicated_oncall": "No (business-hours queue)",
+    },
+}
+
+
+def initialize_support_state(callback_context: CallbackContext) -> None:
+    """Initializes default session and user state keys before the first turn."""
+    if "user:customer_tier" not in callback_context.state:
+        callback_context.state["user:customer_tier"] = "standard"
+    if "escalated_tickets" not in callback_context.state:
+        callback_context.state["escalated_tickets"] = []
+
+
+def lookup_ticket(ticket_id: str, tool_context: ToolContext) -> Dict[str, Any]:
+    """Looks up an enterprise support ticket by ID and syncs customer tier into state.
+
+    Args:
+        ticket_id: Ticket identifier such as 'TCK-1042' or 'TCK-2088'.
+    """
+    norm_id = ticket_id.strip().upper()
+    record = TICKET_DB.get(norm_id)
+    if not record:
+        return {
+            "status": "not_found",
+            "ticket_id": norm_id,
+            "available_sample_tickets": sorted(TICKET_DB.keys()),
+            "message": f"Ticket '{norm_id}' was not found.",
+        }
+
+    tool_context.state["user:customer_tier"] = record["tier"]
+    tool_context.state["active_ticket_id"] = norm_id
+    return {"status": "found", "ticket_id": norm_id, **record}
+
+
+def check_sla_policy(tier: str) -> Dict[str, Any]:
+    """Returns response-time SLA targets for a customer tier ('enterprise' or 'standard').
+
+    Args:
+        tier: Customer support tier ('enterprise' or 'standard').
+    """
+    norm_tier = tier.strip().lower()
+    policy = SLA_POLICIES.get(norm_tier)
+    if not policy:
+        return {
+            "status": "error",
+            "message": f"Unknown tier '{tier}'. Valid tiers: enterprise, standard.",
+        }
+    return {"status": "success", "tier": norm_tier, "sla_targets": policy}
+
+
+def escalate_ticket(
+    ticket_id: str,
+    reason: str,
+    tool_context: ToolContext,
+) -> Dict[str, Any]:
+    """Escalates a high-severity support ticket to the incident engineering queue.
+
+    Args:
+        ticket_id: Ticket identifier to escalate (e.g., 'TCK-1042').
+        reason: Concise technical justification for the escalation.
+    """
+    norm_id = ticket_id.strip().upper()
+    if norm_id not in TICKET_DB:
+        return {"status": "error", "message": f"Cannot escalate unknown ticket '{norm_id}'."}
+
+    escalated = list(tool_context.state.get("escalated_tickets", []))
+    if norm_id not in escalated:
+        escalated.append(norm_id)
+    tool_context.state["escalated_tickets"] = escalated
+
+    tier = tool_context.state.get("user:customer_tier", TICKET_DB[norm_id]["tier"])
+    queue = "24/7 P1 SRE Oncall" if tier == "enterprise" else "Tier-2 Engineering Queue"
+    return {
+        "status": "escalated",
+        "ticket_id": norm_id,
+        "assigned_queue": queue,
+        "reason": reason.strip(),
+        "session_escalated_tickets": escalated,
+    }
+
+
+# Keep name="support_ops_agent" in sync with root_agent_name in agents-cli-manifest.yaml
+root_agent = Agent(
+    name="support_ops_agent",
+    model=Gemini(
+        model=MODEL,
+        retry_options=types.HttpRetryOptions(attempts=3),
+    ),
+    before_agent_callback=initialize_support_state,
+    instruction=(
+        "You are the Support Operations Agent (active customer tier: {user:customer_tier?}).\n"
+        "Follow this exact operational workflow:\n"
+        "1. When given a ticket ID, ALWAYS call `lookup_ticket` first.\n"
+        "2. Call `check_sla_policy` for the ticket's customer tier so your answer cites exact SLA response times.\n"
+        "3. If a ticket has P1 severity OR the user requests escalation, call `escalate_ticket` with a concise technical reason.\n"
+        "4. Summarize the ticket status, applicable SLA target, and any escalation queue clearly."
+    ),
+    tools=[lookup_ticket, check_sla_policy, escalate_ticket],
+)
+
+# CRITICAL for agents-cli: App `name` MUST match `agent_directory: "app"` in agents-cli-manifest.yaml
+app = App(
+    root_agent=root_agent,
+    name="app",
+)
+```
+
+---
+
+### Part 2 Solution: Raw Manual GKE Package (`gke_support_agent/`)
 
 #### `support_agent/__init__.py`
 
@@ -64,59 +220,37 @@ CMD ["adk", "api_server", "/app", "--host", "0.0.0.0", "--port", "8080"]
 
 ### Expected Outputs
 
-#### `gcloud builds submit`
-After a successful build, the output will confirm the image was created and pushed, showing the image name and creation time.
+#### Part 1: `agents-cli run` Against Live GKE Service
+*   **A2A Mode (`--mode a2a`):** Resolves the agent card from `/a2a/app`, invokes `lookup_ticket("TCK-1042")`, `check_sla_policy("enterprise")`, and `escalate_ticket("TCK-1042", ...)`, and reports the `15 minutes` P1 SLA target and `24/7 P1 SRE Oncall` escalation queue.
+*   **ADK SSE Mode (`--mode adk --app-name app`):** Creates an ADK session under `/apps/app/...`, streams SSE events from `/run_sse`, and returns the `enterprise` SLA policy targets (`15 minutes` P1, `1 hour` P2, `4 hours` P3).
 
-#### `kubectl apply`
-When you apply the manifest, you should see a confirmation that the deployment and service were created:
+#### Part 2: `kubectl apply` & `kubectl get service --watch`
 ```
 deployment.apps/support-agent-deployment created
 service/support-agent-service created
 ```
-
-#### `kubectl get service --watch`
-This command will first show `<pending>` under the `EXTERNAL-IP` column. After a few minutes, GKE will provision a load balancer and the output will change to show a public IP address:
 ```
 NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)        AGE
 support-agent-service   LoadBalancer   10.44.192.123   34.123.45.67    80:30123/TCP   2m30s
 ```
-The `EXTERNAL-IP` is the public address of your agent.
-
-### Expected Behavior
-
-Navigating to `http://<EXTERNAL-IP>` in a browser returns a bare `{"detail":"Not Found"}` -- unlike Module 32's `--with_ui` Cloud Run deployment, this container's `Dockerfile` runs a headless `adk api_server` with no UI attached, which is exactly the point for a production deployment (see this module's Key Takeaways). Interact with the Customer Support system via `curl` instead: create a session against `/apps/support_agent/users/<id>/sessions/<id>`, then send a message via `/run_sse`. A billing question routes to `billing_agent`, a technical question routes to `tech_support_agent` — but this time it's running on your own GKE cluster instead of Cloud Run.
 
 ### Troubleshooting Common GKE Errors
 
-*   **`kubectl apply` fails with `metadata.name: Invalid value ... a lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-'`:**
-    *   **Problem:** Kubernetes resource names (`metadata.name` on a `Deployment` or `Service`) cannot contain underscores — only lowercase letters, numbers, and hyphens. This is why `deployment.yaml` uses `support-agent-deployment`, not `support_agent-deployment`, even though the agent's own name (`router_agent`) and the container image tag (`support-agent:v1`) can use underscores freely — those live in different naming systems with different rules.
-    *   **Solution:** Use hyphens, not underscores, in any `metadata.name` field.
-
-*   **`ImagePullBackOff` or `ErrImagePull`:**
-    *   **Problem:** The GKE cluster cannot pull the container image from Artifact Registry. This is almost always a permissions issue.
-    *   **Solution:** Ensure the Artifact Registry API is enabled. Verify that the GKE node service account has the `Artifact Registry Reader` role. GKE Autopilot clusters usually handle this automatically, but Standard clusters may require manual configuration. Also, double-check that the image path in your `deployment.yaml` is exactly correct.
-
-*   **`CrashLoopBackOff`:**
-    *   **Problem:** The container is starting and then immediately crashing. This is an error within the container itself.
-    *   **Solution:** Use `kubectl logs deployment/support-agent-deployment` to view the logs from the crashing pod. The logs will show the error message from the `adk api_server` command (e.g., a missing environment variable, a syntax error in an agent file, or — a common one — the agent directory argument not matching where the files actually landed inside the image).
-
-*   **Service IP remains `<pending>`:**
-    *   **Problem:** GKE is having trouble creating the external load balancer. This can happen due to project quota issues or incorrect network configurations.
-    *   **Solution:** Use `kubectl describe service support-agent-service` to see the events associated with the service. The "Events" section at the bottom will usually contain a detailed error message from the cloud load balancer controller explaining the problem.
+*   **Passing `--cpu` / `--memory` / `--concurrency` on `agents-cli deploy` fails:**
+    *   **Cause:** `agents-cli` rejects imperative container sizing flags for GKE targets.
+    *   **Solution:** Edit pod resource requests/limits and `kubernetes_horizontal_pod_autoscaler_v2` settings declaratively in `deployment/terraform/single-project/service.tf` (and `cicd/service.tf`).
+*   **`kubectl apply` fails with `metadata.name: Invalid value ... RFC 1123 label`:**
+    *   **Cause:** Kubernetes resource names cannot contain underscores (`_`), even when your Python package (`support_agent`) uses underscores.
+    *   **Solution:** Always use hyphens (`support-agent-deployment`, `support-agent-service`) in Kubernetes `metadata.name` fields.
+*   **`CrashLoopBackOff` or `404 NOT_FOUND` on `gemini-3.8-flash`:**
+    *   **Cause:** Missing `GOOGLE_GENAI_USE_ENTERPRISE=1` or `GOOGLE_CLOUD_LOCATION=global` in the pod environment, or mismatched `AGENTS_DIR` inside `Dockerfile`.
+    *   **Solution:** Inspect pod logs with `kubectl logs deployment/<deployment-name>` and ensure `GOOGLE_GENAI_USE_ENTERPRISE="1"` and `GOOGLE_CLOUD_LOCATION="global"` are set.
 
 ### Self-Reflection Answers
 
-1.  **This lab was much more complex than the Cloud Run deployment. What are the key trade-offs you are making (in terms of complexity vs. control) when choosing GKE over Cloud Run?**
-    *   **Answer:** The primary trade-off is **Control vs. Complexity**. GKE offers maximum control over underlying infrastructure (nodes, networking, specific hardware like GPUs), fine-grained security policies, and custom configurations. This flexibility comes at the cost of significantly higher operational complexity, requiring knowledge of Kubernetes concepts (Pods, Deployments, Services, etc.), YAML manifests, and `kubectl`. Cloud Run, conversely, prioritizes simplicity and ease of use, abstracting away most infrastructure concerns but offering less granular control. For simple, stateless agents, Cloud Run's low complexity and rapid deployment are highly advantageous; for complex microservices with specific infrastructure needs, GKE's control outweighs its complexity. Note that we deployed the *exact same agent* both times — the trade-off is purely about the platform, not the application.
-
-2.  **In the `deployment.yaml` file, what is the purpose of the `Deployment` object versus the `Service` object? Why do you need both?**
-    *   **Answer:**
-        *   **`Deployment`:** The `Deployment` object is responsible for managing the *execution* of your application. It defines which container image to run, how many replicas (Pods) to maintain, and ensures that the desired number of agent instances are always running. It handles updates, rollbacks, and self-healing in case of failures.
-        *   **`Service`:** The `Service` object is responsible for managing *access* to your application. It creates a stable network endpoint (like a public IP address) and a load balancer, routing external and internal traffic to the ephemeral Pods managed by the Deployment. Pods are transient and their IPs can change, so the Service provides a consistent way to reach the application.
-        *   **Why both?** You need both because the Deployment ensures your agent is running reliably, while the Service ensures that clients can consistently *find and connect* to your running agent instances, abstracting away the dynamic nature of individual Pods.
-
-3.  **The `Dockerfile` uses `CMD ["adk", "api_server", ...]`. Why is it important to use `api_server` here instead of `web` for a production deployment?**
-    *   **Answer:** For a production deployment to GKE (or any backend service), it is critical to use `adk api_server` instead of `adk web`. The `api_server` command exposes a pure, headless REST API for programmatic consumption by other applications. In contrast, `adk web` includes the ADK Developer UI, which:
-        *   **Security Risk:** Exposes sensitive internal information (e.g., agent's full instruction, tool definitions, detailed execution traces) that should not be publicly accessible in production.
-        *   **Resource Overhead:** Adds unnecessary size to the container image and consumes additional memory and CPU resources, increasing operational costs for a service that will not be interacted with via a UI.
-        Using `adk api_server` results in a leaner, more secure, and more efficient production deployment tailored for backend-to-backend communication.
+1.  **Why does `agents-cli deploy` reject `--cpu`, `--memory`, and `--concurrency` flags when `--deployment-target gke` is configured, whereas Cloud Run and Agent Runtime accept them?**
+    *   **Answer:** On GKE, pod resource requests/limits and replica scaling (`HorizontalPodAutoscaler` + `PodDisruptionBudget`) are governed declaratively by Kubernetes resources inside `deployment/terraform/`. Allowing ad-hoc CLI sizing flags during image deployment would create configuration drift between live Kubernetes cluster state and Terraform IaC, and could conflict with HPA target utilization metrics.
+2.  **How does GKE Workload Identity (`app_sa` in `iam.tf`) eliminate the security risks of static service account JSON keys?**
+    *   **Answer:** Workload Identity binds a Kubernetes `ServiceAccount` directly to a GCP IAM Service Account (`app_sa`) using `roles/iam.workloadIdentityUser`. GKE's metadata server automatically issues short-lived, auto-rotating OAuth credentials to pods running under that Kubernetes `ServiceAccount`, completely eliminating downloadable JSON key files that could be leaked or committed to Git.
+3.  **In Part 2's `deployment.yaml`, what is the distinct role of the `Deployment` object versus the `Service` object, and why is `adk api_server` used in the `Dockerfile` instead of `adk web`?**
+    *   **Answer:** The `Deployment` manages pod execution, desired replica counts, self-healing, and rolling updates/rollbacks, whereas the `Service` provides a stable IP and load balancer across ephemeral pod IPs. `adk api_server` exposes a lean, headless REST/SSE API suitable for production backends, whereas `adk web` bundles the developer debug UI — exposing internal agent prompts, tool definitions, and execution traces while consuming extra memory and CPU.

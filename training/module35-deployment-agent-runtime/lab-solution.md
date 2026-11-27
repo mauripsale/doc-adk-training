@@ -3,32 +3,73 @@ sidebar_position: 3
 title: "Lab Solution"
 ---
 
-# Lab 35 Solution: Deploying an Agent to Agent Runtime
+# Lab 35 Solution: Deploying `support-ops-agent` to Agent Runtime
 
 ## Goal
 
-This lab is a procedural tutorial. The solution for both parts is a successfully deployed Agent Runtime instance running the Customer Support system.
+This solution provides the complete verified `agents-cli` commands for Part 1 (deploying and testing our stateful `support-ops-agent` on Agent Runtime) and the complete Python SDK scripts (`support_agent/agent.py`, `deploy.py`, `interact.py`, `local_test.py`, and `cleanup.py`) for Part 2.
 
 ---
 
-### Part 1: Accelerated Deployment Solution
+### Part 1: Accelerated Deployment of `support-ops-agent` (`agents-cli`)
 
-After running `uvx google-agents-cli scaffold enhance . --adk -d agent_runtime --agent-directory support_agent --region "$DEPLOY_REGION"` followed by `uvx google-agents-cli deploy --project "$GOOGLE_CLOUD_PROJECT" --region "$DEPLOY_REGION" --env-vars "GOOGLE_CLOUD_LOCATION=global" --no-confirm-project` (or `--no-wait` + `--status`), a successful completion is the primary indicator of success.
+#### 1. Bootstrap (or Reuse), Enhance & Install
+```shell
+# Fast-bootstrap if not reusing support-ops-agent/ from Module 31/32
+agents-cli scaffold create support-ops-agent --agent adk --prototype --agent-guidance-filename GEMINI.md
+curl -fsSL https://mauripsale.github.io/doc-adk-training/samples/part6/agent.py -o support-ops-agent/app/agent.py
+cd support-ops-agent
 
-**Expected Outcome:**
-*   The `uvx google-agents-cli deploy` command completes without errors and writes `deployment_metadata.json` containing `remote_agent_runtime_id`.
-*   A new agent appears in **Agent Platform -> Agent Runtime** in the Google Cloud Console (`us-central1`).
-*   `deployment_metadata.json` is ready to be consumed directly by `uvx google-agents-cli publish gemini` in Module 36.
+# Enhance for Agent Runtime (do NOT set --session-type; Agent Runtime wires VertexAiSessionService automatically)
+agents-cli scaffold enhance . \
+  --deployment-target agent_runtime \
+  --cicd-runner github_actions \
+  --region "$DEPLOY_REGION"
+
+agents-cli install
+
+# Quick local smoke test
+agents-cli run "Investigate ticket TCK-1042 and escalate if P1."
+```
+
+#### 2. Deploy with Region Separation & Async `--no-wait` / `--status`
+```shell
+# Start non-blocking rollout (container in us-central1, Gemini 3.8 Flash on global endpoint)
+agents-cli deploy \
+  --project "$GOOGLE_CLOUD_PROJECT" \
+  --region "$DEPLOY_REGION" \
+  --env-vars "GOOGLE_GENAI_USE_ENTERPRISE=1,GOOGLE_CLOUD_LOCATION=global" \
+  --no-confirm-project \
+  --no-wait
+
+# Poll rollout progress; writes deployment_metadata.json ("agent_directory": "app") when complete
+agents-cli deploy --status
+
+# Audit active Agent Runtime deployments
+agents-cli deploy --list --project "$GOOGLE_CLOUD_PROJECT" --region "$DEPLOY_REGION"
+```
+
+#### 3. Live Cloud Verification via `agents-cli run --url` (`adk` & `a2a` Modes)
+```shell
+export AGENT_RUNTIME_ID=$(python3 -c 'import json; print(json.load(open("deployment_metadata.json"))["remote_agent_runtime_id"])')
+export AGENT_RUNTIME_URL="https://${DEPLOY_REGION}-aiplatform.googleapis.com/v1/${AGENT_RUNTIME_ID}"
+
+# Mode 1: Native ADK :streamQuery contract
+agents-cli run "Investigate ticket TCK-1042 and escalate if P1." \
+  --url "$AGENT_RUNTIME_URL" \
+  --mode adk
+
+# Mode 2: A2A JSON-RPC contract via Agent Runtime's /api HTTP passthrough
+agents-cli run "Check ticket TCK-2088 and summarize its SLA response target." \
+  --url "$AGENT_RUNTIME_URL" \
+  --mode a2a
+```
 
 ---
 
-### Part 2: Standard Deployment Solution
-
-This section contains the complete code for `support_agent/agent.py`, `deploy.py`, `interact.py`, and `local_test.py` used in the manual deployment part of the lab.
+### Part 2: Under the Hood — Programmatic Python SDK Solution
 
 #### `support_agent/agent.py`
-
-This file defines the same Customer Support system as Modules 32 and 33, but as Python `Agent` objects instead of YAML config — required because `deploy.py` needs to `import` `root_agent` directly.
 
 ```python
 from google.adk.agents import Agent
@@ -63,7 +104,7 @@ Your job is to understand the user's request and delegate it to the correct spec
 
 #### `deploy.py`
 
-This script initializes Vertex AI in `DEPLOY_REGION = "us-central1"` for the Agent Runtime control plane while injecting `GOOGLE_CLOUD_LOCATION=global` into the runtime container so `gemini-3.8-flash` resolves on the global endpoint (Agent Runtime automatically injects `GOOGLE_CLOUD_PROJECT`).
+This script initializes Vertex AI in `DEPLOY_REGION = "us-central1"` for the Agent Runtime control plane while injecting `GOOGLE_GENAI_USE_ENTERPRISE=1` and `GOOGLE_CLOUD_LOCATION=global` into the runtime container so `gemini-3.8-flash` resolves on the global endpoint (Agent Runtime injects `GOOGLE_CLOUD_PROJECT` automatically).
 
 ```python
 import vertexai
@@ -103,7 +144,7 @@ if __name__ == "__main__":
     main()
 ```
 
-> **Note:** Earlier versions of this lab passed `enable_tracing=True` to `AdkApp`. That parameter is deprecated — telemetry is controlled via the `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` environment variable or the Cloud Console toggle instead.
+> **Note:** Earlier versions of `AdkApp` accepted `enable_tracing=True`. That parameter is deprecated — telemetry is controlled via the `GOOGLE_CLOUD_AGENT_ENGINE_ENABLE_TELEMETRY` environment variable or the Cloud Console toggle.
 
 #### `interact.py`
 
@@ -154,7 +195,7 @@ if __name__ == "__main__":
 
 #### `local_test.py` (Optional)
 
-This script shows the code for the optional local testing step. Note that `async_create_session` returns a plain `dict`, not an object — access the session ID with `session["id"]`, not `session.id`.
+Note that `async_create_session` returns a plain `dict`, so access the session ID with `session["id"]`.
 
 ```python
 import asyncio
@@ -178,13 +219,10 @@ async def main():
     ):
         events.append(event)
 
-    # The full event stream shows the agent's thought process, including
-    # which specialist it delegated to
     print("\n--- Full Event Stream ---")
     for event in events:
         print(event)
 
-    # For quick tests, you can extract just the final text response
     final_text_responses = [
         e for e in events
         if e.get("content", {}).get("parts", [{}])[0].get("text")
@@ -198,37 +236,41 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### Cleanup Commands
+#### `cleanup.py`
 
-If you are not immediately continuing with the Part 1 Agent Runtime instance in Module 36, delete your deployed Agent Runtime resources and staging bucket when finished:
+Run `cleanup.py` to delete the manual Part 2 Agent Runtime resource (keep Part 1's `support-ops-agent` running until you finish Module 36!).
+
+```python
+import vertexai
+from vertexai import agent_engines
+
+# --- CONFIGURATION ---
+PROJECT_ID = "your-gcp-project-id"
+DEPLOY_REGION = "us-central1"
+AGENT_ENGINE_ID = "YOUR_AGENT_ENGINE_ID"
+
+def main():
+    vertexai.init(project=PROJECT_ID, location=DEPLOY_REGION)
+    print(f"Deleting Agent Runtime resource '{AGENT_ENGINE_ID}'...")
+    agent_engines.delete(AGENT_ENGINE_ID, force=True)
+    print("Agent Runtime resource deleted successfully.")
+
+if __name__ == "__main__":
+    main()
+```
 
 ```shell
-# Delete an Agent Runtime instance via Python one-liner (replace PROJECT_ID and ENGINE_ID)
-uv run python -c "import vertexai; from vertexai import agent_engines; vertexai.init(project='YOUR_PROJECT_ID', location='us-central1'); agent_engines.delete('YOUR_AGENT_ENGINE_ID', force=True)"
-
-# Delete the GCS staging bucket used in Part 2
+# Also remove the Part 2 GCS staging bucket when finished
 gcloud storage rm -r gs://YOUR_UNIQUE_BUCKET_NAME
 ```
 
 ### Self-Reflection Answers
 
-1.  **What are the primary advantages of using the Accelerated Deployment method with the Agents CLI compared to the Standard Deployment method for production use?**
-    *   **Answer:** The Accelerated Deployment method with the Agents CLI is significantly more robust and recommended for production due to several advantages:
-        *   **Infrastructure as Code (IaC):** The Agents CLI generates Terraform configurations, ensuring that your cloud infrastructure is provisioned in a reproducible, auditable, and version-controlled manner. The Standard method requires manual `gcloud` commands or custom scripting for infrastructure.
-        *   **Built-in CI/CD:** The Agents CLI includes pre-configured Cloud Build pipelines for automated testing, building, and deploying. This streamlines development workflows and enforces best practices for continuous integration and delivery.
-        *   **Best Practices:** It incorporates Google Cloud and ADK best practices for security (e.g., IAM roles, service accounts), reliability, and scalability from the start.
-        *   **Reduced Manual Effort & Errors:** It minimizes manual configuration, reducing human error and accelerating time to market compared to the more involved Standard Deployment.
+1.  **Why must you omit or clear custom `session_type` overrides when enhancing `support-ops-agent` for `--deployment-target agent_runtime`?**
+    *   **Answer:** On Agent Runtime, the platform injects `GOOGLE_CLOUD_AGENT_ENGINE_ID` into the container and `app_utils/services.py` automatically upgrades the `shared://session` URI to managed **`VertexAiSessionService`**. Setting a conflicting `session_type` is unnecessary and overridden by Agent Runtime's native session management.
 
-2.  **Agent Runtime is a managed backend. How does this simplify the development of complex clients (e.g., web or mobile applications) that interact with your agent?**
-    *   **Answer:** As a managed backend, Agent Runtime significantly simplifies client development by abstracting away the complexities of server-side operations. This includes:
-        *   **Automatic Scaling & Concurrency:** Clients don't need to worry about the agent's backend scaling to handle thousands of concurrent users. Agent Runtime handles this automatically.
-        *   **Stable API:** It provides a stable and consistent API endpoint that clients (whether web, mobile, or other services) can easily connect to without needing to understand the underlying agent's implementation details.
-        *   **Separation of Concerns:** The client can focus solely on UI/UX, session management, and presenting information, while Agent Runtime handles the heavy lifting of agent orchestration, LLM interaction, tool execution, and state management.
-        *   **Security:** Agent Runtime handles much of the backend security, allowing clients to focus on secure authentication with the managed service rather than managing complex server-side security.
+2.  **How do `agents-cli deploy --no-wait` and `agents-cli deploy --status` protect developer and CI workflows against 5–10 minute container build timeouts, and what file does `--status` write upon completion?**
+    *   **Answer:** `--no-wait` starts the server-side container build and `ReasoningEngine` rollout asynchronously and exits immediately so shells or agentic tool runners never hang or time out. Polling `agents-cli deploy --status` checks the operation server-side and, upon completion, writes **`deployment_metadata.json`** (`remote_agent_runtime_id`, `deployment_target`, `is_a2a`, `agent_directory: "app"`), ready for Module 36's `agents-cli publish gemini`.
 
-3.  **For what scenarios might the Standard Deployment method (using `deploy.py` and the Vertex AI SDK) still be advantageous, even if Accelerated Deployment is generally recommended?**
-    *   **Answer:** While Accelerated Deployment is the best practice for new production projects, the Standard Deployment method still has advantages for specific scenarios:
-        *   **Learning & Understanding:** It provides a deeper understanding of the underlying Vertex AI SDK and Agent Runtime APIs, which is invaluable for debugging or custom integrations.
-        *   **Customization:** For highly specialized deployment workflows that deviate significantly from the Agents CLI templates (e.g., integrating with existing, complex CI/CD systems or custom infrastructure), a manual script offers greater flexibility.
-        *   **Modifying Existing Deployments:** If you need to programmatically update specific aspects of an already deployed Agent Runtime instance that aren't covered by the Agents CLI's `deploy` command, a custom script is often necessary.
-        *   **Simplified Projects:** For very simple, one-off deployments or internal tools that don't require a full IaC/CI/CD setup, a direct script might be quicker to set up initially.
+3.  **When would an enterprise security team combine `--agent-identity`, `scaffold enhance . --agent-gateway` + `--agent-gateway-egress`, and `--key` on Agent Runtime?**
+    *   **Answer:** Regulated workloads (finance, healthcare, public sector) often require dedicated per-agent workload principals (`--agent-identity`), centralized outbound TLS inspection and policy enforcement via an **Agent Gateway** (`scaffold enhance . --agent-gateway` injects `AGENT_GATEWAY_ROOT_CERTIFICATES` trust into the `Dockerfile` so `--agent-gateway-egress` can inspect outbound traffic), and customer-controlled cryptographic lifecycle with a Cloud KMS key (`--key` for CMEK at creation time).
